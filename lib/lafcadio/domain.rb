@@ -323,7 +323,7 @@ module Lafcadio
 			end
 		end
 		
-		def self.getField( fieldName ) #:nodoc:
+		def self.get_field( fieldName ) #:nodoc:
 			aDomainClass = self
 			field = nil
 			while aDomainClass < DomainObject && !field
@@ -471,7 +471,7 @@ module Lafcadio
 		
 		def get_getter_field( methId ) #:nodoc:
 			begin
-				self.class.getField( methId.id2name )
+				self.class.get_field( methId.id2name )
 			rescue MissingError
 				nil
 			end
@@ -480,7 +480,7 @@ module Lafcadio
 		def get_setter_field( methId ) #:nodoc:
 			if methId.id2name =~ /(.*)=$/
 				begin
-					self.class.getField( $1 )
+					self.class.get_field( $1 )
 				rescue MissingError
 					nil
 				end

@@ -132,7 +132,7 @@ module Lafcadio
 		def group_query( query )
 			executeSelect( query.toSql )[0].collect { |val|
 				if query.field_name != query.objectType.sql_primary_key_name
-					a_field = query.objectType.getField( query.field_name )
+					a_field = query.objectType.get_field( query.field_name )
 					a_field.valueFromSQL( val )
 				else
 					val.to_i
@@ -720,7 +720,7 @@ module Lafcadio
 				end
 			else
 				begin
-					field = @objectType.getField( key )
+					field = @objectType.get_field( key )
 					field.valueFromSQL( @rowHash[ field.dbFieldName ] )
 				rescue MissingError
 					nil

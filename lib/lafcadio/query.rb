@@ -193,11 +193,11 @@ module Lafcadio
 					db_field_name = @objectType.sql_primary_key_name
 					"#{ db_table }.#{ db_field_name }"
 				else
-					getField.db_table_and_field_name
+					get_field.db_table_and_field_name
 				end
 			end
 			
-			def getField
+			def get_field
 				anObjectType = @objectType
 				field = nil
 				while (anObjectType < DomainObject || anObjectType < DomainObject) &&
@@ -251,10 +251,10 @@ module Lafcadio
 			def toSql
 				not_pk = @fieldName != @objectType.sql_primary_key_name
 				use_field_for_sql_value = ( not_pk &&
-				                            ( !( getField.class <= LinkField ) ||
+				                            ( !( get_field.class <= LinkField ) ||
 																		  @searchTerm.respond_to?( :objectType ) ) )
 				search_val = ( use_field_for_sql_value ?
-				               getField.valueForSQL( @searchTerm ).to_s :
+				               get_field.valueForSQL( @searchTerm ).to_s :
 											 @searchTerm.to_s )
 				"#{ dbFieldName } #{ @@comparators[@compareType] } " + search_val
 			end
@@ -317,7 +317,7 @@ module Lafcadio
 					ObjectFieldImpostor.new( self, fieldName )
 				else
 					begin
-						classField = @domainClass.getField( fieldName )
+						classField = @domainClass.get_field( fieldName )
 						ObjectFieldImpostor.new( self, classField )
 					rescue MissingError
 						super( methId, *args )
@@ -331,7 +331,7 @@ module Lafcadio
 				if primaryKeyField?
 					@searchTerm.to_s
 				else
-					field = getField
+					field = get_field
 					if @searchTerm.class <= ObjectField
 						@searchTerm.db_table_and_field_name
 					else

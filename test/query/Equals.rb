@@ -38,7 +38,7 @@ class TestEquals < LafcadioTestCase
 	end
 	
 	def test_compare_to_other_field
-		email_field = User.getField( 'email' )
+		email_field = User.get_field( 'email' )
 		equals = Query::Equals.new( 'firstNames', email_field, User )
 		assert_equal( 'users.firstNames = users.email', equals.toSql )
 		odd_user = User.new( 'email' => 'foobar', 'firstNames' => 'foobar' )

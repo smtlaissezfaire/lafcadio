@@ -249,7 +249,7 @@ values( 1, 'sample text' )
 
 	def test_large_result_set
 		num_rows = 1000
-		date_time_field = TestRow.getField( 'date_time' )
+		date_time_field = TestRow.get_field( 'date_time' )
 		big_str = <<-BIG_STR
 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
 		BIG_STR

@@ -66,7 +66,7 @@ class TestLinkField < LafcadioTestCase
 		client2 = client.clone
 		client2.pkId = 2
 		@mockObjectStore.commit client2
-		linkField = Invoice.getClassField 'client'
+		linkField = Invoice.get_class_field 'client'
 		begin
 			linkField.verify(client2, 1)
 			fail 'should throw FieldValueError'

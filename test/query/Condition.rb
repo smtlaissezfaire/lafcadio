@@ -6,7 +6,7 @@ class TestCondition < LafcadioTestCase
 	def testRaisesExceptionIfInitHasWrongArguments
 		cond = Query::Condition.new( 'att name', 'name', Attribute )
 		begin
-			cond.getField
+			cond.get_field
 			fail "needs to raise MissingError"
 		rescue MissingError
 			errStr = "Couldn't find field \"att name\" in Attribute domain class"

@@ -236,11 +236,11 @@ class TestDomainObject < LafcadioTestCase
 	def testGetField
 		name = Client.get_class_field 'name'
 		assert_not_nil name
-		assert_equal( 'name', InternalClient.getField( 'name' ).name )
-		assert_equal( 'billingType', InternalClient.getField( 'billingType' ).name )
+		assert_equal( 'name', InternalClient.get_field( 'name' ).name )
+		assert_equal( 'billingType', InternalClient.get_field( 'billingType' ).name )
 		begin
-			InternalClient.getField( 'something' )
-			fail "DomainObject.getField needs to raise an error if it can't find " +
+			InternalClient.get_field( 'something' )
+			fail "DomainObject.get_field needs to raise an error if it can't find " +
            "anything"
     rescue MissingError
     	# ok
