@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'lafcadio/objectField/TextListField'
+require 'lafcadio/objectField'
 
 class TestTextListField < LafcadioTestCase
 	def setup

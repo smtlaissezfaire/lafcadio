@@ -1,6 +1,6 @@
 require 'lafcadio/domain'
 require '../test/mock/domain'
-require 'lafcadio/objectField/LinkField'
+require 'lafcadio/objectField'
 
 class Option < Lafcadio::DomainObject
 	def addEditHomepage
