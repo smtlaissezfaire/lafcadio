@@ -35,7 +35,7 @@ class Query
 			aDomainClass = @domainClass
 			field = nil
 			while aDomainClass < DomainObject && !field
-				field = aDomainClass.getField( fieldName )
+				field = aDomainClass.getClassField( fieldName )
 				aDomainClass = aDomainClass.superclass
 			end
 			if field

@@ -36,7 +36,7 @@ class Query
 			field = nil
 			while(anObjectType < DomainObject || anObjectType < DomainObject) &&
 						!field
-				field = anObjectType.getField @fieldName
+				field = anObjectType.getClassField @fieldName
 				anObjectType = anObjectType.superclass
 			end
 			if field

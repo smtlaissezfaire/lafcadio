@@ -55,7 +55,7 @@ class TestLinkFieldViewer < LafcadioTestCase
 		client1 = Client.storedTestClient
 		client2 = Client.new( { "name" => 'clientName2', 'objId' => 2 } )
 		@mockObjectStore.addObject client2
-		referringClientField = Client.getField 'referringClient'
+		referringClientField = Client.getClassField 'referringClient'
 		html = referringClientField.viewer(nil, 1).toHTMLWidget
 		assert_nil html.index('clientName1')
 	end

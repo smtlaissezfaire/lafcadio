@@ -64,7 +64,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def testGetField
-		name = Client.getField 'name'
+		name = Client.getClassField 'name'
 		assert_not_nil name
 	end
 

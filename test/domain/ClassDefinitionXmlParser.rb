@@ -8,7 +8,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 	end
 
 	def matchField( domainClass, fieldName, fieldClass, attributes = nil )
-		field = domainClass.getField( fieldName )
+		field = domainClass.getClassField( fieldName )
 		assert_not_nil( field )
 		assert_equal( fieldClass, field.class )
 		if attributes

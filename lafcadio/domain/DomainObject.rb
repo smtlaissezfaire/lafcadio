@@ -72,7 +72,7 @@ class DomainObject
 	end
 
 	# Returns the ObjectField instance corresponding to fieldName.
-	def DomainObject.getField(fieldName)
+	def DomainObject.getClassField(fieldName)
 		field = nil
 		self.classFields.each { |aField|
 			field = aField if aField.name == fieldName
