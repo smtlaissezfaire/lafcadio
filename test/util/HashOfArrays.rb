@@ -76,4 +76,10 @@ class TestHashOfArrays < LafcadioTestCase
 			end
 		}
 	end
+	
+	def testGet
+		hoa = HashOfArrays.new
+		hoa[1] = [ 'a', 'b' ]
+		assert_equal [ 'a', 'b' ], hoa[1]
+	end
 end

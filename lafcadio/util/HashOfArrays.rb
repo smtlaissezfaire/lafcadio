@@ -26,6 +26,10 @@ class HashOfArrays
 		array != nil ? array[0] : nil
 	end
 
+	def [] (key)
+		getArray key
+	end
+
 	def values
 		values = []
 		@values.values.each { |val| values << val[0] }
