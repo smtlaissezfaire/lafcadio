@@ -31,6 +31,7 @@ class TestDateTimeField < LafcadioTestCase
 			fail 'should throw an ArgumentError'
 		rescue ArgumentError
 			assert_not_nil $!.to_s =~ /2002-13-30/, $!.to_s
+			assert_not_nil $!.to_s =~ /datetime/, $!.to_s
 		end
 	end
 end

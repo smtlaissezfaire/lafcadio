@@ -10,7 +10,7 @@ class DateTimeField < ObjectField
 				begin
 					value = Time.local $1, $2, $3, $4, $5, $6
 				rescue ArgumentError
-					raise ArgumentError, "argument out of range: #{ valueStr }", caller
+					raise ArgumentError, "argument out of range for #{ name }: #{ valueStr }", caller
 				end
 			end
 		end
