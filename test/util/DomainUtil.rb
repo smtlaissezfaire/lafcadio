@@ -12,5 +12,8 @@ class TestDomainUtil < LafcadioTestCase
 		rescue CouldntMatchObjectTypeError
 			# ok
 		end
+		attributeClass = DomainUtil.getObjectTypeFromString( 'Attribute' )
+		assert_equal( Class, attributeClass.class )
+		assert_equal( 'Attribute', attributeClass.to_s )
 	end
 end

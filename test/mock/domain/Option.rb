@@ -1,7 +1,7 @@
 require 'lafcadio/domain/DomainObject'
 require 'lafcadio/objectField/ImageField'
 require 'lafcadio/objectField/SortOrderField'
-require 'test/mock/domain/Attribute'
+require 'test/mock/domain'
 require 'lafcadio/objectField/LinkField'
 
 class Option < DomainObject

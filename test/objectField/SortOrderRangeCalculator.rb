@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'test/mock/domain/Attribute'
+require 'test/mock/domain'
 require 'lafcadio/mock/MockObjectStore'
 require 'lafcadio/objectField/SortOrderRangeCalculator'
 
