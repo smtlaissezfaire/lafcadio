@@ -202,7 +202,8 @@ module Lafcadio
 				field = nil
 				while (anObjectType < DomainObject || anObjectType < DomainObject) &&
 							!field
-					field = anObjectType.get_class_field @fieldName
+					field = anObjectType.get_class_field( @fieldName ) ||
+					        anObjectType.get_class_field_by_db_name( @fieldName )
 					anObjectType = anObjectType.superclass
 				end
 				if field

@@ -312,6 +312,10 @@ module Lafcadio
 			field
 		end
 		
+		def DomainObject.get_class_field_by_db_name( fieldName ) #:nodoc:
+			self.class_fields.find { |field| field.db_field_name == fieldName }
+		end
+
 		def self.get_domain_dirs #:nodoc:
 			config = LafcadioConfig.new
 			classPath = config['classpath']

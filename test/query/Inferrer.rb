@@ -77,6 +77,11 @@ class TestQueryInferrer < LafcadioTestCase
 		assert_infer_match( desired_sql, Invoice ) { |inv|
 			inv.date.equals( inv.paid )
 		}
+		desired_sql2 = 'select * from some_other_table ' +
+		               'where some_other_table.text_one = some_other_table.text2'
+		assert_infer_match( desired_sql2, XmlSku ) { |xml_sku|
+			xml_sku.text1.equals( xml_sku.text2 )
+		}
 	end
 	
 	def testIn

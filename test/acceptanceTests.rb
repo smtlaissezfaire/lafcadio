@@ -294,6 +294,11 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		}
 		assert_equal( 1, matches.size )
 		assert_equal( 'c', matches.only.text_field )
+		matches2 = @object_store.getTestRows { |test_row|
+			test_row.text2.equals( test_row.text_field )
+		}
+		assert_equal( 1, matches2.size )
+		assert_equal( 'c', matches2.only.text_field )
 	end
 	
 	def test_raise_if_bad_primary_key_map
