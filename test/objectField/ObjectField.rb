@@ -22,17 +22,16 @@ class TestObjectField < LafcadioTestCase
       field.verify("clientName1", nil)
     rescue
       errorCaught = true
-			assert_not_nil $!.to_s =~ /That name is already taken./, $!.to_s
+			assert_not_nil $!.to_s =~ /That name already exists./, $!.to_s
     end
     assert errorCaught
     field.verify("clientName2", nil)
-		field.notUniqueMsg = "That client already exists."
 		errorCaught = false
 		begin
 			field.verify "clientName1", nil
 		rescue
 			errorCaught = true
-			assert_not_nil $!.to_s =~ /That client already exists./
+			assert_not_nil $!.to_s =~ /That name already exists./
 		end
 		assert errorCaught
   end

@@ -5,7 +5,6 @@ class TestBooleanField < LafcadioTestCase
   def setup
   	super
     @bf = BooleanField.new(nil, "administrator")
-    @bf.default = false
   end
 
   def testValueForSQL

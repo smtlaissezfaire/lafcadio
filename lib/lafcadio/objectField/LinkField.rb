@@ -19,8 +19,7 @@ module Lafcadio
 		end
 
 		attr_reader :linkedType
-		attr_accessor :listener, :objectStore, :newDuringEdit, :sortField,
-		              :deleteCascade
+		attr_accessor :listener, :newDuringEdit, :sortField, :deleteCascade
 
 		# [objectType]    The domain class that this field belongs to.
 		# [linkedType]    The domain class that this field points to.
@@ -41,6 +40,11 @@ module Lafcadio
 			@newDuringEdit = true
 		end
 
+		def valueFromSQL(string) #:nodoc:
+			require 'lafcadio/objectStore/DomainObjectProxy'
+			string != nil ? DomainObjectProxy.new(@linkedType, string.to_i) : nil
+		end
+
 		def valueForSQL(value) #:nodoc:
 			require 'lafcadio/objectStore/DomainObjectInitError'
 			if !value
@@ -53,33 +57,29 @@ module Lafcadio
 			end
 		end
 
-		def valueFromSQL(string) #:nodoc:
-			require 'lafcadio/objectStore/DomainObjectProxy'
-			string != nil ? DomainObjectProxy.new(@linkedType, string.to_i) : nil
-		end
-
 		def verify(value, pkId) #:nodoc:
 			super
 			if @linkedType != @objectType && pkId
-				subsetLinkField = nil
-				@linkedType.classFields.each { |field|
-					if field.class == SubsetLinkField && field.subsetField == @name
-						subsetLinkField = field
-					end
+				subsetLinkField = @linkedType.classFields.find { |field|
+					field.class == SubsetLinkField && field.subsetField == @name
 				}
 				if subsetLinkField
-					begin
-						prevObj = ObjectStore.getObjectStore.get(objectType, pkId)
-						prevObjLinkedTo = prevObj.send(name)
-						possiblyMyObj = prevObjLinkedTo.send(subsetLinkField.name)
-						if possiblyMyObj && possiblyMyObj.pkId == pkId
-							cantChangeMsg = "You can't change that."
-							raise FieldValueError, cantChangeMsg, caller
-						end
-					rescue DomainObjectNotFoundError
-						# no previous value, so nothing to check for
-					end
+					verify_subset_link_field( subsetLinkField, pkId )
 				end
+			end
+		end
+
+		def verify_subset_link_field( subsetLinkField, pkId )
+			begin
+				prevObj = ObjectStore.getObjectStore.get(objectType, pkId)
+				prevObjLinkedTo = prevObj.send(name)
+				possiblyMyObj = prevObjLinkedTo.send(subsetLinkField.name)
+				if possiblyMyObj && possiblyMyObj.pkId == pkId
+					cantChangeMsg = "You can't change that."
+					raise FieldValueError, cantChangeMsg, caller
+				end
+			rescue DomainObjectNotFoundError
+				# no previous value, so nothing to check for
 			end
 		end
 	end

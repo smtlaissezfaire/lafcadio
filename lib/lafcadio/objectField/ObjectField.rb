@@ -6,23 +6,10 @@ module Lafcadio
 	class ObjectField
 		include Comparable
 
-		attr_reader :name, :defaultFieldName, :objectType
-		attr_accessor :notNull, :hideLabel, :writeOnce, :unique, :hideDisplay,
-				:default, :dbFieldName, :notUniqueMsg
+		attr_reader :name, :objectType
+		attr_accessor :notNull, :unique, :dbFieldName
 
-		def ObjectField.valueType #:nodoc:
-			Object
-		end
-
-		def ObjectField.instantiationParameters( fieldElt ) #:nodoc:
-			parameters = {}
-			parameters['name'] = fieldElt.attributes['name']
-			parameters['englishName'] = fieldElt.attributes['englishName']
-			parameters['dbFieldName'] = fieldElt.attributes['dbFieldName']
-			parameters
-		end
-		
-		def ObjectField.instantiateFromXml( domainClass, fieldElt ) #:nodoc:
+		def self.instantiateFromXml( domainClass, fieldElt ) #:nodoc:
 			parameters = instantiationParameters( fieldElt )
 			instantiateWithParameters( domainClass, parameters )
 		end
@@ -36,6 +23,18 @@ module Lafcadio
 			instance
 		end
 
+		def self.instantiationParameters( fieldElt ) #:nodoc:
+			parameters = {}
+			parameters['name'] = fieldElt.attributes['name']
+			parameters['englishName'] = fieldElt.attributes['englishName']
+			parameters['dbFieldName'] = fieldElt.attributes['dbFieldName']
+			parameters
+		end
+		
+		def self.valueType #:nodoc:
+			Object
+		end
+
 		# [objectType]  The domain class that this object field belongs to.
 		# [name]        The name of this field.
 		# [englishName] The descriptive English name of this field. (Deprecated)
@@ -45,22 +44,56 @@ module Lafcadio
 			@dbFieldName = name
 			@notNull = true
 			@unique = false
-			( @default, @notUniqueMsg ) = [ nil, nil ]
 			@englishNameOrNil = englishName
 		end
 		
+		def <=>(other)
+			if @objectType == other.objectType && name == other.name
+				0
+			else
+				object_id <=> other.object_id
+			end
+		end
+
 		def bind_write?; false; end #:nodoc:
 		
 		def db_table_and_field_name
 			"#{ objectType.tableName }.#{ dbFieldName }"
 		end
 
+		def dbWillAutomaticallyWrite #:nodoc:
+			false
+		end
+
 		def englishName #:nodoc:
 			@englishNameOrNil || English.camelCaseToEnglish(name).capitalize
 		end
 
+		# Returns the name that this field is referenced by in the MySQL table. By 
+		# default this is the same as the name; to override it, set 
+		# ObjectField#dbFieldName.
+		def nameForSQL
+			dbFieldName
+		end
+
 		def nullErrorMsg #:nodoc:
 			English.sentence "Please enter %a %nam.", englishName.downcase
+		end
+
+		def prevValue(pkId) #:nodoc:
+			prevObject = ObjectStore.getObjectStore.get(@objectType, pkId)
+			prevObject.send(name)
+		end
+
+		def processBeforeVerify(value) #:nodoc:
+			value = @default if value == nil
+			value
+		end
+
+		# Returns a string value suitable for committing this field's value to 
+		# MySQL.
+		def valueForSQL(value)
+			value || 'null'
 		end
 
 		def verify(value, pkId) #:nodoc:
@@ -84,59 +117,14 @@ module Lafcadio
 			}
 			collisions = ObjectStore.getObjectStore.getSubset( inferrer.execute )
 			if collisions.size > 0
-				if @notUniqueMsg
-					notUniqueMsg = @notUniqueMsg
-				else
-					notUniqueMsg = "That #{englishName.downcase} is already taken. " +
-							"Please choose another."
-				end
+				notUniqueMsg = "That #{englishName.downcase} already exists."
 				raise FieldValueError, notUniqueMsg, caller
 			end
-		end
-
-		# Returns the name that this field is referenced by in the MySQL table. By 
-		# default this is the same as the name; to override it, set 
-		# ObjectField#dbFieldName.
-		def nameForSQL
-			dbFieldName
-		end
-
-		# Returns a string value suitable for committing this field's value to 
-		# MySQL.
-		def valueForSQL(value)
-			value || 'null'
-		end
-
-		def firstTime(fieldManager) #:nodoc:
-			pkId = fieldManager.getpkId
-			pkId == nil
-		end
-
-		def prevValue(pkId) #:nodoc:
-			prevObject = ObjectStore.getObjectStore.get(@objectType, pkId)
-			prevObject.send(name)
-		end
-
-		def processBeforeVerify(value) #:nodoc:
-			value = @default if value == nil
-			value
 		end
 
 		# Given the SQL value string, returns a Ruby-native value.
 		def valueFromSQL(string)
 			string
-		end
-
-		def <=>(other)
-			if @objectType == other.objectType && name == other.name
-				0
-			else
-				object_id <=> other.object_id
-			end
-		end
-
-		def dbWillAutomaticallyWrite #:nodoc:
-			false
 		end
 	end
 end
