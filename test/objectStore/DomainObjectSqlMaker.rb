@@ -8,23 +8,23 @@ require '../test/mock/domain/User'
 class TestDomainObjectSqlMaker < LafcadioTestCase
   def testFieldNamesForSQL
     sqlMaker = DomainObjectSqlMaker.new Invoice.getTestInvoice
-    assert_equal(7, sqlMaker.getNameValuePairs(Invoice).size)
+    assert_equal(7, sqlMaker.get_name_value_pairs(Invoice).size)
   end
 
   def testInsertUpdateAndDelete
     values = { "name" => "ClientName1" }
     client1a = Client.new values
-    insertSql = DomainObjectSqlMaker.new(client1a).sqlStatements[0]
+    insertSql = DomainObjectSqlMaker.new(client1a).sql_statements[0]
     values["pkId"] = 1
     client1b = Client.new values
-    updateSql = DomainObjectSqlMaker.new(client1b).sqlStatements[0][0]
+    updateSql = DomainObjectSqlMaker.new(client1b).sql_statements[0][0]
 		assert_match( /update/, updateSql )
     assert_not_nil updateSql.index("pkId")
     client1b.delete = true
-    deleteSql = DomainObjectSqlMaker.new(client1b).sqlStatements[0][0]
-    assert_not_nil deleteSql.index("delete")
-    assert_not_nil deleteSql.index("pkId")
-		binds = DomainObjectSqlMaker.new(client1b).sqlStatements[0][1]
+    delete_sql = DomainObjectSqlMaker.new(client1b).sql_statements[0][0]
+    assert_not_nil delete_sql.index("delete")
+    assert_not_nil delete_sql.index("pkId")
+		binds = DomainObjectSqlMaker.new(client1b).sql_statements[0][1]
 		assert_not_nil( binds )
 		assert_equal( 0, binds.size )
   end
@@ -34,7 +34,7 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
     client.errorMessages << "Please enter a first name."
     caught = false
     begin
-      DomainObjectSqlMaker.new(client).sqlStatements[0]
+      DomainObjectSqlMaker.new(client).sql_statements[0]
     rescue DomainObjectInitError
       caught = true
     end
@@ -44,7 +44,7 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
   def testCommitSQLWithApostrophe
     client = Client.new( { "name" => "T'est name" } )
     assert_equal("T'est name", client.name)
-    sql = DomainObjectSqlMaker.new(client).sqlStatements[0][0]
+    sql = DomainObjectSqlMaker.new(client).sql_statements[0][0]
     assert_equal("T'est name", client.name)
     assert_not_nil sql.index("'T''est name'"), sql
   end
@@ -54,11 +54,11 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
              "date" => Date.new(2001, 4, 5), "hours" => 36.5, 
 						 "invoice_num" => 1, "pkId" => 1 }
     invoice = Invoice.new hash
-    updateSQL = DomainObjectSqlMaker.new(invoice).sqlStatements[0]
-    assert_not_nil(updateSQL =~ /update invoices/, updateSQL)
-    assert_not_nil(updateSQL =~ /pkId=1/, updateSQL)
+    update_sql = DomainObjectSqlMaker.new(invoice).sql_statements[0]
+    assert_not_nil(update_sql =~ /update invoices/, update_sql)
+    assert_not_nil(update_sql =~ /pkId=1/, update_sql)
     invoice.delete = true
-    deleteSQL = DomainObjectSqlMaker.new(invoice).sqlStatements[0]
+    deleteSQL = DomainObjectSqlMaker.new(invoice).sql_statements[0]
     assert_not_nil(deleteSQL =~ /delete from invoices where pkId=1/)
   end
 
@@ -66,7 +66,7 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
 		client = Client.new({ 'pkId' => 1, 'name' => 'client name',
 				'referringClient' => nil, 'priorityInvoice' => nil })
 		sqlMaker = DomainObjectSqlMaker.new client
-		sql = sqlMaker.sqlStatements[0]
+		sql = sqlMaker.sql_statements[0]
 		assert_not_nil sql =~ /referringClient=null/, sql
 		assert_not_nil sql =~ /priorityInvoice=null/, sql
 	end
@@ -75,7 +75,7 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
 		ic = InternalClient.new({ 'pkId' => 1, 'name' => 'client name',
 				'billingType' => 'trade' })
 		sqlMaker = DomainObjectSqlMaker.new ic
-		statements = sqlMaker.sqlStatements
+		statements = sqlMaker.sql_statements
 		assert_equal 2, statements.size
 		sql1 = statements[0]
 		assert_not_nil sql1 =~ /update internalClients set/, sql1
@@ -95,7 +95,7 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
 		ic = InternalClientDiffPk.new( 'name' => 'client name',
 		                               'billingType' => 'trade' )
 		sql_maker = DomainObjectSqlMaker.new( ic )
-		statements = sql_maker.sqlStatements
+		statements = sql_maker.sql_statements
 		assert_equal( 2, statements.size )
 		sql1 = statements[0].first
 		assert_match( /insert into clients/, sql1 )

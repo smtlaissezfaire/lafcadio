@@ -20,7 +20,7 @@ module Lafcadio
 			end
 		end
 		
-		def _getAll(object_type)
+		def _get_all(object_type)
 			@retrievalsByType[object_type] = @retrievalsByType[object_type] + 1
 			@objects[object_type] ? @objects[object_type].values : []
 		end
@@ -28,7 +28,7 @@ module Lafcadio
 		def get_collection_by_query(query)
 			@query_count[query] += 1
 			objects = []
-			_getAll( query.object_type ).each { |dbObj|
+			_get_all( query.object_type ).each { |dbObj|
 				if query.condition
 					objects << dbObj if query.condition.objectMeets(dbObj)
 				else

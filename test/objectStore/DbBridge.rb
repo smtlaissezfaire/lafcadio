@@ -10,10 +10,10 @@ class TestDBBridge < RUNIT::TestCase
   class MockDbh
   	@@connected = false
   
-    attr_reader :lastSQL, :sqlStatements
+    attr_reader :lastSQL, :sql_statements
     
 		def initialize
-			@sqlStatements = []
+			@sql_statements = []
 			@@connected = true
 		end
 		
@@ -23,7 +23,7 @@ class TestDBBridge < RUNIT::TestCase
 		
 		def logSql( sql )
       @lastSQL = sql
-			@sqlStatements << sql
+			@sql_statements << sql
 		end
 
     def select_all(str)
@@ -44,7 +44,7 @@ class TestDBBridge < RUNIT::TestCase
       end
     end
 
-    def getAll(object_type); []; end
+    def get_all(object_type); []; end
     
     def disconnect
     	@@connected = false
@@ -127,10 +127,10 @@ class TestDBBridge < RUNIT::TestCase
 		ic = InternalClient.new({ 'pkId' => 1, 'name' => 'client name',
 				'billingType' => 'trade' })
 		@dbb.commit ic
-		assert_equal 2, @mockDbh.sqlStatements.size
-		sql1 = @mockDbh.sqlStatements[0]
+		assert_equal 2, @mockDbh.sql_statements.size
+		sql1 = @mockDbh.sql_statements[0]
 		assert_not_nil sql1 =~ /update clients set/, sql1
-		sql2 = @mockDbh.sqlStatements[1]
+		sql2 = @mockDbh.sql_statements[1]
 		assert_not_nil sql2 =~ /update internalClients set/, sql2
 	end
 

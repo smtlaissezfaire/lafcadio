@@ -141,7 +141,7 @@ class AccTestBlobField < AcceptanceTestCase
 		test_row = @object_store.getTestRow( 1 )
 		test_row.delete = true
 		test_row.commit
-		assert_equal( 0, @object_store.getAll( TestRow ).size )
+		assert_equal( 0, @object_store.get_all( TestRow ).size )
 	end
 
 	def test_insert
@@ -197,7 +197,7 @@ class AccTestDomainObjInheritance < AcceptanceTestCase
 		child = TestChildRow.new( 'text_field' => 'text',
 		                          'child_text_field' => 'child text' )
 		child.commit
-		all_dobjs = @object_store.getAll( TestChildRow )
+		all_dobjs = @object_store.get_all( TestChildRow )
 		assert_equal( 1, all_dobjs.size )
 		child_prime = all_dobjs.first
 		assert_equal( 'text', child_prime.text_field )
@@ -301,7 +301,7 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		br1.commit
 		error_msg = 'The field "pkId" can\'t be found in the table "testbadrows".'
 		assert_exception( FieldMatchError, error_msg ) {
-			@object_store.getAll( TestBadRow )
+			@object_store.get_all( TestBadRow )
 		}
 	end
 end

@@ -39,25 +39,25 @@ class TestMockDBBridge < LafcadioTestCase
 		assert_equal client2, coll[0]
 	end
 
-	def getAll(object_type)
+	def get_all(object_type)
 		query = Query.new object_type
 		@mockDbBridge.get_collection_by_query query
 	end
 
 	def testGetAll
 		@mockDbBridge.commit @client
-		assert_equal @client, getAll(Client)[0]
+		assert_equal @client, get_all(Client)[0]
 	end
 
   def test_returnsCollection
-    assert_equal(Array, getAll(Client).class)
+    assert_equal(Array, get_all(Client).class)
   end
 
 	def testRetrievalsByType
 		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
-		getAll Client
+		get_all Client
 		assert_equal 1, @mockDbBridge.retrievalsByType[Client]
-		getAll Client
+		get_all Client
 		assert_equal 2, @mockDbBridge.retrievalsByType[Client]
 	end
 
@@ -79,10 +79,10 @@ class TestMockDBBridge < LafcadioTestCase
 		@mockDbBridge.commit @client
 		client2 = Client.new({ 'pkId' => 2, 'name' => 'client2' })
 		@mockDbBridge.commit client2
-		assert_equal 2, getAll(Client).size
+		assert_equal 2, get_all(Client).size
 		@client.delete = true
 		@mockDbBridge.commit @client
-		assert_equal 1, getAll(Client).size
+		assert_equal 1, get_all(Client).size
 		query = Query.new Client, 1
 		clientPrime = @mockDbBridge.get_collection_by_query(query)[0]
 		assert_nil clientPrime

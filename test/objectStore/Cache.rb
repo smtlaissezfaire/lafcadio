@@ -13,7 +13,7 @@ class TestObjectStoreCache < LafcadioTestCase
 		user.pkId = 1
 		@cache.save( user )
 		assert( user.object_id != @cache.get( User, 1 ).object_id )
-		@cache.getAll( User ).each { |a_user|
+		@cache.get_all( User ).each { |a_user|
 			assert( user.object_id != a_user.object_id )
 		}
 	end
@@ -26,8 +26,8 @@ class TestObjectStoreCache < LafcadioTestCase
 	def testFlush
 		user = User.getTestUser
 		@cache.save(user)
-		assert_equal 1, @cache.getAll(User).size
+		assert_equal 1, @cache.get_all(User).size
 		@cache.flush(user)
-		assert_equal 0, @cache.getAll(User).size
+		assert_equal 0, @cache.get_all(User).size
 	end
 end

@@ -35,10 +35,10 @@ class TestDbConnection < RUNIT::TestCase
   class MockDbh
   	@@connected = false
   
-    attr_reader :lastSQL, :sqlStatements
+    attr_reader :lastSQL, :sql_statements
     
 		def initialize
-			@sqlStatements = []
+			@sql_statements = []
 			@@connected = true
 		end
 		
@@ -48,7 +48,7 @@ class TestDbConnection < RUNIT::TestCase
 		
 		def logSql( sql )
       @lastSQL = sql
-			@sqlStatements << sql
+			@sql_statements << sql
 		end
 
     def select_all(str)
@@ -67,7 +67,7 @@ class TestDbConnection < RUNIT::TestCase
       end
     end
 
-    def getAll(object_type); []; end
+    def get_all(object_type); []; end
     
     def disconnect
     	@@connected = false

@@ -21,13 +21,13 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testCaching
-		@testObjectStore.getAll Invoice
+		@testObjectStore.get_all Invoice
 		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
 		assert_equal 1, @mockDbBridge.retrievalsByType[Invoice]
-		@testObjectStore.getAll Invoice
+		@testObjectStore.get_all Invoice
 		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
 		assert_equal 1, @mockDbBridge.retrievalsByType[Invoice]
-		@testObjectStore.getAll Client
+		@testObjectStore.get_all Client
 		assert_equal 1, @mockDbBridge.retrievalsByType[Client]
 	end
 
@@ -61,7 +61,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testDefersLoading
-		@testObjectStore.getAll Invoice
+		@testObjectStore.get_all Invoice
 		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
 		assert_equal 1, @mockDbBridge.retrievalsByType[Invoice]
 	end
@@ -69,10 +69,10 @@ class TestObjectStore < LafcadioTestCase
 	def testDeleteClearsCachedValue
 		client = Client.new({ 'pkId' => 100, 'name' => 'client 100' })
 		@testObjectStore.commit client
-		assert_equal 1, @testObjectStore.getAll(Client).size
+		assert_equal 1, @testObjectStore.get_all(Client).size
 		client.delete = true
 		@testObjectStore.commit client
-		assert_equal 0, @testObjectStore.getAll(Client).size
+		assert_equal 0, @testObjectStore.get_all(Client).size
 	end
 
 	def test_dispatches_inferred_query_to_collector
@@ -152,10 +152,10 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testFlushCacheAfterNewObjectCommit
-		assert_equal 0, @testObjectStore.getAll(Client).size
+		assert_equal 0, @testObjectStore.get_all(Client).size
 		client = Client.new({ })
 		@testObjectStore.commit client
-		assert_equal 1, @testObjectStore.getAll(Client).size
+		assert_equal 1, @testObjectStore.get_all(Client).size
 	end
 	
 	def testGetDbBridge
@@ -180,7 +180,7 @@ class TestObjectStore < LafcadioTestCase
 		ili = TestInventoryLineItem.storedTestInventoryLineItem
 		option = TestOption.storedTestOption
 		iliOption = TestInventoryLineItemOption.storedTestInventoryLineItemOption
-		assert_equal 1, @testObjectStore.getAll(InventoryLineItemOption).size
+		assert_equal 1, @testObjectStore.get_all(InventoryLineItemOption).size
 		assert_equal iliOption, @testObjectStore.getMapObject(InventoryLineItemOption,
 				ili, option)
 		begin

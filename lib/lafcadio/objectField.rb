@@ -167,7 +167,7 @@ module Lafcadio
 				super value
 			else
 				highestValue = 0
-				ObjectStore.get_object_store.getAll(object_type).each { |obj|
+				ObjectStore.get_object_store.get_all(object_type).each { |obj|
 					aValue = obj.send(name).to_i
 					highestValue = aValue if aValue > highestValue
 				}

@@ -40,10 +40,10 @@ class TestGMockObjectStore < LafcadioTestCase
 	def testDelete
 		user = User.getTestUser
 		@mockObjectStore.commit user
-		assert_equal 1, @mockObjectStore.getAll(User).size
+		assert_equal 1, @mockObjectStore.get_all(User).size
 		user.delete = true
 		@mockObjectStore.commit user
-		assert_equal 0, @mockObjectStore.getAll(User).size
+		assert_equal 0, @mockObjectStore.get_all(User).size
 	end
 	
 	def testRespectsLimit

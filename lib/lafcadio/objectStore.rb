@@ -103,8 +103,8 @@ module Lafcadio
 		
 		def commit(dbObject)
 			sqlMaker = DomainObjectSqlMaker.new(dbObject)
-			sqlMaker.sqlStatements.each { |sql, binds| execute_commit( sql, binds ) }
-			if sqlMaker.sqlStatements[0].first =~ /insert/
+			sqlMaker.sql_statements.each { |sql, binds| execute_commit( sql, binds ) }
+			if sqlMaker.sql_statements[0].first =~ /insert/
 				sql = 'select last_insert_id()'
 				result = execute_select( sql )
 				@@last_pk_id_inserted = result[0]['last_insert_id()'].to_i
@@ -272,12 +272,12 @@ module Lafcadio
 
 		def initialize(obj); @obj = obj; end
 
-		def deleteSql(object_type)
+		def delete_sql(object_type)
 			"delete from #{ object_type.table_name} " +
 					"where #{ object_type.sql_primary_key_name }=#{ @obj.pkId }"
 		end
 
-		def getNameValuePairs(object_type)
+		def get_name_value_pairs(object_type)
 			nameValues = []
 			object_type.class_fields.each { |field|
 				value = @obj.send(field.name)
@@ -292,9 +292,9 @@ module Lafcadio
 			QueueHash.new( *nameValues )
 		end
 
-		def insertSQL(object_type)
+		def insert_sql(object_type)
 			fields = object_type.class_fields
-			nameValuePairs = getNameValuePairs(object_type)
+			nameValuePairs = get_name_value_pairs(object_type)
 			if object_type.is_based_on?
 				nameValuePairs[object_type.sql_primary_key_name] = 'LAST_INSERT_ID()'
 			end
@@ -304,7 +304,7 @@ module Lafcadio
 					"values(#{fieldValueStr})"
 		end
 
-		def sqlStatements
+		def sql_statements
 			statements = []
 			if @obj.errorMessages.size > 0
 				raise DomainObjectInitError, @obj.errorMessages, caller
@@ -318,20 +318,20 @@ module Lafcadio
 		def statement_bind_value_pair( object_type )
 			@bindValues = []
 			if @obj.pkId == nil
-				statement = insertSQL(object_type)
+				statement = insert_sql(object_type)
 			else
 				if @obj.delete
-					statement = deleteSql(object_type)
+					statement = delete_sql(object_type)
 				else
-					statement = updateSQL(object_type)
+					statement = update_sql(object_type)
 				end
 			end
 			[statement, @bindValues]
 		end
 
-		def updateSQL(object_type)
+		def update_sql(object_type)
 			nameValueStrings = []
-			nameValuePairs = getNameValuePairs(object_type)
+			nameValuePairs = get_name_value_pairs(object_type)
 			nameValuePairs.each { |key, value|
 				nameValueStrings << "#{key}=#{ value }"
 			}
@@ -438,7 +438,7 @@ module Lafcadio
 		end
 
 		# Returns all domain objects for the given domain class.
-		def getAll(object_type); @cache.getByQuery( Query.new( object_type ) ); end
+		def get_all(object_type); @cache.getByQuery( Query.new( object_type ) ); end
 
 		# Returns the DbBridge; this is useful in case you need to use raw SQL for a
 		# specific query.
@@ -553,7 +553,7 @@ module Lafcadio
 			end
 
 			# Returns an array of all domain objects of a given type.
-			def getAll(object_type)
+			def get_all(object_type)
 				hashByObjectType(object_type).values.collect { |d_obj| d_obj.clone }
 			end
 
@@ -628,7 +628,7 @@ module Lafcadio
 			
 			def dispatch_get_plural
 				if @orig_args.size == 0 && @maybe_proc.nil?
-					@symbol = :getAll
+					@symbol = :get_all
 					@args = [ @domain_class ]
 				else
 					searchTerm = @orig_args[0]
