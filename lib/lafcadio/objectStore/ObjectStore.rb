@@ -27,11 +27,7 @@ module Lafcadio
 		def initialize(context, dbBridge = nil)
 			super context
 			@dbBridge = dbBridge == nil ? DbBridge.new : dbBridge
-			@cache = ObjectStore::Cache.new
-		end
-
-		def clear(dbObject)
-			@cache.flush dbObject
+			@cache = ObjectStore::Cache.new( @dbBridge )
 		end
 
 		# Commits a domain object to the database. You can also simply call
@@ -50,6 +46,7 @@ module Lafcadio
 
 		# Returns the domain object corresponding to the domain class and objId.
 		def get(objectType, objId)
+if false
 			require 'lafcadio/objectStore/DomainObjectNotFoundError'
 			raise "ObjectStore.getObject can't accept nil objId" if objId == nil
 			objId = objId.to_i
@@ -64,17 +61,18 @@ module Lafcadio
 			end
 			(@cache.get(objectType, objId)) ||(raise(DomainObjectNotFoundError,
 					"Can't find #{objectType} #{objId}", caller))
+end
+
+			query = Query.new objectType, objId
+			@cache.getByQuery( query )[0] ||
+			    ( raise( DomainObjectNotFoundError,
+					         "Can't find #{objectType} #{objId}", caller ) )
 		end
 
 		# Returns all domain objects for the given domain class.
 		def getAll(objectType)
-			unless @cache.fullyRetrieved?( objectType )
-				@cache.setFullyRetrieved( objectType )
-				query = Query.new objectType
-				newObjects = @dbBridge.getCollectionByQuery(query)
-				newObjects.each { |dbObj| @cache.save dbObj }
-			end
-			@cache.getAll(objectType)
+			query = Query.new( objectType )
+			@cache.getByQuery( query )
 		end
 
 		def getDbBridge; @dbBridge; end
@@ -161,7 +159,7 @@ module Lafcadio
 				committer.commitType == Committer::INSERT
 				set( committer.dbObject )
 			elsif committer.commitType == Committer::DELETE
-				clear( committer.dbObject )
+				@cache.flush( committer.dbObject )
 			end
 		end
 	end
