@@ -1,0 +1,2 @@
+class MockEmailer
+end

@@ -1,0 +1,2 @@
+class DomainObjectNotFoundError < RuntimeError
+end

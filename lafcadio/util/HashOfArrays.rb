@@ -1,0 +1,34 @@
+class HashOfArrays
+	def initialize
+		@values = {}
+	end
+
+	def set (key, array)
+		raise "HashOfArrays.[]= needs a value of type Array" if array.type != Array
+		@values[key] = array
+	end
+
+	def getArray (key)
+		array = @values[key]
+		if array == nil
+			array = []
+			@values[key] = array
+		end
+		array
+	end
+
+	def get (key)
+		array = @values[key]
+		array != nil ? array[0] : nil
+	end
+
+	def values
+		values = []
+		@values.values.each { |val| values << val[0] }
+		values
+	end
+
+	def keys
+		@values.keys
+	end
+end

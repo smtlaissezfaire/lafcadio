@@ -1,0 +1,2 @@
+class CouldntMatchObjectTypeError < RuntimeError
+end

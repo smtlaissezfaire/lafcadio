@@ -1,0 +1,10 @@
+dbuser:test
+dbpassword:password
+dbname:test
+dbhost:localhost
+adminEmail:john.doe@email.com
+siteName:Site Name
+url:http://test.url
+classpath:lafcadio/
+logdir:/some/dir/
+domainDirs:lafcadio/domain/,test/mock/domain/
