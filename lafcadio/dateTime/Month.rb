@@ -60,4 +60,12 @@ class Month
 	def -(amountToSubtract)
 		self + (-amountToSubtract)
 	end
+	
+	def prev
+		self - 1
+	end
+	
+	def next
+		self + 1
+	end
 end

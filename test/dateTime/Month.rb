@@ -45,10 +45,15 @@ class TestMonth < LafcadioTestCase
 	end
 	
 	def testArithmetic
-		jan2000 = Month.new( 1, 2000 )
-		assert_equal( Month.new( 2, 2000 ), jan2000 + 1 )
-		assert_equal( Month.new( 1, 2001 ), jan2000 + 12 )
-		assert_equal( Month.new( 10, 1999 ), jan2000 - 3 )
-		assert_equal( Month.new( 10, 1999 ), jan2000 + -3 )
+		assert_equal( Month.new( 2, 2000 ), @jan2000 + 1 )
+		assert_equal( Month.new( 1, 2001 ), @jan2000 + 12 )
+		assert_equal( Month.new( 10, 1999 ), @jan2000 - 3 )
+		assert_equal( Month.new( 10, 1999 ), @jan2000 + -3 )
+	end
+	
+	def testPrevNext
+		assert_equal( @dec2000, @jan2001.prev )
+		assert_equal( @jan2001, @dec2000.next )
+		assert_equal( @jan2000, @jan2000.prev.next )
 	end
 end
