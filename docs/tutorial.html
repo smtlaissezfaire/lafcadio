@@ -12,12 +12,14 @@
 <p>Lafcadio requires <a href="http://www.tmtm.org/ja/ruby/mysql/README_en.html">Ruby/MySQL</a>. (Please note that Ruby/MySQL and MySQL/Ruby are not the same thing.)
 <div class="beta_note"><img src="/img/beta-logo.png">
 <br>Lafcadio 0.3.1 and later also requires <a href="http://www.germane-software.com/software/rexml/">REXML</a>, which you'll need to have installed if you're using a Ruby version that's earlier than 1.8.0.
+
+<p>Lafcadio 0.3.3 and later requires <a href="http://ruby-dbi.sourceforge.net/">Ruby DBI</a> instead of Ruby/MySQL.</p>
 </div>
 <ol>
 
 <li><a href="https://sourceforge.net/project/showfiles.php?group_id=83312">Download Lafcadio</a>.
 
-<li>Type <tt>tar zxvf lafcadio-0-2-1.tar.gz</tt> to decompress the file.
+<li>Type <tt>tar zxvf lafcadio-0-3-3.tar.gz</tt> to decompress the file.
 
 <li>Type <tt>./bin/install.rb</tt> to install Lafcadio. (You need to be logged in as root.) This will copy the Ruby files into the right subdirectory in <tt>/usr/local/lib/ruby/site_ruby/</tt>. There are no binary files.
 <div class="beta_note"><img src="/img/beta-logo.png">
@@ -45,13 +47,14 @@
 <p>Every script in your project needs to include this file.
 
 <li>If you want to test that you've done it right, you can create a <tt>test.rb</tt> that tries to create the object store:
-<blockquote><tt>#!/usr/bin/ruby
+<blockquote><tt>#!/usr/bin/env ruby
 <br>
 <br>require 'config'
 <br>require 'lafcadio/objectStore/ObjectStore'
 <br>
-<br>objectStore = ObjectStore.getObjectStore</tt></blockquote>
-<p>The database connection is made the first time you retrieve the objectStore, so if you've made any mistakes in the config file you'll get an error when you run this script. Otherwise it will silently exit.
+<br>objectStore = ObjectStore.getObjectStore
+<br>puts "Test succeeded."</tt></blockquote>
+<p>The database connection is made the first time you retrieve the objectStore, so if you've made any mistakes in the config file you'll get an error when you run this script. Otherwise it will tell you it succeeded.
 </ol>
 
 <h3>3. Create a table, and corresponding object type</h3>
@@ -69,7 +72,7 @@ create table users (
 <br>&nbsp;&nbsp;birthday&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;date
 <br>);
 </tt></blockquote>
-<p>Note that the primary key is named <tt>objId</tt>. Lafcadio's fairly flexible about what your tables look like, but it requires each table to have a numeric primary key. It assumes that it's going to be named <tt>objId</tt>, and that can be changed, but it's a little less work to go with the default.
+<p>Note that the primary key is named <tt>objId</tt>. Lafcadio is fairly flexible about what your tables look like, but it requires each table to have a numeric primary key. It assumes that it's going to be named <tt>objId</tt>, and that can be changed, but it's a little less work to go with the default.
 <p>Although we're creating a new table in this example, Lafcadio can also be integrated with pre-existing tables with only a little more work.
 </p>
 <div class="beta_note">
@@ -94,11 +97,12 @@ require 'lafcadio/domain/DomainObject'
 <br>class User < DomainObject
 <br>&nbsp;&nbsp;def User.getClassFields
 <br>&nbsp;&nbsp;&nbsp;&nbsp;fields = []
-<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << TextField.new (self, 'firstName')
-<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << TextField.new (self, 'lastName')
-<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << TextField.new (self, 'email')
-<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << TextField.new (self, 'password')
-<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << DateField.new (self, 'birthday')
+<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << TextField.new(self, 'firstName')
+<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << TextField.new(self, 'lastName')
+<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << TextField.new(self, 'email')
+<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << TextField.new(self, 'password')
+<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << DateField.new(self, 'birthday')
+<br>&nbsp;&nbsp;&nbsp;&nbsp;fields
 <br>&nbsp;&nbsp;end
 <br>end
 </tt></blockquote>
@@ -123,7 +127,7 @@ require 'lafcadio/domain/DomainObject'
 <p>Now that we've defined a domain object class, we can write a script that makes use of this.
 <ol>
 <li>Create a new user and save it to the database:
-<blockquote><tt>#!/usr/bin/ruby
+<blockquote><tt>#!/usr/bin/env ruby
 <br>
 <br>require 'config'
 <br>require 'lafcadio/objectStore/ObjectStore'
@@ -140,7 +144,7 @@ require 'lafcadio/domain/DomainObject'
 <p>If you run this script you'll find that your <tt>users</tt> table will have one record in it with an objId 1; this is John Doe.
 
 <li>Retrieve a user and change some values:
-<blockquote><tt>#!/usr/bin/ruby
+<blockquote><tt>#!/usr/bin/env ruby
 <br>
 <br>require 'config'
 <br>require 'lafcadio/objectStore/ObjectStore'
@@ -161,13 +165,14 @@ require 'lafcadio/domain/DomainObject'
 </ul></p>
 
 <li>Delete the user:
-<blockquote><tt>#!/usr/bin/ruby
+<blockquote><tt>#!/usr/bin/env ruby
 <br>
 <br>require 'config'
 <br>require 'lafcadio/objectStore/ObjectStore'
 <br>
 <br>objectStore = ObjectStore.getObjectStore
 <br># retrieve user #1
+<br>john = objectStore.getUser 1 
 <br>john.delete = true
 <br>objectStore.commit john
 </tt></blockquote>
@@ -244,7 +249,7 @@ require 'lafcadio/domain/DomainObject'
 <p>Now you can treat instances of Users as values of the fields "author" and "recipient". For example, this code will save all the appropriate values to MySQL:
 
 <blockquote><tt>
-#!/usr/bin/ruby 
+#!/usr/bin/env ruby 
 <br>
 <br>require 'config' 
 <br>require 'lafcadio/objectStore/ObjectStore' 
@@ -254,7 +259,7 @@ require 'lafcadio/domain/DomainObject'
 <br>objectStore = ObjectStore.getObjectStore
 <br>john = objectStore.getUser( 1 )
 <br>fiveYearsAgo = Date.today - (365 * 5)
-<br>jane = User.new({ 'firstName' => 'Jane', 'lastName' => 'Doe,
+<br>jane = User.new({ 'firstName' => 'Jane', 'lastName' => 'Doe',
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'email' => 'jane.doe@email.com', 'password' => 'jane_pass',
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'birthday' => fiveYearsAgo })
 <br>jane.commit
