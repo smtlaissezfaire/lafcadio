@@ -28,7 +28,7 @@ class TestDbObjectCommitter < LafcadioTestCase
 		user.delete = true
 		committer = Committer.new( user, @mockDBBridge )
 		committer.execute
-		assert_equal( 0, @testObjectStore.getXmlSkus.size )
+		assert_equal( 0, @testObjectStore.get_xml_skus.size )
 	end
 
   def testDeleteSetsLinkFieldsToNil

@@ -56,13 +56,13 @@ class TestGMockObjectStore < LafcadioTestCase
 	def testDontChangeFieldsUntilCommit
 		user = User.getTestUser
 		user.commit
-		user_prime = @mockObjectStore.getUser( 1 )
+		user_prime = @mockObjectStore.get_user( 1 )
 		assert( user.object_id != user_prime.object_id )
 		new_email = "another@email.com"
 		user_prime.email = new_email
-		assert( new_email != @mockObjectStore.getUser( 1 ).email )
+		assert( new_email != @mockObjectStore.get_user( 1 ).email )
 		user_prime.commit
-		assert_equal( new_email, @mockObjectStore.getUser( 1 ).email )
+		assert_equal( new_email, @mockObjectStore.get_user( 1 ).email )
 	end
 	
 	def test_order_by

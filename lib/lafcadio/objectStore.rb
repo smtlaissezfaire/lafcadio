@@ -669,7 +669,8 @@ module Lafcadio
 				begin
 					dispatch_get_singular
 				rescue CouldntMatchObjectTypeError
-					object_typeName = English.singular( method_name_after_get )
+					object_typeName = English.singular( camel_case_method_name_after_get
+					                                  )
 					begin
 						@domain_class = DomainObject.
 						                get_object_type_from_string( object_typeName )
@@ -681,8 +682,9 @@ module Lafcadio
 			end
 			
 			def dispatch_get_singular
-				object_type = DomainObject.
-				             get_object_type_from_string( method_name_after_get )
+				object_type = DomainObject.get_object_type_from_string(
+					camel_case_method_name_after_get
+				)
 				if @orig_args[0].class <= Integer
 					@symbol = :get
 					@args = [ object_type, @orig_args[0] ]
@@ -692,9 +694,9 @@ module Lafcadio
 				end
 			end
 			
-			def method_name_after_get
+			def camel_case_method_name_after_get
 				@orig_method.id2name =~ /^get(.*)$/
-				$1
+				$1.underscore_to_camel_case
 			end
 			
 			def raise_no_method_error

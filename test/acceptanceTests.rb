@@ -138,7 +138,7 @@ class AccTestBlobField < AcceptanceTestCase
 	def test_delete
 		test_str = 'The quick brown fox jumped over the lazy dog.'
 		@dbh.do( 'insert into testrows( blob_field ) values( ? )', test_str )
-		test_row = @object_store.getTestRow( 1 )
+		test_row = @object_store.get_test_row( 1 )
 		test_row.delete = true
 		test_row.commit
 		assert_equal( 0, @object_store.get_all( TestRow ).size )
@@ -149,7 +149,7 @@ class AccTestBlobField < AcceptanceTestCase
 		test_row = TestRow.new( 'blob_field' => test_str )
 		test_row.commit
 		@object_store.flush( test_row )
-		test_row_prime = @object_store.getTestRow( 1 )
+		test_row_prime = @object_store.get_test_row( 1 )
 		assert_equal( test_str, test_row_prime.blob_field )
 	end
 	
@@ -157,7 +157,7 @@ class AccTestBlobField < AcceptanceTestCase
 		test_row = TestRow.new( {} )
 		test_row.commit
 		@object_store.flush( test_row )
-		test_row_prime = @object_store.getTestRow( 1 )
+		test_row_prime = @object_store.get_test_row( 1 )
 		assert_nil( test_row_prime.blob_field )
 	end
 end
@@ -165,10 +165,10 @@ end
 class AccTestBooleanField < AcceptanceTestCase
 	def test_value_from_sql
 		@dbh.do( 'insert into testrows( bool_field ) values( 1 )' )
-		test_row = @object_store.getTestRow( 1 )
+		test_row = @object_store.get_test_row( 1 )
 		assert( test_row.bool_field )
 		@dbh.do( 'insert into testrows( bool_field ) values( 0 )' )
-		test_row2 = @object_store.getTestRow( 2 )
+		test_row2 = @object_store.get_test_row( 2 )
 		assert( !test_row2.bool_field )
 	end
 end
@@ -176,10 +176,10 @@ end
 class AccTestDateTimeField < AcceptanceTestCase
 	def test_value_from_sql
 		@dbh.do( 'insert into testrows( date_time ) values( "2004-01-01" )' )
-		test_row = @object_store.getTestRow( 1 )
+		test_row = @object_store.get_test_row( 1 )
 		assert_equal( Time.gm( 2004, 1, 1 ), test_row.date_time )
 		@dbh.do( 'insert into testrows( ) values( )' )
-		test_row2 = @object_store.getTestRow( 2 )
+		test_row2 = @object_store.get_test_row( 2 )
 		assert_nil( test_row2.date_time )
 	end
 end
@@ -189,7 +189,7 @@ class AccTestDomainObjInheritance < AcceptanceTestCase
 		child = TestChildRow.new( 'text_field' => 'text',
 		                          'child_text_field' => 'child text' )
 		child.commit
-		child_prime = @object_store.getTestChildRow( 1 )
+		child_prime = @object_store.get_test_child_row( 1 )
 		assert_equal( child.text_field, child_prime.text_field )
 	end
 
@@ -209,7 +209,7 @@ class AccTestDomainObjectProxy < AcceptanceTestCase
 	def test_correct_hashing
 		test_row = TestRow.new( 'text_field' => 'some text' )
 		test_row.commit
-		coll = @object_store.getTestRows { |test_row|
+		coll = @object_store.get_test_rows { |test_row|
 			test_row.text_field.equals( 'some text' )
 		}
 		assert_equal( 1, coll.size )
@@ -226,7 +226,7 @@ class AccTestEquals < AcceptanceTestCase
 		cond = Query::Equals.new( 'text2', 'some text', TestRow )
 		assert_equal( 1, @object_store.get_subset( cond ).size )
 		@object_store.flush( row )
-		row_prime = @object_store.getTestRow( 1 )
+		row_prime = @object_store.get_test_row( 1 )
 		assert_equal( 'some text', row_prime.text2 )
 	end
 end
@@ -236,7 +236,7 @@ class AccTestObjectStore < AcceptanceTestCase
 		mock = TestDiffPkRow.new( 'pk_id' => 1, 'text_field' => 'sample text' )
 		mock_object_store = MockObjectStore.new
 		mock_object_store.commit( mock )
-		testdiffpkrow1_prime = mock_object_store.getTestDiffPkRows( 1,
+		testdiffpkrow1_prime = mock_object_store.get_test_diff_pk_rows( 1,
 		                                                            'pk_id' ).first
 		assert_equal( 'sample text', testdiffpkrow1_prime.text_field )
 		sql = <<-SQL
@@ -263,7 +263,7 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 			SQL
 			@dbh.do( sql )
 		}
-		rows = @object_store.getTestRows
+		rows = @object_store.get_test_rows
 		assert_equal( num_rows, rows.size )
 		1.upto( num_rows ) { |i|
 			row = rows[i-1]
@@ -289,12 +289,12 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		row1.commit
 		row2 = TestRow.new( 'text_field' => 'c', 'text2' => 'c' )
 		row2.commit
-		matches = @object_store.getTestRows { |test_row|
+		matches = @object_store.get_test_rows { |test_row|
 			test_row.text_field.equals( test_row.text2 )
 		}
 		assert_equal( 1, matches.size )
 		assert_equal( 'c', matches.only.text_field )
-		matches2 = @object_store.getTestRows { |test_row|
+		matches2 = @object_store.get_test_rows { |test_row|
 			test_row.text2.equals( test_row.text_field )
 		}
 		assert_equal( 1, matches2.size )
@@ -319,17 +319,17 @@ some other line
 apostrophe's
 		TEXT
 		@dbh.do( 'insert into testrows( text_field ) values( ? )', text )
-		testrow = @object_store.getTestRow( 1 )
+		testrow = @object_store.get_test_row( 1 )
 		testrow.commit
 		text2 = "Por favor, don't just forward the icon through email\n'cause then you won't be able to see 'em through the web interface."
 		@dbh.do( 'insert into testrows( text_field ) values( ? )', text2 )
-		testrow2 = @object_store.getTestRow( 2 )
+		testrow2 = @object_store.get_test_row( 2 )
 		assert_equal( text2, testrow2.text_field )
 		testrow2.commit
 		text3 = "\n'''the defense asked if two days of work"
 		test_row3 = TestRow.new( 'text_field' => text3 )
 		test_row3.commit
-		test_row3_prime = @object_store.getTestRow( 3 )
+		test_row3_prime = @object_store.get_test_row( 3 )
 		assert_equal( text3, test_row3_prime.text_field )
 	end
 end

@@ -201,7 +201,7 @@ class TestDomainObject < LafcadioTestCase
     client.name = "newClientName"
     assert_equal("newClientName", client.name)
   end
-
+	
 	def testDontSetDeleteWithoutPkId
 		foo = Client.new( { "name" => "clientName1" } )
 		begin

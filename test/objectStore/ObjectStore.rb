@@ -56,7 +56,7 @@ class TestObjectStore < LafcadioTestCase
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client 2',
 				'referringClient' => client1Proxy })
 		@mockDbBridge.commit client2
-		client2Prime = @testObjectStore.getClient 2
+		client2Prime = @testObjectStore.get_client 2
 		assert_equal Client, client2Prime.referringClient.object_type
 	end
 
@@ -77,7 +77,7 @@ class TestObjectStore < LafcadioTestCase
 
 	def test_dispatches_inferred_query_to_collector
 		setTestClient
-		clients = @testObjectStore.getClients { |client|
+		clients = @testObjectStore.get_clients { |client|
 			client.name.equals( @client.name )
 		}
 	end
@@ -94,7 +94,7 @@ class TestObjectStore < LafcadioTestCase
 		@testObjectStore.commit ili
 		ilio = TestInventoryLineItemOption.getTestInventoryLineItemOption
 		@testObjectStore.commit ilio
-		assert_equal ilio, @testObjectStore.getInventoryLineItemOption(
+		assert_equal ilio, @testObjectStore.get_inventory_line_item_option(
 				ili, option)
 	end
 
@@ -106,36 +106,36 @@ class TestObjectStore < LafcadioTestCase
 			assert_match( /undefined method 'notAMethod'/, $!.to_s )
 		end
 		begin
-			@testObjectStore.getFooBar
+			@testObjectStore.get_foo_bar
 			raise "Should raise NoMethodError"
 		rescue NoMethodError
-			assert_match( /undefined method 'getFooBar'/, $!.to_s )
+			assert_match( /undefined method 'get_foo_bar'/, $!.to_s )
 			# ok
 		end
 	end
 
 	def testDynamicMethodNames
 		setTestClient
-		assert_equal @client, @testObjectStore.getClient(1)
+		assert_equal @client, @testObjectStore.get_client(1)
 		invoice1 = Invoice.new( 'client' => nil )
 		invoice1.commit
 		invoice2 = Invoice.new( 'client' => @client )
 		invoice2.commit
 		begin
-			@testObjectStore.getInvoices( nil )
+			@testObjectStore.get_invoices( nil )
 			raise "Should raise ArgumentError"
 		rescue ArgumentError
-			expected = "ObjectStore#getInvoices needs a field name as its second " +
+			expected = "ObjectStore#get_invoices needs a field name as its second " +
 			           "argument if its first argument is nil"
 			assert_equal( expected, $!.to_s )
 		end
-		coll = @testObjectStore.getInvoices( nil, 'client' )
+		coll = @testObjectStore.get_invoices( nil, 'client' )
 		assert_equal( invoice1, coll.only )
 	end
 
 	def testDynamicMethodNamesAsFacadeForCollector
 		setTestClient
-		matchingClients = @testObjectStore.getClients(@client.name, 'name')
+		matchingClients = @testObjectStore.get_clients(@client.name, 'name')
 		assert_equal 1, matchingClients.size
 		assert_equal @client, matchingClients[0]
 	end
@@ -172,7 +172,7 @@ class TestObjectStore < LafcadioTestCase
 		inv2 = Invoice.new({ 'invoiceNum' => 2, 'client' => client,
 				'date' => Date.today - 7, 'rate' => 30, 'hours' => 40 })
 		@testObjectStore.commit inv2
-		coll = @testObjectStore.getInvoices(client)
+		coll = @testObjectStore.get_invoices(client)
 		assert_equal 2, coll.size
 	end
 
@@ -239,7 +239,7 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal Client, origClient.class
 		clientProxy = invoice.client
 		assert_equal DomainObjectProxy, clientProxy.class
-		matches = @testObjectStore.getInvoices(clientProxy)
+		matches = @testObjectStore.get_invoices(clientProxy)
 		assert_equal 1, matches.size
 	end
 
@@ -258,12 +258,12 @@ class TestObjectStore < LafcadioTestCase
 		@testObjectStore.commit client
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client 2' })
 		@testObjectStore.commit client2
-		assert_equal 2, @testObjectStore.getClients('client 2', 'name')[0].pk_id
+		assert_equal 2, @testObjectStore.get_clients('client 2', 'name')[0].pk_id
 	end
 
 	def test_method_missing
 		begin
-			@testObjectStore.getFooBar
+			@testObjectStore.get_foo_bar
 			raise "Should raise NoMethodError"
 		rescue NoMethodError
 			# okay
@@ -275,7 +275,7 @@ class TestObjectStore < LafcadioTestCase
 		inv1.commit
 		inv2 = Invoice.new( 'date' => Date.today, 'paid' => Date.today )
 		inv2.commit
-		matches = @testObjectStore.getInvoices { |inv|
+		matches = @testObjectStore.get_invoices { |inv|
 			inv.date.equals( inv.paid )
 		}
 		assert_equal( 1, matches.size )
@@ -288,22 +288,22 @@ class TestObjectStore < LafcadioTestCase
 		client2.commit
 		client3 = Client.new( 'pk_id' => 3, 'name' => 'client 3' )
 		client3.commit
-		coll1 = @testObjectStore.getClients { |client| client.name.equals( 'client 1' ) }
+		coll1 = @testObjectStore.get_clients { |client| client.name.equals( 'client 1' ) }
 		assert_equal( 1, coll1.size )
 		assert_equal( 1, coll1[0].pk_id )
-		coll2 = @testObjectStore.getClients { |client| client.name.like( /^clie/ ) }
+		coll2 = @testObjectStore.get_clients { |client| client.name.like( /^clie/ ) }
 		assert_equal( 3, coll2.size )
-		coll3 = @testObjectStore.getClients { |client| client.name.like( /^clie/ ).not }
+		coll3 = @testObjectStore.get_clients { |client| client.name.like( /^clie/ ).not }
 		assert_equal( 0, coll3.size )
 		begin
-			@testObjectStore.getClients( 'client 1', 'name' ) { |client|
+			@testObjectStore.get_clients( 'client 1', 'name' ) { |client|
 				client.name.equals( 'client 1' ).not
 			}
 			raise "Should raise ArgumentError"
 		rescue ArgumentError
 			# okay
 		end
-		coll4 = @testObjectStore.getClients
+		coll4 = @testObjectStore.get_clients
 		assert_equal( 3, coll4.size )
 	end
 	
@@ -312,7 +312,7 @@ class TestObjectStore < LafcadioTestCase
 		assert_exception( ArgumentError,
 		                  "Can't query using an uncommitted domain object as a search term"
 		                ) {
-			@testObjectStore.getInvoices( uncommitted )
+			@testObjectStore.get_invoices( uncommitted )
 		}
 	end
 
@@ -336,7 +336,7 @@ class TestObjectStore < LafcadioTestCase
 														'standard_rate' => 100,
 														'referringClient' => client1Proxy })
 		@mockDbBridge.commit client2
-		client1Prime = @testObjectStore.getClient 1
+		client1Prime = @testObjectStore.get_client 1
 		assert_equal 2, client1Prime.referringClient.pk_id
 		assert_equal 100, client1Prime.referringClient.standard_rate
 	end
