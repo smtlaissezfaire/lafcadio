@@ -98,7 +98,7 @@ class ObjectStore < ContextualService
 				begin
 					result = subsystem.send methodName, *args
 					resolved = true
-				rescue CouldntMatchObjectTypeError
+				rescue CouldntMatchObjectTypeError, NoMethodError
 					# try the next one
 				end
 			end

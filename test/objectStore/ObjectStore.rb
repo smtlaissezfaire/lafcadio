@@ -28,6 +28,7 @@ class TestObjectStore < LafcadioTestCase
 	def testDynamicMethodNames
 		setTestClient
 		assert_equal @client, @testObjectStore.getClient(1)
+		@testObjectStore.flush( @client )
 	end
 
 	def testDynamicMethodNamesAsFacadeForCollector
