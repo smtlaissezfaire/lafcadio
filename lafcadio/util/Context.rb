@@ -13,7 +13,7 @@ class Context
 	end
 	
 	def createInstance (resourceName)
-		resourceClass = ClassUtil.getClass resourceName
+		resourceClass = eval resourceName
 		resourceClass.new self
 	end
 
