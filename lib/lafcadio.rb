@@ -13,7 +13,7 @@
 #   overridden.
 #
 # First-time users are recommended to read the tutorial at
-# http://rubyforge.lafcadio.org/tutorial.html.
+# http://lafcadio.rubyforge.org/tutorial.html.
 
 module Lafcadio
 	Version = "0.5.0"
