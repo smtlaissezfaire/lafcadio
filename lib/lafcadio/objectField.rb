@@ -68,10 +68,6 @@ module Lafcadio
 			db_field_name
 		end
 
-		def null_error_msg #:nodoc:
-			"#{ self.object_type.name }##{ name } can not be nil."
-		end
-
 		def prev_value(pk_id) #:nodoc:
 			prevObject = ObjectStore.get_object_store.get(@object_type, pk_id)
 			prevObject.send(name)
@@ -90,7 +86,8 @@ module Lafcadio
 
 		def verify(value, pk_id) #:nodoc:
 			if value.nil? && not_null
-				raise FieldValueError, null_error_msg, caller
+				raise( FieldValueError,
+				       "#{ self.object_type.name }##{ name } can not be nil.", caller )
 			end
 			verify_non_nil( value, pk_id ) if value
 		end
@@ -304,10 +301,6 @@ module Lafcadio
 
 		def initialize( object_type, name = "email" )
 			super( object_type, name )
-		end
-
-		def null_error_msg #:nodoc:
-			"Please enter an email address."
 		end
 
 		def verify_non_nil(value, pk_id) #:nodoc:
