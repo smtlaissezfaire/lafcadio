@@ -10,7 +10,7 @@ class TestCondition < LafcadioTestCase
 			fail "needs to raise MissingError"
 		rescue MissingError
 			errStr = "Couldn't find field \"att name\" in Attribute domain class"
-			assert_equals( $!.to_s, errStr )
+			assert_equal( $!.to_s, errStr )
 		end
 	end
 end

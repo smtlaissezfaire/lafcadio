@@ -19,8 +19,8 @@ class TestContextualService < RUNIT::TestCase
 		context.set_resource( ServiceB, serviceB )
 		assert_equal serviceB, ServiceB.get_service_b
 		assert ServiceA.get_service_a != ServiceB.get_service_b
-		assert_exception( NoMethodError ) { context.setServiceA }
-		assert_exception( NoMethodError ) { context.getServiceA }
+		assert_raise( NoMethodError ) { context.setServiceA }
+		assert_raise( NoMethodError ) { context.getServiceA }
 	end
 	
 	class Outer; class Inner < Lafcadio::ContextualService; end; end
@@ -34,7 +34,7 @@ class TestContextualService < RUNIT::TestCase
 	
 	def test_requires_init_called_through_Context_create_instance
 		context = Context.instance
-		assert_exception( ArgumentError ) { ServiceA.new }
+		assert_raise( ArgumentError ) { ServiceA.new }
 		assert_equal( ServiceA, ServiceA.get_service_a.class )
 	end
 	

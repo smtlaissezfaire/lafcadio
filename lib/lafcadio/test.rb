@@ -1,10 +1,11 @@
 require 'lafcadio/depend'
 require 'lafcadio/mock'
 require 'lafcadio/util'
+require 'test/unit'
 
 # A test case that sets up a number of mock services. In writing an application 
 # that uses Lafcadio you may find it convenient to inherit from this class.
-class LafcadioTestCase < RUNIT::TestCase
+class LafcadioTestCase < Test::Unit::TestCase
 	include Lafcadio
 
   def setup
@@ -14,4 +15,6 @@ class LafcadioTestCase < RUNIT::TestCase
 		ObjectStore.set_object_store @mockObjectStore
 		LafcadioConfig.set_filename 'lafcadio/test/testConfig.dat'
   end
+	
+	def default_test; end
 end

@@ -53,8 +53,8 @@ class TestDomainObject < LafcadioTestCase
 			'domainDirs' => '../test/mock/domain/'
 		)
 		client = Client.new( 'name' => 'client name' )
-		assert_exception( FieldValueError ) { client.name = nil }
-		assert_exception( FieldValueError ) { Client.new( 'name' => nil ) }
+		assert_raise( FieldValueError ) { client.name = nil }
+		assert_raise( FieldValueError ) { Client.new( 'name' => nil ) }
 	end
 
 	def test_checks_fields_on_commit
@@ -63,7 +63,7 @@ class TestDomainObject < LafcadioTestCase
 			'domainDirs' => '../test/mock/domain/'
 		)
 		client = Client.new( {} )
-		assert_exception( FieldValueError ) { client.commit }
+		assert_raise( FieldValueError ) { client.commit }
 	end
 
 	def test_checks_fields_on_instantiation
@@ -72,23 +72,23 @@ class TestDomainObject < LafcadioTestCase
 															 'domainDirs' => '../test/mock/domain/' )
 		first_client = Client.new( 'name' => 'first client' )
 		first_client.commit
-		assert_exception( FieldValueError ) { Client.new( {} ) }
-		assert_exception( FieldValueError ) {
+		assert_raise( FieldValueError ) { Client.new( {} ) }
+		assert_raise( FieldValueError ) {
 			Client.new( 'name' => 'client name', 'referringClient' => first_client,
 			            'notes' => 123 )
 		}
-		assert_exception( FieldValueError ) {
+		assert_raise( FieldValueError ) {
 			Client.new( 'name' => 'client name', 'referringClient' => first_client,
 			            'standard_rate' => "Free!" )
 		}
-		assert_exception( FieldValueError ) {
+		assert_raise( FieldValueError ) {
 			User.new( 'email' => 'a@a', 'firstNames' => 'Bill',
 			          'administrator' => false )
 		}
-		assert_exception( FieldValueError ) {
+		assert_raise( FieldValueError ) {
 			XmlSku.new( 'enum1' => 'c', 'email1' => 'bill@bill.bill' )
 		}
-		assert_exception( FieldValueError ) {
+		assert_raise( FieldValueError ) {
 			XmlSku.new( 'textList1' => 'a,b,c', 'email1' => 'bill@bill.bill',
 			            'enum1' => 'a', 'enum2' => '1' )
 		}

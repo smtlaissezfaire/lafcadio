@@ -3,11 +3,11 @@ require 'dbi'
 require 'lafcadio/domain'
 require 'lafcadio/objectStore'
 require 'lafcadio/util'
-require 'runit/testcase'
+require 'test/unit'
 
 include Lafcadio
 
-class AcceptanceTestCase < RUNIT::TestCase
+class AcceptanceTestCase < Test::Unit::TestCase
 	def setup
 		super
 		@dbh = get_dbh
@@ -19,6 +19,8 @@ class AcceptanceTestCase < RUNIT::TestCase
 		domain_classes.each { |domain_class| domain_class.drop_table( @dbh ) }
 		ObjectStore.set_object_store( nil )
 	end
+	
+	def default_test; end
 
 	def domain_classes; [ TestBadRow, TestRow, TestChildRow, TestDiffPkRow ]; end
 	
@@ -306,7 +308,7 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		br1 = TestBadRow.new( 'text_field' => 'a' )
 		br1.commit
 		error_msg = 'The field "pk_id" can\'t be found in the table "testbadrows".'
-		assert_exception( FieldMatchError, error_msg ) {
+		assert_raise( FieldMatchError, error_msg ) {
 			@object_store.get_all( TestBadRow )
 		}
 	end

@@ -47,7 +47,7 @@ class TestSqlValueConverter < LafcadioTestCase
 		             'standard_rate' => '70' }
 		object_hash = SqlValueConverter.new( Client, row_hash )
 		error_msg = 'The field "pk_id" can\'t be found in the table "clients".'
-		assert_exception( FieldMatchError, error_msg ) { object_hash['pk_id'] }
+		assert_raise( FieldMatchError, error_msg ) { object_hash['pk_id'] }
 	end
 	
 	def test_different_db_field_name

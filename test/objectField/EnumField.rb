@@ -24,7 +24,7 @@ class TestEnumField < LafcadioTestCase
 	def test_verify
 		field = TestEnumField.getTestEnumField
 		field.verify( 'AX', 1 )
-		assert_exception( FieldValueError ) { field.verify( 'IOU', 1 ) }
+		assert_raise( FieldValueError ) { field.verify( 'IOU', 1 ) }
 		field.not_null = false
 		field.verify( nil, 1 )
 	end
