@@ -221,30 +221,41 @@ module Lafcadio
 			@fields_set = []
 		end
 		
-		def method_missing(methId, arg1 = nil)
-			methodName = methId.id2name
-			getter = false
-			setter = false
-			field = nil
-			self.class.allFields.each { |aField|
-				if aField.name == methodName
-					getter = true
-					field = aField
-				elsif "#{ aField.name }=" == methodName
-					setter = true
-					field = aField
-				end
-			}
-			if getter
-				unless @fields_set.include?( field )
-					set_field( field, @fieldHash[field.name] )
-				end
-				@fields[field.name]
-			elsif setter
-				set_field( field, arg1 )
+		def method_missing( methId, *args )
+			if ( field = get_setter_field( methId ) )
+				set_field( field, args.first )
+			elsif ( field = get_getter_field( methId ) )
+				get_field( field )
 			else
-				super(methId)
+				super( methId, *args )
 			end
+		end
+
+		def get_getter_field( methId )
+			begin
+				self.class.getField( methId.id2name )
+			rescue MissingError
+				nil
+			end
+		end
+
+		def get_setter_field( methId )
+			if methId.id2name =~ /(.*)=$/
+				begin
+					self.class.getField( $1 )
+				rescue MissingError
+					nil
+				end
+			else
+				nil
+			end
+		end
+		
+		def get_field( field )
+			unless @fields_set.include?( field )
+				set_field( field, @fieldHash[field.name] )
+			end
+			@fields[field.name]
 		end
 		
 		def set_field( field, value )
