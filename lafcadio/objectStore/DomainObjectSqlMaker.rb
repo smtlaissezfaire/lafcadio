@@ -1,3 +1,4 @@
+# Generates the necessary SQL for committing one domain object to the database.
 class DomainObjectSqlMaker
   def initialize(obj)
     @obj = obj

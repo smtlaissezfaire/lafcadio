@@ -1,6 +1,23 @@
 require 'lafcadio/util/StrUtil'
 require 'lafcadio/query/Equals'
 
+# The Collector searches for certain collections of domain objects in the 
+# database. These are in-SQL queries that are executed, so the time savings can 
+# be quite significant over returning all objects of a certain domain class and 
+# filtering them by hand in Ruby.
+#
+# The most commonly used method of the collector is in this format:
+#   Collector#get< domain class >s (searchTerm, fieldName = nil)
+# Which basically looks for instances of that domain class matching that search term. For example,
+#   Collector#getProducts (aProductCategory)
+# queries MySQL for all products that belong to that product category. If 
+# <tt>fieldName</tt> isn't given, it's inferred from the <tt>searchTerm</tt>. 
+# This works well for a search term that is a domain object, but for something 
+# more prosaic you'll probably need to set <tt>fieldName</tt> explicitly:
+#   Collector#getUsers ("Jones", "lastName")
+#
+# Don't call the Collector's method's directly: ObjectStore automatically 
+# dispatches methods to Collector if there's a match.
 class Collector
   def initialize(objectStore = Context.instance.getObjectStore)
 		@objectStore = objectStore

@@ -1,6 +1,17 @@
 require 'lafcadio/objectField/ObjectField'
 require 'lafcadio/objectField/BooleanFieldViewer'
 
+# BooleanField represents a boolean value. By default, it assumes that the table 
+# field represents true and false with the integers 1 and 0. For a field that 
+# deviates from this default, you can set the enumeration one of two ways.
+# 1. Set BooleanField#enumType one of the enums preset values. Currently there 
+#    are only
+#    * BooleanField::ENUMS_ONE_ZERO (the default, uses integers 1 and 0)
+#    * BooleanField::ENUMS_CAPITAL_YES_NO (uses characters 'Y' and 'N')
+# 1. Set BooleanField#enums to a hash with keys <tt>true</tt> and 
+#    <tt>false</tt>. For example:
+#      myBooleanField.enums = { true => 'yin', false => 'yang' }
+# <tt>enums</tt> takes precedence over <tt>enumType</tt>.
 class BooleanField < ObjectField
 	ENUMS_ONE_ZERO = 0
 	ENUMS_CAPITAL_YES_NO = 1

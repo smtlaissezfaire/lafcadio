@@ -2,6 +2,7 @@ require 'lafcadio/util/ContextualService'
 require 'lafcadio/query/Query'
 
 class ObjectStore < ContextualService
+	# Handles cases of simple domain object retrieval, and domain object caching.
 	class Retriever
 		def initialize(dbBridge)
 			require 'lafcadio/objectStore/Cache'
@@ -10,6 +11,7 @@ class ObjectStore < ContextualService
 			@objectTypesFullyRetrieved = []
 		end
 
+		# Returns the domain object corresponding to the domain class and objId.
 		def get(objectType, objId)
 			require 'lafcadio/objectStore/DomainObjectNotFoundError'
 			raise "ObjectStore.getObject can't accept nil objId" if objId == nil
@@ -27,6 +29,7 @@ class ObjectStore < ContextualService
 					"Can't find #{objectType} #{objId}", caller))
 		end
 
+		# Returns all domain objects for the given domain class.
 		def getAll(objectType)
 			require 'lafcadio/objectStore/Collection'
 			unless @objectTypesFullyRetrieved.index(objectType)
@@ -39,6 +42,7 @@ class ObjectStore < ContextualService
 			coll.concat(@cache.getAll(objectType))
 		end
 
+		# Flushes one domain object from its cache.
 		def flush(dbObject)
 			@cache.flush dbObject
 		end
@@ -47,6 +51,7 @@ class ObjectStore < ContextualService
 			@cache.flush dbObject
 		end
 
+		# Caches one domain object.
 		def set(dbObject)
 			@cache.save dbObject
 		end

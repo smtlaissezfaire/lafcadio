@@ -1,5 +1,6 @@
 require 'lafcadio/objectStore/ObjectStore'
 
+# Commits one domain object to the database.
 class Committer
 	INSERT 	= 1
 	UPDATE 	= 2
@@ -7,6 +8,8 @@ class Committer
 
 	attr_reader :commitType
 
+	# [dbObject] The domain object to be committed.
+	# [dbBridge] The DbBridge.
 	def initialize(dbObject, dbBridge)
 		@dbObject = dbObject
 		@dbBridge = dbBridge
@@ -24,6 +27,9 @@ class Committer
 		end
 	end
 
+	# Executes the commit. Note that this handles all Ruby-level details of 
+	# commits, such as triggers. The actual work of sending a SQL statement to the 
+	# database is handled by the DbBridge.
 	def execute
 		setCommitType
     @dbObject.lastCommit = @objectStore.getLastCommit(@dbObject)

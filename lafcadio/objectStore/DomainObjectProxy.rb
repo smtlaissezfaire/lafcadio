@@ -1,5 +1,10 @@
 require 'lafcadio/objectStore/DomainComparable'
 
+# The DomainObjectProxy is used when retrieving domain objects that are linked 
+# to other domain objects with LinkFields. In terms of objectType and objId, a 
+# DomainObjectProxy instance looks to the outside world like the domain object 
+# it's supposed to represent. It only retrieves its domain object from the 
+# database when member data is requested.
 class DomainObjectProxy
 	include DomainComparable
 

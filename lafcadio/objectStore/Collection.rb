@@ -1,3 +1,4 @@
+# A collection for domain objects.
 class Collection < Array
 	attr_reader :objectType, :filteredByName, :filteredByValue
 
@@ -25,6 +26,12 @@ class Collection < Array
 		end
 	end
 
+	# Sorts the elements in place. If a block is given, then the elements are 
+	# sorted according to the block. Otherwise, the elements are sorted, in rank 
+	# of descending priority, by the fields named in the <tt>accessors</tt> array. 
+	# For example, a name sort of users might look like
+	#   userCollection.sort! ([ 'lastName', 'firstNames' ])
+	# If no accessors are given, sort! sorts by objId.
 	def sort!( accessors = [ 'objId' ] )
 		if block_given?
 			super &(proc { |x, y| yield(x, y) } )
@@ -33,6 +40,13 @@ class Collection < Array
 		end
 	end
 
+	# Returns a copy of this collection with its elements sorted. If a block is 
+	# given, then the elements are sorted according to the block. Otherwise, the 
+	# elements are sorted, in rank of descending priority, by the fields named in 
+	# the <tt>accessors</tt> array. For example, a name sort of users might look 
+	# like
+	#   sortedCollection = userCollection.sort ([ 'lastName', 'firstNames' ])
+	# If no accessors are given, sort sorts by objId.
 	def sort( accessors = [ 'objId' ] )
 		otherColl = self.clone
 		if block_given?
@@ -43,6 +57,12 @@ class Collection < Array
 		otherColl
 	end
 
+	# Returns a copy of this collection with only certain elements. If 
+	# <tt>fieldName</tt> and <tt>searchTerm</tt> are set, then filter will only 
+	# return domain objects such that
+	#   obj.send(fieldName) == searchTerm
+	# Otherwise, filter expects to receive a block, and returns all domain objects 
+	# for which the block evaluates to <tt>true</tt>.
 	def filter(fieldName = nil, searchTerm = nil)
     filteredCollection = Collection.new @objectType, fieldName,
 				searchTerm
@@ -64,6 +84,9 @@ class Collection < Array
 		filter fieldName, searchTerm
   end
 
+	# Returns a copy of this collection, first removing every domain object for 
+	# which
+	#   obj.send(fieldName) != searchTerm
 	def remove(fieldName, searchTerm)
 		filter { |obj| obj.send(fieldName) != searchTerm }
 	end

@@ -17,6 +17,9 @@ class ObjectField
     FieldViewer
   end
 
+	# [objectType] The domain class that this object field belongs to.
+	# [name] The name of this field.
+	# [englishName] The descriptive English name of this field.
   def initialize(objectType, name, englishName = nil)
     @objectType = objectType
     @name = name
@@ -63,10 +66,14 @@ class ObjectField
     end
   end
 
+	# Returns the name that this field is referenced by in the MySQL table. By 
+	# default this is the same as the name; to override it, set 
+	# ObjectField#dbFieldName.
   def nameForSQL
     dbFieldName
   end
 
+	# Returns a string value suitable for committing this field's value to MySQL.
   def valueForSQL(value)
     value || 'null'
   end
@@ -104,6 +111,7 @@ class ObjectField
     value
   end
 
+	# Given the SQL value string, returns a Ruby-native value.
   def valueFromSQL(string)
     string
   end

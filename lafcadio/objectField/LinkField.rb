@@ -9,6 +9,10 @@ class LinkField < ObjectField
   attr_reader :linkedType
   attr_accessor :listener, :objectStore, :newDuringEdit, :sortField
 
+	# [objectType] The domain class that this field belongs to.
+	# [linkedType] The domain class that this field points to.
+	# [name] The name of this field.
+	# [englishName] The English name of this field.
   def initialize(objectType, linkedType, name = nil, englishName = nil)
 		unless name
 			linkedType.name =~ /::/

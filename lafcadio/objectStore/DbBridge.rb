@@ -1,5 +1,6 @@
 require "mysql"
 
+# The DbBridge manages the MySQL connection for the ObjectStore.
 class DbBridge
   @@db = nil
 	@@lastObjIdInserted = nil
@@ -40,11 +41,15 @@ class DbBridge
     end
   end
 
+	# Hook for logging: Useful for testing.
 	def maybeLog(sql)
 		require 'lafcadio/util/Logger'
 #		Logger.log sql, 'sql'
 	end
 
+	# Sends a insert, update, or delete statement to the database. This is only 
+	# called by Committer#execute, which handles a lot of Ruby-level details such 
+	# as triggers.
   def commit(dbObject)
 		require 'lafcadio/objectStore/DomainObjectSqlMaker'
     sqlMaker = DomainObjectSqlMaker.new(dbObject)
@@ -58,6 +63,7 @@ class DbBridge
     end
   end
 
+	# When passed a query, executes that query and returns a Collection.
 	def getCollectionByQuery(query)
 		require 'lafcadio/objectStore/Collection'
 		require 'lafcadio/objectStore/SqlValueConverter'
