@@ -443,7 +443,7 @@ module Lafcadio
 		def get_db_bridge; @dbBridge; end
 		
 		def get_field_name( domain_object )
-			domain_object.object_type.bare_name.decapitalize
+			domain_object.object_type.basename.decapitalize
 		end
 
 		def get_filtered(object_typeName, searchTerm, fieldName = nil) #:nodoc:
@@ -474,8 +474,8 @@ module Lafcadio
 
 		def get_mapped(searchTerm, resultTypeName) #:nodoc:
 			resultType = DomainObject.get_object_type_from_string resultTypeName
-			firstTypeName = searchTerm.class.bare_name
-			secondTypeName = resultType.bare_name
+			firstTypeName = searchTerm.class.basename
+			secondTypeName = resultType.basename
 			mapTypeName = firstTypeName + secondTypeName
 			get_filtered( mapTypeName, searchTerm ).collect { |mapObj|
 				mapObj.send( resultType.name.decapitalize )

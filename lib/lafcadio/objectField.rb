@@ -600,7 +600,7 @@ module Lafcadio
 		end
 
 		def value_for_sql(objectValue) #:nodoc:
-			if objectValue.respond_to?( :join )
+			if objectValue.is_a?( Array )
 				str = objectValue.join(',')
 			else
 				str = objectValue

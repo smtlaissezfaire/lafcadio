@@ -13,12 +13,12 @@ module Lafcadio
 		def get_class_field( fieldElt )
 			className = fieldElt.attributes['class'].to_s
 			name = fieldElt.attributes['name']
-			begin
-				fieldClass = Class.get_class( 'Lafcadio::' + className )
+			if className != ''
+				fieldClass = Class.by_name( 'Lafcadio::' + className )
 				register_name( name )
 				field = fieldClass.instantiate_from_xml( @domain_class, fieldElt )
 				set_field_attributes( field, fieldElt )
-			rescue MissingError
+			else
 				msg = "Couldn't find field class '#{ className }' for field " +
 				      "'#{ name }'"
 				raise( MissingError, msg, caller )
@@ -451,7 +451,7 @@ module Lafcadio
 				if (!xmlParser.nil? && table_name = xmlParser.table_name)
 					table_name
 				else
-					table_name = self.bare_name
+					table_name = self.basename
 					table_name[0] = table_name[0..0].downcase
 					English.plural table_name
 				end
@@ -461,7 +461,7 @@ module Lafcadio
 		def self.try_load_xml_parser
 			require 'lafcadio/domain'
 			dirName = LafcadioConfig.new['classDefinitionDir']
-			xmlFileName = self.bare_name + '.xml'
+			xmlFileName = self.basename + '.xml'
 			xmlPath = File.join( dirName, xmlFileName )
 			xml = ''
 			begin

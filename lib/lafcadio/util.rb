@@ -1,43 +1,7 @@
 require 'delegate'
 require 'singleton'
 
-class Array
-	# If this array has one element, returns that element; otherwise, raises an
-	# error.
-	def only
-		if size != 1
-			raise "Expected single-value Array but Array has #{ size } members"
-		else
-			first
-		end
-	end
-end
-
-class Class < Module
-	# Given a String, returns a class object by the same name.
-	def self.get_class(className)
-		theClass = nil
-		ObjectSpace.each_object(Class) { |aClass|
-			theClass = aClass if aClass.name == className
-		}
-		if theClass
-			theClass
-		else
-			raise( Lafcadio::MissingError, "Couldn't find class \"#{ className }\"",
-			       caller )
-		end
-	end
-	
-	# Returns the name of <tt>aClass</tt> itself, stripping off the names of any 
-	# containing modules or outer classes.
-	def bare_name
-		name =~ /::/
-		$' || name
-	end
-end
-
 module Lafcadio
-
 	# The Context is a singleton object that manages ContextualServices. Each 
 	# ContextualService is a service that connects in some way to external 
 	# resources: ObjectStore connects to the database; Emailer connects to SMTP, 
@@ -350,32 +314,6 @@ module Lafcadio
 	end
 end
 
-class Numeric
-	# Returns a string that represents the numbeer to <tt>precision</tt> decimal 
-	# places, rounding down if necessary. If <tt>padDecimals</tt> is set to 
-	# <tt>false</tt> and the number rounds to a whole number, there will be no 
-	# decimals shown.
-	#
-	#   (24.55).precision_format( 3 )    -> "24.550"
-	#   (24.55).precision_format( 0 )    -> "24"
-	#   100.precision_format( 2, false ) -> "100"
-  def precision_format(precision, padDecimals = true)
-    str = floor.to_s
-    if precision > 0
-      decimal = self - self.floor
-      decimalStr =(decimal * 10 ** precision).floor.to_s
-      if decimalStr.size < precision
-        decimalStr += "0" *(precision - decimalStr.size)
-      end
-      if padDecimals || decimalStr =~ /[123456789]/
-	      str += "."
-  	    str += decimalStr
-  	  end
-    end
-    str
-  end
-end
-
 class String
 	# Returns the underscored version of a camel-case string.
 	def camel_case_to_underscore
@@ -433,25 +371,6 @@ class String
     filename
   end
 
-	# Breaks a string into lines no longer than <tt>lineLength</tt>.
-	#
-	#   'the quick brown fox jumped over the lazy dog.'.line_wrape( 10 ) ->
-	#     "the quick\nbrown fox\njumped\nover the\nlazy dog."
-	def line_wrape(lineLength)
-		words = split ' '
-		line = ''
-		lines = []
-		words.each { |word|
-			if line.length + word.length + 1 > lineLength
-				lines << line
-				line = ''
-			end
-			line = line != '' ? "#{ line } #{ word }" : word
-		}
-		lines << line
-		lines.join "\n"
-	end
-	
 	# Turns a numeric string into U.S. format if it's not already formatted that
 	# way.
 	#
@@ -474,24 +393,6 @@ class String
 		string
 	end
 	
-	# Divides a string into substrings using <tt>regexp</tt> as a 
-	# delimiter, and returns an array containing both the substrings and the 
-	# portions that matched <tt>regexp</tt>.
-	#
-	#   'theZquickZZbrownZfox'.split_keep_in_betweens(/Z+/) ->
-	#     ['the', 'Z', 'quick', 'ZZ', 'brown', 'Z', 'fox' ]
-	def split_keep_in_betweens(regexp)
-		result = []
-		string = clone
-		while string =~ regexp
-			result << $`
-			result << $&
-			string = $'
-		end
-		result << string unless string == ''
-		result
-	end
-
 	# Returns the camel-case equivalent of an underscore-style string.
 	def underscore_to_camel_case
 		capitalize.gsub( /_([a-zA-Z0-9]+)/ ) { |s| s[1,s.size - 1].capitalize }
