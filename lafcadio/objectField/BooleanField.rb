@@ -44,7 +44,7 @@ class BooleanField < ObjectField
 		if @enums
 			@enums
 		elsif @enumType == ENUMS_ONE_ZERO
-			{ true => '1', false => '0' }
+			{ true => 1, false => 0 }
 		elsif @enumType == ENUMS_CAPITAL_YES_NO
 			{ true => 'Y', false => 'N' }
 		end

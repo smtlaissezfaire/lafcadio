@@ -2,7 +2,7 @@ require 'lafcadio/objectField/ObjectField'
 require 'lafcadio/util/StrUtil'
 
 class DateTimeField < ObjectField
-	def valueFromSQL(dbi_value, lookupLink = true) 
+	def valueFromSQL(dbi_value, lookupLink = true)
 		dbi_value ? dbi_value.to_time : nil
 	end
 
