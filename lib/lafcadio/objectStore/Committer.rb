@@ -7,7 +7,7 @@ module Lafcadio
 		UPDATE 	= 2
 		DELETE  = 3
 
-		attr_reader :commitType
+		attr_reader :commitType, :dbObject
 
 		# [dbObject] The domain object to be committed.
 		# [dbBridge] The DbBridge.
@@ -33,7 +33,7 @@ module Lafcadio
 		# the database is handled by the DbBridge.
 		def execute
 			setCommitType
-			@dbObject.lastCommit = @objectStore.getLastCommit(@dbObject)
+			@dbObject.lastCommit = getLastCommit
 			@dbObject.preCommitTrigger
 			if @dbObject.delete
 				dependentClasses = @dbObject.objectType.dependentClasses
@@ -52,6 +52,16 @@ module Lafcadio
 				@dbObject.objId = @dbBridge.lastObjIdInserted
 			end
 			@dbObject.postCommitTrigger
+		end
+		
+		def getLastCommit
+			if @dbObject.delete
+				DomainObject::COMMIT_DELETE
+			elsif @dbObject.objId
+				DomainObject::COMMIT_EDIT
+			else
+				DomainObject::COMMIT_ADD
+			end
 		end
 	end
 end

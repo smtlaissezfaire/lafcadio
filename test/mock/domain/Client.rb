@@ -13,7 +13,7 @@ class Client < Lafcadio::DomainObject
 
 	def Client.storedTestClient
 		client = Client.getTestClient
-		Context.instance.getObjectStore.addObject client
+		Context.instance.getObjectStore.commit client
 		client
 	end
 

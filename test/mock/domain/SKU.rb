@@ -54,7 +54,7 @@ class TestSKU < RUNIT::TestCase
 
 	def TestSKU.storedTestSKU
 		sku = TestSKU.getTestSKU
-		Lafcadio::Context.instance.getObjectStore.addObject sku
+		Lafcadio::Context.instance.getObjectStore.commit sku
 		sku
 	end
 end

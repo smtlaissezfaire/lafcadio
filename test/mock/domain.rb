@@ -29,7 +29,7 @@ class TestAttribute < LafcadioTestCase
 
 	def TestAttribute.storedTestAttribute
 		att = getTestAttribute
-		Context.instance.getObjectStore.addObject att
+		Context.instance.getObjectStore.commit att
 		att
 	end
 end

@@ -17,7 +17,7 @@ class Invoice < Lafcadio::DomainObject
 	def Invoice.storedTestInvoice
 		inv = Invoice.getTestInvoice
 		inv.client = Client.storedTestClient
-		Context.instance.getObjectStore.addObject inv
+		Context.instance.getObjectStore.commit inv
 		inv
 	end
 
