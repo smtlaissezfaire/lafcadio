@@ -19,7 +19,7 @@ module Lafcadio
 		end
 
 		attr_reader :linkedType
-		attr_accessor :listener, :newDuringEdit, :sortField, :deleteCascade
+		attr_accessor :deleteCascade
 
 		# [objectType]    The domain class that this field belongs to.
 		# [linkedType]    The domain class that this field points to.
@@ -36,8 +36,6 @@ module Lafcadio
 			end
 			super(objectType, name, englishName)
 			( @linkedType, @deleteCascade ) = linkedType, deleteCascade
-			@listener = nil
-			@newDuringEdit = true
 		end
 
 		def valueFromSQL(string) #:nodoc:
