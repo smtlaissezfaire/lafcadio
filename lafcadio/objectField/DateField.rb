@@ -29,18 +29,10 @@ class DateField < ObjectField
 		value ? "'#{value.to_s}'" : 'null'
   end
 
-  def valueFromSQL(string, lookupLink = true)
-		if string != nil
-	    dateFields = string.split("-")
-  	  year = dateFields[0].to_i
-    	month = dateFields[1].to_i
-	    dom = dateFields[2].to_i
-  	  if year != 0 && month != 0 && dom != 0
-    	  Date.new(year, month, dom)
-	    else
-  	    nil
-    	end
-		else
+  def valueFromSQL(dbiDate, lookupLink = true)
+		begin
+			dbiDate ? dbiDate.to_date : nil
+		rescue ArgumentError
 			nil
 		end
   end

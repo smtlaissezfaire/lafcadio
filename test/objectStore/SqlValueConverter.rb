@@ -4,6 +4,7 @@ require 'test/mock/domain/User'
 require 'lafcadio/test/LafcadioTestCase'
 require 'test/mock/domain/Invoice'
 require 'lafcadio/objectStore/SqlValueConverter'
+require 'dbi'
 
 class TestSqlValueConverter < LafcadioTestCase
   def testExecute
@@ -16,8 +17,9 @@ class TestSqlValueConverter < LafcadioTestCase
   end
 
   def testTurnsLinkIdsIntoProxies
-    rowHash = { "client" => "1", "date" => "2001-01-01", "rate" => "70",
-		"hours" => "40", "paid" => "0000-00-00" }
+    rowHash = { "client" => "1", "date" => DBI::Date.new( 2001, 1, 1 ),
+                "rate" => "70", "hours" => "40",
+                "paid" => DBI::Date.new( 0, 0, 0 ) }
     converter = SqlValueConverter.new(Invoice, rowHash)
     objectHash = converter.execute
 		assert_nil objectHash['clientId']

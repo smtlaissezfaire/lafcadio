@@ -1,3 +1,4 @@
+require 'dbi'
 require 'lafcadio/objectField/DateField'
 require 'lafcadio/test/LafcadioTestCase'
 require 'test/mock/domain/Invoice'
@@ -33,9 +34,9 @@ class TestDateField < LafcadioTestCase
   end
 
   def testValueFromSQL
-    obj = @odf.valueFromSQL "2001-04-05"
+		obj = @odf.valueFromSQL( DBI::Date.new( 2001, 4, 5 ) )
     assert_equal(Date, obj.class)
-    obj2 = @odf.valueFromSQL "0000-00-00"
+		obj2 = @odf.valueFromSQL( DBI::Date.new( 0, 0, 0 ) )
     assert_nil obj2
 		obj3 = @odf.valueFromSQL nil
 		assert_nil obj3
