@@ -43,6 +43,21 @@ class TestDomainObject < LafcadioTestCase
 		2.times { MockDomainObject.classFields }
 	end
 
+	def test_checks_fields_at_all_states
+		LafcadioConfig.setValues( 'checkFields' => 'onAllStates',
+		                          'classDefinitionDir' => '../test/testData' )
+		client = Client.new( 'name' => 'client name' )
+		assert_exception( FieldValueError ) { client.name = nil }
+		assert_exception( FieldValueError ) { Client.new( 'name' => nil ) }
+	end
+
+	def test_checks_fields_on_commit
+		LafcadioConfig.setValues( 'checkFields' => 'onCommit',
+		                          'classDefinitionDir' => '../test/testData' )
+		client = Client.new( {} )
+		assert_exception( FieldValueError ) { client.commit }
+	end
+
 	def test_checks_fields_on_instantiation
 		LafcadioConfig.setValues( 'checkFields' => 'onInstantiate',
 		                          'classDefinitionDir' => '../test/testData' )
@@ -68,14 +83,6 @@ class TestDomainObject < LafcadioTestCase
 			XmlSku.new( 'textList1' => 'a,b,c', 'email1' => 'bill@bill.bill',
 			            'enum1' => 'a', 'enum2' => '1' )
 		}
-	end
-	
-	def test_checks_fields_at_all_states
-		LafcadioConfig.setValues( 'checkFields' => 'onAllStates',
-		                          'classDefinitionDir' => '../test/testData' )
-		client = Client.new( 'name' => 'client name' )
-		assert_exception( FieldValueError ) { client.name = nil }
-		assert_exception( FieldValueError ) { Client.new( 'name' => nil ) }
 	end
 	
 	def test_class_fields_from_one_line_class_methods

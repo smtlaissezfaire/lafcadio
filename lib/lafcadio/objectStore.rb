@@ -21,6 +21,7 @@ module Lafcadio
 		end
 		
 		def execute
+			@dbObject.verify if LafcadioConfig.new()['checkFields'] == 'onCommit'
 			setCommitType
 			@dbObject.lastCommit = getLastCommit
 			@dbObject.preCommitTrigger
