@@ -9,7 +9,6 @@ class CreateTableStatement
 		require 'lafcadio/objectField/LinkField'
 		require 'lafcadio/objectField/IntegerField'
 		require 'lafcadio/objectField/DateField'
-		require 'lafcadio/objectField/ImageField'
 		require 'lafcadio/objectField/EnumField'
 		require 'lafcadio/objectField/TextListField'
 		require 'lafcadio/objectField/BooleanField'
@@ -19,8 +18,7 @@ class CreateTableStatement
 				"'#{ enumValue }'"
 			}
 			"enum( #{ singleQuotedValues.join( ', ' ) } )"
-		elsif ( field.class <= TextField || field.class <= ImageField ||
-		        field.class <= TextListField )
+		elsif ( field.class <= TextField || field.class <= TextListField )
 			'varchar(255)'
 		elsif field.class <= DecimalField
 			"float(10, #{ field.precision })"
