@@ -1,5 +1,21 @@
 CHANGELOG
 
+0.3.5 -- March 31 2004
+* WARNING: Removed a lot of inessential files having to do with HTML, CGI, and XML
+* WARNING: Moved ClassUtil methods into Class, DomainUtil methods into DomainObject, StrUtil methods into String and Numeric. Renamed EnglishUtil to English.
+* WARNING: Everything is now in a Lafcadio module
+* TextField#valueForSQL handles an apostrophe after a newline
+* All the library code is now in the /lib/ directory, instead of the /lafcadio/ directory
+* You can use the whole library by simply including "lafcadio"
+* The Rubygem works now, too!
+* Added basic query inference to ObjectStore
+* Fixed a bug where DateTimeField#valueFromSQL needed to handle DBI::Timestamp instead of String because of the move to DBI in 0.3.3
+* Fixed Query::Not#objectType
+* Fixed a method dispatching bug in ObjectStore#method_missing
+* install.rb installs and deinstalls binaries in /usr/local/bin
+* Fixed ObjectCollector#getMapped
+* BooleanField#valueFromSQL handles either Fixnum or String for a MySQL tinyint, since DBI seems to be indecisive about which it prefers
+
 0.3.4 -- December 31 2003
 * Fixed a bug in TextField#valueForSQL where committing a string value with backslashes before a newline caused a problem with apostrophe escaping
 * Fixed a bug where DateField#valueFromSQL needed to handle DBI::Date instead of String because of the move to DBI in 0.3.3
