@@ -1,5 +1,8 @@
 CHANGELOG
 
+0.7.3 -- March 1 2005
+* fixed bug with MockObjectStore handling Query#limit.
+
 0.7.2 -- February 26 2005
 * WARNING: changed DomainObject one-line directive from
   "link field_name { 'linked_type' => linked_type }" to
