@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'lafcadio/xml/XmlElement'
+require 'lafcadio/xml'
 
 class TestXmlElement < LafcadioTestCase
 	def testAtts

@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'lafcadio/cgi/CgiUtil'
+require 'lafcadio/cgi'
 
 class TestCgiUtil < LafcadioTestCase
 	def testPercentSign

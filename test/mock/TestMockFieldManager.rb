@@ -1,3 +1,5 @@
+require 'lafcadio/test'
+
 class TestMockFieldManager < LafcadioTestCase
 	def testConvertsIntsToStrings
 		mfm = MockFieldManager.new({ 'objId' => 1 })

@@ -1,4 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/mock'
 
 class TestMockFileManager < LafcadioTestCase
 	def setup
