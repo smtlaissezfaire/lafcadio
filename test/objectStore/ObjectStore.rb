@@ -142,6 +142,15 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal( 70, @testObjectStore.getMax( Invoice, 'rate' ) )
 	end
 
+	def test_raises_error_with_querying_with_uncommitted_dobj
+		uncommitted = Client.new( {} )
+		assert_exception( ArgumentError,
+		                  "Can't query using an uncommitted domain object as a search term"
+		                ) {
+			@testObjectStore.getInvoices( uncommitted )
+		}
+	end
+
 	def testSelfLinking
 		client1Proxy = DomainObjectProxy.new(Client, 1)
 		client2Proxy = DomainObjectProxy.new(Client, 2)

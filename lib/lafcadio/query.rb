@@ -438,6 +438,16 @@ module Lafcadio
 		end
 
 		class Link < Condition #:nodoc:
+			def initialize( fieldName, searchTerm, objectType )
+				if searchTerm.pkId.nil?
+					raise ArgumentError,
+					      "Can't query using an uncommitted domain object as a search term",
+								caller
+				else
+					super( fieldName, searchTerm, objectType )
+				end
+			end
+		
 			def self.searchTermType
 				DomainObject
 			end
