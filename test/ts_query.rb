@@ -264,9 +264,9 @@ class TestQueryInferrer < LafcadioTestCase
 	end
 
 	def testCompareFieldBelongingToSuperclass
-		desiredSql = "select * from clients, internalClients " +
-		             "where clients.pk_id = internalClients.pk_id and " +
-                 "clients.standard_rate < 10"
+		desiredSql =
+			"select * from clients, internal_clients where clients.pk_id = " +
+			"internal_clients.pk_id and clients.standard_rate < 10"
     assert_infer_match( desiredSql, InternalClient ) { |intc|
 			intc.standard_rate.lt( 10 )
 		}
@@ -300,8 +300,9 @@ class TestQueryInferrer < LafcadioTestCase
 	def testEquals
 		desiredSql = "select * from invoices where invoices.hours = 10"
 		assert_infer_match( desiredSql, Invoice ) { |inv| inv.hours.equals( 10 ) }
-		desired_sql2 = 'select * from inventoryLineItemOptions ' +
-		               'where inventoryLineItemOptions.optionId = 1'
+		desired_sql2 =
+			'select * from inventory_line_item_options where ' +
+			'inventory_line_item_options.optionId = 1'
 		assert_infer_match( desired_sql2, InventoryLineItemOption ) { |ilio|
 			ilio.option.equals( TestOption.storedTestOption )
 		}
@@ -522,7 +523,7 @@ class TestQuery < LafcadioTestCase
 
 	def testGetAll
 		query = Query.new Domain::LineItem
-		assert_equal "select * from lineItems", query.to_sql
+		assert_equal "select * from line_items", query.to_sql
 	end
 
 	def testGetSubsetWithCondition
@@ -580,13 +581,18 @@ class TestQuery < LafcadioTestCase
 
 	def testTableJoinsForInheritance
 		query = Query.new InternalClient, 1
-		assert_equal 'select * from clients, internalClients ' +
-				'where clients.pk_id = internalClients.pk_id and ' +
-				'internalClients.pk_id = 1', query.to_sql
+		assert_equal(
+			'select * from clients, internal_clients where clients.pk_id = ' +
+					'internal_clients.pk_id and internal_clients.pk_id = 1',
+			query.to_sql
+		)
 		condition = Query::Equals.new('billingType', 'whatever', InternalClient)
 		query2 = Query.new InternalClient, condition
-		assert_equal "select * from clients, internalClients " +
-				"where clients.pk_id = internalClients.pk_id and " +
-				"internalClients.billingType = 'whatever'", query2.to_sql
+		assert_equal(
+			'select * from clients, internal_clients where clients.pk_id = ' +
+					'internal_clients.pk_id and internal_clients.billingType = ' +
+					'\'whatever\'',
+			query2.to_sql
+		)
 	end
 end

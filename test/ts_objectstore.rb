@@ -74,7 +74,7 @@ class TestDBBridge < Test::Unit::TestCase
 		sql1 = @mockDbh.sql_statements[0]
 		assert_not_nil sql1 =~ /update clients set/, sql1
 		sql2 = @mockDbh.sql_statements[1]
-		assert_not_nil sql2 =~ /update internalClients set/, sql2
+		assert_match( /update internal_clients set/, sql2 )
 	end
 
 	def testGetAll

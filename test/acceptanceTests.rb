@@ -36,9 +36,9 @@ end
 
 class TestBadRow < DomainObject
 	def self.create_table( dbh )
-		dbh.do( 'drop table if exists testbadrows' )
+		dbh.do( 'drop table if exists test_bad_rows' )
 		createSql = <<-CREATE
-create table testbadrows (
+create table test_bad_rows (
 	objId int not null auto_increment,
 	primary key (objId),
 	text_field text
@@ -47,7 +47,7 @@ create table testbadrows (
 		dbh.do( createSql )
 	end
 	
-	def self.drop_table( dbh ); dbh.do( 'drop table testbadrows' ); end
+	def self.drop_table( dbh ); dbh.do( 'drop table test_bad_rows' ); end
 
 	def self.get_class_fields
 		fields = super
@@ -58,9 +58,9 @@ end
 
 class TestDiffPkRow < DomainObject
 	def self.create_table( dbh )
-		dbh.do( 'drop table if exists testdiffpkrows' )
+		dbh.do( 'drop table if exists test_diff_pk_rows' )
 		createSql = <<-CREATE
-create table testdiffpkrows (
+create table test_diff_pk_rows (
 	objId int not null auto_increment,
 	primary key (objId),
 	text_field text
@@ -69,7 +69,7 @@ create table testdiffpkrows (
 		dbh.do( createSql )
 	end
 	
-	def self.drop_table( dbh ); dbh.do( 'drop table testdiffpkrows' ); end
+	def self.drop_table( dbh ); dbh.do( 'drop table test_diff_pk_rows' ); end
 
 	def self.get_class_fields
 		super.concat( [ TextField.new( self, 'text_field' ) ] )
@@ -80,9 +80,9 @@ end
 
 class TestRow < DomainObject
 	def self.create_table( dbh )
-		dbh.do( 'drop table if exists testrows' )
+		dbh.do( 'drop table if exists test_rows' )
 		createSql = <<-CREATE
-create table testrows (
+create table test_rows (
 	pk_id int not null auto_increment,
 	primary key (pk_id),
 	text_field text,
@@ -96,7 +96,7 @@ create table testrows (
 		dbh.do( createSql )
 	end
 	
-	def self.drop_table( dbh ); dbh.do( 'drop table testrows' ); end
+	def self.drop_table( dbh ); dbh.do( 'drop table test_rows' ); end
 
 	text      'text_field'
 	date_time 'date_time'
@@ -112,9 +112,9 @@ end
 
 class TestChildRow < TestRow
 	def self.create_table( dbh )
-		dbh.do( 'drop table if exists testchildrows' )
+		dbh.do( 'drop table if exists test_child_rows' )
 		createSql = <<-CREATE
-create table testchildrows (
+create table test_child_rows (
 	pk_id int not null auto_increment,
 	primary key (pk_id),
 	child_text_field text
@@ -123,7 +123,7 @@ create table testchildrows (
 		dbh.do( createSql )
 	end
 	
-	def self.drop_table( dbh ); dbh.do( 'drop table testchildrows' ); end
+	def self.drop_table( dbh ); dbh.do( 'drop table test_child_rows' ); end
 
 	def self.get_class_fields
 		fields = []
@@ -139,7 +139,7 @@ end
 class AccTestBlobField < AcceptanceTestCase
 	def test_delete
 		test_str = 'The quick brown fox jumped over the lazy dog.'
-		@dbh.do( 'insert into testrows( blob_field ) values( ? )', test_str )
+		@dbh.do( 'insert into test_rows( blob_field ) values( ? )', test_str )
 		test_row = @object_store.get_test_row( 1 )
 		test_row.delete = true
 		test_row.commit
@@ -166,10 +166,10 @@ end
 
 class AccTestBooleanField < AcceptanceTestCase
 	def test_value_from_sql
-		@dbh.do( 'insert into testrows( bool_field ) values( 1 )' )
+		@dbh.do( 'insert into test_rows( bool_field ) values( 1 )' )
 		test_row = @object_store.get_test_row( 1 )
 		assert( test_row.bool_field )
-		@dbh.do( 'insert into testrows( bool_field ) values( 0 )' )
+		@dbh.do( 'insert into test_rows( bool_field ) values( 0 )' )
 		test_row2 = @object_store.get_test_row( 2 )
 		assert( !test_row2.bool_field )
 	end
@@ -183,10 +183,10 @@ end
 
 class AccTestDateTimeField < AcceptanceTestCase
 	def test_value_from_sql
-		@dbh.do( 'insert into testrows( date_time ) values( "2004-01-01" )' )
+		@dbh.do( 'insert into test_rows( date_time ) values( "2004-01-01" )' )
 		test_row = @object_store.get_test_row( 1 )
 		assert_equal( Time.gm( 2004, 1, 1 ), test_row.date_time )
-		@dbh.do( 'insert into testrows( ) values( )' )
+		@dbh.do( 'insert into test_rows( ) values( )' )
 		test_row2 = @object_store.get_test_row( 2 )
 		assert_nil( test_row2.date_time )
 	end
@@ -272,7 +272,7 @@ class AccTestObjectStore < AcceptanceTestCase
 		                                                            'pk_id' ).first
 		assert_equal( 'sample text', testdiffpkrow1_prime.text_field )
 		sql = <<-SQL
-insert into testdiffpkrows( objId, text_field )
+insert into test_diff_pk_rows( objId, text_field )
 values( 1, 'sample text' )
 		SQL
 		@dbh.do( sql )
@@ -298,7 +298,7 @@ values( 1, 'sample text' )
 			date_time_str = date_time_field.value_for_sql( Time.now )
 			bool_val = ( i % 2 == 0 ) ? "'1'" : "'0'"
 			sql = <<-SQL
-insert into testrows( text_field, date_time, bool_field, blob_field )
+insert into test_rows( text_field, date_time, bool_field, blob_field )
 values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 			SQL
 			@dbh.do( sql )
@@ -310,7 +310,7 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 			assert_equal( i, row.pk_id )
 			assert_equal( "row #{ i }", row.text_field )
 		}
-		result = @dbh.select_all( 'select * from testrows' )
+		result = @dbh.select_all( 'select * from test_rows' )
 		assert_equal( num_rows, result.size )
 		result.each { |row_hash| value = row_hash['text_field'] }
 	end
@@ -360,7 +360,7 @@ class AccTestQuery < AcceptanceTestCase
 		query = Query.new( TestRow )
 		query.order_by = 'text2'
 		assert_equal(
-			'select * from testRows order by text_field2 asc', query.to_sql
+			'select * from test_rows order by text_field2 asc', query.to_sql
 		)
 		coll = @object_store.get_subset( query )
 		assert_equal( 2, coll.size )
@@ -375,11 +375,11 @@ class AccTestTextField < AcceptanceTestCase
 some other line
 apostrophe's
 		TEXT
-		@dbh.do( 'insert into testrows( text_field ) values( ? )', text )
+		@dbh.do( 'insert into test_rows( text_field ) values( ? )', text )
 		testrow = @object_store.get_test_row( 1 )
 		testrow.commit
 		text2 = "Por favor, don't just forward the icon through email\n'cause then you won't be able to see 'em through the web interface."
-		@dbh.do( 'insert into testrows( text_field ) values( ? )', text2 )
+		@dbh.do( 'insert into test_rows( text_field ) values( ? )', text2 )
 		testrow2 = @object_store.get_test_row( 2 )
 		assert_equal( text2, testrow2.text_field )
 		testrow2.commit

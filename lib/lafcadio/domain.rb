@@ -494,9 +494,7 @@ module Lafcadio
 				if (!xmlParser.nil? && table_name = xmlParser.table_name)
 					table_name
 				else
-					table_name = self.basename
-					table_name[0] = table_name[0..0].downcase
-					English.plural table_name
+					English.plural( self.basename.camel_case_to_underscore )
 				end
 			end
 		end

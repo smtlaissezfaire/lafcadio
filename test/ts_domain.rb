@@ -382,7 +382,7 @@ class TestDomainObject < LafcadioTestCase
 	
 	def testHandlesClassWithoutXml
 		assert_equal( 'no_xml_id', NoXml.sql_primary_key_name )
-		assert_equal( 'noXmls', NoXml.table_name )
+		assert_equal( 'no_xmls', NoXml.table_name )
 	end
 	
 	def test_hash_and_eql
@@ -458,7 +458,7 @@ class TestDomainObject < LafcadioTestCase
 
 	def testTableName
 		assert_equal( "users", User.table_name )
-		assert_equal( "lineItems", Domain::LineItem.table_name )
+		assert_equal( "line_items", Domain::LineItem.table_name )
 	end
 	
 	def test_to_s
