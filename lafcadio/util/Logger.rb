@@ -1,3 +1,5 @@
+require 'lafcadio/util/Config'
+
 class Logger
 	@@logging = true
 
