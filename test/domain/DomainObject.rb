@@ -168,4 +168,25 @@ class TestDomainObject < LafcadioTestCase
     	# ok
     end
 	end
+	
+	def testGetObjectTypeFromString
+		assert_equal Class,((DomainObject.getObjectTypeFromString('Invoice')).class)
+		assert_equal Class,(
+				(DomainObject.getObjectTypeFromString('Domain::LineItem')).class)
+		begin
+			assert_equal nil,(DomainObject.getObjectTypeFromString('notAnObjectType'))
+			fail "Should throw an error when matching fails"
+		rescue CouldntMatchObjectTypeError
+			# ok
+		end
+		attributeClass = DomainObject.getObjectTypeFromString( 'Attribute' )
+		assert_equal( Class, attributeClass.class )
+		assert_equal( 'Attribute', attributeClass.to_s )
+	end
+	
+	def testGetObjectTypeFromStringWithoutDomainFile
+		LafcadioConfig.setFilename 'test/testData/config_no_domain_file.dat'
+		assert_equal( 'Invoice',
+		              DomainObject.getObjectTypeFromString( 'Invoice' ).name )
+	end
 end
