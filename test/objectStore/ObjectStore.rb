@@ -20,6 +20,29 @@ class TestObjectStore < LafcadioTestCase
 		@mockDbBridge.addObject @client
 	end
 
+	def testCaching
+		@testObjectStore.getAll Invoice
+		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
+		assert_equal 1, @mockDbBridge.retrievalsByType[Invoice]
+		@testObjectStore.getAll Invoice
+		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
+		assert_equal 1, @mockDbBridge.retrievalsByType[Invoice]
+		@testObjectStore.getAll Client
+		assert_equal 1, @mockDbBridge.retrievalsByType[Client]
+	end
+
+	def testConvertsFixnums
+		@mockDbBridge.addObject Client.getTestClient
+		@testObjectStore.get Client, 1
+		@testObjectStore.get Client, "1"
+		begin
+			@testObjectStore.get Client, "abc"
+			fail "should throw exception for non-numeric index"
+		rescue
+			# ok
+		end
+	end
+
 	def testDeepLinking
 		client1 = Client.getTestClient
 		@mockDbBridge.addObject client1
@@ -69,6 +92,22 @@ class TestObjectStore < LafcadioTestCase
 				ili, option)
 	end
 
+	def testDynamicMethodNameDispatchingRaisesNoMethodError
+		begin
+			@testObjectStore.notAMethod
+			raise "Should raise NoMethodError"
+		rescue NoMethodError
+			assert_match( /undefined method 'notAMethod'/, $!.to_s )
+		end
+		begin
+			@testObjectStore.getFooBar
+			raise "Should raise NoMethodError"
+		rescue NoMethodError
+			assert_match( /undefined method 'getFooBar'/, $!.to_s )
+			# ok
+		end
+	end
+
 	def testDynamicMethodNames
 		setTestClient
 		assert_equal @client, @testObjectStore.getClient(1)
@@ -95,20 +134,15 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal @client, matchingClients[0]
 	end
 	
-	def testDynamicMethodNameDispatchingRaisesNoMethodError
-		begin
-			@testObjectStore.notAMethod
-			raise "Should raise NoMethodError"
-		rescue NoMethodError
-			assert_match( /undefined method 'notAMethod'/, $!.to_s )
-		end
-		begin
-			@testObjectStore.getFooBar
-			raise "Should raise NoMethodError"
-		rescue NoMethodError
-			assert_match( /undefined method 'getFooBar'/, $!.to_s )
-			# ok
-		end
+	def testFlush
+		client = Client.getTestClient
+		@mockDbBridge.commit client
+		assert_equal client.name, @testObjectStore.get(Client, 1).name
+		client.name = 'new client name'
+		@mockDbBridge.commit client
+		assert_equal client.name, @testObjectStore.get(Client, 1).name
+		@testObjectStore.flush client
+		assert_equal 'new client name', @testObjectStore.get(Client, 1).name
 	end
 
 	def testFlushCacheAfterNewObjectCommit
@@ -122,61 +156,34 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal( @mockDbBridge, @testObjectStore.getDbBridge )
 	end
 
-	def testGetSubset
-		setTestClient
-		condition = Query::Equals.new 'name', 'clientName1', Client
-		assert_equal @client, @testObjectStore.getSubset(condition)[0]
-		query = Query.new Client, condition
-		assert_equal @client, @testObjectStore.getSubset(query)[0]
-		query2 = Query.new( Client, Query::Equals.new( 'name', 'foobar', Client ) )
-		assert_equal( 0, @testObjectStore.getSubset( query2 ).size )
-		assert_equal( 1, @mockDbBridge.query_count[query2])
-		assert_equal( 0, @testObjectStore.getSubset( query2 ).size )
-		assert_equal( 1, @mockDbBridge.query_count[query])
+	def testGetInvoices
+		client = Client.getTestClient
+		client.commit
+		inv1 = Invoice.new({ 'invoiceNum' => 1, 'client' => client,
+				'date' => Date.today, 'rate' => 30, 'hours' => 40 })
+		
+				@testObjectStore.commit inv1
+		inv2 = Invoice.new({ 'invoiceNum' => 2, 'client' => client,
+				'date' => Date.today - 7, 'rate' => 30, 'hours' => 40 })
+		@testObjectStore.commit inv2
+		coll = @testObjectStore.getInvoices(client)
+		assert_equal 2, coll.size
 	end
 
-	def testMax
-		setTestClient
-		assert_equal 1, @testObjectStore.getMax(Client)
-		Invoice.storedTestInvoice
-		assert_equal( 70, @testObjectStore.getMax( Invoice, 'rate' ) )
-	end
-
-	def test_raises_error_with_querying_with_uncommitted_dobj
-		uncommitted = Client.new( {} )
-		assert_exception( ArgumentError,
-		                  "Can't query using an uncommitted domain object as a search term"
-		                ) {
-			@testObjectStore.getInvoices( uncommitted )
-		}
-	end
-
-	def testSelfLinking
-		client1Proxy = DomainObjectProxy.new(Client, 1)
-		client2Proxy = DomainObjectProxy.new(Client, 2)
-		client1 = Client.new({ 'pkId' => 1, 'name' => 'client 1',
-														'standard_rate' => 50,
-														'referringClient' => client2Proxy })
-		@mockDbBridge.addObject client1
-		client2 = Client.new({ 'pkId' => 2, 'name' => 'client 2',
-														'standard_rate' => 100,
-														'referringClient' => client1Proxy })
-		@mockDbBridge.addObject client2
-		client1Prime = @testObjectStore.getClient 1
-		assert_equal 2, client1Prime.referringClient.pkId
-		assert_equal 100, client1Prime.referringClient.standard_rate
-	end
-
-	def testUpdateFlushesCache
-		client = Client.new({ 'pkId' => 100, 'name' => 'client 100' })
-		@testObjectStore.commit client
-		assert_equal 'client 100', @testObjectStore.get(Client, 100).name
-		clientPrime = Client.new({ 'pkId' => 100, 'name' => 'client 100.1' })
-		@testObjectStore.commit clientPrime
-		assert_equal 'client 100.1', @testObjectStore.get(Client, 100).name
-		clientPrime.name = 'client 100.2'
-		@testObjectStore.commit clientPrime
-		assert_equal 'client 100.2', @testObjectStore.get(Client, 100).name		
+	def testGetMapObject
+		ili = TestInventoryLineItem.storedTestInventoryLineItem
+		option = TestOption.storedTestOption
+		iliOption = TestInventoryLineItemOption.storedTestInventoryLineItemOption
+		assert_equal 1, @testObjectStore.getAll(InventoryLineItemOption).size
+		assert_equal iliOption, @testObjectStore.getMapObject(InventoryLineItemOption,
+				ili, option)
+		begin
+			@testObjectStore.getMapObject InventoryLineItemOption, ili, nil
+			fail 'Should throw an error'
+		rescue ArgumentError
+			errorStr = $!.to_s
+			assert_equal "ObjectStore#getMapObject needs two non-nil keys", errorStr
+		end 
 	end
 	
 	def test_getMapped
@@ -207,26 +214,17 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 2, coll.size
 	end
 
-	def testGetInvoices
-		client = Client.getTestClient
-		client.commit
-		inv1 = Invoice.new({ 'invoiceNum' => 1, 'client' => client,
-				'date' => Date.today, 'rate' => 30, 'hours' => 40 })
-		
-				@testObjectStore.commit inv1
-		inv2 = Invoice.new({ 'invoiceNum' => 2, 'client' => client,
-				'date' => Date.today - 7, 'rate' => 30, 'hours' => 40 })
-		@testObjectStore.commit inv2
-		coll = @testObjectStore.getInvoices(client)
-		assert_equal 2, coll.size
-	end
-
-	def testGetWithaNonLinkingField	
-		client = Client.getTestClient
-		@testObjectStore.commit client
-		client2 = Client.new({ 'pkId' => 2, 'name' => 'client 2' })
-		@testObjectStore.commit client2
-		assert_equal 2, @testObjectStore.getClients('client 2', 'name')[0].pkId
+	def testGetSubset
+		setTestClient
+		condition = Query::Equals.new 'name', 'clientName1', Client
+		assert_equal @client, @testObjectStore.getSubset(condition)[0]
+		query = Query.new Client, condition
+		assert_equal @client, @testObjectStore.getSubset(query)[0]
+		query2 = Query.new( Client, Query::Equals.new( 'name', 'foobar', Client ) )
+		assert_equal( 0, @testObjectStore.getSubset( query2 ).size )
+		assert_equal( 1, @mockDbBridge.query_count[query2])
+		assert_equal( 0, @testObjectStore.getSubset( query2 ).size )
+		assert_equal( 1, @mockDbBridge.query_count[query])
 	end
 
 	def testHandlesLinksThroughProxies
@@ -239,22 +237,41 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 1, matches.size
 	end
 
-	def testGetMapObject
-		ili = TestInventoryLineItem.storedTestInventoryLineItem
-		option = TestOption.storedTestOption
-		iliOption = TestInventoryLineItemOption.storedTestInventoryLineItemOption
-		assert_equal 1, @testObjectStore.getAll(InventoryLineItemOption).size
-		assert_equal iliOption, @testObjectStore.getMapObject(InventoryLineItemOption,
-				ili, option)
-		begin
-			@testObjectStore.getMapObject InventoryLineItemOption, ili, nil
-			fail 'Should throw an error'
-		rescue ArgumentError
-			errorStr = $!.to_s
-			assert_equal "ObjectStore#getMapObject needs two non-nil keys", errorStr
-		end 
+	def testMax
+		setTestClient
+		assert_equal 1, @testObjectStore.getMax(Client)
+		Invoice.storedTestInvoice
+		assert_equal( 70, @testObjectStore.getMax( Invoice, 'rate' ) )
 	end
-	
+
+	def testGetWithaNonLinkingField	
+		client = Client.getTestClient
+		@testObjectStore.commit client
+		client2 = Client.new({ 'pkId' => 2, 'name' => 'client 2' })
+		@testObjectStore.commit client2
+		assert_equal 2, @testObjectStore.getClients('client 2', 'name')[0].pkId
+	end
+
+	def test_method_missing
+		begin
+			@testObjectStore.getFooBar
+			raise "Should raise NoMethodError"
+		rescue NoMethodError
+			# okay
+		end
+	end
+
+	def test_query_field_comparison
+		inv1 = Invoice.new( 'date' => Date.today, 'paid' => Date.today + 30 )
+		inv1.commit
+		inv2 = Invoice.new( 'date' => Date.today, 'paid' => Date.today )
+		inv2.commit
+		matches = @testObjectStore.getInvoices { |inv|
+			inv.date.equals( inv.paid )
+		}
+		assert_equal( 1, matches.size )
+	end
+
 	def test_query_inference
 		client1 = Client.new( 'pkId' => 1, 'name' => 'client 1' )
 		client1.commit
@@ -281,47 +298,13 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal( 3, coll4.size )
 	end
 	
-	def test_method_missing
-		begin
-			@testObjectStore.getFooBar
-			raise "Should raise NoMethodError"
-		rescue NoMethodError
-			# okay
-		end
-	end
-
-	def testConvertsFixnums
-		@mockDbBridge.addObject Client.getTestClient
-		@testObjectStore.get Client, 1
-		@testObjectStore.get Client, "1"
-		begin
-			@testObjectStore.get Client, "abc"
-			fail "should throw exception for non-numeric index"
-		rescue
-			# ok
-		end
-	end
-
-	def testCaching
-		@testObjectStore.getAll Invoice
-		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
-		assert_equal 1, @mockDbBridge.retrievalsByType[Invoice]
-		@testObjectStore.getAll Invoice
-		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
-		assert_equal 1, @mockDbBridge.retrievalsByType[Invoice]
-		@testObjectStore.getAll Client
-		assert_equal 1, @mockDbBridge.retrievalsByType[Client]
-	end
-
-	def testFlush
-		client = Client.getTestClient
-		@mockDbBridge.commit client
-		assert_equal client.name, @testObjectStore.get(Client, 1).name
-		client.name = 'new client name'
-		@mockDbBridge.commit client
-		assert_equal client.name, @testObjectStore.get(Client, 1).name
-		@testObjectStore.flush client
-		assert_equal 'new client name', @testObjectStore.get(Client, 1).name
+	def test_raises_error_with_querying_with_uncommitted_dobj
+		uncommitted = Client.new( {} )
+		assert_exception( ArgumentError,
+		                  "Can't query using an uncommitted domain object as a search term"
+		                ) {
+			@testObjectStore.getInvoices( uncommitted )
+		}
 	end
 
 	def testRaisesExceptionIfCantFindObject
@@ -333,14 +316,31 @@ class TestObjectStore < LafcadioTestCase
 		end
 	end
 	
-	def test_query_field_comparison
-		inv1 = Invoice.new( 'date' => Date.today, 'paid' => Date.today + 30 )
-		inv1.commit
-		inv2 = Invoice.new( 'date' => Date.today, 'paid' => Date.today )
-		inv2.commit
-		matches = @testObjectStore.getInvoices { |inv|
-			inv.date.equals( inv.paid )
-		}
-		assert_equal( 1, matches.size )
+	def testSelfLinking
+		client1Proxy = DomainObjectProxy.new(Client, 1)
+		client2Proxy = DomainObjectProxy.new(Client, 2)
+		client1 = Client.new({ 'pkId' => 1, 'name' => 'client 1',
+														'standard_rate' => 50,
+														'referringClient' => client2Proxy })
+		@mockDbBridge.addObject client1
+		client2 = Client.new({ 'pkId' => 2, 'name' => 'client 2',
+														'standard_rate' => 100,
+														'referringClient' => client1Proxy })
+		@mockDbBridge.addObject client2
+		client1Prime = @testObjectStore.getClient 1
+		assert_equal 2, client1Prime.referringClient.pkId
+		assert_equal 100, client1Prime.referringClient.standard_rate
+	end
+
+	def testUpdateFlushesCache
+		client = Client.new({ 'pkId' => 100, 'name' => 'client 100' })
+		@testObjectStore.commit client
+		assert_equal 'client 100', @testObjectStore.get(Client, 100).name
+		clientPrime = Client.new({ 'pkId' => 100, 'name' => 'client 100.1' })
+		@testObjectStore.commit clientPrime
+		assert_equal 'client 100.1', @testObjectStore.get(Client, 100).name
+		clientPrime.name = 'client 100.2'
+		@testObjectStore.commit clientPrime
+		assert_equal 'client 100.2', @testObjectStore.get(Client, 100).name		
 	end
 end
