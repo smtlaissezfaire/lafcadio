@@ -98,7 +98,7 @@ class TestDBBridge < RUNIT::TestCase
 	
 	def test_passes_sql_value_converter_to_domain_class_init
 		query = Query.new( XmlSku )
-		xml_sku = @dbb.getCollectionByQuery( query ).only
+		xml_sku = @dbb.get_collection_by_query( query ).only
 		assert_equal( 'foobar', xml_sku.text1 )
 		assert_equal( 'foobar', xml_sku.text1 )
 		assert_nil( xml_sku.date1 )
@@ -119,7 +119,7 @@ class TestDBBridge < RUNIT::TestCase
 
 	def testGetAll
 		query = Query.new Domain::LineItem
-		coll = @dbb.getCollectionByQuery query
+		coll = @dbb.get_collection_by_query query
 		assert_equal Array, coll.class
 	end
 

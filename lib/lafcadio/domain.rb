@@ -16,7 +16,7 @@ module Lafcadio
 			begin
 				fieldClass = Class.getClass( 'Lafcadio::' + className )
 				register_name( name )
-				field = fieldClass.instantiateFromXml( @domainClass, fieldElt )
+				field = fieldClass.instantiate_from_xml( @domainClass, fieldElt )
 				set_field_attributes( field, fieldElt )
 			rescue MissingError
 				msg = "Couldn't find field class '#{ className }' for field " +
@@ -281,7 +281,7 @@ module Lafcadio
 				@@class_fields[self] = class_fields
 			end
 			att_hash['name'] = name
-			field = field_class.instantiateWithParameters( self, att_hash )
+			field = field_class.instantiate_with_parameters( self, att_hash )
 			att_hash.each { |field_name, value|
 				setter = field_name + '='
 				field.send( setter, value ) if field.respond_to?( setter )

@@ -16,7 +16,7 @@ class TestDbObjectCommitter < LafcadioTestCase
 	
 	def getFromDbBridge(object_type, pkId)
 		query = Query.new object_type, pkId
-		@mockDBBridge.getCollectionByQuery(query)[0]
+		@mockDBBridge.get_collection_by_query(query)[0]
 	end
 	
 	def test_delete_cascade

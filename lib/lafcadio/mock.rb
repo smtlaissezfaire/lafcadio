@@ -25,7 +25,7 @@ module Lafcadio
 			@objects[object_type] ? @objects[object_type].values : []
 		end
 		
-		def getCollectionByQuery(query)
+		def get_collection_by_query(query)
 			@query_count[query] += 1
 			objects = []
 			_getAll( query.object_type ).each { |dbObj|

@@ -10,12 +10,12 @@ module Lafcadio
 		attr_reader :name, :object_type
 		attr_accessor :notNull, :unique, :dbFieldName
 
-		def self.instantiateFromXml( domainClass, fieldElt ) #:nodoc:
+		def self.instantiate_from_xml( domainClass, fieldElt ) #:nodoc:
 			parameters = instantiationParameters( fieldElt )
-			instantiateWithParameters( domainClass, parameters )
+			instantiate_with_parameters( domainClass, parameters )
 		end
 
-		def self.instantiateWithParameters( domainClass, parameters ) #:nodoc:
+		def self.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
 			instance = self.new( domainClass, parameters['name'],
 			                     parameters['englishName'] )
 			if ( dbFieldName = parameters['dbFieldName'] )
@@ -320,7 +320,7 @@ module Lafcadio
 	
 	# DecimalField represents a decimal value.
 	class DecimalField < ObjectField
-		def self.instantiateWithParameters( domainClass, parameters ) #:nodoc:
+		def self.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
 			self.new( domainClass, parameters['name'], parameters['englishName'] )
 		end
 
@@ -378,7 +378,7 @@ module Lafcadio
 	# enums as the +enums+ argument.
 	#
 	class EnumField < TextField
-		def self.instantiateWithParameters( domainClass, parameters ) #:nodoc:
+		def self.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
 			self.new( domainClass, parameters['name'], parameters['enums'],
 								parameters['englishName'] )
 		end
@@ -442,7 +442,7 @@ module Lafcadio
 
 	# A LinkField is used to link from one domain class to another.
 	class LinkField < ObjectField
-		def LinkField.instantiateWithParameters( domainClass, parameters ) #:nodoc:
+		def LinkField.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
 			self.new( domainClass, parameters['linkedType'], parameters['name'],
 								parameters['englishName'], parameters['deleteCascade'] )
 		end
@@ -556,7 +556,7 @@ module Lafcadio
 	end
 
 	class SubsetLinkField < LinkField #:nodoc:
-		def self.instantiateWithParameters( domainClass, parameters )
+		def self.instantiate_with_parameters( domainClass, parameters )
 			self.new( domainClass, parameters['linkedType'],
 			          parameters['subsetField'], parameters['name'],
 								parameters['englishName'] )

@@ -34,14 +34,14 @@ class TestMockDBBridge < LafcadioTestCase
 		client2 = Client.new({ 'pkId' => 2, 'name' => 'client2' })
 		@mockDbBridge.commit client2
 		query = Query.new Client, 2
-		coll = @mockDbBridge.getCollectionByQuery(query)
+		coll = @mockDbBridge.get_collection_by_query(query)
 		assert_equal 1, coll.size
 		assert_equal client2, coll[0]
 	end
 
 	def getAll(object_type)
 		query = Query.new object_type
-		@mockDbBridge.getCollectionByQuery query
+		@mockDbBridge.get_collection_by_query query
 	end
 
 	def testGetAll
@@ -63,7 +63,7 @@ class TestMockDBBridge < LafcadioTestCase
 
 	def get(object_type, pkId)
 		query = Query.new object_type, pkId
-		@mockDbBridge.getCollectionByQuery(query)[0]
+		@mockDbBridge.get_collection_by_query(query)[0]
 	end
 
 	def testUpdate
@@ -84,7 +84,7 @@ class TestMockDBBridge < LafcadioTestCase
 		@mockDbBridge.commit @client
 		assert_equal 1, getAll(Client).size
 		query = Query.new Client, 1
-		clientPrime = @mockDbBridge.getCollectionByQuery(query)[0]
+		clientPrime = @mockDbBridge.get_collection_by_query(query)[0]
 		assert_nil clientPrime
 	end
 end

@@ -122,7 +122,7 @@ module Lafcadio
 			end	
 		end
 		
-		def getCollectionByQuery(query)
+		def get_collection_by_query(query)
 			object_type = query.object_type
 			executeSelect( query.toSql ).collect { |row_hash|
 				object_type.new( SqlValueConverter.new( object_type, row_hash ) )
@@ -559,7 +559,7 @@ module Lafcadio
 
 			def getByQuery( query )
 				unless @collections_by_query[query]
-					newObjects = @dbBridge.getCollectionByQuery(query)
+					newObjects = @dbBridge.get_collection_by_query(query)
 					newObjects.each { |dbObj| save dbObj }
 					@collections_by_query[query] = newObjects.collect { |dobj|
 						dobj.pkId
