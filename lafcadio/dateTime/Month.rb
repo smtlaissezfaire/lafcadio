@@ -45,4 +45,19 @@ class Month
 	def eql?(anOther)
 		self == anOther
 	end
+	
+	def +( amountToAdd )
+		( fullYears, remainingMonths ) = amountToAdd.divmod( 12 )
+		resultYear = @year + fullYears
+		resultMonth = @month + remainingMonths
+		if resultMonth > 12
+			resultMonth -= 12
+			resultYear += 1
+		end
+		Month.new( resultMonth, resultYear )
+	end
+	
+	def -(amountToSubtract)
+		self + (-amountToSubtract)
+	end
 end

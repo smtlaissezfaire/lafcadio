@@ -43,4 +43,12 @@ class TestMonth < LafcadioTestCase
 		assert_equal( date.mon, month.month )
 		assert_equal( date.year, month.year )
 	end
+	
+	def testArithmetic
+		jan2000 = Month.new( 1, 2000 )
+		assert_equal( Month.new( 2, 2000 ), jan2000 + 1 )
+		assert_equal( Month.new( 1, 2001 ), jan2000 + 12 )
+		assert_equal( Month.new( 10, 1999 ), jan2000 - 3 )
+		assert_equal( Month.new( 10, 1999 ), jan2000 + -3 )
+	end
 end
