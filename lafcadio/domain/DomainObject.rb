@@ -151,4 +151,9 @@ class DomainObject
 		copy.fields = @fields.clone
 		copy
 	end
+	
+	def commit
+		require 'lafcadio/objectStore/ObjectStore'
+		ObjectStore.getObjectStore.commit self
+	end
 end

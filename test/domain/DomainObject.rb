@@ -135,4 +135,11 @@ class TestDomainObject < LafcadioTestCase
 		client2.name = 'client 2 name'
 		assert_equal 'clientName', client1.name
 	end
+	
+	def testCommit
+		assert_equal 0, @mockObjectStore.getAll(Client).size
+		client = newTestClientWithoutObjId
+		client.commit
+		assert_equal 1, @mockObjectStore.getAll(Client).size
+	end
 end
