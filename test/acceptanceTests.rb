@@ -10,15 +10,17 @@ class AcceptanceTestCase < RUNIT::TestCase
 	def setup
 		super
 		@dbh = get_dbh
-		TestRow.create_table( @dbh )
+		domain_classes.each { |domain_class| domain_class.create_table( @dbh ) }
 		@object_store = ObjectStore.getObjectStore
 	end
 	
 	def teardown
-		TestRow.drop_table( @dbh )
+		domain_classes.each { |domain_class| domain_class.drop_table( @dbh ) }
 		Context.instance.setObjectStore( nil )
 	end
 
+	def domain_classes; [ TestRow, TestChildRow ]; end
+	
 	def get_dbh
 		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
 		config = LafcadioConfig.new
@@ -56,6 +58,32 @@ create table testrows (
 	end
 	
 	def TestRow.sqlPrimaryKeyName
+		'pkId'
+	end
+end
+
+class TestChildRow < TestRow
+	def self.create_table( dbh )
+		dbh.do( 'drop table if exists testchildrows' )
+		createSql = <<-CREATE
+create table testchildrows (
+	pkId int not null auto_increment,
+	primary key (pkId),
+	child_text_field text
+)
+		CREATE
+		dbh.do( createSql )
+	end
+	
+	def self.drop_table( dbh ); dbh.do( 'drop table testchildrows' ); end
+
+	def self.getClassFields
+		fields = []
+		fields << TextField.new( self, 'child_text_field' )
+		fields
+	end
+	
+	def self.sqlPrimaryKeyName
 		'pkId'
 	end
 end
@@ -107,6 +135,19 @@ class AccTestDateTimeField < AcceptanceTestCase
 		@dbh.do( 'insert into testrows( ) values( )' )
 		test_row2 = @object_store.getTestRow( 2 )
 		assert_nil( test_row2.date_time )
+	end
+end
+
+class AccTestDomainObjInheritance < AcceptanceTestCase
+	def test_insert
+		child = TestChildRow.new( 'text_field' => 'text',
+		                          'child_text_field' => 'child text' )
+		child.commit
+		all_dobjs = @object_store.getAll( TestChildRow )
+		assert_equal( 1, all_dobjs.size )
+		child_prime = all_dobjs.first
+		assert_equal( 'text', child_prime.text_field )
+		assert_equal( 'child text', child_prime.child_text_field )
 	end
 end
 

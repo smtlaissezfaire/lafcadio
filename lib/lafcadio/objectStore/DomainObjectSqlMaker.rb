@@ -6,14 +6,14 @@ module Lafcadio
 	class DomainObjectSqlMaker
 		attr_reader :bindValues
 
-		def initialize(obj)
-			@obj = obj
-			@bindValues = []
-		end
+		def initialize(obj); @obj = obj; end
 
 		def insertSQL(objectType)
 			fields = objectType.classFields
 			nameValuePairs = getNameValuePairs(objectType)
+			if objectType.isBasedOn?
+				nameValuePairs[objectType.sqlPrimaryKeyName] = 'LAST_INSERT_ID()'
+			end
 			fieldNameStr = nameValuePairs.keys.join ", "
 			fieldValueStr = nameValuePairs.values.join ", "
 			"insert into #{ objectType.tableName}(#{fieldNameStr}) " +
@@ -58,6 +58,7 @@ module Lafcadio
 				raise DomainObjectInitError, @obj.errorMessages, caller
 			end
 			@obj.class.selfAndConcreteSuperclasses.each { |objectType|
+				@bindValues = []
 				if @obj.objId == nil
 					statement = insertSQL(objectType)
 				else
@@ -69,7 +70,7 @@ module Lafcadio
 				end
 				statements << [statement, @bindValues]
  			}
-			statements
+			statements.reverse
 		end
 	end
 end

@@ -120,9 +120,9 @@ class TestDBBridge < RUNIT::TestCase
 		@dbb.commit ic
 		assert_equal 2, @mockDbh.sqlStatements.size
 		sql1 = @mockDbh.sqlStatements[0]
-		assert_not_nil sql1 =~ /update internalClients set/, sql1
+		assert_not_nil sql1 =~ /update clients set/, sql1
 		sql2 = @mockDbh.sqlStatements[1]
-		assert_not_nil sql2 =~ /update clients set/, sql2
+		assert_not_nil sql2 =~ /update internalClients set/, sql2
 	end
 
 	def testGetMax

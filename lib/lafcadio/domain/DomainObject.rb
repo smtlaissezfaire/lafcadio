@@ -143,6 +143,19 @@ module Lafcadio
 			@@subclassHash.keys
 		end
 
+		# Returns true for all classes that are concrete domain object
+		# classes, as opposed to DomainObject and others that are abstract
+		# super classes. 
+		def DomainObject.isConcrete?
+		  (self != DomainObject && abstractSubclasses.index(self).nil?)
+		end
+		
+		# Is this Domain object based on another, ie: are there two tables and 
+		# not just one on the database layer ? 
+		def DomainObject.isBasedOn?
+		  self.superclass.isConcrete?
+		end
+
 		def self.getDomainDirs
 			config = LafcadioConfig.new
 			classPath = config['classpath']

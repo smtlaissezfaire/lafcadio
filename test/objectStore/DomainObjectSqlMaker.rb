@@ -83,4 +83,29 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
 		sql2 = statements[1]
 		assert_not_nil sql2 =~ /update clients set/, sql2
 	end
+	
+	class InternalClientDiffPk < Client
+		def self.getClassFields; [ TextField.new( self, 'billingType' ) ]; end
+		
+		def self.sqlPrimaryKeyName; 'primary_key'; end
+		
+		def self.tableName; 'internalClients'; end
+	end
+
+	def test_inheritance_insert
+		ic = InternalClientDiffPk.new( 'name' => 'client name',
+		                               'billingType' => 'trade' )
+		sql_maker = DomainObjectSqlMaker.new( ic )
+		statements = sql_maker.sqlStatements
+		assert_equal( 2, statements.size )
+		sql1 = statements[0].first
+		assert_match( /insert into clients/, sql1 )
+		bind1 = statements[0].last
+		assert_equal( 1, bind1.size )
+		sql2 = statements[1].first
+		assert_match( /insert into internalClients.*primary_key/, sql2 )
+		assert_match( /values.*LAST_INSERT_ID\(\)/, sql2 )
+		bind2 = statements[1].last
+		assert_equal( 0, bind2.size )
+	end
 end
