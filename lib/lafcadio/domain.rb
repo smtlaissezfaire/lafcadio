@@ -28,7 +28,11 @@ module Lafcadio
 
 		def get_class_fields
 			namesProcessed = {}
-			fields = []
+			pk_field = PrimaryKeyField.new( @domain_class )
+			if ( spkn = @xmlDocRoot.attributes['sql_primary_key_name'] )
+				pk_field.db_field_name = spkn
+			end
+			fields = [ pk_field ]
 			@xmlDocRoot.elements.each('field') { |fieldElt|
 				fields << get_class_field( fieldElt )
 			}
@@ -278,7 +282,7 @@ module Lafcadio
 		def self.create_field( field_class, name, att_hash )
 			class_fields = @@class_fields[self]
 			if class_fields.nil?
-				class_fields = []
+				class_fields = [ PrimaryKeyField.new( self ) ]
 				@@class_fields[self] = class_fields
 			end
 			att_hash['name'] = name
@@ -320,13 +324,17 @@ module Lafcadio
 		# Returns an Array of ObjectField instances for this domain class, parsing
 		# them from XML if necessary.
 		def self.get_class_fields
-			xmlParser = try_load_xml_parser
-			if xmlParser
-				xmlParser.get_class_fields
+			if self.methods( false ).include?( 'get_class_fields' )
+				[ PrimaryKeyField.new( self ) ]
 			else
-				error_msg = "Couldn't find either an XML class description file " +
-										"or get_class_fields method for " + self.name
-				raise MissingError, error_msg, caller
+				xmlParser = try_load_xml_parser
+				if xmlParser
+					xmlParser.get_class_fields
+				else
+					error_msg = "Couldn't find either an XML class description file " +
+											"or get_class_fields method for " + self.name
+					raise MissingError, error_msg, caller
+				end
 			end
 		end
 
@@ -387,12 +395,8 @@ module Lafcadio
 			method_name = methodId.id2name
 			maybe_field_class_name = ( method_name.gsub( /^(.)/ ) { $&.upcase } ) +
 			                         'Field'
-			begin
-				field_class = Lafcadio.const_get( maybe_field_class_name )
-				create_field( field_class, args[0], args[1] || {} )
-			rescue NameError
-				ObjectType.get_object_type( self ).send( method_name, *args )
-			end
+			field_class = Lafcadio.const_get( maybe_field_class_name )
+			create_field( field_class, args[0], args[1] || {} )
 		end
 
 		def self.object_type #:nodoc:

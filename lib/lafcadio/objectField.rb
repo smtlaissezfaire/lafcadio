@@ -551,6 +551,13 @@ module Lafcadio
 			value
 		end
 	end
+	
+	class PrimaryKeyField < IntegerField
+		def initialize( domain_class )
+			super( domain_class, 'pk_id' )
+			@not_null = false
+		end
+	end
 
 	# A StateField is a specialized subclass of EnumField; its possible values are
 	# any of the 50 states of the United States, stored as each state's two-letter
