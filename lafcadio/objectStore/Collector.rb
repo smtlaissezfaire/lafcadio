@@ -60,6 +60,10 @@ class Collector
 	end
 
 	def getMapObject (objectType, map1, map2)
+		unless map1 && map2
+			raise ArgumentError,
+					"Collector#getMapObject needs two non-nil keys", caller
+		end
 		mapMatch1 = getMapMatch objectType, map1
 		mapMatch2 = getMapMatch objectType, map2
 		condition = Query::CompoundCondition.new mapMatch1, mapMatch2

@@ -68,5 +68,12 @@ class TestObjectCollector < LafcadioTestCase
 		assert_equal 1, @mockObjectStore.getAll(InventoryLineItemOption).size
 		assert_equal iliOption, @collector.getMapObject(InventoryLineItemOption,
 				ili, option)
+		begin
+			@collector.getMapObject InventoryLineItemOption, ili, nil
+			fail 'Should throw an error'
+		rescue ArgumentError
+			errorStr = $!.to_s
+			assert_equal "Collector#getMapObject needs two non-nil keys", errorStr
+		end 
 	end
 end
