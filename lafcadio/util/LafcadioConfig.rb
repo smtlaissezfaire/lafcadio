@@ -16,7 +16,7 @@ class LafcadioConfig < Hash
   def initialize
    file = File.new @@filename
     file.each_line { |line|
-			line =~ /^(.*?):(.*)$/
+			line.chomp =~ /^(.*?):(.*)$/
 			self[$1] = $2
     }
   end
