@@ -4,7 +4,6 @@ module Lafcadio
 	class TimeStampField < DateTimeField #:nodoc:
 		def initialize(objectType, name = 'timeStamp', englishName = nil)
 			super( objectType, name, englishName )
-			@hideDisplay = true
 			@notNull = false
 		end
 

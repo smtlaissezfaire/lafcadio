@@ -10,11 +10,18 @@ module Lafcadio
 				@commit_times = {}
 			end
 
-			def hashByObjectType(objectType)
-				unless @objects[objectType]
-					@objects[objectType] = {}
-				end
-				@objects[objectType]
+			# Flushes a domain object.
+			def flush(dbObject)
+				hashByObjectType(dbObject.objectType).delete dbObject.pkId
+				flush_collection_cache( dbObject.objectType )
+			end
+			
+			def flush_collection_cache( objectType )
+				@collections_by_query.keys.each { |query|
+					if query.objectType == objectType
+						@collections_by_query.delete( query )
+					end
+				}
 			end
 
 			# Returns a cached domain object, or nil if none is found.
@@ -22,12 +29,11 @@ module Lafcadio
 				hashByObjectType(objectType)[pkId].clone
 			end
 
-			# Saves a domain object.
-			def save(dbObject)
-				hashByObjectType(dbObject.objectType)[dbObject.pkId] = dbObject
-				flush_collection_cache( dbObject.objectType )
+			# Returns an array of all domain objects of a given type.
+			def getAll(objectType)
+				hashByObjectType(objectType).values.collect { |d_obj| d_obj.clone }
 			end
-			
+
 			def getByQuery( query )
 				unless @collections_by_query[query]
 					newObjects = @dbBridge.getCollectionByQuery(query)
@@ -44,23 +50,11 @@ module Lafcadio
 				collection
 			end
 
-			# Returns an array of all domain objects of a given type.
-			def getAll(objectType)
-				hashByObjectType(objectType).values.collect { |d_obj| d_obj.clone }
-			end
-
-			# Flushes a domain object.
-			def flush(dbObject)
-				hashByObjectType(dbObject.objectType).delete dbObject.pkId
-				flush_collection_cache( dbObject.objectType )
-			end
-			
-			def flush_collection_cache( objectType )
-				@collections_by_query.keys.each { |query|
-					if query.objectType == objectType
-						@collections_by_query.delete( query )
-					end
-				}
+			def hashByObjectType(objectType)
+				unless @objects[objectType]
+					@objects[objectType] = {}
+				end
+				@objects[objectType]
 			end
 
 			def last_commit_time( domain_class, pkId )
@@ -75,6 +69,12 @@ module Lafcadio
 					@commit_times[d_obj.objectType] = by_domain_class
 				end
 				by_domain_class[d_obj.pkId] = Time.now
+			end
+
+			# Saves a domain object.
+			def save(dbObject)
+				hashByObjectType(dbObject.objectType)[dbObject.pkId] = dbObject
+				flush_collection_cache( dbObject.objectType )
 			end
 		end
 	end
