@@ -79,9 +79,7 @@ class LinkField < ObjectField
 					prevObjLinkedTo = prevObj.send(name)
 					possiblyMyObj = prevObjLinkedTo.send(subsetLinkField.name)
 					if possiblyMyObj && possiblyMyObj.objId == objId
-						cantChangeMsg = <<-MSG
-This #{@objectType.englishName} is selected as the #{subsetLinkField.englishName} in #{@linkedType.englishName} \"#{prevObjLinkedTo.name}\". To change the #{subsetLinkField.englishName} this #{@objectType.englishName} belongs to, you must first change the #{subsetLinkField.englishName} in #{@linkedType.englishName} \"#{prevObjLinkedTo.name}\".
-						MSG
+						cantChangeMsg = "You can't change that."
 						raise FieldValueError, cantChangeMsg, caller
 					end
 				rescue DomainObjectNotFoundError

@@ -34,10 +34,6 @@ class ObjectType
 		end
 	end
 
-  def englishName
-		EnglishUtil.camelCaseToEnglish ClassUtil.bareClassName(@objectType)
-  end
-  
   def getClassFields
 		unless @classFields
 			if @xmlParser
