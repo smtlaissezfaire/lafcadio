@@ -20,10 +20,47 @@ class TestObjectStore < LafcadioTestCase
 		@mockDbBridge.addObject @client
 	end
 
+	def testDeepLinking
+		client1 = Client.getTestClient
+		@mockDbBridge.addObject client1
+		client1Proxy = DomainObjectProxy.new(Client, 1)
+		client2 = Client.new({ 'objId' => 2, 'name' => 'client 2',
+				'referringClient' => client1Proxy })
+		@mockDbBridge.addObject client2
+		client2Prime = @testObjectStore.getClient 2
+		assert_equal Client, client2Prime.referringClient.objectType
+	end
+
+	def testDefersLoading
+		@testObjectStore.getAll Invoice
+		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
+		assert_equal 1, @mockDbBridge.retrievalsByType[Invoice]
+	end
+
+	def testDeleteClearsCachedValue
+		client = Client.new({ 'objId' => 100, 'name' => 'client 100' })
+		@testObjectStore.commit client
+		assert_equal 1, @testObjectStore.getAll(Client).size
+		client.delete = true
+		@testObjectStore.commit client
+		assert_equal 0, @testObjectStore.getAll(Client).size
+	end
+
   def testDumpable
 		newOs = Marshal.load(Marshal.dump(@testObjectStore))
     assert_equal ObjectStore, newOs.class
   end
+
+	def testDynamicMethodNameDispatchesToCollectorMapObjectFunction
+		option = TestOption.getTestOption
+		@testObjectStore.commit option
+		ili = TestInventoryLineItem.getTestInventoryLineItem
+		@testObjectStore.commit ili
+		ilio = TestInventoryLineItemOption.getTestInventoryLineItemOption
+		@testObjectStore.commit ilio
+		assert_equal ilio, @testObjectStore.getInventoryLineItemOption(
+				ili, option)
+	end
 
 	def testDynamicMethodNames
 		setTestClient
@@ -37,16 +74,34 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 1, matchingClients.size
 		assert_equal @client, matchingClients[0]
 	end
+	
+	def testDynamicMethodNameDispatchingRaisesNoMethodError
+		begin
+			@testObjectStore.notAMethod
+			raise "Should raise NoMethodError"
+		rescue NoMethodError
+			# ok
+		end
+	end
 
-	def testDeepLinking
-		client1 = Client.getTestClient
-		@mockDbBridge.addObject client1
-		client1Proxy = DomainObjectProxy.new(Client, 1)
-		client2 = Client.new({ 'objId' => 2, 'name' => 'client 2',
-				'referringClient' => client1Proxy })
-		@mockDbBridge.addObject client2
-		client2Prime = @testObjectStore.getClient 2
-		assert_equal Client, client2Prime.referringClient.objectType
+	def testFlushCacheAfterNewObjectCommit
+		assert_equal 0, @testObjectStore.getAll(Client).size
+		client = Client.new({ })
+		@testObjectStore.commit client
+		assert_equal 1, @testObjectStore.getAll(Client).size
+	end
+
+	def testGetSubset
+		setTestClient
+		condition = Query::Equals.new 'name', 'clientName1', Client
+		assert_equal @client, @testObjectStore.getSubset(condition)[0]
+		query = Query.new Client, condition
+		assert_equal @client, @testObjectStore.getSubset(query)[0]
+	end
+
+	def testMax
+		setTestClient
+		assert_equal 1, @testObjectStore.getMax(Client)
 	end
 
 	def testSelfLinking
@@ -65,12 +120,6 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 100, client1Prime.referringClient.standard_rate
 	end
 
-	def testDefersLoading
-		@testObjectStore.getAll Invoice
-		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
-		assert_equal 1, @mockDbBridge.retrievalsByType[Invoice]
-	end
-
 	def testUpdateFlushesCache
 		client = Client.new({ 'objId' => 100, 'name' => 'client 100' })
 		@testObjectStore.commit client
@@ -81,45 +130,5 @@ class TestObjectStore < LafcadioTestCase
 		clientPrime.name = 'client 100.2'
 		@testObjectStore.commit clientPrime
 		assert_equal 'client 100.2', @testObjectStore.get(Client, 100).name		
-	end
-
-	def testDeleteClearsCachedValue
-		client = Client.new({ 'objId' => 100, 'name' => 'client 100' })
-		@testObjectStore.commit client
-		assert_equal 1, @testObjectStore.getAll(Client).size
-		client.delete = true
-		@testObjectStore.commit client
-		assert_equal 0, @testObjectStore.getAll(Client).size
-	end
-
-	def testMax
-		setTestClient
-		assert_equal 1, @testObjectStore.getMax(Client)
-	end
-
-	def testGetSubset
-		setTestClient
-		condition = Query::Equals.new 'name', 'clientName1', Client
-		assert_equal @client, @testObjectStore.getSubset(condition)[0]
-		query = Query.new Client, condition
-		assert_equal @client, @testObjectStore.getSubset(query)[0]
-	end
-	
-	def testDynamicMethodNameDispatchesToCollectorMapObjectFunction
-		option = TestOption.getTestOption
-		@testObjectStore.commit option
-		ili = TestInventoryLineItem.getTestInventoryLineItem
-		@testObjectStore.commit ili
-		ilio = TestInventoryLineItemOption.getTestInventoryLineItemOption
-		@testObjectStore.commit ilio
-		assert_equal ilio, @testObjectStore.getInventoryLineItemOption(
-				ili, option)
-	end
-
-	def testFlushCacheAfterNewObjectCommit
-		assert_equal 0, @testObjectStore.getAll(Client).size
-		client = Client.new({ })
-		@testObjectStore.commit client
-		assert_equal 1, @testObjectStore.getAll(Client).size
 	end
 end

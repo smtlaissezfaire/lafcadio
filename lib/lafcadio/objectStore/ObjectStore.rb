@@ -1,6 +1,4 @@
-require 'lafcadio/objectStore/Collector'
-require 'lafcadio/objectStore/DbBridge'
-require 'lafcadio/util/ContextualService'
+require 'lafcadio'
 
 module Lafcadio
 	# The ObjectStore represents the database in a Lafcadio application.
@@ -35,20 +33,6 @@ module Lafcadio
 			@collector = Lafcadio::Collector.new self
 		end
 
-		def get(objectType, objId)
-			@retriever.get objectType, objId
-		end
-
-		def getLastCommit(dbObject)
-			if dbObject.delete
-				DomainObject::COMMIT_DELETE
-			elsif dbObject.objId
-				DomainObject::COMMIT_EDIT
-			else
-				DomainObject::COMMIT_ADD
-			end
-		end
-
 		# Commits a domain object to the database. You can also simply call
 		#   myDomainObject.commit
 		def commit(dbObject)
@@ -60,6 +44,20 @@ module Lafcadio
 				@retriever.set dbObject
 			elsif committer.commitType == Committer::DELETE
 				@retriever.clear dbObject
+			end
+		end
+
+		def get(objectType, objId)
+			@retriever.get objectType, objId
+		end
+
+		def getLastCommit(dbObject)
+			if dbObject.delete
+				DomainObject::COMMIT_DELETE
+			elsif dbObject.objId
+				DomainObject::COMMIT_EDIT
+			else
+				DomainObject::COMMIT_ADD
 			end
 		end
 
@@ -82,34 +80,9 @@ module Lafcadio
 		end
 
 		def method_missing(methodId, *args)
-			require 'lafcadio/objectStore/CouldntMatchObjectTypeError'
-			methodName = methodId.id2name
-			begin
-				methodName =~ /^get(.*)$/
-				objectType = DomainObject.getObjectTypeFromString $1
-				if args[0].class <= Integer
-					get objectType, args[0]
-				elsif args[0].class <= DomainObject
-					@collector.getMapObject objectType, args[0], args[1]
-				end
-			rescue CouldntMatchObjectTypeError
-				subsystems = [ @collector, @dbBridge, @retriever ]
-				resolved = false
-				while(subsystems.size > 0 && !resolved)
-					subsystem = subsystems.shift
-					begin
-						result = subsystem.send methodName, *args
-						resolved = true
-					rescue CouldntMatchObjectTypeError, NoMethodError
-						# try the next one
-					end
-				end
-				if resolved
-					result
-				else
-					super methodId
-				end
-			end		
+			subsystems = { 'collector' => @collector, 'dbBridge' => @dbBridge,
+			               'retriever' => @retriever }
+			MethodDispatcher.new( subsystems, methodId, *args ).execute
 		end
 	end
 end
