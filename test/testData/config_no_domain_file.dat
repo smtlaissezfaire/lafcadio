@@ -5,8 +5,6 @@ dbhost:localhost
 adminEmail:john.doe@email.com
 siteName:Site Name
 url:http://test.url
-classpath:lafcadio/
 logdir:test/testOutput/
-domainDirs:../test/mock/domain/
 logSql:n
 classDefinitionDir:test/testData

@@ -128,8 +128,7 @@ class TestDomainObject < LafcadioTestCase
 	def test_checks_fields_at_all_states
 		LafcadioConfig.set_values(
 			'checkFields' => 'onAllStates',
-			'classDefinitionDir' => '../test/testData',
-			'domainDirs' => '../test/mock/domain/'
+			'classDefinitionDir' => '../test/testData'
 		)
 		client = Client.new( 'name' => 'client name' )
 		assert_raise( FieldValueError ) { client.name = nil }
@@ -138,8 +137,7 @@ class TestDomainObject < LafcadioTestCase
 
 	def test_checks_fields_on_commit
 		LafcadioConfig.set_values(
-			'checkFields' => 'onCommit', 'classDefinitionDir' => '../test/testData',
-			'domainDirs' => '../test/mock/domain/'
+			'checkFields' => 'onCommit', 'classDefinitionDir' => '../test/testData'
 		)
 		client = Client.new( {} )
 		assert_raise( FieldValueError ) { client.commit }
@@ -147,8 +145,7 @@ class TestDomainObject < LafcadioTestCase
 
 	def test_checks_fields_on_instantiation
 		LafcadioConfig.set_values( 'checkFields' => 'onInstantiate',
-		                           'classDefinitionDir' => '../test/testData',
-															 'domainDirs' => '../test/mock/domain/' )
+		                           'classDefinitionDir' => '../test/testData' )
 		first_client = Client.new( 'name' => 'first client' )
 		first_client.commit
 		assert_raise( FieldValueError ) { Client.new( {} ) }

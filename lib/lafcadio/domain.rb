@@ -342,13 +342,10 @@ module Lafcadio
 		end
 
 		def self.get_domain_dirs #:nodoc:
-			config = LafcadioConfig.new
-			classPath = config['classpath']
-			domainDirStr = config['domainDirs']
-			if domainDirStr
-				domainDirs = domainDirStr.split(',')
+			if ( domainDirStr = LafcadioConfig.new['domainDirs'] )
+				domainDirStr.split(',')
 			else
-				domainDirs = [ classPath + 'domain/' ]
+				[]
 			end
 		end
 		
