@@ -91,6 +91,8 @@ class TestDBBridge < Test::Unit::TestCase
 		assert_equal( invoice.date, @dbb.group_query( query2 ).only )
 		query3 = Query::Max.new( XmlSku )
 		assert_equal( 5, @dbb.group_query( query3 ).only )
+		query4 = Query::Max.new( Attribute )
+		assert_nil( @dbb.group_query( query4 ).only )
 	end
 
   def testLastPkIdInserted
@@ -168,6 +170,8 @@ class TestDBBridge < Test::Unit::TestCase
 				                         'text_one' => 'foobar', 'link1' => '1' ) ]
 			elsif str == 'select max(some_other_id) from some_other_table'
 				[ [ '5' ] ]
+			elsif str == 'select max(pk_id) from attributes'
+				[ [ nil ] ]
 			else
 				[]
       end

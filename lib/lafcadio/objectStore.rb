@@ -1,4 +1,5 @@
 require 'dbi'
+require 'lafcadio/depend'
 require 'lafcadio/domain'
 require 'lafcadio/query'
 require 'lafcadio/util'
@@ -129,12 +130,8 @@ module Lafcadio
 		
 		def group_query( query )
 			execute_select( query.to_sql )[0].collect { |val|
-				if query.field_name != query.domain_class.sql_primary_key_name
-					a_field = query.domain_class.get_field( query.field_name )
-					a_field.value_from_sql( val )
-				else
-					val.to_i
-				end
+				a_field = query.domain_class.get_field( query.field_name )
+				a_field.value_from_sql( val )
 			}
 		end
 
