@@ -6,6 +6,17 @@ require '../test/mock/domain/Client'
 require '../test/mock/domain/User'
 
 class TestDomainObject < LafcadioTestCase
+	def matchField( domainClass, fieldName, fieldClass, attributes = nil )
+		field = domainClass.getClassField( fieldName )
+		assert_not_nil( field )
+		assert_equal( fieldClass, field.class )
+		if attributes
+			attributes.each { |attrName, attrValue|
+				assert_equal( attrValue, field.send( attrName ) )
+			}
+		end
+	end
+	
 	def newTestClientWithoutPkId
 		Client.new( { "name" => "clientName" } )
 	end
@@ -230,5 +241,38 @@ class TestDomainObject < LafcadioTestCase
 			raise "Should only access #{ key } once" if @key_lookups[key] > 1
 			super( key )
 		end
+	end
+	
+	def test_class_fields_from_one_line_class_methods
+		require '../test/mock/domain/XmlSku2'
+		matchField( XmlSku2, 'boolean1', BooleanField,
+		            { 'enumType' => BooleanField::ENUMS_CAPITAL_YES_NO } )
+		matchField( XmlSku2, 'boolean2', BooleanField,
+		            { 'enums' => { true => 'yin', false => 'yang' },
+		              'englishName' => 'boolean 2' } )
+		matchField( XmlSku2, 'date1', DateField, { 'notNull' => false } )
+		matchField( XmlSku2, 'date2', DateField,
+		            { 'range' => DateField::RANGE_PAST } )
+		matchField( XmlSku2, 'dateTime1', DateTimeField )
+		matchField( XmlSku2, 'decimal1', DecimalField,
+		            { 'precision' => 4, 'englishName' => 'decimal 1' } )
+		matchField( XmlSku2, 'email1', EmailField )
+		matchField( XmlSku2, 'enum1', EnumField,
+		            { 'enums' => QueueHash.new( 'a', 'a', 'b', 'b' ) } )
+		matchField( XmlSku2, 'enum2', EnumField,
+		            { 'enums' => QueueHash.new( '1', '2', '3', '4' ) } )
+		matchField( XmlSku2, 'integer1', IntegerField )
+		matchField( XmlSku2, 'link1', LinkField,
+		            { 'linkedType' => User, 'deleteCascade' => true } )
+		matchField( XmlSku2, 'money1', MoneyField )
+		matchField( XmlSku2, 'month1', MonthField )
+		matchField( XmlSku2, 'subsetLink1', SubsetLinkField,
+		            { 'subsetField' => 'xmlSku' } )
+		matchField( XmlSku2, 'text1', TextField,
+		            { 'size' => 16, 'unique' => true } )
+		matchField( XmlSku2, 'text2', TextField, { 'large' => true } )
+		matchField( XmlSku2, 'textList1', TextListField,
+		            { 'dbFieldName' => 'text_list1' } )
+		matchField( XmlSku2, 'timestamp1', TimeStampField )
 	end
 end

@@ -110,6 +110,21 @@ module Lafcadio
 
 		include DomainComparable
 		
+		def self.createField( field_class, name, att_hash )
+			class_fields = @@classFields[self]
+			if class_fields.nil?
+				class_fields = []
+				@@classFields[self] = class_fields
+			end
+			att_hash['name'] = name
+			field = field_class.instantiateWithParameters( self, att_hash )
+			att_hash.each { |field_name, value|
+				setter = field_name + '='
+				field.send( setter, value ) if field.respond_to?( setter )
+			}
+			class_fields << field
+		end
+		
 		def DomainObject.classFields #:nodoc:
 			classFields = @@classFields[self]
 			unless classFields
@@ -135,9 +150,16 @@ module Lafcadio
 			classes
 		end
 
-		def DomainObject.method_missing(methodId) #:nodoc:
-			require 'lafcadio/domain'
-			ObjectType.getObjectType( self ).send( methodId.id2name )
+		def DomainObject.method_missing( methodId, *args ) #:nodoc:
+			method_name = methodId.id2name
+			maybe_field_class_name = ( method_name.gsub( /^(.)/ ) { $&.upcase } ) +
+			                         'Field'
+			begin
+				field_class = Lafcadio.const_get( maybe_field_class_name )
+				createField( field_class, args[0], args[1] || {} )
+			rescue NameError
+				ObjectType.getObjectType( self ).send( method_name )
+			end
 		end
 
 		def DomainObject.getClassField(fieldName) #:nodoc:
