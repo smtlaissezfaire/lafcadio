@@ -37,19 +37,6 @@ class DomainObject
 	COMMIT_DELETE = 3
 
 	include DomainComparable
-
-	# Any concrete class that inherits from DomainObject needs to define this
-	# method to return an array of ObjectField instances. You don't have to define
-	# an ObjectField instance for "objId".
-	def DomainObject.getClassFields
-		require 'lafcadio/domain'
-		dirName = LafcadioConfig.new['classDefinitionDir']
-		xmlFileName = ClassUtil.bareClassName( self ) + '.xml'
-		xmlPath = File.join( dirName, xmlFileName )
-		xml = ''
-		File.open( xmlPath ) { |file| xml = file.readlines.join }
-		ClassDefinitionXmlParser.new( self, xml ).execute
-	end
 	
 	def DomainObject.classFields
 		classFields = @@classFields[self]
@@ -80,7 +67,8 @@ class DomainObject
 	end
 
 	def DomainObject.method_missing(methodId)
-		ObjectType.new(self).send(methodId.id2name)
+		require 'lafcadio/domain'
+		ObjectType.getObjectType( self ).send( methodId.id2name )
 	end
 
 	# Returns the ObjectField instance corresponding to fieldName.

@@ -5,12 +5,14 @@ require 'test/mock/domain/LineItem'
 
 class TestObjectType < LafcadioTestCase
 	def testTableName
-		assert_equal "users", ObjectType.new(User).tableName
-		assert_equal "lineItems", ObjectType.new(Domain::LineItem).tableName
+		assert_equal( "users", ObjectType.getObjectType(User).tableName )
+		assert_equal( "lineItems",
+		              ObjectType.getObjectType(Domain::LineItem).tableName )
 	end
 
 	def testEnglishName
-		assert_equal "line item", ObjectType.new(Domain::LineItem).englishName
-		assert_equal "user", ObjectType.new(User).englishName
+		assert_equal( "line item",
+		              ObjectType.getObjectType(Domain::LineItem).englishName )
+		assert_equal( "user", ObjectType.getObjectType(User).englishName )
 	end
 end

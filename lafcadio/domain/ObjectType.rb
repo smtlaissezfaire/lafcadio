@@ -2,8 +2,29 @@
 # methods here are usually called as methods of DomainObject, and then delegated 
 # to this class.
 class ObjectType
+	@@instances = {}
+	
+	def ObjectType.getObjectType( aClass )
+		instance = @@instances[aClass]
+		if instance.nil?
+			@@instances[aClass] = new( aClass )
+			instance = @@instances[aClass]
+		end
+		instance
+	end
+
+	private_class_method :new
+
 	def initialize(objectType)
+		require 'lafcadio/domain'
+
 		@objectType = objectType
+		dirName = LafcadioConfig.new['classDefinitionDir']
+		xmlFileName = ClassUtil.bareClassName( @objectType ) + '.xml'
+		xmlPath = File.join( dirName, xmlFileName )
+		xml = ''
+		File.open( xmlPath ) { |file| xml = file.readlines.join }
+		@xmlParser = ClassDefinitionXmlParser.new( @objectType, xml )
 	end
 
 	# Returns the table name, which is assumed to be the domain class name 
@@ -18,6 +39,13 @@ class ObjectType
 
   def englishName
 		EnglishUtil.camelCaseToEnglish ClassUtil.bareClassName(@objectType)
+  end
+  
+  def getClassFields
+		unless @classFields
+			@classFields = @xmlParser.getClassFields
+		end
+		@classFields
   end
 end
 

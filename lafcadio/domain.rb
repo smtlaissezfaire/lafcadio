@@ -59,7 +59,7 @@ class ClassDefinitionXmlParser
 		@domainClass = domainClass; @xml = xml
 	end
 
-	def execute
+	def getClassFields
 		require 'rexml/document'
 		require 'lafcadio/util'
 		
