@@ -1,10 +1,11 @@
 require 'lafcadio/includer'
 Includer.include( 'domain' )
 require 'lafcadio/objectField'
+require 'lafcadio/util'		
+require 'rexml/document'
 
 class ClassDefinitionXmlParser
-	class InvalidDataError < ArgumentError
-	end
+	class InvalidDataError < ArgumentError; end
 
 	class FieldAttribute
 		INTEGER = 1
@@ -56,35 +57,40 @@ class ClassDefinitionXmlParser
 	end
 
 	def initialize( domainClass, xml )
-		require 'rexml/document'
-
 		@domainClass = domainClass
 		@xmlDocRoot = REXML::Document.new( xml ).root
+		@namesProcessed = {}
+	end
+	
+	def get_class_field( fieldElt )
+		className = fieldElt.attributes['class']
+		name = fieldElt.attributes['name']
+		begin
+			fieldClass = ClassUtil.getClass( className )
+			register_name( name )
+			field = fieldClass.instantiateFromXml( @domainClass, fieldElt )
+			possibleFieldAttributes.each { |fieldAttr|
+				fieldAttr.maybeSetFieldAttr( field, fieldElt )
+			}
+		rescue MissingError
+			msg = "Couldn't find field class '#{ className }' for field '#{ name }'"
+			raise( MissingError, msg, caller )
+		end
+		field
 	end
 
 	def getClassFields
-		require 'lafcadio/util'
-		
 		namesProcessed = {}
 		fields = []
 		@xmlDocRoot.elements.each('field') { |fieldElt|
-			className = fieldElt.attributes['class']
-			name = fieldElt.attributes['name']
-			begin
-				fieldClass = ClassUtil.getClass( className )
-				raise InvalidDataError if namesProcessed[name]
-				field = fieldClass.instantiateFromXml( @domainClass, fieldElt )
-				possibleFieldAttributes.each { |fieldAttr|
-					fieldAttr.maybeSetFieldAttr( field, fieldElt )
-				}
-				fields << field
-				namesProcessed[name] = true
-			rescue MissingError
-				msg = "Couldn't find field class '#{ className }' for field '#{ name }'"
-				raise( MissingError, msg, caller )
-			end
+			fields << get_class_field( fieldElt )
 		}
 		fields
+	end
+	
+	def register_name( name )
+		raise InvalidDataError if @namesProcessed[name]
+		@namesProcessed[name] = true
 	end
 	
 	def sqlPrimaryKeyName
