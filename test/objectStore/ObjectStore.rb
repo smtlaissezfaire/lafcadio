@@ -114,4 +114,11 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal ilio, @testObjectStore.getInventoryLineItemOption(
 				ili, option)
 	end
+
+	def testFlushCacheAfterNewObjectCommit
+		assert_equal 0, @testObjectStore.getAll(Client).size
+		client = Client.new ({ })
+		@testObjectStore.commit client
+		assert_equal 1, @testObjectStore.getAll(Client).size
+	end
 end

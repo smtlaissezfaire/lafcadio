@@ -36,7 +36,8 @@ class ObjectStore < ContextualService
   def commit (dbObject)
   	committer = Committer.new dbObject, @dbBridge
   	committer.execute
-		if committer.commitType == Committer::UPDATE
+		if committer.commitType == Committer::UPDATE ||
+				committer.commitType == Committer::INSERT
 			@retriever.set dbObject
 		elsif committer.commitType == Committer::DELETE
 			@retriever.clear dbObject
