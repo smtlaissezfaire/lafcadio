@@ -3,7 +3,7 @@ module Lafcadio
 	class English
 		# Turns a camel-case string ("camelCaseToEnglish") to plain English ("camel 
 		# case to english"). Each word is decapitalized.
-		def English.camelCaseToEnglish(camelCaseStr)
+		def self.camelCaseToEnglish(camelCaseStr)
 			words = []
 			nextCapIndex =(camelCaseStr =~ /[A-Z]/)
 			while nextCapIndex != nil
@@ -14,6 +14,52 @@ module Lafcadio
 			end
 			words << camelCaseStr
 			words.join ' '
+		end
+
+		# Turns an English language string into camel case.
+		def self.englishToCamelCase(englishStr)
+			cc = ""
+			englishStr.split.each { |word|
+				word = word.capitalize unless cc == ''
+				cc = cc += word
+			}
+			cc
+		end
+
+		# Given a singular noun, returns the plural form.
+		def self.plural(singular)
+			consonantYPattern = Regexp.new("([^aeiou])y$", Regexp::IGNORECASE)
+			if singular =~ consonantYPattern
+				singular.gsub consonantYPattern, '\1ies'
+			elsif singular =~ /[xs]$/
+				singular + "es"
+			else
+				singular + "s"
+			end
+		end
+
+		# Returns the proper noun form of a string by capitalizing most of the 
+		# words.
+		#
+		# Examples:
+		#   English.properNoun("bosnia and herzegovina") ->
+		#     "Bosnia and Herzegovina"
+		#   English.properNoun("macedonia, the former yugoslav republic of") ->
+		#     "Macedonia, the Former Yugoslav Republic of"
+		#   English.properNoun("virgin islands, u.s.") ->
+		#     "Virgin Islands, U.S."
+		def self.properNoun(string)
+			properNoun = ""
+			while(matchIndex = string =~ /[\. ]/)
+				word = string[0..matchIndex-1]
+				word = word.capitalize unless [ 'and', 'the', 'of' ].index(word) != nil
+				properNoun += word + $&
+				string = string[matchIndex+1..string.length]
+			end
+			word = string
+			word = word.capitalize unless [ 'and', 'the', 'of' ].index(word) != nil
+			properNoun += word
+			properNoun
 		end
 
 		# Given a format for a template sentence, generates the sentence while 
@@ -36,7 +82,7 @@ module Lafcadio
 		#   English.sentence("There %is currently %num %nam", "product category",
 		#                        1) -> "There is currently 1 product category"
 		#   English.sentence("Add %a %nam", "invoice") -> "Add an invoice"	
-		def English.sentence(format, name, number = 1)
+		def self.sentence(format, name, number = 1)
 			sentence = format
 			sentence.gsub!( /%num/, number.to_s )
 			isVerb = number == 1 ? "is" : "are"
@@ -47,53 +93,8 @@ module Lafcadio
 			sentence.gsub!( /%a/, article )
 			sentence
 		end
-
-		# Does this word start with a vowel sound? "User" and "usury" don't, but 
-		# "ugly" does.
-		def English.startsWithVowelSound(word)
-			uSomethingUMatch = word =~ /^u[^aeiuo][aeiou]/
-					# 'user' and 'usury' don't start with a vowel sound
-			word =~ /^[aeiou]/ && !uSomethingUMatch
-		end
-
-		# Given a singular noun, returns the plural form.
-		def English.plural(singular)
-			consonantYPattern = Regexp.new("([^aeiou])y$", Regexp::IGNORECASE)
-			if singular =~ consonantYPattern
-				singular.gsub consonantYPattern, '\1ies'
-			elsif singular =~ /[xs]$/
-				singular + "es"
-			else
-				singular + "s"
-			end
-		end
-
-		# Returns the proper noun form of a string by capitalizing most of the 
-		# words.
-		#
-		# Examples:
-		#   English.properNoun("bosnia and herzegovina") ->
-		#     "Bosnia and Herzegovina"
-		#   English.properNoun("macedonia, the former yugoslav republic of") ->
-		#     "Macedonia, the Former Yugoslav Republic of"
-		#   English.properNoun("virgin islands, u.s.") ->
-		#     "Virgin Islands, U.S."
-		def English.properNoun(string)
-			properNoun = ""
-			while(matchIndex = string =~ /[\. ]/)
-				word = string[0..matchIndex-1]
-				word = word.capitalize unless [ 'and', 'the', 'of' ].index(word) != nil
-				properNoun += word + $&
-				string = string[matchIndex+1..string.length]
-			end
-			word = string
-			word = word.capitalize unless [ 'and', 'the', 'of' ].index(word) != nil
-			properNoun += word
-			properNoun
-		end
-
-		# Given a noun in plural form, returns its singular version.
-		def English.singular(plural)
+		
+		def self.singular(plural)
 			if plural =~ /(.*)ies/
 				$1 + 'y'
 			elsif plural =~ /(.*s)es/
@@ -103,15 +104,13 @@ module Lafcadio
 				$1
 			end
 		end
-
-		# Turns an English language string into camel case.
-		def English.englishToCamelCase(englishStr)
-			cc = ""
-			englishStr.split.each { |word|
-				word = word.capitalize unless cc == ''
-				cc = cc += word
-			}
-			cc
+		
+		# Does this word start with a vowel sound? "User" and "usury" don't, but 
+		# "ugly" does.
+		def self.startsWithVowelSound(word)
+			uSomethingUMatch = word =~ /^u[^aeiuo][aeiou]/
+			# 'user' and 'usury' don't start with a vowel sound
+			word =~ /^[aeiou]/ && !uSomethingUMatch
 		end
 	end
 end

@@ -8,7 +8,7 @@ module Lafcadio
 	#
 	# For example: ObjectStore.getObjectStore
 	class ContextualService
-		def ContextualService.method_missing(methodId)
+		def self.method_missing(methodId)
 			methodName = methodId.id2name
 			if methodName =~ /^get.*/
 				Context.instance.send(methodName)
