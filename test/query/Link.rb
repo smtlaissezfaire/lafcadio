@@ -1,6 +1,6 @@
 require 'lafcadio/test/LafcadioTestCase'
 require '../test/mock/domain/Client'
-require 'lafcadio/query/Link'
+require 'lafcadio/query'
 
 class TestLinkQuery < LafcadioTestCase
 	def testObjectDoesntMeetNil

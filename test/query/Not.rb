@@ -1,7 +1,6 @@
 require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/query'
 require '../test/mock/domain/User'
-require 'lafcadio/query/Not'
 
 class TestNot < LafcadioTestCase
 	def setup

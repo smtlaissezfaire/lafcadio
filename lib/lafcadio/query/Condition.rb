@@ -52,7 +52,6 @@ module Lafcadio
 			end
 			
 			def not
-				require 'lafcadio/query/Not'
 				Query::Not.new( self )
 			end
 
