@@ -40,7 +40,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def testCachesClassFields
-		2.times { MockDomainObject.classFields }
+		2.times { MockDomainObject.class_fields }
 	end
 
 	def test_checks_fields_at_all_states

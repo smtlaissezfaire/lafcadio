@@ -279,7 +279,7 @@ module Lafcadio
 
 		def getNameValuePairs(objectType)
 			nameValues = []
-			objectType.classFields.each { |field|
+			objectType.class_fields.each { |field|
 				value = @obj.send(field.name)
 				unless field.dbWillAutomaticallyWrite
 					nameValues << field.nameForSQL
@@ -293,7 +293,7 @@ module Lafcadio
 		end
 
 		def insertSQL(objectType)
-			fields = objectType.classFields
+			fields = objectType.class_fields
 			nameValuePairs = getNameValuePairs(objectType)
 			if objectType.isBasedOn?
 				nameValuePairs[objectType.sql_primary_key_name] = 'LAST_INSERT_ID()'

@@ -25,7 +25,7 @@ module Lafcadio
 			createDefinitions << "#{ @domainClass.sql_primary_key_name } " +
 													 "int not null auto_increment"
 			createDefinitions << "primary key (#{ @domainClass.sql_primary_key_name })"
-			@domainClass.classFields.each { |field|
+			@domainClass.class_fields.each { |field|
 				createDefinitions << definition_terms( field )
 			}
 			<<-SQL

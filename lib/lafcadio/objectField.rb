@@ -494,7 +494,7 @@ module Lafcadio
 		def verify_non_nil(value, pkId) #:nodoc:
 			super
 			if @linkedType != @objectType && pkId
-				subsetLinkField = @linkedType.classFields.find { |field|
+				subsetLinkField = @linkedType.class_fields.find { |field|
 					field.class == SubsetLinkField && field.subsetField == @name
 				}
 				if subsetLinkField

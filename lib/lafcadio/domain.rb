@@ -55,7 +55,7 @@ module Lafcadio
 		
 		def set_field_attributes( field, fieldElt )
 			possible_field_attributes.each { |fieldAttr|
-				fieldAttr.maybeSetFieldAttr( field, fieldElt )
+				fieldAttr.maybe_set_field_attr( field, fieldElt )
 			}
 		end
 
@@ -80,22 +80,22 @@ module Lafcadio
 				@objectFieldClass = objectFieldClass
 			end
 			
-			def maybeSetFieldAttr( field, fieldElt )
+			def maybe_set_field_attr( field, fieldElt )
 				setterMethod = "#{ name }="
 				if field.respond_to?( setterMethod )
 					if valueClass != FieldAttribute::HASH
 						if ( attrStr = fieldElt.attributes[name] )
-							field.send( setterMethod, valueFromString( attrStr ) )
+							field.send( setterMethod, value_from_string( attrStr ) )
 						end
 					else
 						if ( attrElt = fieldElt.elements[name] )
-							field.send( setterMethod, valueFromElt( attrElt ) )
+							field.send( setterMethod, value_from_elt( attrElt ) )
 						end
 					end
 				end
 			end
 
-			def valueFromElt( elt )
+			def value_from_elt( elt )
 				hash = {}
 				elt.elements.each( English.singular( @name ) ) { |subElt|
 					key = subElt.attributes['key'] == 'true'
@@ -105,7 +105,7 @@ module Lafcadio
 				hash
 			end
 			
-			def valueFromString( valueStr )
+			def value_from_string( valueStr )
 				if @valueClass == INTEGER
 					valueStr.to_i
 				elsif @valueClass == BOOLEAN
@@ -242,7 +242,7 @@ module Lafcadio
 	# different levels.
 	class DomainObject
 		@@subclassHash = {}
-		@@classFields = {}
+		@@class_fields = {}
 
 		COMMIT_ADD = 1
 		COMMIT_EDIT = 2
@@ -250,7 +250,7 @@ module Lafcadio
 
 		include DomainComparable
 		
-		def self.abstractSubclasses #:nodoc:
+		def self.abstract_subclasses #:nodoc:
 			require 'lafcadio/domain'
 			[ MapObject ]
 		end
@@ -260,25 +260,25 @@ module Lafcadio
 		def DomainObject.allFields
 			allFields = []
 			selfAndConcreteSuperclasses.each { |aClass|
-				aClass.classFields.each { |field| allFields << field }
+				aClass.class_fields.each { |field| allFields << field }
 			}
 			allFields
 		end
 
-		def self.classFields #:nodoc:
-			classFields = @@classFields[self]
-			unless classFields
-				@@classFields[self] = self.get_class_fields
-				classFields = @@classFields[self]
+		def self.class_fields #:nodoc:
+			class_fields = @@class_fields[self]
+			unless class_fields
+				@@class_fields[self] = self.get_class_fields
+				class_fields = @@class_fields[self]
 			end
-			classFields
+			class_fields
 		end
 
 		def self.createField( field_class, name, att_hash )
-			class_fields = @@classFields[self]
+			class_fields = @@class_fields[self]
 			if class_fields.nil?
 				class_fields = []
-				@@classFields[self] = class_fields
+				@@class_fields[self] = class_fields
 			end
 			att_hash['name'] = name
 			field = field_class.instantiateWithParameters( self, att_hash )
@@ -293,8 +293,8 @@ module Lafcadio
 			dependentClasses = {}
 			DomainObject.subclasses.each { |aClass|
 				if aClass != DomainObjectProxy &&
-						(!DomainObject.abstractSubclasses.index(aClass))
-					aClass.classFields.each { |field|
+						(!DomainObject.abstract_subclasses.index(aClass))
+					aClass.class_fields.each { |field|
 						if field.class <= LinkField && field.linkedType == self.objectType
 							dependentClasses[aClass] = field
 						end
@@ -306,7 +306,7 @@ module Lafcadio
 
 		def self.getClassField(fieldName) #:nodoc:
 			field = nil
-			self.classFields.each { |aField|
+			self.class_fields.each { |aField|
 				field = aField if aField.name == fieldName
 			}
 			field
@@ -362,7 +362,7 @@ module Lafcadio
 		end
 
 		def self.isConcrete? #:nodoc:
-		  (self != DomainObject && abstractSubclasses.index(self).nil?)
+		  (self != DomainObject && abstract_subclasses.index(self).nil?)
 		end
 
 		def self.method_missing( methodId, *args ) #:nodoc:
@@ -400,7 +400,7 @@ module Lafcadio
 			classes = [ ]
 			anObjectType = self
 			until(anObjectType == DomainObject ||
-					abstractSubclasses.index(anObjectType) != nil)
+					abstract_subclasses.index(anObjectType) != nil)
 				classes << anObjectType
 				anObjectType = anObjectType.superclass
 			end
@@ -580,23 +580,23 @@ module Lafcadio
 
 		def initialize(objectType) #:nodoc:
 			@objectType = objectType
-			( @classFields, @xmlParser, @table_name ) = [ nil, nil, nil ]
+			( @class_fields, @xmlParser, @table_name ) = [ nil, nil, nil ]
 		end
 
 		# Returns an Array of ObjectField instances for this domain class, parsing
 		# them from XML if necessary.
 		def get_class_fields
-			unless @classFields
+			unless @class_fields
 				try_load_xml_parser
 				if @xmlParser
-					@classFields = @xmlParser.get_class_fields
+					@class_fields = @xmlParser.get_class_fields
 				else
 					error_msg = "Couldn't find either an XML class description file " +
 											"or get_class_fields method for " + @objectType.name
 					raise MissingError, error_msg, caller
 				end
 			end
-			@classFields
+			@class_fields
 		end
 
 		# Returns the name of the primary key in the database, retrieving it from
