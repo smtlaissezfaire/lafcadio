@@ -1,7 +1,7 @@
 require 'rubygems'
 spec = Gem::Specification.new do |s|
 	s.name = 'lafcadio'
-	s.version = '0.3.4'
+	s.version = '0.3.5'
 	s.platform = Gem::Platform::RUBY
 	s.date = Time.now
 	s.summary = "Lafcadio is an object-relational mapping layer"
