@@ -73,5 +73,16 @@ class FieldManager
 		@valueHash.keys.each { |key| hash[key] = get key }
 		hash
 	end
+
+	def dump
+		str = ""
+		@valueHash.keys.each { |key|
+			line = "#{key}: "
+			line += @valueHash.getArray(key).join(", ")
+			line += "\n"
+			str += line
+		}
+		str
+	end
 end
 

@@ -111,5 +111,12 @@ class TestFieldManager < LafcadioTestCase
 		assert_equal 'b', hash['a']
 		assert_equal 'd', hash['c']
 	end
+	
+	def testDump
+		fm = fieldManager ({ 'a' => [ 'b' ], 'c' => [ 'd', 'e' ] })
+		dump = fm.dump
+		assert_not_nil dump =~ /a: b\n/, dump
+		assert_not_nil dump =~ /c: d, e\n/, dump
+	end
 end
 
