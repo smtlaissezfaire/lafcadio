@@ -262,7 +262,7 @@ module Lafcadio
 			require 'lafcadio/domain'
 			[ MapObject ]
 		end
-
+		
 		# Returns an array of all fields defined for this class and all concrete
 		# superclasses.
 		def self.all_fields

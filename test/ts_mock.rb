@@ -45,6 +45,12 @@ class TestMockDBBridge < LafcadioTestCase
 	def testGetAll
 		@mockDbBridge.commit @client
 		assert_equal @client, get_all(Client)[0]
+		(2..10).each { |pk_id|
+			@mockDbBridge.commit( Client.new( 'pk_id' => pk_id ) )
+		}
+		all = get_all( Client )
+		assert_equal( 10, all.size )
+		( 1..10 ).each { |i| assert_equal( i, all[i-1].pk_id ) }
 	end
 
 	def testGetCollectionByQuery

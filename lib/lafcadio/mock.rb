@@ -43,6 +43,8 @@ module Lafcadio
 			if ( order_by = query.order_by )
 				objects = objects.sort_by { |dobj| dobj.send( order_by ) }
 				objects.reverse! if query.order_by_order == Query::DESC
+			else
+				objects = objects.sort_by { |dobj| dobj.pk_id }
 			end
 			if (range = query.limit)
 				objects = objects[0..(range.last - range.first)]
