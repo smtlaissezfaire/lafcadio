@@ -1,4 +1,5 @@
 require 'singleton'
+require 'lafcadio/util/ClassUtil'
 
 class Context
 	include Singleton
