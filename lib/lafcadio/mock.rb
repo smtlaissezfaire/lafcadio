@@ -11,24 +11,26 @@ module Lafcadio
 		end
 
 		def commit(db_object)
-			objectsByObjectType = get_objects_by_domain_class( db_object.object_type )
+			objects_by_domain_class = get_objects_by_domain_class(
+				db_object.domain_class
+			)
 			if db_object.delete
-				objectsByObjectType.delete db_object.pk_id
+				objects_by_domain_class.delete( db_object.pk_id )
 			else
 				object_pk_id = get_pk_id_before_committing( db_object )
-				objectsByObjectType[object_pk_id] = db_object
+				objects_by_domain_class[object_pk_id] = db_object
 			end
 		end
 		
-		def _get_all(object_type)
-			@retrievals_by_type[object_type] = @retrievals_by_type[object_type] + 1
-			@objects[object_type] ? @objects[object_type].values : []
+		def _get_all( domain_class )
+			@retrievals_by_type[domain_class] = @retrievals_by_type[domain_class] + 1
+			@objects[domain_class] ? @objects[domain_class].values : []
 		end
 		
 		def get_collection_by_query(query)
 			@query_count[query] += 1
 			objects = []
-			_get_all( query.object_type ).each { |dbObj|
+			_get_all( query.domain_class ).each { |dbObj|
 				if query.condition
 					objects << dbObj if query.condition.object_meets(dbObj)
 				else
@@ -49,7 +51,8 @@ module Lafcadio
 			object_pk_id = db_object.pk_id
 			unless object_pk_id
 				maxpk_id = 0
-				get_objects_by_domain_class( db_object.object_type ).keys.each { |pk_id|
+				pk_ids = get_objects_by_domain_class( db_object.domain_class ).keys
+				pk_ids.each { |pk_id|
 					maxpk_id = pk_id if pk_id > maxpk_id
 				}
 				@last_pk_id_inserted = maxpk_id + 1
@@ -70,7 +73,7 @@ module Lafcadio
 		def group_query( query )
 			if query.class == Query::Max
 				if ( query.field_name == 'pk_id' || query.field_name == 'rate' )
-					query.collect( @objects[query.object_type].values )
+					query.collect( @objects[query.domain_class].values )
 				else
 					raise "Can't handle query with sql '#{ query.to_sql }'"
 				end

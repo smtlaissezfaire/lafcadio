@@ -7,7 +7,7 @@ module Lafcadio
 	class ObjectField
 		include Comparable
 
-		attr_reader :name, :object_type
+		attr_reader :name, :domain_class
 		attr_accessor :not_null, :db_field_name
 
 		def self.instantiate_from_xml( domain_class, fieldElt ) #:nodoc:
@@ -34,17 +34,17 @@ module Lafcadio
 			Object
 		end
 
-		# [object_type]  The domain class that this object field belongs to.
-		# [name]        The name of this field.
-		def initialize( object_type, name )
-			@object_type = object_type
+		# [domain_class]  The domain class that this object field belongs to.
+		# [name]          The name of this field.
+		def initialize( domain_class, name )
+			@domain_class = domain_class
 			@name = name
 			@db_field_name = name
 			@not_null = true
 		end
 		
 		def <=>(other)
-			if @object_type == other.object_type && name == other.name
+			if @domain_class == other.domain_class && name == other.name
 				0
 			else
 				object_id <=> other.object_id
@@ -54,7 +54,7 @@ module Lafcadio
 		def bind_write?; false; end #:nodoc:
 		
 		def db_table_and_field_name
-			"#{ object_type.table_name }.#{ db_field_name }"
+			"#{ domain_class.table_name }.#{ db_field_name }"
 		end
 
 		def db_will_automatically_write #:nodoc:
@@ -69,7 +69,7 @@ module Lafcadio
 		end
 
 		def prev_value(pk_id) #:nodoc:
-			prevObject = ObjectStore.get_object_store.get(@object_type, pk_id)
+			prevObject = ObjectStore.get_object_store.get( @domain_class, pk_id )
 			prevObject.send(name)
 		end
 
@@ -86,8 +86,11 @@ module Lafcadio
 
 		def verify(value, pk_id) #:nodoc:
 			if value.nil? && not_null
-				raise( FieldValueError,
-				       "#{ self.object_type.name }##{ name } can not be nil.", caller )
+				raise(
+					FieldValueError,
+					"#{ self.domain_class.name }##{ name } can not be nil.",
+					caller
+				)
 			end
 			verify_non_nil( value, pk_id ) if value
 		end
@@ -95,10 +98,12 @@ module Lafcadio
 		def verify_non_nil( value, pk_id )
 			value_type = self.class.value_type
 			unless value.class <= value_type
-				raise( FieldValueError, 
-				       "#{ object_type.name }##{ name } needs a " + value_type.name +
+				raise(
+					FieldValueError, 
+					"#{ domain_class.name }##{ name } needs a " + value_type.name +
 				           " value.",
-				       caller )
+					caller
+				)
 			end
 		end
 
@@ -173,8 +178,8 @@ module Lafcadio
 
 		attr_accessor :enum_type, :enums
 
-		def initialize( object_type, name )
-			super( object_type, name )
+		def initialize( domain_class, name )
+			super( domain_class, name )
 			@enum_type = ENUMS_ONE_ZERO
 			@enums = nil
 		end
@@ -227,8 +232,8 @@ module Lafcadio
 			Date
 		end
 
-		def initialize( object_type, name = "date" )
-			super( object_type, name )
+		def initialize( domain_class, name = "date" )
+			super( domain_class, name )
 		end
 
 		def value_for_sql(value) # :nodoc:
@@ -293,16 +298,18 @@ module Lafcadio
 			address =~ /^[^ @]+@[^ \.]+\.[^ ,]+$/
 		end
 
-		def initialize( object_type, name = "email" )
-			super( object_type, name )
+		def initialize( domain_class, name = "email" )
+			super( domain_class, name )
 		end
 
 		def verify_non_nil(value, pk_id) #:nodoc:
 			super(value, pk_id)
 			if !EmailField.valid_address(value)
-				raise( FieldValueError,
-				       "#{ object_type.name }##{ name } needs a valid email address.",
-				       caller )
+				raise(
+					FieldValueError,
+				  "#{ domain_class.name }##{ name } needs a valid email address.",
+				  caller
+				)
 			end
 		end
 	end
@@ -349,12 +356,12 @@ module Lafcadio
 		
 		attr_reader :enums
 
-		# [object_type]  The domain class that this field belongs to.
-		# [name]        The name of this domain class.
-		# [enums]       An array of Strings representing the possible choices for
-		#               this field.
-		def initialize( object_type, name, enums )
-			super( object_type, name )
+		# [domain_class]  The domain class that this field belongs to.
+		# [name]          The name of this domain class.
+		# [enums]         An array of Strings representing the possible choices for
+		#                 this field.
+		def initialize( domain_class, name, enums )
+			super( domain_class, name )
 			if enums.class == Array 
 				@enums = QueueHash.new_from_array enums
 			else
@@ -371,7 +378,7 @@ module Lafcadio
 			if @enums[value].nil?
 				key_str = '[ ' +
 				          ( @enums.keys.map { |key| "\"#{ key }\"" } ).join(', ') + ' ]'
-				err_str = "#{ @object_type.name }##{ name } needs a value that is " +
+				err_str = "#{ @domain_class.name }##{ name } needs a value that is " +
 				          "one of #{ key_str }"
 				raise( FieldValueError, err_str, caller )
 			end
@@ -397,7 +404,7 @@ module Lafcadio
 		def self.instantiation_parameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			linked_typeStr = fieldElt.attributes['linked_type']
-			linked_type = DomainObject.get_object_type_from_string( linked_typeStr )
+			linked_type = DomainObject.get_domain_class_from_string( linked_typeStr )
 			parameters['linked_type'] = linked_type
 			parameters['delete_cascade'] = fieldElt.attributes['delete_cascade'] == 'y'
 			parameters
@@ -406,19 +413,20 @@ module Lafcadio
 		attr_reader :linked_type
 		attr_accessor :delete_cascade
 
-		# [object_type]    The domain class that this field belongs to.
-		# [linked_type]    The domain class that this field points to.
-		# [name]          The name of this field.
-		# [delete_cascade] If this is true, deleting the domain object that is linked
-		#                 to will cause this domain object to be deleted as well.
-		def initialize( object_type, linked_type, name = nil,
+		# [domain_class]    The domain class that this field belongs to.
+		# [linked_type]     The domain class that this field points to.
+		# [name]            The name of this field.
+		# [delete_cascade]  If this is true, deleting the domain object that is
+		#                   linked to will cause this domain object to be deleted
+		#                   as well.
+		def initialize( domain_class, linked_type, name = nil,
 		                delete_cascade = false )
 			unless name
 				linked_type.name =~ /::/
 				name = $' || linked_type.name
 				name = name.decapitalize
 			end
-			super( object_type, name )
+			super( domain_class, name )
 			( @linked_type, @delete_cascade ) = linked_type, delete_cascade
 		end
 
@@ -439,7 +447,7 @@ module Lafcadio
 
 		def verify_non_nil(value, pk_id) #:nodoc:
 			super
-			if @linked_type != @object_type && pk_id
+			if @linked_type != @domain_class && pk_id
 				subsetLinkField = @linked_type.class_fields.find { |field|
 					field.class == SubsetLinkField && field.subset_field == @name
 				}
@@ -451,7 +459,7 @@ module Lafcadio
 
 		def verify_subset_link_field( subsetLinkField, pk_id )
 			begin
-				prevObj = ObjectStore.get_object_store.get(object_type, pk_id)
+				prevObj = ObjectStore.get_object_store.get( domain_class, pk_id )
 				prevObjLinkedTo = prevObj.send(name)
 				possiblyMyObj = prevObjLinkedTo.send(subsetLinkField.name)
 				if possiblyMyObj && possiblyMyObj.pk_id == pk_id
@@ -487,8 +495,8 @@ module Lafcadio
 	# any of the 50 states of the United States, stored as each state's two-letter
 	# postal code.
 	class StateField < EnumField
-		def initialize( object_type, name = "state" )
-			super( object_type, name, UsStates.states )
+		def initialize( domain_class, name = "state" )
+			super( domain_class, name, UsStates.states )
 		end
 	end
 
@@ -506,9 +514,9 @@ module Lafcadio
 		
 		attr_accessor :subset_field
 
-		def initialize( object_type, linked_type, subset_field,
+		def initialize( domain_class, linked_type, subset_field,
 		                name = linked_type.name.downcase )
-			super( object_type, linked_type, name )
+			super( domain_class, linked_type, name )
 			@subset_field = subset_field
 		end
 	end
@@ -541,8 +549,8 @@ module Lafcadio
 	end
 
 	class TimeStampField < DateTimeField #:nodoc:
-		def initialize( object_type, name = 'timeStamp' )
-			super( object_type, name )
+		def initialize( domain_class, name = 'timeStamp' )
+			super( domain_class, name )
 			@not_null = false
 		end
 

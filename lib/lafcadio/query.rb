@@ -105,18 +105,18 @@ module Lafcadio
 		ASC		= 1
 		DESC 	= 2
 
-		attr_reader :object_type, :condition
+		attr_reader :domain_class, :condition
 		attr_accessor :order_by, :order_by_order, :limit
 
-		def initialize(object_type, pk_idOrCondition = nil)
-			@object_type = object_type
+		def initialize(domain_class, pk_idOrCondition = nil)
+			@domain_class = domain_class
 			( @condition, @order_by, @limit ) = [ nil, nil, nil ]
 			if pk_idOrCondition
 				if pk_idOrCondition.class <= Condition
 					@condition = pk_idOrCondition
 				else
 					@condition = Query::Equals.new( 'pk_id', pk_idOrCondition,
-					                                object_type )
+					                                domain_class )
 				end
 			end
 			@order_by_order = ASC
@@ -125,7 +125,7 @@ module Lafcadio
 		def and( &action ); compound( CompoundCondition::AND, action ); end
 		
 		def compound( comp_type, action )
-			rquery = Query.infer( @object_type ) { |dobj| action.call( dobj ) }
+			rquery = Query.infer( @domain_class ) { |dobj| action.call( dobj ) }
 			comp_cond = Query::CompoundCondition.new( @condition, rquery.condition,
 			                                          comp_type )
 			comp_cond.query
@@ -151,12 +151,12 @@ module Lafcadio
 			end
 		end
 
-		def sql_primary_key_field(object_type)
-			"#{ object_type.table_name }.#{ object_type.sql_primary_key_name }"
+		def sql_primary_key_field(domain_class)
+			"#{ domain_class.table_name }.#{ domain_class.sql_primary_key_name }"
 		end
 
 		def tables
-			concrete_classes = object_type.self_and_concrete_superclasses.reverse
+			concrete_classes = domain_class.self_and_concrete_superclasses.reverse
 			table_names = concrete_classes.collect { |domain_class|
 				domain_class.table_name
 			}
@@ -172,7 +172,7 @@ module Lafcadio
 		end
 
 		def where_clause
-			concrete_classes = object_type.self_and_concrete_superclasses.reverse
+			concrete_classes = domain_class.self_and_concrete_superclasses.reverse
 			where_clauses = []
 			concrete_classes.each_with_index { |domain_class, i|
 				if i < concrete_classes.size - 1
@@ -191,18 +191,18 @@ module Lafcadio
 				Object
 			end
 
-			attr_reader :object_type
+			attr_reader :domain_class
 
-			def initialize(fieldName, searchTerm, object_type)
+			def initialize(fieldName, searchTerm, domain_class)
 				@fieldName = fieldName
 				@searchTerm = searchTerm
 				unless @searchTerm.class <= self.class.search_term_type
 					raise "Incorrect searchTerm type #{ searchTerm.class }"
 				end
-				@object_type = object_type
-				if @object_type
-					unless @object_type <= DomainObject
-						raise "Incorrect object type #{ @object_type.to_s }"
+				@domain_class = domain_class
+				if @domain_class
+					unless @domain_class <= DomainObject
+						raise "Incorrect object type #{ @domain_class.to_s }"
 					end
 				end
 			end
@@ -210,23 +210,22 @@ module Lafcadio
 			def db_field_name; get_field.db_table_and_field_name; end
 			
 			def get_field
-				anObjectType = @object_type
+				a_domain_class = @domain_class
 				field = nil
-				while (anObjectType < DomainObject || anObjectType < DomainObject) &&
-							!field
-					field = anObjectType.get_class_field( @fieldName )
-					anObjectType = anObjectType.superclass
+				while ( a_domain_class < DomainObject ) && !field
+					field = a_domain_class.get_class_field( @fieldName )
+					a_domain_class = a_domain_class.superclass
 				end
 				if field
 					field
 				else
 					errStr = "Couldn't find field \"#{ @fieldName }\" in " +
-									 "#{ @object_type } domain class"
+									 "#{ @domain_class } domain class"
 					raise( MissingError, errStr, caller )
 				end
 			end
 			
-			def query; Query.new( @object_type, self ); end
+			def query; Query.new( @domain_class, self ); end
 			
 			def not
 				Query::Not.new( self )
@@ -257,8 +256,8 @@ module Lafcadio
 				GREATER_THAN => Proc.new { |d1, d2| d1 > d2 }
 			}
 
-			def initialize(fieldName, searchTerm, object_type, compareType)
-				super fieldName, searchTerm, object_type
+			def initialize(fieldName, searchTerm, domain_class, compareType)
+				super fieldName, searchTerm, domain_class
 				@compareType = compareType
 			end
 
@@ -295,7 +294,7 @@ module Lafcadio
 					@compoundType = AND
 				end
 				@conditions = conditions
-				@object_type = conditions[0].object_type
+				@domain_class = conditions[0].domain_class
 			end
 
 			def object_meets(anObj)
@@ -411,8 +410,8 @@ module Lafcadio
 			POST_ONLY			= 3
 
 			def initialize(
-					fieldName, searchTerm, object_type, matchType = PRE_AND_POST)
-				super fieldName, searchTerm, object_type
+					fieldName, searchTerm, domain_class, matchType = PRE_AND_POST)
+				super fieldName, searchTerm, domain_class
 				@matchType = matchType
 			end
 			
@@ -452,13 +451,13 @@ module Lafcadio
 		end
 
 		class Link < Condition #:nodoc:
-			def initialize( fieldName, searchTerm, object_type )
+			def initialize( fieldName, searchTerm, domain_class )
 				if searchTerm.pk_id.nil?
 					raise ArgumentError,
 					      "Can't query using an uncommitted domain object as a search term",
 								caller
 				else
-					super( fieldName, searchTerm, object_type )
+					super( fieldName, searchTerm, domain_class )
 				end
 			end
 		
@@ -479,8 +478,8 @@ module Lafcadio
 		class Max < Query #:nodoc:
 			attr_reader :field_name
 		
-			def initialize( object_type, field_name = 'pk_id' )
-				super( object_type )
+			def initialize( domain_class, field_name = 'pk_id' )
+				super( domain_class )
 				@field_name = field_name
 			end
 		
@@ -493,7 +492,7 @@ module Lafcadio
 			end
 		
 			def fields
-				"max(#{ @object_type.get_field( @field_name ).db_field_name })"
+				"max(#{ @domain_class.get_field( @field_name ).db_field_name })"
 			end
 		end
 
@@ -506,7 +505,7 @@ module Lafcadio
 				!@unCondition.object_meets(obj)
 			end
 			
-			def object_type; @unCondition.object_type; end
+			def domain_class; @unCondition.domain_class; end
 
 			def to_sql
 				"!(#{ @unCondition.to_sql })"

@@ -122,14 +122,14 @@ module Lafcadio
 	module DomainComparable
 		include Comparable
 
-		# A DomainObject or DomainObjectProxy is compared by +object_type+ and by
+		# A DomainObject or DomainObjectProxy is compared by +domain_class+ and by
 		# +pk_id+. 
 		def <=>(anOther)
-			if anOther.respond_to?( 'object_type' )
-				if self.object_type == anOther.object_type
+			if anOther.respond_to?( 'domain_class' )
+				if self.domain_class == anOther.domain_class
 					self.pk_id <=> anOther.pk_id
 				else
-					self.object_type.name <=> anOther.object_type.name
+					self.domain_class.name <=> anOther.domain_class.name
 				end
 			else
 				nil
@@ -298,7 +298,8 @@ module Lafcadio
 				if aClass != DomainObjectProxy &&
 						(!DomainObject.abstract_subclasses.index(aClass))
 					aClass.class_fields.each { |field|
-						if field.class <= LinkField && field.linked_type == self.object_type
+						if ( field.is_a?( LinkField ) &&
+						     field.linked_type == self.domain_class )
 							dependent_classes[aClass] = field
 						end
 					}
@@ -363,17 +364,17 @@ module Lafcadio
 			end
 		end
 
-		def self.get_object_type_from_string(typeString) #:nodoc:
-			object_type = nil
+		def self.get_domain_class_from_string(typeString) #:nodoc:
+			domain_class = nil
 			require_domain_file( typeString )
 			subclasses.each { |subclass|
-				object_type = subclass if subclass.to_s == typeString
+				domain_class = subclass if subclass.to_s == typeString
 			}
-			if object_type
-				object_type
+			if domain_class
+				domain_class
 			else
-				raise CouldntMatchObjectTypeError,
-						"couldn't match object_type #{typeString}", caller
+				raise CouldntMatchDomainClassError,
+						"couldn't match domain_class #{typeString}", caller
 			end
 		end
 		
@@ -397,7 +398,7 @@ module Lafcadio
 			create_field( field_class, args[0], args[1] || {} )
 		end
 
-		def self.object_type #:nodoc:
+		def self.domain_class #:nodoc:
 			self
 		end
 
@@ -418,11 +419,11 @@ module Lafcadio
 
 		def self.self_and_concrete_superclasses # :nodoc:
 			classes = [ ]
-			anObjectType = self
-			until(anObjectType == DomainObject ||
-					abstract_subclasses.index(anObjectType) != nil)
-				classes << anObjectType
-				anObjectType = anObjectType.superclass
+			a_domain_class = self
+			until( a_domain_class == DomainObject ||
+					   abstract_subclasses.index( a_domain_class ) != nil )
+				classes << a_domain_class
+				a_domain_class = a_domain_class.superclass
 			end
 			classes
 		end
@@ -568,8 +569,8 @@ module Lafcadio
 		# Returns the subclass of DomainObject that this instance represents.
 		# Because of the way that proxying works, clients should call this method
 		# instead of Object.class.
-		def object_type
-			self.class.object_type
+		def domain_class
+			self.class.domain_class
 		end
 
 		# This template method is called before every commit. Subclasses can 

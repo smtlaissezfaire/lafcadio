@@ -9,7 +9,7 @@ class TestNot < LafcadioTestCase
 				Query::Equals.new('email', 'test@test.com', User))
 	end
 	
-	def test_object_type; assert_equal( User, @not.object_type ); end
+	def test_domain_class; assert_equal( User, @not.domain_class ); end
 
 	def testToSql
 		assert_equal "!(users.email = 'test@test.com')", @not.to_sql

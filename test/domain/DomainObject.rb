@@ -140,7 +140,7 @@ class TestDomainObject < LafcadioTestCase
 		invoice = Invoice.new hash
 		proxyPrime = invoice.client
 		assert_equal DomainObjectProxy, proxyPrime.class
-		assert_equal Client, proxyPrime.object_type
+		assert_equal Client, proxyPrime.domain_class
 		assert_equal 99, proxyPrime.pk_id
 		begin
 			proxyPrime.name
@@ -257,25 +257,29 @@ class TestDomainObject < LafcadioTestCase
     end
 	end
 	
-	def testGetObjectTypeFromString
-		assert_equal Class,((DomainObject.get_object_type_from_string('Invoice')).class)
+	def test_get_domain_class_from_string
+		assert_equal(
+			Class, DomainObject.get_domain_class_from_string( 'Invoice' ).class
+		)
 		assert_equal Class,(
-				(DomainObject.get_object_type_from_string('Domain::LineItem')).class)
+				(DomainObject.get_domain_class_from_string('Domain::LineItem')).class)
 		begin
-			assert_equal nil,(DomainObject.get_object_type_from_string('notAnObjectType'))
+			assert_equal(
+				nil, ( DomainObject.get_domain_class_from_string( 'notADomainClass' ) )
+			)
 			fail "Should throw an error when matching fails"
-		rescue CouldntMatchObjectTypeError
+		rescue CouldntMatchDomainClassError
 			# ok
 		end
-		attributeClass = DomainObject.get_object_type_from_string( 'Attribute' )
+		attributeClass = DomainObject.get_domain_class_from_string( 'Attribute' )
 		assert_equal( Class, attributeClass.class )
 		assert_equal( 'Attribute', attributeClass.to_s )
 	end
 	
-	def testGetObjectTypeFromStringWithoutDomainFile
+	def test_get_domain_class_from_string_without_domain_file
 		LafcadioConfig.set_filename '../test/testData/config_no_domain_file.dat'
 		assert_equal( 'Invoice',
-		              DomainObject.get_object_type_from_string( 'Invoice' ).name )
+		              DomainObject.get_domain_class_from_string( 'Invoice' ).name )
 	end
 	
 	def testHandlesClassWithoutXml

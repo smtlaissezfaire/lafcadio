@@ -12,7 +12,7 @@ class TestCompoundCondition < LafcadioTestCase
 		condition = Query::CompoundCondition.new(pastExpDate, notExpiredYet)
 		assert_equal( "(invoices.date >= '2003-01-01' and invoices.hours = 10)",
 		              condition.to_sql )
-		assert_equal Invoice, condition.object_type
+		assert_equal Invoice, condition.domain_class
 	end
 
 	def testMoreThanTwoConditions
