@@ -1,4 +1,4 @@
-require 'lafcadio/objectStore/ObjectStore'
+require 'lafcadio/objectStore'
 
 module Lafcadio
 	class Committer #:nodoc:
