@@ -30,8 +30,5 @@
 	<field name="month1" class="MonthField"/>
 	<field name="text1" class="TextField" size="16" unique="y"/>
 	<field name="text2" class="TextField" large="y"/>
-
-	<field name="description" class="TextField" notNull="n"/>
-	<field name="salePrice" class="MoneyField" notNull="n"/>
-	<field name="size" class="TextField" notNull="n"/>
+	<field name="textList1" class="TextListField" />
 </lafcadio_class_definition>
