@@ -1,6 +1,7 @@
 require 'lafcadio/test/LafcadioTestCase'
 require 'date'
 require 'lafcadio/query/Compare'
+require 'test/mock/domain/InternalClient'
 require 'test/mock/domain/Invoice'
 require 'test/mock/domain/User'
 
@@ -73,5 +74,11 @@ class TestCompare < LafcadioTestCase
 		condition = Query::Compare.new('client', 10, Invoice,
 				Query::Compare::LESS_THAN)
 		assert_equal 'client < 10', condition.toSql
+	end
+	
+	def testFieldBelongingToSuperclass
+		condition = Query::Compare.new ('standard_rate', 10, InternalClient,
+				Query::Compare::LESS_THAN)
+		assert_equal 'standard_rate < 10', condition.toSql
 	end
 end

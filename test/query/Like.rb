@@ -1,5 +1,6 @@
 require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/query/Like'
+require 'test/mock/domain/InternalClient'
 require 'test/mock/domain/Invoice'
 
 class TestLike < LafcadioTestCase
@@ -26,5 +27,10 @@ class TestLike < LafcadioTestCase
 		client234 = Client.new ({ 'objId' => 234 })
 		invoiceWith234 = Invoice.new ({ 'client' => client234 })
 		assert !like4.objectMeets(invoiceWith234)
+	end
+	
+	def testFieldBelongingToSuperclass
+		condition = Query::Like.new ('name', 'client name', InternalClient)
+		assert_equal "name like '%client name%'", condition.toSql
 	end
 end

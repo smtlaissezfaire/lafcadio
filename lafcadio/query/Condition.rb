@@ -21,5 +21,16 @@ class Query
 				end
 			end
 		end
+		
+		def getField
+			anObjectType = @objectType
+			field = nil
+			while (anObjectType < DomainObject || anObjectType < DomainObject) &&
+						field == nil
+				field = anObjectType.getField @fieldName
+				anObjectType = anObjectType.superclass
+			end
+			field
+		end
 	end
 end

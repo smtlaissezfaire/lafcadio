@@ -22,12 +22,12 @@ class Query
 		def toSql
 			useFieldForSqlValue = false
 			if @fieldName != @objectType.sqlPrimaryKeyName
-				field = @objectType.getField @fieldName
+				field = getField
 				useFieldForSqlValue = true unless field.type <= LinkField
 			end
 			if useFieldForSqlValue
 				"#{ @fieldName } #{ @@comparators[@compareType] } " +
-						field.valueForSQL(@searchTerm)
+						field.valueForSQL(@searchTerm).to_s
 			else
 				"#{ @fieldName } #{ @@comparators[@compareType] } #{ @searchTerm }"
 			end

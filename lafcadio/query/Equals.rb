@@ -9,13 +9,7 @@ class Query
 				if @fieldName == @objectType.sqlPrimaryKeyName
 					sql += @searchTerm.to_s
 				else
-					anObjectType = @objectType
-					field = nil
-					while (anObjectType < DomainObject || anObjectType < DomainObject) &&
-								field == nil
-						field = anObjectType.getField @fieldName
-						anObjectType = anObjectType.superclass
-					end
+					field = getField
 					sql += field.valueForSQL(@searchTerm).to_s
 				end
 			else
