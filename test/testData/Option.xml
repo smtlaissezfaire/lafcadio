@@ -2,5 +2,4 @@
 	<field name="attribute" class="LinkField" linkedType="Attribute"
 	       newDuringEdit="n" />
 	<field name="name" class="TextField" />
-	<field name="sortOrder" class="SortOrderField" sortWithin="Attribute" />
 </lafcadio_class_definition>
