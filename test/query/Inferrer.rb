@@ -2,6 +2,7 @@ require 'lafcadio/query'
 require 'lafcadio/test'
 require 'test/mock/domain/Invoice'
 require 'test/mock/domain/InternalClient'
+require 'test/mock/domain/Client'
 
 class TestQueryInferrer < LafcadioTestCase
 	def assert_infer_match( desiredSql, domainClass, &action )
@@ -78,5 +79,11 @@ class TestQueryInferrer < LafcadioTestCase
 		assert_infer_match( desiredSql2, User ) { |user| user.email =~ /^hotmail/ }
 		desiredSql3 = "select * from users where email like '%hotmail'"
 		assert_infer_match( desiredSql3, User ) { |user| user.email =~ /hotmail$/ }
+	end
+	
+	def testLink
+		aClient = Client.storedTestClient
+		desiredSql = "select * from invoices where client = 1"
+		assert_infer_match( desiredSql, Invoice ) { |inv| inv.client == aClient }
 	end
 end
