@@ -68,4 +68,12 @@ class Month
 	def next
 		self + 1
 	end
+	
+	def startDate
+		Date.new( @year, @month, 1 )
+	end
+	
+	def endDate
+		self.next.startDate - 1
+	end
 end
