@@ -461,12 +461,10 @@ module Lafcadio
 		end
 
 		def valueFromSQL(string) #:nodoc:
-			require 'lafcadio/objectStore/DomainObjectProxy'
 			string != nil ? DomainObjectProxy.new(@linkedType, string.to_i) : nil
 		end
 
 		def valueForSQL(value) #:nodoc:
-			require 'lafcadio/objectStore/DomainObjectInitError'
 			if !value
 				"null"
 			elsif value.pkId

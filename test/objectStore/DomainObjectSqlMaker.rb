@@ -2,7 +2,7 @@ require '../test/mock/domain/InternalClient'
 require 'lafcadio/test/LafcadioTestCase'
 require '../test/mock/domain/Client'
 require '../test/mock/domain/Invoice'
-require 'lafcadio/objectStore/DomainObjectInitError'
+require 'lafcadio/objectStore'
 require '../test/mock/domain/User'
 require 'lafcadio/objectStore/DomainObjectSqlMaker'
 

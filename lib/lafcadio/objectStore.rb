@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'dbi'
 require_gem 'log4r'
+require 'lafcadio/domain'
 require 'lafcadio/query'
 require 'lafcadio/util'
 require 'lafcadio/includer'
@@ -196,6 +197,76 @@ module Lafcadio
 		
 		def method_missing( symbol, *args )
 			@dbh.send( symbol, *args )
+		end
+	end
+
+	class DomainObjectInitError < RuntimeError #:nodoc:
+		attr_reader :messages
+
+		def initialize(messages)
+			@messages = messages
+		end
+	end
+
+	class DomainObjectNotFoundError < RuntimeError #:nodoc:
+	end
+
+	# The DomainObjectProxy is used when retrieving domain objects that are 
+	# linked to other domain objects with LinkFields. In terms of +objectType+ and 
+	# +pkId+, a DomainObjectProxy instance looks to the outside world like the 
+	# domain object it's supposed to represent. It only retrieves its domain 
+	# object from the database when member data is requested.
+	#
+	# In normal usage you will probably never manipulate a DomainObjectProxy
+	# directly, but you may discover it by accident by calling
+	# DomainObjectProxy#class (or DomainObject#class) instead of
+	# DomainObjectProxy#objectType (or DomainObjectProxy#objectType).
+	class DomainObjectProxy
+		include DomainComparable
+
+		attr_accessor :objectType, :pkId
+
+		def initialize(objectTypeOrDbObject, pkId = nil)
+			if pkId
+				@objectType = objectTypeOrDbObject
+				@pkId = pkId
+			elsif objectTypeOrDbObject.class < DomainObject
+				@dbObject = objectTypeOrDbObject
+				@d_obj_retrieve_time = Time.now
+				@objectType = @dbObject.class
+				@pkId = @dbObject.pkId
+			else
+				raise ArgumentError
+			end
+			@dbObject = nil
+		end
+
+		def getDbObject
+			object_store = ObjectStore.getObjectStore
+			if @dbObject.nil? || needs_refresh?
+				@dbObject = object_store.get(@objectType, @pkId)
+								@d_obj_retrieve_time = Time.now
+
+			end
+			@dbObject
+		end
+
+		def hash
+			getDbObject.hash
+		end
+
+		def method_missing(methodId, *args)
+			getDbObject.send(methodId.id2name, *args)
+		end
+
+		def needs_refresh?
+			object_store = ObjectStore.getObjectStore
+			last_commit_time = object_store.last_commit_time( @objectType, @pkId )
+			!last_commit_time.nil? && last_commit_time > @d_obj_retrieve_time
+		end
+		
+		def to_s
+			getDbObject.to_s
 		end
 	end
 

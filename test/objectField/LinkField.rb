@@ -1,4 +1,4 @@
-require 'lafcadio/objectStore/DomainObjectProxy'
+require 'lafcadio/objectStore'
 require 'lafcadio/test/LafcadioTestCase'
 require '../test/mock/domain/Client'
 require '../test/mock/domain/InternalClient'

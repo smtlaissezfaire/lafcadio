@@ -1,4 +1,4 @@
-require 'lafcadio/objectStore/DomainObjectInitError'
+require 'lafcadio/objectStore'
 require 'lafcadio/util'
 
 module Lafcadio
