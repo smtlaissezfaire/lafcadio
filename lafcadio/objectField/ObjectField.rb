@@ -38,7 +38,7 @@ class ObjectField
   end
 
   def verify(value, objId)
-    if !value && notNull
+		if value.nil? && notNull
       raise FieldValueError, nullErrorMsg, caller
     end
     if value

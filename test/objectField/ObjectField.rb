@@ -112,4 +112,9 @@ class TestObjectField < LafcadioTestCase
 		ratio = oldTime / newTime
 		assert ratio > 1.25, ratio.to_s
 	end
+	
+	def testVerifyFalseValue
+		field = ObjectField.new(Client, 'name')
+		field.verify( false, nil )
+	end
 end
