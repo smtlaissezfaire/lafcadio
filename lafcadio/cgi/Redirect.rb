@@ -1,4 +1,4 @@
-require 'lafcadio/util/Config'
+require 'lafcadio/util/LafcadioConfig'
 
 class Redirect
 	def initialize(localPath, solApDir = true)
@@ -7,7 +7,7 @@ class Redirect
 	end
 
 	def to_s
-		config = Config.new
+		config = LafcadioConfig.new
 		str = "Location: #{config['url']}/#{@localPath}\n"
 		str += "\n" if @soleApacheDirective
 		str

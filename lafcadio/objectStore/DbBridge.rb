@@ -25,10 +25,10 @@ class DbBridge
   end
 
   def initialize(db = nil, mysqlClass = Mysql)
-		require 'lafcadio/util/Config'
+		require 'lafcadio/util/LafcadioConfig'
     if db == nil
       if @@db == nil
-        config = Config.new
+        config = LafcadioConfig.new
 					@@db = mysqlClass.new config['dbhost'], config['dbuser'],
 						config['dbpassword']
 				dbName = @@dbName || config["dbname"]

@@ -1,7 +1,7 @@
 require 'runit/testcase'
 require 'lafcadio/mock/MockObjectStore'
 require 'lafcadio/mock/MockEmailer'
-require 'lafcadio/util/Config'
+require 'lafcadio/util/LafcadioConfig'
 
 class LafcadioTestCase < RUNIT::TestCase
   def setup
@@ -11,6 +11,6 @@ class LafcadioTestCase < RUNIT::TestCase
 		context.setObjectStore @mockObjectStore
 		@mockEmailer = MockEmailer.new
 		context.setEmailer @mockEmailer
-		Config.setFilename 'lafcadio/testconfig.dat'
+		LafcadioConfig.setFilename 'lafcadio/testConfig.dat'
   end
 end

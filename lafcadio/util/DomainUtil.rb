@@ -2,11 +2,11 @@ class DomainUtil
   def DomainUtil.getObjectTypeFromString(typeString)
 		require 'lafcadio/domain/DomainObject'
 		require 'lafcadio/objectStore/CouldntMatchObjectTypeError'
-		require 'lafcadio/util/Config'
+		require 'lafcadio/util/LafcadioConfig'
     objectType = nil
 		typeString =~ /([^\:]*)$/
 		fileName = $1
-		config = Config.new
+		config = LafcadioConfig.new
 		classPath = config['classpath']
 		domainDirStr = config['domainDirs']
 		if domainDirStr
