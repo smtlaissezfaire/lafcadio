@@ -11,13 +11,13 @@ module Lafcadio
 		UPDATE 	= 2
 		DELETE  = 3
 
-		attr_reader :commitType, :dbObject
+		attr_reader :commit_type, :dbObject
 
 		def initialize(dbObject, dbBridge)
 			@dbObject = dbObject
 			@dbBridge = dbBridge
 			@objectStore = Context.instance.get_object_store
-			@commitType = nil
+			@commit_type = nil
 		end
 		
 		def execute
@@ -45,11 +45,11 @@ module Lafcadio
 		
 		def set_commit_type
 			if @dbObject.delete
-				@commitType = DELETE
+				@commit_type = DELETE
 			elsif @dbObject.pk_id
-				@commitType = UPDATE
+				@commit_type = UPDATE
 			else
-				@commitType = INSERT
+				@commit_type = INSERT
 			end
 		end
 
@@ -601,10 +601,10 @@ module Lafcadio
 			end
 			
 			def update_after_commit( committer ) #:nodoc:
-				if committer.commitType == Committer::UPDATE ||
-					committer.commitType == Committer::INSERT
+				if committer.commit_type == Committer::UPDATE ||
+					committer.commit_type == Committer::INSERT
 					save( committer.dbObject )
-				elsif committer.commitType == Committer::DELETE
+				elsif committer.commit_type == Committer::DELETE
 					flush( committer.dbObject )
 				end
 				set_commit_time( committer.dbObject )

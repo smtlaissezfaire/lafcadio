@@ -108,7 +108,7 @@ class TestDomainObject < LafcadioTestCase
 		matchField( XmlSku2, 'money1', MoneyField )
 		matchField( XmlSku2, 'month1', MonthField )
 		matchField( XmlSku2, 'subsetLink1', SubsetLinkField,
-		            { 'subsetField' => 'xmlSku' } )
+		            { 'subset_field' => 'xmlSku' } )
 		matchField( XmlSku2, 'text1', TextField,
 		            { 'unique' => true } )
 		matchField( XmlSku2, 'text2', TextField )

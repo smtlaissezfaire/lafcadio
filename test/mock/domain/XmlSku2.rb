@@ -21,7 +21,7 @@ class XmlSku2 < Lafcadio::DomainObject
 	link       'link1', { 'linked_type' => User, 'delete_cascade' => true }
 	money      'money1'
 	month      'month1'
-	subsetLink 'subsetLink1', { 'subsetField' => 'xmlSku' }
+	subsetLink 'subsetLink1', { 'subset_field' => 'xmlSku' }
 	text       'text1', { 'size' => 16, 'unique' => true }
 	text       'text2', { 'large' => true }
 	textList   'textList1', { 'db_field_name' => 'text_list1' }

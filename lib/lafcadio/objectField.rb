@@ -495,7 +495,7 @@ module Lafcadio
 			super
 			if @linked_type != @object_type && pk_id
 				subsetLinkField = @linked_type.class_fields.find { |field|
-					field.class == SubsetLinkField && field.subsetField == @name
+					field.class == SubsetLinkField && field.subset_field == @name
 				}
 				if subsetLinkField
 					verify_subset_link_field( subsetLinkField, pk_id )
@@ -558,22 +558,22 @@ module Lafcadio
 	class SubsetLinkField < LinkField #:nodoc:
 		def self.instantiate_with_parameters( domainClass, parameters )
 			self.new( domainClass, parameters['linked_type'],
-			          parameters['subsetField'], parameters['name'],
+			          parameters['subset_field'], parameters['name'],
 								parameters['english_name'] )
 		end
 
 		def self.instantiation_parameters( fieldElt )
 			parameters = super( fieldElt )
-			parameters['subsetField'] = fieldElt.attributes['subsetField']
+			parameters['subset_field'] = fieldElt.attributes['subset_field']
 			parameters
 		end
 		
-		attr_accessor :subsetField
+		attr_accessor :subset_field
 
-		def initialize(object_type, linked_type, subsetField,
+		def initialize(object_type, linked_type, subset_field,
 				name = linked_type.name.downcase, english_name = nil)
 			super(object_type, linked_type, name, english_name)
-			@subsetField = subsetField
+			@subset_field = subset_field
 		end
 	end
 

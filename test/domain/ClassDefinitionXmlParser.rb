@@ -44,7 +44,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		matchField( XmlSku, 'money1', MoneyField )
 		matchField( XmlSku, 'month1', MonthField )
 		matchField( XmlSku, 'subsetLink1', SubsetLinkField,
-		            { 'subsetField' => 'xmlSku' } )
+		            { 'subset_field' => 'xmlSku' } )
 		matchField( XmlSku, 'text1', TextField, { 'unique' => true } )
 		matchField( XmlSku, 'text2', TextField )
 		matchField( XmlSku, 'textList1', TextListField,

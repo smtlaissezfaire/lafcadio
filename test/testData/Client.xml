@@ -5,6 +5,6 @@
 	<field name="referringClient" class="LinkField" linked_type="Client"
 	       not_null="n"/>
 	<field name="priorityInvoice" class="SubsetLinkField" linked_type="Invoice"
-	       subsetField="client" not_null="n" />
+	       subset_field="client" not_null="n" />
 	<field name="notes" class="BlobField" not_null="n"/>
 </lafcadio_class_definition>

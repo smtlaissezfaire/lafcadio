@@ -58,14 +58,14 @@ class TestDbObjectCommitter < LafcadioTestCase
 		client = Client.new({ 'name' => 'client name' })
     committer = Committer.new(client, @mockDBBridge)
     committer.execute
-		assert_equal Committer::INSERT, committer.commitType
+		assert_equal Committer::INSERT, committer.commit_type
 		client2 = Client.new({ 'pk_id' => 25, 'name' => 'client 25' })
 		committer2 = Committer.new(client2, @mockDBBridge)
 		committer2.execute
-		assert_equal Committer::UPDATE, committer2.commitType
+		assert_equal Committer::UPDATE, committer2.commit_type
 		client2.delete = true
 		committer3 = Committer.new(client2, @mockDBBridge)
 		committer3.execute
-		assert_equal Committer::DELETE, committer3.commitType
+		assert_equal Committer::DELETE, committer3.commit_type
 	end
 end

@@ -33,7 +33,7 @@
 	<field name="money1" class="MoneyField" not_null="n" />
 	<field name="month1" class="MonthField" not_null="n" />
 	<field name="subsetLink1" class="SubsetLinkField" linked_type="Invoice"
-	       subsetField="xmlSku" not_null="n" />
+	       subset_field="xmlSku" not_null="n" />
 	<field name="text1" class="TextField" size="16" unique="y"
 	                    db_field_name="text_one" not_null="n" />
 	<field name="text2" class="TextField" large="y" not_null="n" />
