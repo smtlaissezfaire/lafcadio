@@ -3,7 +3,7 @@
 #                                                                              #
 #  Name: install.rb                                                            #
 #  Author: Sean E Russell <ser@germane-software.com>                           #
-#  Version: $Id: install.rb,v 1.4 2004/03/22 04:44:53 francis Exp $
+#  Version: $Id: install.rb,v 1.5 2004/03/30 05:13:00 francis Exp $
 #  Date: *2002-174                                                             #
 #  Description:                                                                #
 #    This is a generic installation script for pure ruby sources.  Features    #
@@ -18,7 +18,8 @@
 ################################################################################
 
 # CHANGE THIS
-SRC = 'lafcadio'
+SRC = 'lib'
+MODULE_NAME = 'lafcadio'
 BIN = 'bin'
 # CHANGE NOTHING BELOW THIS LINE
 
@@ -72,12 +73,19 @@ if $0 == __FILE__
 	
 	destdir = File.join append, destdir if append
 	
+	def get_install_base( file )
+		file_parts = file.split( File::SEPARATOR )
+		file_parts.shift
+		file_parts.join( File::SEPARATOR )
+	end
+	
 	def install destdir, bindir
 		puts "Installing in #{destdir}"
 		begin
 			Find.find(SRC) { |file|
 				next if file =~ /CVS|\.svn/
-				dst = File.join( destdir, file )
+				install_base = get_install_base( file )
+				dst = File.join( destdir, install_base )
 				if defined? NOOP
 					puts ">> #{dst}" if file =~ /\.rb$/
 				else
@@ -110,13 +118,15 @@ if $0 == __FILE__
 		begin
 			puts "Deleting:"
 			dirs = []
-			Find.find(File.join(destdir,SRC)) do |file| 
-				if defined? NOOP
-					puts "-- #{file}" if File.file? file
-				else
-					File.rm_f file,true if File.file? file
+			Find.find( destdir ) do |file|
+				if file =~ /^#{ destdir }#{ File::SEPARATOR }#{ MODULE_NAME }/
+					if defined? NOOP
+						puts "-- #{file}" if File.file? file
+					else
+						File.rm_f file,true if File.file? file
+					end
+					dirs << file if File.directory? file
 				end
-				dirs << file if File.directory? file
 			end
 			dirs.sort { |x,y|
 				y.length <=> x.length 	

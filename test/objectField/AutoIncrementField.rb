@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'test/mock/domain/Invoice'
+require '../test/mock/domain/Invoice'
 require 'lafcadio/objectField/AutoIncrementField'
 
 class TestAutoIncrementField < LafcadioTestCase

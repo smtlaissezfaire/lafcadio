@@ -1,6 +1,6 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'test/mock/domain/Client'
-require 'test/mock/domain/SKU'
+require '../test/mock/domain/Client'
+require '../test/mock/domain/SKU'
 
 class TestMockDBBridge < LafcadioTestCase
   def setup

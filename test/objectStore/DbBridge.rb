@@ -1,7 +1,7 @@
-require 'test/mock/domain/InternalClient'
+require '../test/mock/domain/InternalClient'
 require "runit/testcase"
-require 'test/mock/domain/Client'
-require 'test/mock/domain/LineItem'
+require '../test/mock/domain/Client'
+require '../test/mock/domain/LineItem'
 require 'lafcadio/query/Query'
 
 class TestDBBridge < RUNIT::TestCase
@@ -49,7 +49,7 @@ class TestDBBridge < RUNIT::TestCase
   end
 
   def setup
-		LafcadioConfig.setFilename 'lafcadio/testconfig.dat'
+		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
     @mockDbh = MockDbh.new
     @dbb = DbBridge.new(@mockDbh)
     @client = Client.new( {"objId" => 1, "name" => "clientName1"} )
@@ -140,19 +140,19 @@ class TestDBBridge < RUNIT::TestCase
 	end
 	
 	def testLogsSql
-		logFilePath = 'test/testOutput/sql'
+		logFilePath = '../test/testOutput/sql'
 		@dbb.executeSelect( 'select * from users' )
 		if FileTest.exist?( logFilePath )
 			fail if Time.now - File.ctime( logFilePath ) < 5
 		end
-		LafcadioConfig.setFilename( 'test/testData/config_with_sql_logging.dat' )
+		LafcadioConfig.setFilename( '../test/testData/config_with_sql_logging.dat' )
 		@dbb.executeSelect( 'select * from clients' )
 		fail if Time.now - File.ctime( logFilePath ) > 5
 	end
 	
 	def testLogsSqlToDifferentFileName
-		LafcadioConfig.setFilename( 'test/testData/config_with_log_path.dat' )
-		logFilePath = 'test/testOutput/another.sql'
+		LafcadioConfig.setFilename( '../test/testData/config_with_log_path.dat' )
+		logFilePath = '../test/testOutput/another.sql'
 		@dbb.executeSelect( 'select * from users' )
 		fail if Time.now - File.ctime( logFilePath ) > 5
 	end

@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'test/mock/domain/Invoice'
+require '../test/mock/domain/Invoice'
 
 class TestDecimalField < LafcadioTestCase
   def setup

@@ -4,7 +4,7 @@ class InventoryLineItem < Lafcadio::DomainObject
 end
 
 require 'runit/testcase'
-require 'test/mock/domain/SKU'
+require '../test/mock/domain/SKU'
 
 class TestInventoryLineItem < RUNIT::TestCase
 	def TestInventoryLineItem.getTestInventoryLineItem

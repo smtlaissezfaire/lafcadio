@@ -1,6 +1,6 @@
 require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/mock/MockDbBridge'
-require 'test/mock/domain/Client'
+require '../test/mock/domain/Client'
 
 class TestRetriever < LafcadioTestCase
 	def setup

@@ -1,13 +1,13 @@
 require 'lafcadio/domain/ObjectType'
 require 'lafcadio/test/LafcadioTestCase'
-require 'test/mock/domain/User'
-require 'test/mock/domain/LineItem'
-require 'test/mock/domain'
+require '../test/mock/domain/User'
+require '../test/mock/domain/LineItem'
+require '../test/mock/domain'
 
 class TestObjectType < LafcadioTestCase
 	def teardown
-		if FileTest.exist?( 'test/testData/Attribute.xml.tmp' )
-			`mv test/testData/Attribute.xml.tmp test/testData/Attribute.xml`
+		if FileTest.exist?( '../test/testData/Attribute.xml.tmp' )
+			`mv ../test/testData/Attribute.xml.tmp ../test/testData/Attribute.xml`
 		end
 		ObjectType.flush
 	end
@@ -25,7 +25,7 @@ class TestObjectType < LafcadioTestCase
 	end
 	
 	def test_informative_error_if_missing_class_data
-		`mv test/testData/Attribute.xml test/testData/Attribute.xml.tmp`
+		`mv ../test/testData/Attribute.xml ../test/testData/Attribute.xml.tmp`
 		begin
 			ObjectType.flush
 			Attribute.getClassFields

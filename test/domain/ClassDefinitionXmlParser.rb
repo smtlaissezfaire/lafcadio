@@ -1,7 +1,7 @@
 require 'lafcadio/test'
 require 'lafcadio/domain'
-require 'test/mock/domain'
-require 'test/mock/domain/XmlSku'
+require '../test/mock/domain'
+require '../test/mock/domain/XmlSku'
 
 class TestClassDefinitionXmlParser < LafcadioTestCase
 	def getClassFields( domainClass, xml )
@@ -21,7 +21,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 
 	def testClassFieldsFromXml
 		require 'lafcadio/objectField'
-		require 'test/mock/domain/User'
+		require '../test/mock/domain/User'
 		matchField( XmlSku, 'boolean1', BooleanField,
 		            { 'enumType' => BooleanField::ENUMS_CAPITAL_YES_NO } )
 		matchField( XmlSku, 'boolean2', BooleanField,

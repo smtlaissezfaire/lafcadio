@@ -1,9 +1,9 @@
 require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/domain/MapObject'
-require 'test/mock/domain/InternalClient'
-require 'test/mock/domain/Invoice'
-require 'test/mock/domain/Client'
-require 'test/mock/domain/User'
+require '../test/mock/domain/InternalClient'
+require '../test/mock/domain/Invoice'
+require '../test/mock/domain/Client'
+require '../test/mock/domain/User'
 
 class TestDomainObject < LafcadioTestCase
 	def newTestClientWithoutObjId
@@ -185,7 +185,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 	
 	def testGetObjectTypeFromStringWithoutDomainFile
-		LafcadioConfig.setFilename 'test/testData/config_no_domain_file.dat'
+		LafcadioConfig.setFilename '../test/testData/config_no_domain_file.dat'
 		assert_equal( 'Invoice',
 		              DomainObject.getObjectTypeFromString( 'Invoice' ).name )
 	end

@@ -1,7 +1,7 @@
-require 'test/mock/domain/Client'
-require 'test/mock/domain/InventoryLineItem'
-require 'test/mock/domain/InventoryLineItemOption'
-require 'test/mock/domain/Option'
+require '../test/mock/domain/Client'
+require '../test/mock/domain/InventoryLineItem'
+require '../test/mock/domain/InventoryLineItemOption'
+require '../test/mock/domain/Option'
 require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/mock/MockDbBridge'
 

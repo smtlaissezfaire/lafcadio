@@ -6,6 +6,6 @@ adminEmail:john.doe@email.com
 siteName:Site Name
 url:http://test.url
 classpath:lafcadio/
-logdir:test/testOutput/
+logdir:../test/testOutput/
 domainDirs:lafcadio/domain/,test/mock/domain/
 logSql:y

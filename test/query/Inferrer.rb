@@ -1,8 +1,8 @@
 require 'lafcadio/query'
 require 'lafcadio/test'
-require 'test/mock/domain/Invoice'
-require 'test/mock/domain/InternalClient'
-require 'test/mock/domain/Client'
+require '../test/mock/domain/Invoice'
+require '../test/mock/domain/InternalClient'
+require '../test/mock/domain/Client'
 
 class TestQueryInferrer < LafcadioTestCase
 	def assert_infer_match( desiredSql, domainClass, &action )

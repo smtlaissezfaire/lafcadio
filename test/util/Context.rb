@@ -23,7 +23,7 @@ class TestContext < RUNIT::TestCase
 	end
 	
 	def testCreatesStandardInstances
-		LafcadioConfig.setFilename 'lafcadio/testconfig.dat'
+		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
 		objectStore = Context.instance.getObjectStore
 		assert_equal ObjectStore, objectStore.class
 	end

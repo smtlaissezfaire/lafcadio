@@ -6,8 +6,8 @@ adminEmail:john.doe@email.com
 siteName:Site Name
 url:http://test.url
 classpath:lafcadio/
-logdir:test/testOutput/
-domainDirs:lafcadio/domain/,test/mock/domain/
-domainFiles:test/mock/domain.rb
+logdir:../test/testOutput/
+domainDirs:lafcadio/domain/,../test/mock/domain/
+domainFiles:../test/mock/domain.rb
 logSql:n
-classDefinitionDir:test/testData
+classDefinitionDir:../test/testData

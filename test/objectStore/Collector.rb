@@ -1,11 +1,11 @@
-require 'test/mock/domain/Option'
-require 'test/mock/domain/InventoryLineItem'
-require 'test/mock/domain/InventoryLineItemOption'
-require 'test/mock/domain/Invoice'
+require '../test/mock/domain/Option'
+require '../test/mock/domain/InventoryLineItem'
+require '../test/mock/domain/InventoryLineItemOption'
+require '../test/mock/domain/Invoice'
 require 'date'
 require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/objectStore/Collector'
-require 'test/mock/domain/Client'
+require '../test/mock/domain/Client'
 
 class TestObjectCollector < LafcadioTestCase
 	def setup

@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'test/mock/domain/Client'
+require '../test/mock/domain/Client'
 
 class TestDomainComparable < LafcadioTestCase
 	def testComparableToNil

@@ -1,11 +1,12 @@
 require 'date'
 require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/mock/MockDbBridge'
-require 'test/mock/domain/Client'
+require '../test/mock/domain/Client'
 require 'lafcadio/objectStore/Committer'
 
 class TestDbObjectCommitter < LafcadioTestCase
 	def setup
+		super
 		context = Context.instance
 		context.flush
 		@mockDBBridge = MockDbBridge.new

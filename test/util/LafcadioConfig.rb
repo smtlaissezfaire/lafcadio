@@ -5,7 +5,7 @@ class TestConfig < RUNIT::TestCase
 	include Lafcadio
 
 	def setup
-		LafcadioConfig.setFilename 'lafcadio/testconfig.dat'
+		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
 		@config = LafcadioConfig.new
 	end
 

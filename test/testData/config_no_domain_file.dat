@@ -7,6 +7,6 @@ siteName:Site Name
 url:http://test.url
 classpath:lafcadio/
 logdir:test/testOutput/
-domainDirs:lafcadio/domain/,test/mock/domain/
+domainDirs:lafcadio/domain/,../test/mock/domain/
 logSql:n
 classDefinitionDir:test/testData

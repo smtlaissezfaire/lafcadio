@@ -1,7 +1,7 @@
 require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/query/Like'
-require 'test/mock/domain/InternalClient'
-require 'test/mock/domain/Invoice'
+require '../test/mock/domain/InternalClient'
+require '../test/mock/domain/Invoice'
 
 class TestLike < LafcadioTestCase
 	def setup

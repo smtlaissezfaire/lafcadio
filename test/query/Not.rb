@@ -1,6 +1,6 @@
 require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/query/Equals'
-require 'test/mock/domain/User'
+require '../test/mock/domain/User'
 require 'lafcadio/query/Not'
 
 class TestNot < LafcadioTestCase

@@ -2,8 +2,8 @@ require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/query/Compare'
 require 'lafcadio/query/Equals'
 require 'date'
-require 'test/mock/domain/User'
-require 'test/mock/domain/Invoice'
+require '../test/mock/domain/User'
+require '../test/mock/domain/Invoice'
 require 'lafcadio/query/CompoundCondition'
 
 class TestCompoundCondition < LafcadioTestCase

@@ -1,10 +1,10 @@
 require 'lafcadio/objectStore/DomainObjectProxy'
 require 'lafcadio/test/LafcadioTestCase'
-require 'test/mock/domain/Client'
-require 'test/mock/domain/InternalClient'
+require '../test/mock/domain/Client'
+require '../test/mock/domain/InternalClient'
 require 'lafcadio/objectField/MoneyField'
-require 'test/mock/domain/Invoice'
-require 'test/mock/domain/LineItem'
+require '../test/mock/domain/Invoice'
+require '../test/mock/domain/LineItem'
 require 'lafcadio/objectField/FieldValueError'
 
 class TestLinkField < LafcadioTestCase

@@ -1,6 +1,6 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'test/mock/domain/User'
-require 'test/mock/domain/Client'
+require '../test/mock/domain/User'
+require '../test/mock/domain/Client'
 
 class TestGMockObjectStore < LafcadioTestCase
 	def testObjectsRetrievable

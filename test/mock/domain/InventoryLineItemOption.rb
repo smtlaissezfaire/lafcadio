@@ -1,6 +1,6 @@
 require 'lafcadio/domain/MapObject'
-require 'test/mock/domain/InventoryLineItem'
-require 'test/mock/domain/Option'
+require '../test/mock/domain/InventoryLineItem'
+require '../test/mock/domain/Option'
 
 class InventoryLineItemOption < Lafcadio::MapObject
 	def InventoryLineItemOption.mappedTypes

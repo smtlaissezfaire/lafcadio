@@ -1,5 +1,5 @@
 require 'lafcadio/domain/DomainObject'
-require 'test/mock/domain'
+require '../test/mock/domain'
 require 'lafcadio/objectField/LinkField'
 
 class Option < Lafcadio::DomainObject

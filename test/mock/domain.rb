@@ -1,6 +1,6 @@
 require 'lafcadio/objectField/TextField'
 require 'lafcadio/domain/DomainObject'
-require 'test/mock/domain/Option'
+require '../test/mock/domain/Option'
 
 class Attribute < Lafcadio::DomainObject
 	def Attribute.tableName
