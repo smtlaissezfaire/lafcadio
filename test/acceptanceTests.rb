@@ -143,6 +143,14 @@ class AccTestDateTimeField < AcceptanceTestCase
 end
 
 class AccTestDomainObjInheritance < AcceptanceTestCase
+	def test_get
+		child = TestChildRow.new( 'text_field' => 'text',
+		                          'child_text_field' => 'child text' )
+		child.commit
+		child_prime = @object_store.getTestChildRow( 1 )
+		assert_equal( child.text_field, child_prime.text_field )
+	end
+
 	def test_insert
 		child = TestChildRow.new( 'text_field' => 'text',
 		                          'child_text_field' => 'child text' )

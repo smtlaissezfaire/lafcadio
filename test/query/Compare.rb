@@ -16,7 +16,8 @@ class TestCompare < LafcadioTestCase
 		comparators.each { |compareType, comparisonSymbol|
 			dc = Query::Compare.new('date', Date.new(2003, 1, 1), Invoice,
 					compareType)
-			assert_equal "date #{ comparisonSymbol } '2003-01-01'", dc.toSql
+			assert_equal( "invoices.date #{ comparisonSymbol } '2003-01-01'",
+			              dc.toSql )
 		}
 	end
 
@@ -67,24 +68,24 @@ class TestCompare < LafcadioTestCase
 	def testLessThan
 		condition = Query::Compare.new(
 				User.sqlPrimaryKeyName, 10, User, Query::Compare::LESS_THAN)
-		assert_equal 'pkId < 10', condition.toSql
+		assert_equal( 'users.pkId < 10', condition.toSql )
 	end
 
 	def testNumericalSearchingOfaLinkField
 		condition = Query::Compare.new('client', 10, Invoice,
 				Query::Compare::LESS_THAN)
-		assert_equal 'client < 10', condition.toSql
+		assert_equal( 'invoices.client < 10', condition.toSql )
 	end
 	
 	def testFieldBelongingToSuperclass
 		condition = Query::Compare.new('standard_rate', 10, InternalClient,
 				Query::Compare::LESS_THAN)
-		assert_equal 'standard_rate < 10', condition.toSql
+		assert_equal( 'clients.standard_rate < 10', condition.toSql )
 	end
 
 	def testDbFieldName
 		compare = Query::Compare.new( 'text1', 'foobar', XmlSku,
 		                              Query::Compare::LESS_THAN )
-		assert_equal( "text_one < 'foobar'", compare.toSql )
+		assert_equal( "some_other_table.text_one < 'foobar'", compare.toSql )
 	end
 end

@@ -51,6 +51,10 @@ module Lafcadio
 		
 		def bind_write?; false; end #:nodoc:
 		
+		def db_table_and_field_name
+			"#{ objectType.tableName }.#{ dbFieldName }"
+		end
+
 		def englishName #:nodoc:
 			@englishNameOrNil || English.camelCaseToEnglish(name).capitalize
 		end

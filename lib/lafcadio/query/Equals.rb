@@ -12,7 +12,7 @@ module Lafcadio
 					else
 						field = getField
 						if @searchTerm.class <= ObjectField
-							sql += @searchTerm.dbFieldName
+							sql += @searchTerm.db_table_and_field_name
 						else
 							sql += field.valueForSQL(@searchTerm).to_s
 						end

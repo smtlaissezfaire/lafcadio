@@ -13,32 +13,34 @@ class TestQuery < LafcadioTestCase
 
 	def testOnePkId
 		query = Query.new SKU, 199
-    assert_equal 'select * from skus where pkId = 199', query.toSql
+    assert_equal( 'select * from skus where skus.pkId = 199', query.toSql )
 	end
 
 	def testByCondition
 		client = Client.new({ 'pkId' => 13 })
 		condition = Query::Equals.new('client', client, Invoice)
 		query = Query.new Invoice, condition
-		assert_equal 'select * from invoices where client = 13', query.toSql
+		assert_equal( 'select * from invoices where invoices.client = 13',
+		              query.toSql )
 	end
 
 	def testGetSubsetWithCondition
 		condition = Query::In.new('client', [ 1, 2, 3 ], Invoice)
 		query = Query.new Invoice, condition
-		assert_equal 'select * from invoices where client in (1, 2, 3)', query.toSql
+		assert_equal( 'select * from invoices where invoices.client in (1, 2, 3)',
+		              query.toSql )
 	end
 
 	def testTableJoinsForInheritance
 		query = Query.new InternalClient, 1
 		assert_equal 'select * from clients, internalClients ' +
 				'where clients.pkId = internalClients.pkId and ' +
-				'pkId = 1', query.toSql
+				'internalClients.pkId = 1', query.toSql
 		condition = Query::Equals.new('billingType', 'whatever', InternalClient)
 		query2 = Query.new InternalClient, condition
 		assert_equal "select * from clients, internalClients " +
 				"where clients.pkId = internalClients.pkId and " +
-				"billingType = 'whatever'", query2.toSql
+				"internalClients.billingType = 'whatever'", query2.toSql
 	end
 
 	def testOrderBy

@@ -27,9 +27,11 @@ module Lafcadio
 			
 			def dbFieldName
 				if @objectType.sqlPrimaryKeyName == @fieldName
-					@fieldName
+					db_table = @objectType.tableName
+					db_field_name = @fieldName
+					"#{ db_table }.#{ db_field_name }"
 				else
-					getField.dbFieldName
+					getField.db_table_and_field_name
 				end
 			end
 			
