@@ -712,19 +712,16 @@ module Lafcadio
 		end
 
 		def []( key )
-			if key == 'pk_id'
-				if ( field_val = @row_hash[@object_type.sql_primary_key_name] ).nil?
+			begin
+				field = @object_type.get_field( key )
+				val = field.value_from_sql( @row_hash[ field.db_field_name ] )
+				if field.instance_of?( PrimaryKeyField ) && val.nil?
 					raise FieldMatchError, error_msg, caller
 				else
-					field_val.to_i
+					val
 				end
-			else
-				begin
-					field = @object_type.get_field( key )
-					field.value_from_sql( @row_hash[ field.db_field_name ] )
-				rescue MissingError
-					nil
-				end
+			rescue MissingError
+				nil
 			end
 		end
 
