@@ -44,7 +44,7 @@ module Lafcadio
 			@dbFieldName = name
 			@notNull = true
 			@unique = false
-			@default = nil
+			( @default, @notUniqueMsg ) = [ nil, nil ]
 			@englishNameOrNil = englishName
 		end
 		
@@ -126,7 +126,7 @@ module Lafcadio
 			if @objectType == other.objectType && name == other.name
 				0
 			else
-				id <=> other.id
+				object_id <=> other.object_id
 			end
 		end
 

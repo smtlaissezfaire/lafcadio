@@ -57,7 +57,7 @@ class TestGMockObjectStore < LafcadioTestCase
 		user = User.getTestUser
 		user.commit
 		user_prime = @mockObjectStore.getUser( 1 )
-		assert( user.id != user_prime.id )
+		assert( user.object_id != user_prime.object_id )
 		new_email = "another@email.com"
 		user_prime.email = new_email
 		assert( new_email != @mockObjectStore.getUser( 1 ).email )

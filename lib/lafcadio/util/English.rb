@@ -38,13 +38,13 @@ module Lafcadio
 		#   English.sentence("Add %a %nam", "invoice") -> "Add an invoice"	
 		def English.sentence(format, name, number = 1)
 			sentence = format
-			sentence.gsub! /%num/, number.to_s
+			sentence.gsub!( /%num/, number.to_s )
 			isVerb = number == 1 ? "is" : "are"
-			sentence.gsub! /%is/, isVerb
+			sentence.gsub!( /%is/, isVerb )
 			name = English.plural name if number != 1
-			sentence.gsub! /%nam/, name
+			sentence.gsub!( /%nam/, name )
 			article = startsWithVowelSound(name) ? 'an' : 'a'
-			sentence.gsub! /%a/, article
+			sentence.gsub!( /%a/, article )
 			sentence
 		end
 

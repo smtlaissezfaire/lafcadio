@@ -23,6 +23,7 @@ module Lafcadio
 
 		def initialize(objectType)
 			@objectType = objectType
+			( @classFields, @xmlParser ) = [ nil, nil ]
 			dirName = LafcadioConfig.new['classDefinitionDir']
 			xmlFileName = @objectType.bareName + '.xml'
 			xmlPath = File.join( dirName, xmlFileName )

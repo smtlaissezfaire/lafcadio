@@ -23,6 +23,7 @@ module Lafcadio
 			else
 				raise ArgumentError
 			end
+			@dbObject = nil
 		end
 
 		def getDbObject

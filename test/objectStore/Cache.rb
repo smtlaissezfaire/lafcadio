@@ -11,8 +11,10 @@ class TestObjectStoreCache < LafcadioTestCase
 		user = User.getTestUser
 		user.pkId = 1
 		@cache.save( user )
-		assert( user.id != @cache.get( User, 1 ).id )
-		@cache.getAll( User ).each { |a_user| assert( user.id != a_user.id ) }
+		assert( user.object_id != @cache.get( User, 1 ).object_id )
+		@cache.getAll( User ).each { |a_user|
+			assert( user.object_id != a_user.object_id )
+		}
 	end
 	
 	def test_dumpable

@@ -14,6 +14,7 @@ module Lafcadio
 		#                    condition.
 		def initialize(objectType, pkIdOrCondition = nil)
 			@objectType = objectType
+			( @condition, @orderBy, @limit ) = [ nil, nil, nil ]
 			if pkIdOrCondition
 				if pkIdOrCondition.class <= Condition
 					@condition = pkIdOrCondition

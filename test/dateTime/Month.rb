@@ -31,7 +31,7 @@ class TestMonth < LafcadioTestCase
 		newJan2000 = Month.new(1, 2000)
 		assert_equal @jan2000, newJan2000
 		assert_equal @jan2000.hash, newJan2000.hash
-		assert (@jan2000.eql? newJan2000)
+		assert( @jan2000.eql?( newJan2000 ) )
 		normalHash = {}
 		normalHash[@jan2000] = 'q'
 		assert_equal 'q', normalHash[newJan2000]

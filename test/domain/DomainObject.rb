@@ -44,7 +44,7 @@ class TestDomainObject < LafcadioTestCase
 		client = Client.getTestClient
 		clientPrime = Client.getTestClient
 		assert_equal client, clientPrime
-		assert (client.eql? clientPrime)
+		assert( client.eql?( clientPrime ) )
 		invoice = Invoice.getTestInvoice
 		assert_equal 1, invoice.pkId
 		assert_equal 1, client.pkId
@@ -61,11 +61,6 @@ class TestDomainObject < LafcadioTestCase
 		data = Marshal.dump client
 		clientPrime = Marshal.load data
 		assert_equal client, clientPrime.priorityInvoice.client
-	end
-
-	def testGetField
-		name = Client.getClassField 'name'
-		assert_not_nil name
 	end
 
 	def testObjectLinksUpdateLive
@@ -158,6 +153,8 @@ class TestDomainObject < LafcadioTestCase
 	end
 	
 	def testGetField
+		name = Client.getClassField 'name'
+		assert_not_nil name
 		assert_equal( 'name', InternalClient.getField( 'name' ).name )
 		assert_equal( 'billingType', InternalClient.getField( 'billingType' ).name )
 		begin

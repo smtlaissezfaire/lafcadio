@@ -194,7 +194,8 @@ module Lafcadio
 			end
 		end
 
-		attr_accessor :delete, :errorMessages, :pkId, :lastCommit, :fields
+		attr_accessor :errorMessages, :pkId, :lastCommit, :fields
+		attr_reader :delete
 		protected :fields
 
 		# fieldHash should contain key-value associations for the different

@@ -33,7 +33,7 @@ module Lafcadio
 					@bindValues << value
 				end
 			}
-			QueueHash.new *nameValues
+			QueueHash.new( *nameValues )
 		end
 
 		def updateSQL(objectType)

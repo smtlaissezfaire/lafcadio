@@ -11,7 +11,7 @@ class TestContext < RUNIT::TestCase
 	end
 
 	def testSingleton
-		assert_equal Context.instance.id, Context.instance.id
+		assert_equal Context.instance.object_id, Context.instance.object_id
 	end
 	
 	def testSetterAndGetter

@@ -36,6 +36,7 @@ module Lafcadio
 		def initialize(objectType, name, englishName = nil)
 			super(objectType, name, englishName)
 			@enumType = ENUMS_ONE_ZERO
+			@enums = nil
 		end
 
 		def getEnums( value = nil )
