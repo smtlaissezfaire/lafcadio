@@ -8,7 +8,7 @@ class FieldManager
     cgi = CGI.new if cgi == nil
 		@valueHash = HashOfArrays.new
     cgi.keys.each { |key|
-			valueArray = cgi[key]
+			valueArray = cgi.params[key]
 			@valueHash.set(key, valueArray)
     }
   end

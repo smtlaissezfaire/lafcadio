@@ -4,16 +4,18 @@ require 'test/mock/domain/User'
 require 'lafcadio/cgi/FieldManager'
 
 class TestFieldManager < LafcadioTestCase
-  class MockCGI < Hash
+  class MockCGI
     def initialize(aHash)
-      aHash.keys.each { |key| self[key] = aHash[key] }
+    	@hash = aHash
     end
 
-    def [](key)
-      value = super key
-      self[key] = nil
-      value
-    end
+		def params
+			@hash
+		end
+		
+		def keys
+			@hash.keys
+		end
   end
 
 	def fieldManager(aHash)
