@@ -1,4 +1,7 @@
+require 'rubygems'
+
 require 'dbi'
+require_gem 'log4r'
 require 'lafcadio/util/LafcadioConfig'
 
 module Lafcadio
@@ -54,10 +57,14 @@ module Lafcadio
 		
 		# Hook for logging: Useful for testing.
 		def maybeLog(sql)
-			require 'lafcadio/util/Logger'
 			config = LafcadioConfig.new
 			if config['logSql'] == 'y'
-				Logger.log( sql, config['sqlLogFile'] || 'sql' )
+				sqllog = Log4r::Logger['sql'] || Log4r::Logger.new( 'sql' )
+				filename = File.join( config['logdir'], config['sqlLogFile'] || 'sql' )
+				outputter = Log4r::FileOutputter.new( 'outputter',
+																							{ :filename => filename } )
+				sqllog.outputters = outputter
+				sqllog.info sql
 			end
 		end
 		
