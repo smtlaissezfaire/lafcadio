@@ -62,4 +62,18 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 			# desired behavior
 		end
 	end
+	
+	def testUsefulErrorMessages
+		begin
+			execute( XmlSku, <<-XML
+				<lafcadio_class_definition name="XmlSku">
+					<field name="date1" notNull="n"/>
+				</lafcadio_class_definition>
+			XML
+			)
+			fail "Should've thrown a StandardError"
+		rescue StandardError
+			assert_equal( "Couldn't find field class '' for field 'date1'", $!.to_s )
+		end
+	end
 end

@@ -67,8 +67,13 @@ class ClassDefinitionXmlParser
 		fields = []
 		rexmlDoc = REXML::Document.new( @xml )
 		rexmlDoc.root.elements.each('field') { |fieldElt|
-			fieldClass = ClassUtil.getClass( fieldElt.attributes['class'] )
+			className = fieldElt.attributes['class']
+			fieldClass = ClassUtil.getClass( className )
 			name = fieldElt.attributes['name']
+			unless fieldClass
+				msg = "Couldn't find field class '#{ className }' for field '#{ name }'"
+				raise( StandardError, msg, caller )
+			end
 			raise InvalidDataError if namesProcessed[name]
 			field = fieldClass.instantiateFromXml( @domainClass, fieldElt )
 			possibleFieldAttributes.each { |fieldAttr|
