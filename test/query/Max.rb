@@ -5,7 +5,7 @@ require 'lafcadio/query'
 class TestQuery < LafcadioTestCase
 	def testToSql
 		query = Query::Max.new(Client)
-		assert_equal 'select max(pkId) from clients', query.to_sql
+		assert_equal 'select max(pk_id) from clients', query.to_sql
 		query2 = Query::Max.new( Invoice, 'rate' )
 		assert_equal( 'select max(rate) from invoices', query2.to_sql )
 		query3 = Query::Max.new( XmlSku )

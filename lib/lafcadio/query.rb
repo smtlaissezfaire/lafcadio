@@ -39,8 +39,8 @@
 #   # => "select * from invoices where client = 99"
 # 
 # == Inclusion: +in+
-#   first_three_invs = object_store.getInvoices { |inv| inv.pkId.in( 1, 2, 3 ) }
-#   # => "select * from invoices where pkId in ( 1, 2, 3 )"
+#   first_three_invs = object_store.getInvoices { |inv| inv.pk_id.in( 1, 2, 3 ) }
+#   # => "select * from invoices where pk_id in ( 1, 2, 3 )"
 #
 # == Text comparison: +like+
 #   fname_starts_with_a = object_store.getUsers { |user|
@@ -99,15 +99,15 @@ module Lafcadio
 		attr_reader :object_type, :condition
 		attr_accessor :orderBy, :orderByOrder, :limit
 
-		def initialize(object_type, pkIdOrCondition = nil)
+		def initialize(object_type, pk_idOrCondition = nil)
 			@object_type = object_type
 			( @condition, @orderBy, @limit ) = [ nil, nil, nil ]
-			if pkIdOrCondition
-				if pkIdOrCondition.class <= Condition
-					@condition = pkIdOrCondition
+			if pk_idOrCondition
+				if pk_idOrCondition.class <= Condition
+					@condition = pk_idOrCondition
 				else
 					@condition = Query::Equals.new( object_type.sql_primary_key_name,
-					                                pkIdOrCondition, object_type )
+					                                pk_idOrCondition, object_type )
 				end
 			end
 			@orderByOrder = ASC
@@ -219,7 +219,7 @@ module Lafcadio
 			end
 
 			def primary_key_field?
-				[ @object_type.sql_primary_key_name, 'pkId' ].include?( @fieldName )
+				[ @object_type.sql_primary_key_name, 'pk_id' ].include?( @fieldName )
 			end
 		end
 
@@ -261,7 +261,7 @@ module Lafcadio
 
 			def object_meets(anObj)
 				value = anObj.send @fieldName
-				value = value.pkId if value.class <= DomainObject
+				value = value.pk_id if value.class <= DomainObject
 				if value
 					@@mockComparators[@compareType].call(value, @searchTerm)
 				else
@@ -313,7 +313,7 @@ module Lafcadio
 			
 			def method_missing( methId, *args )
 				fieldName = methId.id2name
-				if fieldName == 'pkId'
+				if fieldName == 'pk_id'
 					ObjectFieldImpostor.new( self, fieldName )
 				else
 					begin
@@ -342,7 +342,7 @@ module Lafcadio
 
 			def object_meets(anObj)
 				if @fieldName == @object_type.sql_primary_key_name
-					object_value = anObj.pkId
+					object_value = anObj.pk_id
 				else
 					object_value = anObj.send @fieldName
 				end
@@ -417,7 +417,7 @@ module Lafcadio
 			def object_meets(anObj)
 				value = anObj.send @fieldName
 				if value.class <= DomainObject || value.class == DomainObjectProxy
-					value = value.pkId.to_s
+					value = value.pk_id.to_s
 				end
 				if value.class <= Array
 					(value.index(@searchTerm) != nil)
@@ -441,7 +441,7 @@ module Lafcadio
 
 		class Link < Condition #:nodoc:
 			def initialize( fieldName, searchTerm, object_type )
-				if searchTerm.pkId.nil?
+				if searchTerm.pk_id.nil?
 					raise ArgumentError,
 					      "Can't query using an uncommitted domain object as a search term",
 								caller
@@ -456,11 +456,11 @@ module Lafcadio
 
 			def object_meets(anObj)
 				value = anObj.send @fieldName
-				value ? value.pkId == @searchTerm.pkId : false
+				value ? value.pk_id == @searchTerm.pk_id : false
 			end
 
 			def to_sql
-				"#{ db_field_name } = #{ @searchTerm.pkId }"
+				"#{ db_field_name } = #{ @searchTerm.pk_id }"
 			end
 		end
 
@@ -479,7 +479,7 @@ module Lafcadio
 			end
 		
 			def collect( coll )
-				fn = @pk ? 'pkId': @field_name
+				fn = @pk ? 'pk_id': @field_name
 				max = coll.inject( nil ) { |max, d_obj|
 					a_value = d_obj.send( fn )
 					( max.nil? || a_value > max ) ? a_value : max
@@ -521,8 +521,8 @@ module Lafcadio
 		
 			def initialize( domainObjectImpostor, class_field_or_name )
 				@domainObjectImpostor = domainObjectImpostor
-				if class_field_or_name == 'pkId'
-					@db_field_name = 'pkId'
+				if class_field_or_name == 'pk_id'
+					@db_field_name = 'pk_id'
 				else
 					@class_field = class_field_or_name
 					@db_field_name = class_field_or_name.db_field_name

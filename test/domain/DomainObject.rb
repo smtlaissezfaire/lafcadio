@@ -29,12 +29,12 @@ class TestDomainObject < LafcadioTestCase
 
 	def testAssignProxies
 		invoice = Invoice.storedTestInvoice
-		assert_equal 1, invoice.client.pkId
-		client2 = Client.new({ 'pkId' => 2, 'name' => 'client 2' })
+		assert_equal 1, invoice.client.pk_id
+		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client 2' })
 		invoice.client = client2
 		client2Proxy = invoice.client
 		assert_equal DomainObjectProxy, client2Proxy.class
-		assert_equal 2, client2Proxy.pkId
+		assert_equal 2, client2Proxy.pk_id
 		invoice.client = nil
 		assert_nil invoice.client
 	end
@@ -136,12 +136,12 @@ class TestDomainObject < LafcadioTestCase
 		clientProxy = DomainObjectProxy.new Client, 99
 		hash = { 'client' => clientProxy, 'rate' => 70,
 				'date' => Date.new(2001, 4, 5), 'hours' => 36.5, 'invoice_num' => 1,
-				'pkId' => 1 }
+				'pk_id' => 1 }
 		invoice = Invoice.new hash
 		proxyPrime = invoice.client
 		assert_equal DomainObjectProxy, proxyPrime.class
 		assert_equal Client, proxyPrime.object_type
-		assert_equal 99, proxyPrime.pkId
+		assert_equal 99, proxyPrime.pk_id
 		begin
 			proxyPrime.name
 			fail "should throw DomainObjectNotFoundError"
@@ -149,7 +149,7 @@ class TestDomainObject < LafcadioTestCase
 			# ok
 		end
 		client = Client.getTestClient
-    client.pkId = 99
+    client.pk_id = 99
     @mockObjectStore.commit client
 		assert_equal client.name, proxyPrime.name
 	end
@@ -167,11 +167,11 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def test_defers_field_copying
-		row_hash = OneTimeAccessHash.new( 'pkId' => '1', 'hours' => '36.5',
+		row_hash = OneTimeAccessHash.new( 'pk_id' => '1', 'hours' => '36.5',
 		                                  'xmlSku' => nil )
 		converter = SqlValueConverter.new( Invoice, row_hash )
 		inv = Invoice.new( converter )
-		assert_equal( 1, row_hash.key_lookups['pkId'] )
+		assert_equal( 1, row_hash.key_lookups['pk_id'] )
 		assert_equal( 0, row_hash.key_lookups['hours'] )
 		assert_equal( 0, row_hash.key_lookups['xmlSku'] )
 		assert_equal( 36.5, inv.hours )
@@ -183,7 +183,7 @@ class TestDomainObject < LafcadioTestCase
 		xml_sku_row_hash = OneTimeAccessHash.new( 'some_other_id' => '345' )
 		xml_sku_converter = SqlValueConverter.new( XmlSku, xml_sku_row_hash )
 		xml_sku = XmlSku.new( xml_sku_converter )
-		assert_equal( 345, xml_sku.pkId )
+		assert_equal( 345, xml_sku.pk_id )
 	end
 	
   def testDefinesSetters
@@ -208,18 +208,18 @@ class TestDomainObject < LafcadioTestCase
     data = Marshal.dump client
     newClient = Marshal.load data
     assert_equal Client, newClient.class
-		assert_nil newClient.pkId
+		assert_nil newClient.pk_id
 		client2 = Client.getTestClient
-		assert_equal 1, client2.pkId
+		assert_equal 1, client2.pk_id
 		@mockObjectStore.commit client2
 		data2 = Marshal.dump client2
 		newClient2 = Marshal.load data2
-		assert_equal 1, newClient2.pkId
+		assert_equal 1, newClient2.pk_id
 		coll = [ client, client2 ]
 		collData = Marshal.dump coll
 		collPrime = Marshal.load collData
-		assert_equal nil, collPrime[0].pkId
-		assert_equal 1, collPrime[1].pkId
+		assert_equal nil, collPrime[0].pk_id
+		assert_equal 1, collPrime[1].pk_id
   end
 
 	def testEquality
@@ -228,8 +228,8 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal client, clientPrime
 		assert( client.eql?( clientPrime ) )
 		invoice = Invoice.getTestInvoice
-		assert_equal 1, invoice.pkId
-		assert_equal 1, client.pkId
+		assert_equal 1, invoice.pk_id
+		assert_equal 1, client.pk_id
 		assert invoice != client
 	end
 
@@ -269,12 +269,12 @@ class TestDomainObject < LafcadioTestCase
 	end
 	
 	def test_hash_and_eql
-		client = Client.new( 'pkId' => 1, 'name' => 'client name' )
-		client_prime = Client.new( 'pkId' => 1, 'name' => 'client name' )
+		client = Client.new( 'pk_id' => 1, 'name' => 'client name' )
+		client_prime = Client.new( 'pk_id' => 1, 'name' => 'client name' )
 		assert_equal( client.hash, client_prime.hash )
 		assert( client.eql?( client_prime ) )
 		assert( client_prime.eql?( client ) )
-		client2 = Client.new( 'pkId' => 2, 'name' => 'someone else' )
+		client2 = Client.new( 'pk_id' => 2, 'name' => 'someone else' )
 		assert( !client.eql?( client2 ) )
 	end
 	
@@ -301,7 +301,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 	
 	def testPkIdNeedsFixnum
-		assert_equal Fixnum, Client.getTestClient.pkId.class
+		assert_equal Fixnum, Client.getTestClient.pk_id.class
 	end
 
 	def test_to_s

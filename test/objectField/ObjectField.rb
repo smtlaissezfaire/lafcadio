@@ -10,7 +10,7 @@ class TestObjectField < LafcadioTestCase
 				"lastName" => "Hwang", "phone" => "", "address1" => "",
 				"address2" => "", "city" => "", "state" => "",
 				"zip" => "", "email" => "test@test.com",
-				"password" => "mypassword!", "pkId" => 1 })
+				"password" => "mypassword!", "pk_id" => 1 })
 		@mockObjectStore.commit @user
 	end
 
@@ -44,8 +44,8 @@ class TestObjectField < LafcadioTestCase
 
 	def testNameForSQL
 		field = ObjectField.new User, "id"
-		field.db_field_name = "pkId"
-		assert_equal "pkId", field.name_for_sql
+		field.db_field_name = "pk_id"
+		assert_equal "pk_id", field.name_for_sql
 	end
 
 	def testComparable

@@ -81,8 +81,8 @@ module Lafcadio
 			"#{ self.object_type.name }##{ name } can not be nil."
 		end
 
-		def prev_value(pkId) #:nodoc:
-			prevObject = ObjectStore.get_object_store.get(@object_type, pkId)
+		def prev_value(pk_id) #:nodoc:
+			prevObject = ObjectStore.get_object_store.get(@object_type, pk_id)
 			prevObject.send(name)
 		end
 
@@ -97,14 +97,14 @@ module Lafcadio
 			value || 'null'
 		end
 
-		def verify(value, pkId) #:nodoc:
+		def verify(value, pk_id) #:nodoc:
 			if value.nil? && notNull
 				raise FieldValueError, null_error_msg, caller
 			end
-			verify_non_nil( value, pkId ) if value
+			verify_non_nil( value, pk_id ) if value
 		end
 
-		def verify_non_nil( value, pkId )
+		def verify_non_nil( value, pk_id )
 			value_type = self.class.value_type
 			unless value.class <= value_type
 				raise( FieldValueError, 
@@ -112,13 +112,13 @@ module Lafcadio
 				           " value.",
 				       caller )
 			end
-			verify_uniqueness(value, pkId) if unique
+			verify_uniqueness(value, pk_id) if unique
 		end
 
-		def verify_uniqueness(value, pkId) #:nodoc:
+		def verify_uniqueness(value, pk_id) #:nodoc:
 			inferrer = Query::Inferrer.new( @object_type ) { |domain_obj|
 				Query.And( domain_obj.send( self.name ).equals( value ),
-									 domain_obj.pkId.equals( pkId ).not )
+									 domain_obj.pk_id.equals( pk_id ).not )
 			}
 			collisions = ObjectStore.get_object_store.get_subset( inferrer.execute )
 			if collisions.size > 0
@@ -354,8 +354,8 @@ module Lafcadio
 			"Please enter an email address."
 		end
 
-		def verify_non_nil(value, pkId) #:nodoc:
-			super(value, pkId)
+		def verify_non_nil(value, pk_id) #:nodoc:
+			super(value, pk_id)
 			if !EmailField.valid_address(value)
 				raise( FieldValueError,
 				       "#{ object_type.name }##{ name } needs a valid email address.",
@@ -425,7 +425,7 @@ module Lafcadio
 			value != '' ?(super(value)) : 'null'
 		end
 		
-		def verify_non_nil( value, pkId ) #:nodoc:
+		def verify_non_nil( value, pk_id ) #:nodoc:
 			super
 			if @enums[value].nil?
 				key_str = '[ ' +
@@ -483,32 +483,32 @@ module Lafcadio
 		def value_for_sql(value) #:nodoc:
 			if !value
 				"null"
-			elsif value.pkId
-				value.pkId
+			elsif value.pk_id
+				value.pk_id
 			else
-				raise( DomainObjectInitError, "Can't commit #{name} without pkId", 
+				raise( DomainObjectInitError, "Can't commit #{name} without pk_id", 
 				       caller )
 			end
 		end
 
-		def verify_non_nil(value, pkId) #:nodoc:
+		def verify_non_nil(value, pk_id) #:nodoc:
 			super
-			if @linkedType != @object_type && pkId
+			if @linkedType != @object_type && pk_id
 				subsetLinkField = @linkedType.class_fields.find { |field|
 					field.class == SubsetLinkField && field.subsetField == @name
 				}
 				if subsetLinkField
-					verify_subset_link_field( subsetLinkField, pkId )
+					verify_subset_link_field( subsetLinkField, pk_id )
 				end
 			end
 		end
 
-		def verify_subset_link_field( subsetLinkField, pkId )
+		def verify_subset_link_field( subsetLinkField, pk_id )
 			begin
-				prevObj = ObjectStore.get_object_store.get(object_type, pkId)
+				prevObj = ObjectStore.get_object_store.get(object_type, pk_id)
 				prevObjLinkedTo = prevObj.send(name)
 				possiblyMyObj = prevObjLinkedTo.send(subsetLinkField.name)
-				if possiblyMyObj && possiblyMyObj.pkId == pkId
+				if possiblyMyObj && possiblyMyObj.pk_id == pk_id
 					cantChangeMsg = "You can't change that."
 					raise FieldValueError, cantChangeMsg, caller
 				end

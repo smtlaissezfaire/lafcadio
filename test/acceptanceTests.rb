@@ -77,8 +77,8 @@ class TestRow < DomainObject
 		dbh.do( 'drop table if exists testrows' )
 		createSql = <<-CREATE
 create table testrows (
-	pkId int not null auto_increment,
-	primary key (pkId),
+	pk_id int not null auto_increment,
+	primary key (pk_id),
 	text_field text,
 	date_time datetime,
 	bool_field tinyint,
@@ -104,7 +104,7 @@ create table testrows (
 	end
 	
 	def TestRow.sql_primary_key_name
-		'pkId'
+		'pk_id'
 	end
 end
 
@@ -113,8 +113,8 @@ class TestChildRow < TestRow
 		dbh.do( 'drop table if exists testchildrows' )
 		createSql = <<-CREATE
 create table testchildrows (
-	pkId int not null auto_increment,
-	primary key (pkId),
+	pk_id int not null auto_increment,
+	primary key (pk_id),
 	child_text_field text
 )
 		CREATE
@@ -130,7 +130,7 @@ create table testchildrows (
 	end
 	
 	def self.sql_primary_key_name
-		'pkId'
+		'pk_id'
 	end
 end
 
@@ -233,7 +233,7 @@ end
 
 class AccTestObjectStore < AcceptanceTestCase
 	def test_diff_pk
-		mock = TestDiffPkRow.new( 'pkId' => 1, 'text_field' => 'sample text' )
+		mock = TestDiffPkRow.new( 'pk_id' => 1, 'text_field' => 'sample text' )
 		mock_object_store = MockObjectStore.new( Context.instance )
 		mock_object_store.commit( mock )
 		testdiffpkrow1_prime = mock_object_store.getTestDiffPkRows( 1,
@@ -267,7 +267,7 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		assert_equal( num_rows, rows.size )
 		1.upto( num_rows ) { |i|
 			row = rows[i-1]
-			assert_equal( i, row.pkId )
+			assert_equal( i, row.pk_id )
 			assert_equal( "row #{ i }", row.text_field )
 		}
 		result = @dbh.select_all( 'select * from testrows' )
@@ -299,7 +299,7 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 	def test_raise_if_bad_primary_key_map
 		br1 = TestBadRow.new( 'text_field' => 'a' )
 		br1.commit
-		error_msg = 'The field "pkId" can\'t be found in the table "testbadrows".'
+		error_msg = 'The field "pk_id" can\'t be found in the table "testbadrows".'
 		assert_exception( FieldMatchError, error_msg ) {
 			@object_store.get_all( TestBadRow )
 		}

@@ -49,7 +49,7 @@ require 'runit/testcase'
 
 class TestSKU < RUNIT::TestCase
 	def TestSKU.getTestSKU
-		SKU.new({ 'pkId' => 1, 'sku' => 'sku0001', 'standardPrice' => 99.95 })
+		SKU.new({ 'pk_id' => 1, 'sku' => 'sku0001', 'standardPrice' => 99.95 })
 	end
 
 	def TestSKU.storedTestSKU

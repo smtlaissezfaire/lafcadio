@@ -73,17 +73,17 @@ module Lafcadio
 			ENUM    = 3
 			HASH    = 4
 			
-			attr_reader :name, :valueClass
+			attr_reader :name, :value_class
 		
-			def initialize( name, valueClass, objectFieldClass = nil )
-				@name = name; @valueClass = valueClass
+			def initialize( name, value_class, objectFieldClass = nil )
+				@name = name; @value_class = value_class
 				@objectFieldClass = objectFieldClass
 			end
 			
 			def maybe_set_field_attr( field, fieldElt )
 				setterMethod = "#{ name }="
 				if field.respond_to?( setterMethod )
-					if valueClass != FieldAttribute::HASH
+					if value_class != FieldAttribute::HASH
 						if ( attrStr = fieldElt.attributes[name] )
 							field.send( setterMethod, value_from_string( attrStr ) )
 						end
@@ -106,11 +106,11 @@ module Lafcadio
 			end
 			
 			def value_from_string( valueStr )
-				if @valueClass == INTEGER
+				if @value_class == INTEGER
 					valueStr.to_i
-				elsif @valueClass == BOOLEAN
+				elsif @value_class == BOOLEAN
 					valueStr == 'y'
-				elsif @valueClass == ENUM
+				elsif @value_class == ENUM
 					eval "#{ @objectFieldClass.name }::#{ valueStr }"
 				end
 			end
@@ -123,11 +123,11 @@ module Lafcadio
 		include Comparable
 
 		# A DomainObject or DomainObjectProxy is compared by +object_type+ and by
-		# +pkId+. 
+		# +pk_id+. 
 		def <=>(anOther)
 			if anOther.respond_to?( 'object_type' )
 				if self.object_type == anOther.object_type
-					self.pkId <=> anOther.pkId
+					self.pk_id <=> anOther.pk_id
 				else
 					self.object_type.name <=> anOther.object_type.name
 				end
@@ -140,7 +140,7 @@ module Lafcadio
 			self == otherObj
 		end
 
-		def hash; "#{ self.class.name } #{ pkId }".hash; end
+		def hash; "#{ self.class.name } #{ pk_id }".hash; end
 	end
 
 	# All classes that correspond to a table in the database need to be children 
@@ -202,22 +202,22 @@ module Lafcadio
  	#                      'author' => john, 'recipient' => jane,
  	#                      'dateSent' => Date.today )
 	#
-	# = pkId and committing
+	# = pk_id and committing
 	# Lafcadio requires that each table has a numeric primary key. It assumes that
-	# this key is named +pkId+ in the database, though that can be overridden.
+	# this key is named +pk_id+ in the database, though that can be overridden.
 	#
 	# When you create a domain object by calling new, you should not assign a
-	# +pkId+ to the new instance. The pkId will automatically be set when you
+	# +pk_id+ to the new instance. The pk_id will automatically be set when you
 	# commit the object by calling DomainObject#commit.
 	#
-	# However, you may want to manually set +pkId+ when setting up a test case, so
+	# However, you may want to manually set +pk_id+ when setting up a test case, so
 	# you can ensure that a domain object has a given primary key.
 	#
 	# = Naming assumptions, and how to override them
 	# By default, Lafcadio assumes that every domain object is indexed by the
-	# field +pkId+ in the database schema. If you're dealing with a table that 
+	# field +pk_id+ in the database schema. If you're dealing with a table that 
 	# uses a different field name, override DomainObject.sql_primary_key_name.
-	# However, you will always use +pkId+ in your Ruby code.
+	# However, you will always use +pk_id+ in your Ruby code.
 	#
 	# Lafcadio assumes that a domain class corresponds to a table whose name is 
 	# the plural of the class name, and whose first letter is lowercase. A User 
@@ -238,7 +238,7 @@ module Lafcadio
 	#   end
 	#
 	# Lafcadio assumes that each concrete class has a corresponding table, and
-	# that each table has a +pkId+ field that is used to match rows between
+	# that each table has a +pk_id+ field that is used to match rows between
 	# different levels.
 	class DomainObject
 		@@subclassHash = {}
@@ -411,7 +411,7 @@ module Lafcadio
 			@@subclassHash.keys
 		end
 
-		attr_accessor :errorMessages, :pkId, :lastCommit, :fields, :fields_set
+		attr_accessor :error_messages, :pk_id, :lastCommit, :fields, :fields_set
 		attr_reader :delete
 		protected :fields, :fields_set
 
@@ -423,17 +423,17 @@ module Lafcadio
 		#             'email' => 'john.doe@email.com', 'password' => 'l33t' )
 		#
 		# In normal usage any code you write that creates a domain object will not
-		# define the +pkId+ field. The system assumes that a domain object with an
-		# undefined +pkId+ has yet to be inserted into the database, and when you
-		# commit the domain object a +pkId+ will automatically be assigned.
+		# define the +pk_id+ field. The system assumes that a domain object with an
+		# undefined +pk_id+ has yet to be inserted into the database, and when you
+		# commit the domain object a +pk_id+ will automatically be assigned.
 		#
 		# If you're creating mock objects for unit tests, you can explicitly set 
-		# the +pkId+ to represent objects that already exist in the database.
+		# the +pk_id+ to represent objects that already exist in the database.
 		def initialize(fieldHash)
 			@fieldHash = fieldHash
-			@pkId = fieldHash['pkId']
-			@pkId = @pkId.to_i unless @pkId.nil?
-			@errorMessages = []
+			@pk_id = fieldHash['pk_id']
+			@pk_id = @pk_id.to_i unless @pk_id.nil?
+			@error_messages = []
 			@fields = {}
 			@fields_set = []
 			check_fields = LafcadioConfig.new()['checkFields']
@@ -456,7 +456,7 @@ module Lafcadio
 		# Set the delete value to true if you want this domain object to be deleted
 		# from the database during its next commit.
 		def delete=(value)
-			if value && !pkId
+			if value && !pk_id
 				raise "No point deleting an object that's not already in the DB"
 			end
 			@delete = value
@@ -525,7 +525,7 @@ module Lafcadio
 				end
 			end
 			if LafcadioConfig.new()['checkFields'] == 'onAllStates'
-				field.verify( value, pkId )
+				field.verify( value, pk_id )
 			end
 			@fields[field.name] = value
 			@fields_set << field
@@ -533,7 +533,7 @@ module Lafcadio
 		
 		def verify
 			self.class.get_class_fields.each { |field|
-				field.verify( self.send( field.name ), self.pkId )
+				field.verify( self.send( field.name ), self.pk_id )
 			}
 		end
 	end
@@ -611,7 +611,7 @@ module Lafcadio
 				if !@xmlParser.nil? && ( spkn = @xmlParser.sql_primary_key_name )
 					spkn
 				else
-					'pkId'
+					'pk_id'
 				end
 			end
 		end

@@ -11,9 +11,9 @@ class TestLinkField < LafcadioTestCase
 		super
     @olf = LinkField.new(nil, Client)
 		@mockObjectStore.commit Client.new(
-				{ "pkId" => 1, "name" => "clientName1" } )
+				{ "pk_id" => 1, "name" => "clientName1" } )
 		@mockObjectStore.commit Client.new(
-				{ "pkId" => 2, "name" => "clientName2" } )
+				{ "pk_id" => 2, "name" => "clientName2" } )
     @fieldWithListener = LinkField.new(nil, Client, "client", "Client")
     rateField = MoneyField.new nil, "rate"
   end
@@ -28,7 +28,7 @@ class TestLinkField < LafcadioTestCase
   end
 
   def testValueForSQL
-    client = Client.new( { "name" => "my name", "pkId" => 10 } )
+    client = Client.new( { "name" => "my name", "pk_id" => 10 } )
     assert_equal(10, @olf.value_for_sql(client))
 		badClient = Client.new({ 'name' => 'Bad client' })
 		begin
@@ -64,7 +64,7 @@ class TestLinkField < LafcadioTestCase
 		client.priorityInvoice = invoice
 		@mockObjectStore.commit client
 		client2 = client.clone
-		client2.pkId = 2
+		client2.pk_id = 2
 		@mockObjectStore.commit client2
 		linkField = Invoice.get_class_field 'client'
 		begin

@@ -14,8 +14,8 @@ class TestDbObjectCommitter < LafcadioTestCase
     context.set_object_store @testObjectStore
 	end
 	
-	def getFromDbBridge(object_type, pkId)
-		query = Query.new object_type, pkId
+	def getFromDbBridge(object_type, pk_id)
+		query = Query.new object_type, pk_id
 		@mockDBBridge.get_collection_by_query(query)[0]
 	end
 	
@@ -32,8 +32,8 @@ class TestDbObjectCommitter < LafcadioTestCase
 	end
 
   def testDeleteSetsLinkFieldsToNil
-		client = Client.new({ 'pkId' => 1, 'name' => 'client name' })
-		invoice = Invoice.new({ 'pkId' => 1,
+		client = Client.new({ 'pk_id' => 1, 'name' => 'client name' })
+		invoice = Invoice.new({ 'pk_id' => 1,
 				'client' => DomainObjectProxy.new(client), 'date' => Date.new(2000, 1, 17),
 				'rate' => 45, 'hours' => 20 })
     @mockDBBridge.commit client
@@ -48,10 +48,10 @@ class TestDbObjectCommitter < LafcadioTestCase
 
 	def testAssignsPkIdOnNewCommit
 		client = Client.new({ 'name' => 'client name' })
-		assert_nil client.pkId
+		assert_nil client.pk_id
     committer = Committer.new(client, @mockDBBridge)
     committer.execute
-		assert_not_nil client.pkId
+		assert_not_nil client.pk_id
 	end
 
 	def testCommitType
@@ -59,7 +59,7 @@ class TestDbObjectCommitter < LafcadioTestCase
     committer = Committer.new(client, @mockDBBridge)
     committer.execute
 		assert_equal Committer::INSERT, committer.commitType
-		client2 = Client.new({ 'pkId' => 25, 'name' => 'client 25' })
+		client2 = Client.new({ 'pk_id' => 25, 'name' => 'client 25' })
 		committer2 = Committer.new(client2, @mockDBBridge)
 		committer2.execute
 		assert_equal Committer::UPDATE, committer2.commitType

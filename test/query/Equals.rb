@@ -18,8 +18,8 @@ class TestEquals < LafcadioTestCase
 	end
 
 	def testPkId
-		equals = Query::Equals.new('pkId', 123, Client)
-		assert_equal( 'clients.pkId = 123', equals.to_sql )
+		equals = Query::Equals.new('pk_id', 123, Client)
+		assert_equal( 'clients.pk_id = 123', equals.to_sql )
 	end
 
 	def testSubclass
@@ -46,7 +46,7 @@ class TestEquals < LafcadioTestCase
 	end
 	
 	def test_different_pk_name
-		equals1 = Query::Equals.new( 'pkId', 123, XmlSku )
+		equals1 = Query::Equals.new( 'pk_id', 123, XmlSku )
 		assert_equal( 'some_other_table.some_other_id = 123', equals1.to_sql )
 		equals2 = Query::Equals.new( 'some_other_id', 123, XmlSku )
 		assert_equal( 'some_other_table.some_other_id = 123', equals2.to_sql )

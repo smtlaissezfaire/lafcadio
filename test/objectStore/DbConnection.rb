@@ -55,7 +55,7 @@ class TestDbConnection < RUNIT::TestCase
 			logSql( str )
       if str == "select last_insert_id()"
 				[ { 'last_insert_id()' => '12' } ]
-			elsif str == 'select max(pkId) from clients'
+			elsif str == 'select max(pk_id) from clients'
 				[ [ '1' ] ]
 			elsif str == 'select max(date) from invoices'
 				[ [ DBI::Date.new( 2001, 4, 5 ) ] ]

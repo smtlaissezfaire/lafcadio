@@ -24,7 +24,7 @@ require 'lafcadio/test'
 
 class TestAttribute < LafcadioTestCase
 	def TestAttribute.getTestAttribute
-		Attribute.new( { "pkId" => 1, "name" => "attribute name" })
+		Attribute.new( { "pk_id" => 1, "name" => "attribute name" })
 	end
 
 	def TestAttribute.storedTestAttribute

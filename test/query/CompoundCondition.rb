@@ -28,7 +28,7 @@ class TestCompoundCondition < LafcadioTestCase
 		assert_equal( "(invoices.date >= '2003-01-01' and invoices.rate = 10 and " +
 		              "invoices.hours = 10)",
 		              condition.to_sql )
-		invoice = Invoice.new({ 'pkId' => 1, 'date' => Date.new(2003, 1, 1),
+		invoice = Invoice.new({ 'pk_id' => 1, 'date' => Date.new(2003, 1, 1),
 				'rate' => 10, 'hours' => 10 })
 		assert condition.object_meets(invoice)
 		invoice.hours = 10.5

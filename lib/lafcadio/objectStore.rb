@@ -27,8 +27,8 @@ module Lafcadio
 			@dbObject.pre_commit_trigger
 			update_dependent_domain_objects if @dbObject.delete
 			@dbBridge.commit @dbObject
-			unless @dbObject.pkId
-				@dbObject.pkId = @dbBridge.last_pk_id_inserted
+			unless @dbObject.pk_id
+				@dbObject.pk_id = @dbBridge.last_pk_id_inserted
 			end
 			@dbObject.post_commit_trigger
 		end
@@ -36,7 +36,7 @@ module Lafcadio
 		def get_last_commit
 			if @dbObject.delete
 				DomainObject::COMMIT_DELETE
-			elsif @dbObject.pkId
+			elsif @dbObject.pk_id
 				DomainObject::COMMIT_EDIT
 			else
 				DomainObject::COMMIT_ADD
@@ -46,7 +46,7 @@ module Lafcadio
 		def set_commit_type
 			if @dbObject.delete
 				@commitType = DELETE
-			elsif @dbObject.pkId
+			elsif @dbObject.pk_id
 				@commitType = UPDATE
 			else
 				@commitType = INSERT
@@ -210,7 +210,7 @@ module Lafcadio
 
 	# The DomainObjectProxy is used when retrieving domain objects that are 
 	# linked to other domain objects with LinkFields. In terms of +object_type+ and 
-	# +pkId+, a DomainObjectProxy instance looks to the outside world like the 
+	# +pk_id+, a DomainObjectProxy instance looks to the outside world like the 
 	# domain object it's supposed to represent. It only retrieves its domain 
 	# object from the database when member data is requested.
 	#
@@ -221,17 +221,17 @@ module Lafcadio
 	class DomainObjectProxy
 		include DomainComparable
 
-		attr_accessor :object_type, :pkId
+		attr_accessor :object_type, :pk_id
 
-		def initialize(object_typeOrDbObject, pkId = nil)
-			if pkId
+		def initialize(object_typeOrDbObject, pk_id = nil)
+			if pk_id
 				@object_type = object_typeOrDbObject
-				@pkId = pkId
+				@pk_id = pk_id
 			elsif object_typeOrDbObject.class < DomainObject
 				@dbObject = object_typeOrDbObject
 				@d_obj_retrieve_time = Time.now
 				@object_type = @dbObject.class
-				@pkId = @dbObject.pkId
+				@pk_id = @dbObject.pk_id
 			else
 				raise ArgumentError
 			end
@@ -241,7 +241,7 @@ module Lafcadio
 		def get_db_object
 			object_store = ObjectStore.get_object_store
 			if @dbObject.nil? || needs_refresh?
-				@dbObject = object_store.get(@object_type, @pkId)
+				@dbObject = object_store.get(@object_type, @pk_id)
 								@d_obj_retrieve_time = Time.now
 
 			end
@@ -258,7 +258,7 @@ module Lafcadio
 
 		def needs_refresh?
 			object_store = ObjectStore.get_object_store
-			last_commit_time = object_store.last_commit_time( @object_type, @pkId )
+			last_commit_time = object_store.last_commit_time( @object_type, @pk_id )
 			!last_commit_time.nil? && last_commit_time > @d_obj_retrieve_time
 		end
 		
@@ -274,7 +274,7 @@ module Lafcadio
 
 		def delete_sql(object_type)
 			"delete from #{ object_type.table_name} " +
-					"where #{ object_type.sql_primary_key_name }=#{ @obj.pkId }"
+					"where #{ object_type.sql_primary_key_name }=#{ @obj.pk_id }"
 		end
 
 		def get_name_value_pairs(object_type)
@@ -306,8 +306,8 @@ module Lafcadio
 
 		def sql_statements
 			statements = []
-			if @obj.errorMessages.size > 0
-				raise DomainObjectInitError, @obj.errorMessages, caller
+			if @obj.error_messages.size > 0
+				raise DomainObjectInitError, @obj.error_messages, caller
 			end
 			@obj.class.self_and_concrete_superclasses.each { |object_type|
 				statements << statement_bind_value_pair( object_type )
@@ -317,7 +317,7 @@ module Lafcadio
 
 		def statement_bind_value_pair( object_type )
 			@bindValues = []
-			if @obj.pkId == nil
+			if @obj.pk_id == nil
 				statement = insert_sql(object_type)
 			else
 				if @obj.delete
@@ -337,7 +337,7 @@ module Lafcadio
 			}
 			allNameValues = nameValueStrings.join ', '
 			"update #{ object_type.table_name} set #{allNameValues} " +
-					"where #{ object_type.sql_primary_key_name}=#{@obj.pkId}"
+					"where #{ object_type.sql_primary_key_name}=#{@obj.pk_id}"
 		end
 	end
 
@@ -362,8 +362,8 @@ module Lafcadio
 	# = Dynamic method calls
 	# ObjectStore uses reflection to provide a lot of convenience methods for
 	# querying domain objects in a number of ways.
-	# [ObjectStore#get< domain class > (pkId)]
-	#   Retrieves one domain object by pkId. For example,
+	# [ObjectStore#get< domain class > (pk_id)]
+	#   Retrieves one domain object by pk_id. For example,
 	#     ObjectStore#getUser( 100 )
 	#   will return User 100.
 	# [ObjectStore#get< domain class >s (searchTerm, fieldName = nil)]
@@ -429,12 +429,12 @@ module Lafcadio
 			@cache.flush dbObject
 		end
 
-		# Returns the domain object corresponding to the domain class and pkId.
-		def get(object_type, pkId)
-			query = Query.new object_type, pkId
+		# Returns the domain object corresponding to the domain class and pk_id.
+		def get(object_type, pk_id)
+			query = Query.new object_type, pk_id
 			@cache.get_by_query( query )[0] ||
 			    ( raise( DomainObjectNotFoundError,
-					         "Can't find #{object_type} #{pkId}", caller ) )
+					         "Can't find #{object_type} #{pk_id}", caller ) )
 		end
 
 		# Returns all domain objects for the given domain class.
@@ -486,17 +486,17 @@ module Lafcadio
 		
 		# Retrieves the maximum value across all instances of one domain class.
 		#   ObjectStore#get_max( Client )
-		# returns the highest +pkId+ in the +clients+ table.
+		# returns the highest +pk_id+ in the +clients+ table.
 		#   ObjectStore#get_max( Invoice, "rate" )
 		# will return the highest rate for all invoices.
 		def get_max( domain_class, field_name = nil )
 			@dbBridge.group_query( Query::Max.new( domain_class, field_name ) ).only
 		end
 
-		# Retrieves a collection of domain objects by +pkId+.
+		# Retrieves a collection of domain objects by +pk_id+.
 		#   ObjectStore#get_objects( Clients, [ 1, 2, 3 ] )
-		def get_objects(object_type, pkIds)
-			get_subset Query::In.new('pkId', pkIds, object_type)
+		def get_objects(object_type, pk_ids)
+			get_subset Query::In.new('pk_id', pk_ids, object_type)
 		end
 
 		def get_subset(conditionOrQuery) #:nodoc:
@@ -509,8 +509,8 @@ module Lafcadio
 			@cache.get_by_query( query )
 		end
 		
-		def last_commit_time( domain_class, pkId ) #:nodoc:
-			@cache.last_commit_time( domain_class, pkId )
+		def last_commit_time( domain_class, pk_id ) #:nodoc:
+			@cache.last_commit_time( domain_class, pk_id )
 		end
 
 		def method_missing(methodId, *args) #:nodoc:
@@ -535,7 +535,7 @@ module Lafcadio
 
 			# Flushes a domain object.
 			def flush(dbObject)
-				hash_by_object_type(dbObject.object_type).delete dbObject.pkId
+				hash_by_object_type(dbObject.object_type).delete dbObject.pk_id
 				flush_collection_cache( dbObject.object_type )
 			end
 			
@@ -548,8 +548,8 @@ module Lafcadio
 			end
 
 			# Returns a cached domain object, or nil if none is found.
-			def get(object_type, pkId)
-				hash_by_object_type(object_type)[pkId].clone
+			def get(object_type, pk_id)
+				hash_by_object_type(object_type)[pk_id].clone
 			end
 
 			# Returns an array of all domain objects of a given type.
@@ -562,12 +562,12 @@ module Lafcadio
 					newObjects = @dbBridge.get_collection_by_query(query)
 					newObjects.each { |dbObj| save dbObj }
 					@collections_by_query[query] = newObjects.collect { |dobj|
-						dobj.pkId
+						dobj.pk_id
 					}
 				end
 				collection = []
-				@collections_by_query[query].each { |pkId|
-					dobj = get( query.object_type, pkId )
+				@collections_by_query[query].each { |pk_id|
+					dobj = get( query.object_type, pk_id )
 					collection << dobj if dobj
 				}
 				collection
@@ -580,9 +580,9 @@ module Lafcadio
 				@objects[object_type]
 			end
 
-			def last_commit_time( domain_class, pkId )
+			def last_commit_time( domain_class, pk_id )
 				by_domain_class = @commit_times[domain_class]
-				by_domain_class ? by_domain_class[pkId] : nil
+				by_domain_class ? by_domain_class[pk_id] : nil
 			end
 			
 			def set_commit_time( d_obj )
@@ -591,12 +591,12 @@ module Lafcadio
 					by_domain_class = {}
 					@commit_times[d_obj.object_type] = by_domain_class
 				end
-				by_domain_class[d_obj.pkId] = Time.now
+				by_domain_class[d_obj.pk_id] = Time.now
 			end
 
 			# Saves a domain object.
 			def save(dbObject)
-				hash_by_object_type(dbObject.object_type)[dbObject.pkId] = dbObject
+				hash_by_object_type(dbObject.object_type)[dbObject.pk_id] = dbObject
 				flush_collection_cache( dbObject.object_type )
 			end
 			
@@ -712,7 +712,7 @@ module Lafcadio
 		end
 
 		def []( key )
-			if key == 'pkId'
+			if key == 'pk_id'
 				if ( field_val = @rowHash[@object_type.sql_primary_key_name] ).nil?
 					raise FieldMatchError, error_msg, caller
 				else

@@ -23,19 +23,19 @@ class TestSqlValueConverter < LafcadioTestCase
 		assert_nil converter['clientId']
 		assert_equal DomainObjectProxy, converter['client'].class
 		proxy = converter['client']
-		assert_equal 1, proxy.pkId
+		assert_equal 1, proxy.pk_id
 		assert_equal Client, proxy.object_type
   end
 
   def testConvertsPkId
-    rowHash = { "pkId" => "1", "name" => "clientName1",
+    rowHash = { "pk_id" => "1", "name" => "clientName1",
 		"standard_rate" => "70" }
     converter = SqlValueConverter.new(Client, rowHash)
-    assert_equal(Fixnum, converter["pkId"].class)
+    assert_equal(Fixnum, converter["pk_id"].class)
   end
 
 	def testInheritanceConstruction
-		rowHash = { 'pkId' => '1', 'name' => 'clientName1',
+		rowHash = { 'pk_id' => '1', 'name' => 'clientName1',
 				'billingType' => 'trade' }
 		objectHash = SqlValueConverter.new(InternalClient, rowHash)
 		assert_equal 'clientName1', objectHash['name']
@@ -46,8 +46,8 @@ class TestSqlValueConverter < LafcadioTestCase
 		row_hash = { 'objId' => '1', 'name' => 'client name',
 		             'standard_rate' => '70' }
 		object_hash = SqlValueConverter.new( Client, row_hash )
-		error_msg = 'The field "pkId" can\'t be found in the table "clients".'
-		assert_exception( FieldMatchError, error_msg ) { object_hash['pkId'] }
+		error_msg = 'The field "pk_id" can\'t be found in the table "clients".'
+		assert_exception( FieldMatchError, error_msg ) { object_hash['pk_id'] }
 	end
 	
 	def test_different_db_field_name

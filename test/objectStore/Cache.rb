@@ -10,7 +10,7 @@ class TestObjectStoreCache < LafcadioTestCase
 
 	def test_clones
 		user = User.getTestUser
-		user.pkId = 1
+		user.pk_id = 1
 		@cache.save( user )
 		assert( user.object_id != @cache.get( User, 1 ).object_id )
 		@cache.get_all( User ).each { |a_user|
