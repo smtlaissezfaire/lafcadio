@@ -1,4 +1,5 @@
 require 'lafcadio/objectStore/CouldntMatchObjectTypeError'
+require 'lafcadio/domain/DomainObject'
 
 class ClassUtil
   def ClassUtil.getObjectTypeFromString (typeString)
@@ -7,7 +8,12 @@ class ClassUtil
 		typeString =~ /([^\:]*)$/
 		config = Config.new
 		classPath = config['classpath']
-		domainDirs = config['domainDirs'].split(',')
+		domainDirStr = config['domainDirs']
+		if domainDirStr
+			domainDirs = domainDirStr.split(',')
+		else
+			domainDirs = [ classPath + 'domain/' ]
+		end
 		domainDirs.each { |domainDir|
 			if Dir.entries(domainDir).index("#{$1}.rb")
 				require "#{ domainDir }#{ $1 }"
