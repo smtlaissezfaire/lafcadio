@@ -1,5 +1,6 @@
 require 'lafcadio/util/ContextualService'
 require 'lafcadio/objectStore/Cache'
+require 'lafcadio/objectStore/Collection'
 require 'lafcadio/objectStore/DomainObjectNotFoundError'
 
 class ObjectStore < ContextualService
