@@ -4,10 +4,17 @@ CHANGELOG
 Initial alpha release.
 
 0.1.1 -- July 27 2003
-* extracted DomainUtil from ClassUtil.
-* extended sprintf-style support in DateFormatter.
-* you can set a BooleanField's enums directly with BooleanField#enums
+* Extracted DomainUtil from ClassUtil.
+* Extended sprintf-style support in DateFormatter.
+* You can set a BooleanField's enums directly with BooleanField#enums
 * Collector#getMapObject raises ArgumentError if either of its keys are nil
 * ObjectStore flushes cache after new object commit
-* added HashOfArrays#[], HashOfArrays#[]=
-* added StrUtil.lineWrap
+* Added HashOfArrays#[], HashOfArrays#[]=
+* Added StrUtil.lineWrap
+
+0.1.2 -- August 6 2003
+* Cleaned up code to work with Ruby 1.8.0. 
+* The code's been optimized in a number of places.
+* MockEmailer calls Email#verifySendable before pretending to send an email. 
+* DateTimeField#valueFromSQL throws an informative error if it gets an unparseable string.
+* Condition#toSql can deal with fields of superclasses
