@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'lafcadio/query/Like'
+require 'lafcadio/query'
 require '../test/mock/domain/InternalClient'
 require '../test/mock/domain/Invoice'
 
