@@ -68,7 +68,7 @@ module Lafcadio
 	# DomainObject#preCommitTrigger and DomainObject#postCommitTrigger for more.
 	class ObjectStore < ContextualService
 		def ObjectStore.setDbName(dbName) #:nodoc:
-			DbBridge.setDbName dbName
+			DbConnection.set_db_name dbName
 		end
 		
 		def initialize(context, dbBridge = nil) #:nodoc:

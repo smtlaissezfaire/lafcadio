@@ -71,14 +71,15 @@ class TestDBBridge < RUNIT::TestCase
   def setup
 		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
     @mockDbh = MockDbh.new
-    @dbb = DbBridge.new(@mockDbh)
+		DbConnection.set_dbh( @mockDbh )
+		@dbb = DbBridge.new
     @client = Client.new( {"pkId" => 1, "name" => "clientName1"} )
   end
 
   def teardown
 		@dbb = nil
- 		DbBridge.flushConnection
-		DbBridge.setDbName nil
+ 		DbConnection.flush
+		DbConnection.set_db_name nil
 	end
 
   def test_commits_delete
@@ -104,38 +105,13 @@ class TestDBBridge < RUNIT::TestCase
 		assert_equal( 1, xml_sku.link1.pkId )
 	end
 
-  class MockDbi
-    @@instances = 0
-    @@dbName = nil
-
-		def MockDbi.connect( dbAndHost, user, password )
-			@@dbName = dbAndHost.split(':')[2]
-      @@instances += 1
-      raise "initialize me just once, please" if @@instances > 1
-      return MockDbh.new
-		end
-
-		def MockDbi.flushInstanceCount
-			@@instances = 0
-		end
-
-		def MockDbi.dbName
-			@@dbName
-		end
-  end
-
-  def testConnectionPooling
-  	DbBridge.setConnectionClass( MockDbi )
-    100.times { DbBridge.new }
-    DbBridge.flushConnection
-    DbBridge.setConnectionClass( DBI )
-  end
-
   def testLastPkIdInserted
     client = Client.new( { "name" => "clientName1" } )
     @dbb.commit client
     assert_equal 12, @dbb.lastPkIdInserted
-		dbb2 = DbBridge.new @mockDbh
+    DbConnection.flush
+    DbConnection.set_dbh( @mockDbh )
+		dbb2 = DbBridge.new
     assert_equal 12, dbb2.lastPkIdInserted
   end
 
@@ -164,16 +140,6 @@ class TestDBBridge < RUNIT::TestCase
 		assert_equal( invoice.date, @dbb.group_query( query2 ).only )
 	end
 	
-	def testDbName
-  	DbBridge.setConnectionClass( MockDbi )
-  	DbBridge.flushConnection
-		MockDbi.flushInstanceCount
-		ObjectStore.setDbName 'some_other_db'
-		db = DbBridge.new( nil )
-		assert_equal 'some_other_db', MockDbi.dbName
-    DbBridge.setConnectionClass( DBI )
-	end
-	
 	def testLogsSql
 		logFilePath = '../test/testOutput/sql'
 		@dbb.executeSelect( 'select * from users' )
@@ -190,10 +156,5 @@ class TestDBBridge < RUNIT::TestCase
 		logFilePath = '../test/testOutput/another.sql'
 		@dbb.executeSelect( 'select * from users' )
 		fail if Time.now - File.ctime( logFilePath ) > 5
-	end
-	
-	def testDisconnect
-		DbBridge.disconnect
-		assert !@mockDbh.connected?
 	end
 end

@@ -1,21 +1,15 @@
 require 'rubygems'
-
 require 'dbi'
 require_gem 'log4r'
+require 'lafcadio/objectStore'
 require 'lafcadio/util/LafcadioConfig'
 
 module Lafcadio
 	class DbBridge #:nodoc:
 		@@dbh = nil
 		@@lastPkIdInserted = nil
-		@@dbName = nil
-		@@connectionClass = DBI
 		
-		def DbBridge.setDbName(dbName)
-			@@dbName = dbName
-		end
-		
-		def DbBridge._load(aString)
+		def self._load(aString)
 			aString =~ /dbh:/
 			dbString = $'
 			begin
@@ -26,49 +20,16 @@ module Lafcadio
 			new dbh
 		end
 		
-		def DbBridge.flushConnection
-			@@dbh = nil
+		def initialize
+			@db_conn = DbConnection.getDbConnection
+			ObjectSpace.define_finalizer( self, proc { |id|
+				DbConnection.getDbConnection.disconnect
+			} )
 		end
-		
-		def DbBridge.setConnectionClass( aClass )
-			@@connectionClass = aClass
-		end
-		
-		def DbBridge.disconnect
-			@@dbh.disconnect if @@dbh
-		end
-		
-		def initialize(dbh = nil)
-			if dbh == nil
-				if @@dbh == nil
-					config = LafcadioConfig.new
-					dbName = @@dbName || config['dbname']
-					dbAndHost = nil
-					if dbName && config['dbhost']
-						dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"
-					else
-						dbAndHost = "dbi:#{config['dbconn']}"
-					end
-					@@dbh = @@connectionClass.connect( dbAndHost, config['dbuser'],
-																						 config['dbpassword'] )
-				end
-			else
-				@@dbh = dbh
-			end
-			@dbh = @@dbh
-			ObjectSpace.define_finalizer( self, proc { |id| DbBridge.disconnect } )
-		end
-		
-		def maybeLog(sql)
-			config = LafcadioConfig.new
-			if config['logSql'] == 'y'
-				sqllog = Log4r::Logger['sql'] || Log4r::Logger.new( 'sql' )
-				filename = File.join( config['logdir'], config['sqlLogFile'] || 'sql' )
-				outputter = Log4r::FileOutputter.new( 'outputter',
-																							{ :filename => filename } )
-				sqllog.outputters = outputter
-				sqllog.info sql
-			end
+
+		def _dump(aDepth)
+			dbDump = @dbh.respond_to?( '_dump' ) ? @dbh._dump : @dbh.class.to_s
+			"dbh:#{dbDump}"
 		end
 		
 		def commit(dbObject)
@@ -82,59 +43,48 @@ module Lafcadio
 			end
 		end
 		
-		def executeCommit( sql, binds )
-			@dbh.do( sql, *binds )
-		end
-		
-		def getCollectionByQuery(query)
-			require 'lafcadio/objectStore/SqlValueConverter'
-			objectType = query.objectType
-			coll = []
-			objects = []
-			result = executeSelect query.toSql
-			result.each { |row_hash|
-				converter = SqlValueConverter.new(objectType, row_hash)
-				obj = objectType.new converter
-				objects << obj
-			}
-			coll = coll.concat objects
-			coll
-		end
+		def executeCommit( sql, binds ); @db_conn.do( sql, *binds ); end
 		
 		def executeSelect(sql)
 			maybeLog sql
 			begin
-				@dbh.select_all( sql )
+				@db_conn.select_all( sql )
 			rescue DBI::DatabaseError => e
 				raise $!.to_s + ": #{ e.errstr }"
 			end	
 		end
 		
-		def _dump(aDepth)
-			if @db.respond_to? '_dump'
-				dbDump = @db._dump
-			else
-				dbDump = @db.class.to_s
-			end
-			"dbh:#{dbDump}"
-		end
-		
-		def lastPkIdInserted
-			@@lastPkIdInserted
+		def getCollectionByQuery(query)
+			require 'lafcadio/objectStore/SqlValueConverter'
+			objectType = query.objectType
+			executeSelect( query.toSql ).collect { |row_hash|
+				objectType.new( SqlValueConverter.new( objectType, row_hash ) )
+			}
 		end
 		
 		def group_query( query )
-			row = executeSelect( query.toSql )[0]
-			result = []
-			row.each { |val|
+			executeSelect( query.toSql )[0].collect { |val|
 				if query.field_name != 'pkId'
 					a_field = query.objectType.getField( query.field_name )
-					result << a_field.valueFromSQL( val )
+					a_field.valueFromSQL( val )
 				else
-					result << val.to_i
+					val.to_i
 				end
 			}
-			result
+		end
+
+		def lastPkIdInserted; @@lastPkIdInserted; end
+		
+		def maybeLog(sql)
+			config = LafcadioConfig.new
+			if config['logSql'] == 'y'
+				sqllog = Log4r::Logger['sql'] || Log4r::Logger.new( 'sql' )
+				filename = File.join( config['logdir'], config['sqlLogFile'] || 'sql' )
+				outputter = Log4r::FileOutputter.new( 'outputter',
+																							{ :filename => filename } )
+				sqllog.outputters = outputter
+				sqllog.info sql
+			end
 		end
 	end
 end

@@ -3,6 +3,48 @@ Includer.include( 'objectStore' )
 require 'lafcadio/util/English'
 
 module Lafcadio
+	class DbConnection < ContextualService
+		@@connectionClass = DBI
+		@@db_name = nil
+		@@dbh = nil
+
+		def self.flush
+			Context.instance.setDbConnection( nil )
+			@@dbh = nil
+		end
+
+		def self.set_connection_class( aClass ); @@connectionClass = aClass; end
+
+		def self.set_db_name( db_name ); @@db_name = db_name; end
+
+		def self.set_dbh( dbh ); @@dbh = dbh; end
+		
+		def initialize( pass_key )
+			super
+			@@dbh = load_new_dbh if @@dbh.nil?
+			@dbh = @@dbh
+		end
+	
+		def disconnect; @dbh.disconnect if @dbh; end
+		
+		def load_new_dbh
+			config = LafcadioConfig.new
+			dbName = @@db_name || config['dbname']
+			dbAndHost = nil
+			if dbName && config['dbhost']
+				dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"
+			else
+				dbAndHost = "dbi:#{config['dbconn']}"
+			end
+			@@dbh = @@connectionClass.connect( dbAndHost, config['dbuser'],
+																				 config['dbpassword'] )
+		end
+		
+		def method_missing( symbol, *args )
+			@dbh.send( symbol, *args )
+		end
+	end
+
 	class FieldMatchError < StandardError; end
 
 	class ObjectStore
