@@ -1,5 +1,14 @@
 CHANGELOG
 
+0.5.0 -- September 5 2004
+* ObjectStore raises an informative error if a domain class' primary key is defined incorrectly
+* instead of using an external config file, you can set LafcadioConfig's values using LafcadioConfig.setValues
+* convenience methods for defining domain class methods in Ruby
+* fixed bug on ObjectStore#getClients( 1, 'client_id' ) for domain classes with non-standard primary keys
+* one-line methods for overriding DomainObject.tableName and DomainObject.sqlPrimaryKeyName
+* lots of code cleanup
+* WARNING: Removed DecimalField#precision; ObjectField#defaultFieldName, #hideLabel, #writeOnce, #hideDisplay, #default, #notUniqueMsg; LinkField#listener, #newDuringEdit, #sortField; PasswordField#maxLength, #autoGenerate; TextField#large, #size; HashOfArrays
+
 0.4.0 -- June 26 2004
 * WARNING: Domain object primary key is now named "pkId", not "objId"
 * Added ObjectStore#getMax( domain_class, field_name )
