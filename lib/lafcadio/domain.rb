@@ -247,7 +247,6 @@ module Lafcadio
 	class DomainObject
 		@@subclassHash = {}
 		@@class_fields = {}
-		@@sql_primary_key_names = {}
 
 		COMMIT_ADD = 1
 		COMMIT_EDIT = 2
@@ -433,16 +432,16 @@ module Lafcadio
 		# the class definition XML if necessary.
 		def self.sql_primary_key_name( set_sql_primary_key_name = nil )
 			if set_sql_primary_key_name
-				@@sql_primary_key_names[self] = set_sql_primary_key_name
-			elsif @@sql_primary_key_names[self].nil?
+				get_field( 'pk_id' ).db_field_name = set_sql_primary_key_name
+			elsif get_field( 'pk_id' ).db_field_name.nil?
 				xmlParser = try_load_xml_parser
 				if !xmlParser.nil? && ( spkn = xmlParser.sql_primary_key_name )
-					@@sql_primary_key_names[self] = spkn
+					get_field( 'pk_id' ).db_field_name = spkn
 				else
-					@@sql_primary_key_names[self] = 'pk_id'
+					get_field( 'pk_id' ).db_field_name = 'pk_id'
 				end
 			end
-			@@sql_primary_key_names[self]
+			get_field( 'pk_id' ).db_field_name
 		end
 
 		def self.subclasses #:nodoc:

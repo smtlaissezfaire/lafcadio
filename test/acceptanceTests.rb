@@ -46,7 +46,7 @@ create table testbadrows (
 	def self.drop_table( dbh ); dbh.do( 'drop table testbadrows' ); end
 
 	def self.get_class_fields
-		fields = []
+		fields = super
 		fields << TextField.new( self, 'text_field' )
 		fields
 	end
