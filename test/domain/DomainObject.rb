@@ -142,4 +142,18 @@ class TestDomainObject < LafcadioTestCase
 		client.commit
 		assert_equal 1, @mockObjectStore.getAll(Client).size
 	end
+	
+	class MockDomainObject < DomainObject
+		@@classesInstantiated = false
+		
+		def MockDomainObject.getClassFields
+			raise "should be cached" if @@classesInstantiated
+			@@classesInstantiated = true
+			[]
+		end
+	end
+	
+	def testCachesClassFields
+		2.times { MockDomainObject.classFields }
+	end
 end

@@ -30,6 +30,7 @@ require 'lafcadio/objectStore/DomainObjectProxy'
 
 class DomainObject
 	@@subclassHash = {}
+	@@classFields = {}
 
 	COMMIT_ADD = 1
 	COMMIT_EDIT = 2
@@ -40,8 +41,17 @@ class DomainObject
 	# Any concrete class that inherits from DomainObject needs to define this
 	# method to return an array of ObjectField instances. You don't have to define
 	# an ObjectField instance for "objId".
+	def DomainObject.getClassFields
+		raise "getClassFields needs to be defined for #{ self.name }"
+	end
+	
 	def DomainObject.classFields
-		raise "classFields needs to be defined for #{ self.name }"
+		classFields = @@classFields[self]
+		unless classFields
+			@@classFields[self] = self.getClassFields
+			classFields = @@classFields[self]
+		end
+		classFields
 	end
 
 	# Returns an array of subclasses that cannot be instantiated.
