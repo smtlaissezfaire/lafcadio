@@ -1,6 +1,7 @@
 require 'lafcadio/test/LafcadioTestCase'
 require 'test/mock/domain/User'
 require 'test/mock/domain/Invoice'
+require 'test/mock/domain/InternalClient'
 require 'test/mock/domain/Client'
 
 class TestEquals < LafcadioTestCase
@@ -19,5 +20,10 @@ class TestEquals < LafcadioTestCase
 	def testObjId
 		equals = Query::Equals.new ('objId', 123, Client)
 		assert_equal 'objId = 123', equals.toSql
+	end
+
+	def testSubclass
+		clientCondition = Query::Equals.new ('name', 'client 1', InternalClient)
+		assert_equal "name = 'client 1'", clientCondition.toSql
 	end
 end
