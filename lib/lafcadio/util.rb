@@ -22,28 +22,28 @@ module Lafcadio
 		include Singleton
 
 		def initialize
-			@resources = {}
+			flush
 			@init_procs = {}
 		end
 		
-		def create_instance( service_class ) #:nodoc:
+		def create_instance( service_class, *init_args ) #:nodoc:
 			if ( proc = @init_procs[service_class] )
-				proc.call
+				proc.call( *init_args )
 			else
-				service_class.new
+				service_class.new( *init_args )
 			end
 		end
 		
 		# Flushes all cached ContextualServices.
 		def flush
-			@resources = {}
+			@resources_by_class = Hash.new { |hash, key| hash[key] = {} }
 		end
 
-		def get_resource( service_class ) #:nodoc:
-			resource = @resources[service_class]
+		def get_resource( service_class, *init_args ) #:nodoc:
+			resource = @resources_by_class[service_class][init_args]
 			unless resource
-				resource = create_instance( service_class )
-				set_resource service_class, resource
+				resource = create_instance( service_class, *init_args )
+				set_resource( service_class, resource, *init_args )
 			end
 			resource
 		end
@@ -52,8 +52,8 @@ module Lafcadio
 			@init_procs[service_class] = proc
 		end
 		
-		def set_resource(service_class, resource) #:nodoc:
-			@resources[service_class] = resource
+		def set_resource( service_class, resource, *init_args ) #:nodoc:
+			@resources_by_class[service_class][init_args] = resource
 		end
 	end
 

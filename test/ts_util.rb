@@ -35,6 +35,12 @@ end
 
 class ServiceB < ContextualService
 end
+
+class ParamService < ContextualService
+	def initialize( arg1, arg2 )
+		super()
+	end
+end
 	
 class TestContextualService < Test::Unit::TestCase
 	def testClassMethodAccess
@@ -69,6 +75,17 @@ class TestContextualService < Test::Unit::TestCase
 		assert_equal( Outer::Inner, inner.class )
 		inner_prime = Outer::Inner.get_inner
 		assert_equal( inner, inner_prime )
+	end
+	
+	def test_init_with_args
+		serv1 = ParamService.get_param_service( 123, 456 )
+		serv2 = ParamService.get_param_service( 123, 456 )
+		assert_equal( serv1.id, serv2.id )
+		serv3 = ParamService.get_param_service( 456, 123 )
+		assert( serv1.id != serv3.id )
+		mock_serv = "some object"
+		ParamService.set_param_service( mock_serv, 111, 222 )
+		assert_equal( mock_serv, ParamService.get_param_service( 111, 222 ) )
 	end
 	
 	def test_requires_init_called_through_Context_create_instance
