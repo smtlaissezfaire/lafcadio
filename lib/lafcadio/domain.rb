@@ -613,12 +613,15 @@ module Lafcadio
 				set_field( field, args.first )
 			elsif ( field = get_getter_field( methId ) )
 				get_field( field )
-			elsif ( methId.to_s =~ /^get_/ and
-			        ObjectStore.get_object_store.respond_to?( methId ) )
-				args = [ self ].concat( args )
-				ObjectStore.get_object_store.send( methId, *args )
 			else
-				super( methId, *args )
+				new_symbol = ( 'get_' + methId.id2name ).to_sym
+				object_store = ObjectStore.get_object_store
+				if object_store.respond_to? new_symbol
+					args = [ self ].concat args
+					object_store.send( 'get_' + methId.id2name, *args )
+				else
+					super( methId, *args )
+				end
 			end
 		end
 
