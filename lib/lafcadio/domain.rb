@@ -405,8 +405,12 @@ module Lafcadio
 				end
 			else
 				maybe_field_class_name = method_name.underscore_to_camel_case + 'Field'
-				field_class = Lafcadio.const_get( maybe_field_class_name )
-				create_field( field_class, args[0], args[1] || {} )
+				begin
+					field_class = Lafcadio.const_get( maybe_field_class_name )
+					create_field( field_class, args[0], args[1] || {} )
+				rescue NameError
+					super
+				end
 			end
 		end
 

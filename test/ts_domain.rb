@@ -417,6 +417,15 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal( [], MapObject.get_class_fields )
 	end
 	
+	def test_method_missing
+		begin
+			Client.foobar
+			fail "Should raise NoMethodError"
+		rescue NoMethodError => err
+			assert_equal( "undefined method `foobar' for Client:Class", err.to_s )
+		end
+	end
+	
 	def testObjectLinksUpdateLive
 		invoice = Invoice.storedTestInvoice
 		client = Client.storedTestClient
