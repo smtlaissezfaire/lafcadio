@@ -122,6 +122,12 @@ class TestQueryInferrer < LafcadioTestCase
 		assert_infer_match( desiredSql3, User ) { |user|
 			user.email.like( /hotmail$/ )
 		}
+		assert_raise( ArgumentError ) {
+			inferrer = Query::Inferrer.new( User ) { |user|
+				user.email.like( 'hotmail' )
+			}
+			inferrer.execute
+		}
 	end
 	
 	def testLink

@@ -572,18 +572,25 @@ module Lafcadio
 			end
 			
 			def like( regexp )
-				if regexp.source =~ /^\^(.*)/
-					searchTerm = $1
-					matchType = Query::Like::POST_ONLY
-				elsif regexp.source =~ /(.*)\$$/
-					searchTerm = $1
-					matchType = Query::Like::PRE_ONLY
+				if regexp.is_a?( Regexp )
+					if regexp.source =~ /^\^(.*)/
+						searchTerm = $1
+						matchType = Query::Like::POST_ONLY
+					elsif regexp.source =~ /(.*)\$$/
+						searchTerm = $1
+						matchType = Query::Like::PRE_ONLY
+					else
+						searchTerm = regexp.source
+						matchType = Query::Like::PRE_AND_POST
+					end
+					Query::Like.new( @field_name, searchTerm,
+													 @domainObjectImpostor.domain_class, matchType )
 				else
-					searchTerm = regexp.source
-					matchType = Query::Like::PRE_AND_POST
+					raise(
+						ArgumentError, "#{ @field_name }#like needs to receive a Regexp",
+						caller
+					)
 				end
-				Query::Like.new( @field_name, searchTerm,
-												 @domainObjectImpostor.domain_class, matchType )
 			end
 			
 			def in( *searchTerms )
