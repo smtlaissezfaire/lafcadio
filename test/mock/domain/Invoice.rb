@@ -19,27 +19,6 @@ class Invoice < DomainObject
 		inv
 	end
 
-  def Invoice.classFields
-		require 'lafcadio/objectField/LinkField'
-		require 'lafcadio/objectField/DateField'
-		require 'lafcadio/objectField/MoneyField'
-		require 'lafcadio/objectField/DecimalField'
-		require 'lafcadio/objectField/AutoIncrementField'
-		require 'test/mock/domain/Client'
-    invoiceNumField = AutoIncrementField.new(Invoice, "invoice_num",
-	"Invoice No.")
-    clientField = LinkField.new Invoice, Client
-    dateField = DateField.new Invoice
-    rateField = MoneyField.new Invoice, "rate"
-    rateField.setDefault(clientField, "standard_rate")
-    hoursField = DecimalField.new(Invoice, "hours", 2)
-    paidField = DateField.new(Invoice, "paid", "Paid")
-    paidField.notNull = false
-		xmlSku = LinkField.new( self, XmlSku )
-    [ invoiceNumField, clientField, dateField, rateField, hoursField,
-      paidField, xmlSku ]
-  end
-
   def name
     invoice_num.to_s
   end

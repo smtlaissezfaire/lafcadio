@@ -1,15 +1,6 @@
 require 'lafcadio/domain/DomainObject'
 
 class InventoryLineItem < DomainObject
-	def InventoryLineItem.classFields(fieldSet = 'default')
-		require 'lafcadio/objectField/LinkField'
-		require 'test/mock/domain/SKU'
-		require 'lafcadio/objectField/IntegerField'
-		sku = LinkField.new self, SKU
-		count = IntegerField.new self, 'count'
-		count.default = 0
-		[ sku, count ]
-	end
 end
 
 require 'runit/testcase'

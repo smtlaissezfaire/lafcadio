@@ -1,8 +1,6 @@
 require 'lafcadio/test'
 require 'lafcadio/domain'
-
-class XmlSku < DomainObject
-end
+require 'test/mock/domain/XmlSku'
 
 class TestClassDefinitionXmlParser < LafcadioTestCase
 	def execute( domainClass, xml )

@@ -1,0 +1,4 @@
+<lafcadio_class_definition name="InventoryLineItem">
+	<field name="sku" class="LinkField" linkedType="SKU" />
+	<field name="count" class="IntegerField" default="0" />
+</lafcadio_class_definition>

@@ -3,13 +3,6 @@ require 'test/mock/domain/InventoryLineItem'
 require 'test/mock/domain/Option'
 
 class InventoryLineItemOption < MapObject
-	def InventoryLineItemOption.classFields
-		lineItem = LinkField.new self, InventoryLineItem
-		option = LinkField.new self, Option
-		option.dbFieldName = 'optionId'
-		[ lineItem, option ]
-	end
-
 	def InventoryLineItemOption.mappedTypes
 		[ InventoryLineItem, Option ]
 	end
