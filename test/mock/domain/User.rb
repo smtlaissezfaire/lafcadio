@@ -1,6 +1,7 @@
 require 'lafcadio/domain/DomainObject'
 require 'lafcadio/objectField/SubsetLinkField'
 require 'lafcadio/objectField/EmailField'
+require 'lafcadio/objectField/TextField'
 
 class User < DomainObject
   def User.classFields
@@ -13,6 +14,7 @@ A profile already exists for the email address that you have entered.
 Please choose another email address.
 		MSG
 		fields << emailField
+		fields << TextField.new (self, 'firstNames')
     fields
   end
 

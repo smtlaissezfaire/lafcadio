@@ -2,6 +2,7 @@ require 'lafcadio/test/LafcadioTestCase'
 require 'date'
 require 'lafcadio/query/Compare'
 require 'test/mock/domain/Invoice'
+require 'test/mock/domain/User'
 
 class TestCompare < LafcadioTestCase
 	def testComparators
@@ -60,6 +61,12 @@ class TestCompare < LafcadioTestCase
 		dc = Query::Compare.new (
 				'date', Date.today, Invoice, Query::Compare::LESS_THAN)
 		assert !dc.objectMeets(invoice)
+	end
+
+	def testLessThan
+		condition = Query::Compare.new(
+				User.sqlPrimaryKeyName, 10, User, Query::Compare::LESS_THAN)
+		assert_equal 'objId < 10', condition.toSql
 	end
 
 	def testNumericalSearchingOfaLinkField
