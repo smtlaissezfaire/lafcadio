@@ -60,7 +60,7 @@ module Lafcadio
 		end
 
 		def textEnumType # :nodoc:
-			@enumType == ENUMS_CAPITAL_YES_NO
+			@enums ? @enums[true].class == String : @enumType == ENUMS_CAPITAL_YES_NO
 		end
 
 		def trueEnum( value = nil ) # :nodoc:

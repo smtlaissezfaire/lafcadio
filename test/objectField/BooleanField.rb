@@ -39,4 +39,10 @@ class TestBooleanField < LafcadioTestCase
 			# ok
 		end
 	end
+	
+	def test_text_enums
+		@bf.enums = { true => '1', false => '0' }
+		assert_equal( "'1'", @bf.valueForSQL( true ) )
+		assert_equal( "'0'", @bf.valueForSQL( false ) )
+	end
 end
