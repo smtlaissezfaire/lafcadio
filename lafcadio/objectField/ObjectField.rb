@@ -16,6 +16,22 @@ class ObjectField
   def ObjectField.viewerType
     FieldViewer
   end
+  
+  def ObjectField.instantiationParameters( fieldElt )
+		parameters = {}
+		parameters['name'] = fieldElt.attributes['name']
+		parameters['englishName'] = fieldElt.attributes['englishName']
+		parameters
+  end
+  
+  def ObjectField.instantiateFromXml( domainClass, fieldElt )
+		parameters = instantiationParameters( fieldElt )
+		instantiateWithParameters( domainClass, parameters )
+  end
+
+	def ObjectField.instantiateWithParameters( domainClass, parameters )
+		self.new( domainClass, parameters['name'], parameters['englishName'] )
+	end
 
 	# [objectType] The domain class that this object field belongs to.
 	# [name] The name of this field.

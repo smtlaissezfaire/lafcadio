@@ -5,6 +5,18 @@ class LinkField < ObjectField
 		require 'lafcadio/objectField/LinkFieldViewer'
 		LinkFieldViewer
   end
+  
+	def LinkField.instantiationParameters( fieldElt )
+		parameters = super( fieldElt )
+		linkedTypeStr = fieldElt.attributes['linkedType']
+		parameters['linkedType'] = ClassUtil.getClass( linkedTypeStr )
+		parameters
+	end
+
+  def LinkField.instantiateWithParameters( domainClass, parameters )
+		self.new( domainClass, parameters['linkedType'], parameters['name'],
+		          parameters['englishName'] )
+  end
 
   attr_reader :linkedType
   attr_accessor :listener, :objectStore, :newDuringEdit, :sortField

@@ -12,6 +12,17 @@ class DecimalField < ObjectField
   def DecimalField.viewerType
     DecimalFieldViewer
   end
+  
+  def DecimalField.instantiationParameters( fieldElt )
+		parameters = super( fieldElt )
+		parameters['precision'] = fieldElt.attributes['precision'].to_i
+		parameters
+  end
+  
+  def DecimalField.instantiateWithParameters( domainClass, parameters )
+		self.new( domainClass, parameters['name'], parameters['precision'],
+		          parameters['englishName'] )
+	end
 
   def initialize(objectType, name, precision, englishName = nil)
     super(objectType, name, englishName)

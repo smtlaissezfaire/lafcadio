@@ -57,34 +57,6 @@ class ClassDefinitionXmlParser
 	def initialize( domainClass, xml )
 		@domainClass = domainClass; @xml = xml
 	end
-	
-	def instantiateField( fieldClass, fieldElt, name )
-		englishName = fieldElt.attributes['englishName']
-		if fieldClass == DecimalField
-			precision = fieldElt.attributes['precision'].to_i
-			fieldClass.new( @domainClass, name, precision, englishName )
-		elsif fieldClass == EnumField
-			if fieldElt.elements['enums'][1].attributes['key']
-				enumValues = []
-				fieldElt.elements.each( 'enums/enum' ) { |enumElt|
-					enumValues << enumElt.attributes['key']
-					enumValues << enumElt.text.to_s
-				}
-				enums = QueueHash.new( *enumValues )
-			else
-				enums = []
-				fieldElt.elements.each( 'enums/enum' ) { |enumElt|
-					enums << enumElt.text.to_s
-				}
-			end
-			fieldClass.new( @domainClass, name, enums, englishName )
-		elsif fieldClass == LinkField
-			linkedType = ClassUtil.getClass( fieldElt.attributes['linkedType'] )
-			fieldClass.new( @domainClass, linkedType, name, englishName )
-		else
-			fieldClass.new( @domainClass, name, englishName )
-		end
-	end
 
 	def execute
 		require 'rexml/document'
@@ -97,7 +69,7 @@ class ClassDefinitionXmlParser
 			fieldClass = ClassUtil.getClass( fieldElt.attributes['class'] )
 			name = fieldElt.attributes['name']
 			raise InvalidDataError if namesProcessed[name]
-			field = instantiateField( fieldClass, fieldElt, name )
+			field = fieldClass.instantiateFromXml( @domainClass, fieldElt )
 			possibleFieldAttributes.each { |fieldAttr|
 				fieldAttr.maybeSetFieldAttr( field, fieldElt )
 			}
