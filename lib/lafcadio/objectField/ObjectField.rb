@@ -17,6 +17,7 @@ module Lafcadio
 			parameters = {}
 			parameters['name'] = fieldElt.attributes['name']
 			parameters['englishName'] = fieldElt.attributes['englishName']
+			parameters['dbFieldName'] = fieldElt.attributes['dbFieldName']
 			parameters
 		end
 		
@@ -26,13 +27,18 @@ module Lafcadio
 		end
 
 		def ObjectField.instantiateWithParameters( domainClass, parameters )
-			self.new( domainClass, parameters['name'], parameters['englishName'] )
+			instance = self.new( domainClass, parameters['name'],
+			                     parameters['englishName'] )
+			if ( dbFieldName = parameters['dbFieldName'] )
+				instance.dbFieldName = dbFieldName
+			end
+			instance
 		end
 
 		# [objectType] The domain class that this object field belongs to.
 		# [name] The name of this field.
 		# [englishName] The descriptive English name of this field.
-		def initialize(objectType, name, englishName = nil)
+		def initialize(objectType, name, englishName = nil )
 			@objectType = objectType
 			@name = name
 			@dbFieldName = name
