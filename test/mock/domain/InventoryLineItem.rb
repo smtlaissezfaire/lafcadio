@@ -1,4 +1,4 @@
-require 'lafcadio/domain/DomainObject'
+require 'lafcadio/domain'
 
 class InventoryLineItem < Lafcadio::DomainObject
 end

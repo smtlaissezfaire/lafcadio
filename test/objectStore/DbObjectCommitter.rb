@@ -1,6 +1,6 @@
 require 'date'
 require 'lafcadio/test/LafcadioTestCase'
-require 'lafcadio/mock/MockDbBridge'
+require 'lafcadio/mock'
 require '../test/mock/domain/Client'
 require 'lafcadio/objectStore/Committer'
 

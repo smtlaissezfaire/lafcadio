@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'lafcadio/domain/MapObject'
+require 'lafcadio/domain'
 require '../test/mock/domain/InternalClient'
 require '../test/mock/domain/Invoice'
 require '../test/mock/domain/Client'

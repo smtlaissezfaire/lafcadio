@@ -1,4 +1,4 @@
-require 'lafcadio/domain/DomainObject'
+require 'lafcadio/domain'
 require '../test/mock/domain'
 require 'lafcadio/objectField/LinkField'
 

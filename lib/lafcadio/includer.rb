@@ -11,7 +11,7 @@ class Includer # :nodoc:
 		}
 		if dir
 			dir.entries.each { |entry|
-				require "lafcadio/#{ subdir }/#{ $1 }" if entry =~ /(.*)\.rb/
+				require "lafcadio/#{ subdir }/#{ $1 }" if entry =~ /(.*)\.rb$/
 			}
 		end
 	end

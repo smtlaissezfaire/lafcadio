@@ -1,4 +1,4 @@
-require 'lafcadio/domain/DomainObject'
+require 'lafcadio/domain'
 require 'lafcadio/util/QueueHash'
 
 class SKU < Lafcadio::DomainObject

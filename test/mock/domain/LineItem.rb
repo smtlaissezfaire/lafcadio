@@ -1,4 +1,4 @@
-require 'lafcadio/domain/DomainObject'
+require 'lafcadio/domain'
 
 module Domain
 	class LineItem < Lafcadio::DomainObject

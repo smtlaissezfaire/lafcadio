@@ -1,4 +1,4 @@
-require 'lafcadio/domain/MapObject'
+require 'lafcadio/domain'
 require '../test/mock/domain/InventoryLineItem'
 require '../test/mock/domain/Option'
 

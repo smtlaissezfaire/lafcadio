@@ -1,5 +1,5 @@
 require 'lafcadio/objectStore/ObjectStore'
-require 'lafcadio/mock/MockDbBridge'
+require 'lafcadio/mock'
 
 module Lafcadio
 	# Externally, the MockObjectStore looks and acts exactly like the ObjectStore,

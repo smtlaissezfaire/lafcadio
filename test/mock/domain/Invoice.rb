@@ -1,4 +1,4 @@
-require 'lafcadio/domain/DomainObject'
+require 'lafcadio/domain'
 require 'lafcadio/test/LafcadioTestCase'
 require 'date'
 require '../test/mock/domain/Client'

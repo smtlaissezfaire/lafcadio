@@ -1,4 +1,4 @@
-require 'lafcadio/domain/DomainObject'
+require 'lafcadio/domain'
 require 'lafcadio/objectField/SubsetLinkField'
 require 'lafcadio/objectField/EmailField'
 require 'lafcadio/objectField/TextField'

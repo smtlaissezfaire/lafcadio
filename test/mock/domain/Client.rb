@@ -1,6 +1,6 @@
 require '../test/mock/domain/Invoice'
 require 'lafcadio/objectField/SubsetLinkField'
-require 'lafcadio/domain/DomainObject'
+require 'lafcadio/domain'
 require 'lafcadio/objectField/TextField'
 require 'lafcadio/objectField/MoneyField'
 

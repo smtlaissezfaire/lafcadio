@@ -1,5 +1,5 @@
 require 'lafcadio/objectField/TextField'
-require 'lafcadio/domain/DomainObject'
+require 'lafcadio/domain'
 require '../test/mock/domain/Option'
 
 class Attribute < Lafcadio::DomainObject
