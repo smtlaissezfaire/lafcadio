@@ -1,3 +1,4 @@
+require 'lafcadio/domain'
 require 'lafcadio/util'
 
 # A utility class that handles a few details for the DomainObject class. All the 
@@ -8,7 +9,7 @@ class ObjectType
 	
 	def self.flush; @@instances = {}; end
 	
-	def ObjectType.getObjectType( aClass )
+	def self.getObjectType( aClass )
 		instance = @@instances[aClass]
 		if instance.nil?
 			@@instances[aClass] = new( aClass )
@@ -20,8 +21,6 @@ class ObjectType
 	private_class_method :new
 
 	def initialize(objectType)
-		require 'lafcadio/domain'
-
 		@objectType = objectType
 		dirName = LafcadioConfig.new['classDefinitionDir']
 		xmlFileName = ClassUtil.bareClassName( @objectType ) + '.xml'
@@ -33,24 +32,6 @@ class ObjectType
 		rescue Errno::ENOENT
 			# no xml file, so no @xmlParser
 		end
-	end
-
-	# Returns the table name, which is assumed to be the domain class name 
-	# pluralized, and with the first letter lowercase. A User class is
-	# assumed to be stored in a "users" table, while a ProductCategory class is
-	# assumed to be stored in a "productCategories" table.
-	def tableName
-		if (!@xmlParser.nil? && tableName = @xmlParser.tableName)
-			tableName
-		else
-			tableName = ClassUtil.bareClassName @objectType
-			tableName[0] = tableName[0..0].downcase
-			EnglishUtil.plural tableName
-		end
-	end
-
-	def sqlPrimaryKeyName
-		!@xmlParser.nil? && ( spkn = @xmlParser.sqlPrimaryKeyName ) ? spkn : 'objId'
 	end
 
   def englishName
@@ -69,5 +50,23 @@ class ObjectType
 		end
 		@classFields
   end
+
+	def sqlPrimaryKeyName
+		!@xmlParser.nil? && ( spkn = @xmlParser.sqlPrimaryKeyName ) ? spkn : 'objId'
+	end
+
+	# Returns the table name, which is assumed to be the domain class name 
+	# pluralized, and with the first letter lowercase. A User class is
+	# assumed to be stored in a "users" table, while a ProductCategory class is
+	# assumed to be stored in a "productCategories" table.
+	def tableName
+		if (!@xmlParser.nil? && tableName = @xmlParser.tableName)
+			tableName
+		else
+			tableName = ClassUtil.bareClassName @objectType
+			tableName[0] = tableName[0..0].downcase
+			EnglishUtil.plural tableName
+		end
+	end
 end
 
