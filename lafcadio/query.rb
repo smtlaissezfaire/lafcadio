@@ -2,6 +2,13 @@ require 'lafcadio/includer'
 Includer.include( 'query' )
 
 class Query
+	def self.And( *conditions ); CompoundCondition.new( *conditions ); end
+	
+	def self.Or( *conditions )
+		conditions << CompoundCondition::OR
+		CompoundCondition.new( *conditions)
+	end
+
 	class Inferrer
 		def initialize( domainClass, &action )
 			@domainClass = domainClass; @action = action
@@ -11,17 +18,6 @@ class Query
 			impostor = DomainObjectImpostor.new( @domainClass )
 			condition = @action.call( impostor )
 			query = Query.new( @domainClass, condition )
-		end
-		
-		module Methods
-			def query_and( *conditions )
-				CompoundCondition.new( *conditions )
-			end
-			
-			def query_or( *conditions )
-				conditions << CompoundCondition::OR
-				CompoundCondition.new( *conditions)
-			end
 		end
 	end
 	
