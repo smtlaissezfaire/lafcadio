@@ -31,4 +31,9 @@ class TestEquals < LafcadioTestCase
 		equals = Query::Equals.new( 'administrator', false, User )
 		assert_equal( 'administrator = 0', equals.toSql )
 	end
+	
+	def testDbFieldName
+		equals = Query::Equals.new( 'text1', 'foobar', XmlSku )
+		assert_equal( "text_one = 'foobar'", equals.toSql )
+	end
 end

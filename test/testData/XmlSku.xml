@@ -31,7 +31,8 @@
 	<field name="month1" class="MonthField"/>
 	<field name="subsetLink1" class="SubsetLinkField" linkedType="Invoice"
 	       subsetField="xmlSku" />
-	<field name="text1" class="TextField" size="16" unique="y"/>
+	<field name="text1" class="TextField" size="16" unique="y"
+	                    dbFieldName="text_one" />
 	<field name="text2" class="TextField" large="y"/>
 	<field name="textList1" class="TextListField" dbFieldName="text_list1" />
 </lafcadio_class_definition>

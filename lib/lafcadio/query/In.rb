@@ -9,7 +9,7 @@ module Lafcadio
 			end
 
 			def toSql
-				"#{ @fieldName } in (#{ @searchTerm.join(', ') })"
+				"#{ dbFieldName } in (#{ @searchTerm.join(', ') })"
 			end
 
 			def objectMeets(anObj)

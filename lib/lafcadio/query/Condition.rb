@@ -32,6 +32,14 @@ module Lafcadio
 				end
 			end
 			
+			def dbFieldName
+				if @objectType.sqlPrimaryKeyName == @fieldName
+					@fieldName
+				else
+					getField.dbFieldName
+				end
+			end
+			
 			def getField
 				anObjectType = @objectType
 				field = nil

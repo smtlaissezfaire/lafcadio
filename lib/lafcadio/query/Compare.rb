@@ -28,10 +28,10 @@ module Lafcadio
 					useFieldForSqlValue = true unless field.class <= LinkField
 				end
 				if useFieldForSqlValue
-					"#{ @fieldName } #{ @@comparators[@compareType] } " +
+					"#{ dbFieldName } #{ @@comparators[@compareType] } " +
 							field.valueForSQL(@searchTerm).to_s
 				else
-					"#{ @fieldName } #{ @@comparators[@compareType] } #{ @searchTerm }"
+					"#{ dbFieldName } #{ @@comparators[@compareType] } #{ @searchTerm }"
 				end
 			end
 

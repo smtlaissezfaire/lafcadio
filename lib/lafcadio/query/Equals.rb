@@ -5,7 +5,7 @@ module Lafcadio
 		# Tests whether a field is equal to a given value.
 		class Equals < Condition
 			def toSql
-				sql = "#{ @fieldName } "
+				sql = "#{ dbFieldName } "
 				unless @searchTerm.nil?
 					sql += "= "
 					if @fieldName == @objectType.sqlPrimaryKeyName

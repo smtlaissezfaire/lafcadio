@@ -33,4 +33,9 @@ class TestLike < LafcadioTestCase
 		condition = Query::Like.new('name', 'client name', InternalClient)
 		assert_equal "name like '%client name%'", condition.toSql
 	end
+
+	def testDbFieldName
+		condition = Query::Like.new( 'text1', 'foobar', XmlSku )
+		assert_equal( "text_one like '%foobar%'", condition.toSql )
+	end
 end

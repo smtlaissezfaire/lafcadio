@@ -81,4 +81,10 @@ class TestCompare < LafcadioTestCase
 				Query::Compare::LESS_THAN)
 		assert_equal 'standard_rate < 10', condition.toSql
 	end
+
+	def testDbFieldName
+		compare = Query::Compare.new( 'text1', 'foobar', XmlSku,
+		                              Query::Compare::LESS_THAN )
+		assert_equal( "text_one < 'foobar'", compare.toSql )
+	end
 end

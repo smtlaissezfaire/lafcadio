@@ -33,7 +33,7 @@ module Lafcadio
 				elsif @matchType == POST_ONLY
 					withWildcards += "%"
 				end
-				"#{ @fieldName } like '#{ withWildcards }'"
+				"#{ dbFieldName } like '#{ withWildcards }'"
 			end
 
 			def objectMeets(anObj)
