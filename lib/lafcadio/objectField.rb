@@ -16,8 +16,7 @@ module Lafcadio
 		end
 
 		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
-			instance = self.new( domain_class, parameters['name'],
-			                     parameters['english_name'] )
+			instance = self.new( domain_class, parameters['name'] )
 			if ( db_field_name = parameters['db_field_name'] )
 				instance.db_field_name = db_field_name
 			end
@@ -27,7 +26,6 @@ module Lafcadio
 		def self.instantiation_parameters( fieldElt ) #:nodoc:
 			parameters = {}
 			parameters['name'] = fieldElt.attributes['name']
-			parameters['english_name'] = fieldElt.attributes['english_name']
 			parameters['db_field_name'] = fieldElt.attributes['db_field_name']
 			parameters
 		end
@@ -38,14 +36,12 @@ module Lafcadio
 
 		# [object_type]  The domain class that this object field belongs to.
 		# [name]        The name of this field.
-		# [english_name] The descriptive English name of this field. (Deprecated)
-		def initialize(object_type, name, english_name = nil )
+		def initialize( object_type, name )
 			@object_type = object_type
 			@name = name
 			@db_field_name = name
 			@not_null = true
 			@unique = false
-			@english_nameOrNil = english_name
 		end
 		
 		def <=>(other)
@@ -64,10 +60,6 @@ module Lafcadio
 
 		def db_will_automatically_write #:nodoc:
 			false
-		end
-
-		def english_name #:nodoc:
-			@english_nameOrNil || English.camel_case_to_english(name).capitalize
 		end
 
 		# Returns the name that this field is referenced by in the MySQL table. By 
@@ -122,7 +114,7 @@ module Lafcadio
 			}
 			collisions = ObjectStore.get_object_store.get_subset( inferrer.execute )
 			if collisions.size > 0
-				notUniqueMsg = "That #{english_name.downcase} already exists."
+				notUniqueMsg = "That #{name} already exists."
 				raise FieldValueError, notUniqueMsg, caller
 			end
 		end
@@ -157,8 +149,8 @@ module Lafcadio
 	class AutoIncrementField < IntegerField # :nodoc:
 		attr_reader :object_type
 
-		def initialize(object_type, name, english_name = nil)
-			super(object_type, name, english_name)
+		def initialize( object_type, name )
+			super( object_type, name )
 			@object_type = object_type
 		end
 
@@ -220,8 +212,8 @@ module Lafcadio
 
 		attr_accessor :enum_type, :enums
 
-		def initialize(object_type, name, english_name = nil)
-			super(object_type, name, english_name)
+		def initialize( object_type, name )
+			super( object_type, name )
 			@enum_type = ENUMS_ONE_ZERO
 			@enums = nil
 		end
@@ -279,8 +271,8 @@ module Lafcadio
 
 		attr_accessor :range
 
-		def initialize(object_type, name = "date", english_name = nil)
-			super(object_type, name, english_name)
+		def initialize( object_type, name = "date" )
+			super( object_type, name )
 			@range = RANGE_NEAR_FUTURE
 		end
 
@@ -321,7 +313,7 @@ module Lafcadio
 	# DecimalField represents a decimal value.
 	class DecimalField < ObjectField
 		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
-			self.new( domain_class, parameters['name'], parameters['english_name'] )
+			self.new( domain_class, parameters['name'] )
 		end
 
 		def self.value_type #:nodoc:
@@ -346,8 +338,8 @@ module Lafcadio
 			address =~ /^[^ @]+@[^ \.]+\.[^ ,]+$/
 		end
 
-		def initialize(object_type, name = "email", english_name = nil)
-			super(object_type, name, english_name)
+		def initialize( object_type, name = "email" )
+			super( object_type, name )
 		end
 
 		def null_error_msg #:nodoc:
@@ -379,8 +371,7 @@ module Lafcadio
 	#
 	class EnumField < TextField
 		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
-			self.new( domain_class, parameters['name'], parameters['enums'],
-								parameters['english_name'] )
+			self.new( domain_class, parameters['name'], parameters['enums'] )
 		end
 
 		def self.enum_queue_hash( fieldElt )
@@ -411,9 +402,8 @@ module Lafcadio
 		# [name]        The name of this domain class.
 		# [enums]       An array of Strings representing the possible choices for
 		#               this field.
-		# [english_name] The English name of this field. (Deprecated)
-		def initialize(object_type, name, enums, english_name = nil)
-			super object_type, name, english_name
+		def initialize( object_type, name, enums )
+			super( object_type, name )
 			if enums.class == Array 
 				@enums = QueueHash.new_from_array enums
 			else
@@ -445,7 +435,7 @@ module Lafcadio
 		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
 			instance = self.new(
 				domain_class, parameters['linked_type'], parameters['name'],
-				parameters['english_name'], parameters['delete_cascade']
+				parameters['delete_cascade']
 			)
 			if parameters['db_field_name']
 				instance.db_field_name = parameters['db_field_name']
@@ -468,17 +458,16 @@ module Lafcadio
 		# [object_type]    The domain class that this field belongs to.
 		# [linked_type]    The domain class that this field points to.
 		# [name]          The name of this field.
-		# [english_name]   The English name of this field. (Deprecated)
 		# [delete_cascade] If this is true, deleting the domain object that is linked
 		#                 to will cause this domain object to be deleted as well.
-		def initialize( object_type, linked_type, name = nil, english_name = nil,
+		def initialize( object_type, linked_type, name = nil,
 		                delete_cascade = false )
 			unless name
 				linked_type.name =~ /::/
 				name = $' || linked_type.name
 				name = name.decapitalize
 			end
-			super(object_type, name, english_name)
+			super( object_type, name )
 			( @linked_type, @delete_cascade ) = linked_type, delete_cascade
 		end
 
@@ -563,16 +552,15 @@ module Lafcadio
 	# any of the 50 states of the United States, stored as each state's two-letter
 	# postal code.
 	class StateField < EnumField
-		def initialize(object_type, name = "state", english_name = nil)
-			super object_type, name, UsStates.states, english_name
+		def initialize( object_type, name = "state" )
+			super( object_type, name, UsStates.states )
 		end
 	end
 
 	class SubsetLinkField < LinkField #:nodoc:
 		def self.instantiate_with_parameters( domain_class, parameters )
 			self.new( domain_class, parameters['linked_type'],
-			          parameters['subset_field'], parameters['name'],
-								parameters['english_name'] )
+			          parameters['subset_field'], parameters['name'] )
 		end
 
 		def self.instantiation_parameters( fieldElt )
@@ -583,9 +571,9 @@ module Lafcadio
 		
 		attr_accessor :subset_field
 
-		def initialize(object_type, linked_type, subset_field,
-				name = linked_type.name.downcase, english_name = nil)
-			super(object_type, linked_type, name, english_name)
+		def initialize( object_type, linked_type, subset_field,
+		                name = linked_type.name.downcase )
+			super( object_type, linked_type, name )
 			@subset_field = subset_field
 		end
 	end
@@ -618,8 +606,8 @@ module Lafcadio
 	end
 
 	class TimeStampField < DateTimeField #:nodoc:
-		def initialize(object_type, name = 'timeStamp', english_name = nil)
-			super( object_type, name, english_name )
+		def initialize( object_type, name = 'timeStamp' )
+			super( object_type, name )
 			@not_null = false
 		end
 

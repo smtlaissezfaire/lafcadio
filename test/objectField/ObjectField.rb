@@ -73,9 +73,4 @@ class TestObjectField < LafcadioTestCase
 		field = ObjectField.new( Client, 'name' )
 		field.verify( false, nil )
 	end
-	
-	def testEnglishName
-		field = ObjectField.new( Client, 'name', 'client name' )
-		assert_equal( 'client name', field.english_name )
-	end
 end

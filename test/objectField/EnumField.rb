@@ -6,7 +6,7 @@ class TestEnumField < LafcadioTestCase
 	def TestEnumField.getTestEnumField
 		cardTypes = QueueHash.new( 'AX', 'American Express', 'MC', 'MasterCard',
 				'VI', 'Visa', 'DS', 'Discover' )
-		EnumField.new User, "cardType", cardTypes,	"Credit card type"
+		EnumField.new( User, "cardType", cardTypes )
 	end
 
 	def testSimpleEnumsArray

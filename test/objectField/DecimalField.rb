@@ -4,7 +4,7 @@ require '../test/mock/domain'
 class TestDecimalField < LafcadioTestCase
   def setup
   	super
-    @odf = DecimalField.new(Invoice, "hours", 2)
+    @odf = DecimalField.new( Invoice, "hours" )
   end
   
   def testGetvalue_from_sql
