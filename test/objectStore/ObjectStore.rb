@@ -19,7 +19,7 @@ class TestObjectStore < LafcadioTestCase
 		@client = Client.getTestClient
 		@mockDbBridge.addObject @client
 	end
-
+	
 	def testDeepLinking
 		client1 = Client.getTestClient
 		@mockDbBridge.addObject client1
@@ -46,6 +46,13 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 0, @testObjectStore.getAll(Client).size
 	end
 
+	def test_dispatches_inferred_query_to_collector
+		setTestClient
+		clients = @testObjectStore.getClients { |client|
+			client.name.equals( @client.name )
+		}
+	end
+	
   def testDumpable
 		newOs = Marshal.load(Marshal.dump(@testObjectStore))
     assert_equal ObjectStore, newOs.class

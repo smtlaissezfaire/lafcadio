@@ -4,6 +4,8 @@ require 'lafcadio/objectStore'
 require 'lafcadio/util'
 require 'runit/testcase'
 
+include Lafcadio
+
 class AcceptanceTestCase < RUNIT::TestCase
 	def setup
 		super
@@ -18,7 +20,7 @@ class AcceptanceTestCase < RUNIT::TestCase
 	end
 
 	def get_dbh
-		LafcadioConfig.setFilename 'lafcadio/testConfig.dat'
+		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
 		config = LafcadioConfig.new
 		dbName = config['dbname']
 		dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"

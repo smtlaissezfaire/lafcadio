@@ -84,7 +84,9 @@ module Lafcadio
 		def method_missing(methodId, *args)
 			subsystems = { 'collector' => @collector, 'dbBridge' => @dbBridge,
 			               'retriever' => @retriever }
-			MethodDispatcher.new( subsystems, methodId, *args ).execute
+			proc = block_given? ? ( proc { |obj| yield( obj ) } ) : nil
+			dispatcher = MethodDispatcher.new( subsystems, methodId, proc, *args )
+			dispatcher.execute
 		end
 	end
 end

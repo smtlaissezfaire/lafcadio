@@ -4,8 +4,8 @@ Includer.include( 'objectStore' )
 module Lafcadio
 	class ObjectStore
 		class MethodDispatcher
-			def initialize( subsystems, methodId, *args )
-				@subsystems = subsystems; @methodId = methodId; @args = args
+			def initialize( subsystems, methodId, proc, *args )
+				@subsystems = subsystems; @methodId = methodId; @proc = proc; @args = args
 			end
 			
 			def dispatchGetMethod
@@ -23,7 +23,13 @@ module Lafcadio
 				while(@subsystems.size > 0 && !@resolved)
 					subsystem = ( @subsystems.shift )[1]
 					begin
-						@result = subsystem.send methodName, *@args
+						if @proc
+							@result = subsystem.send( methodName, *@args ) { |obj|
+								@proc.call( obj )
+							}
+						else
+							@result = subsystem.send methodName, *@args
+						end
 						@resolved = true
 					rescue CouldntMatchObjectTypeError, NoMethodError
 						# try the next one
