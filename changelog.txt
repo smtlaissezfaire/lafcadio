@@ -1,5 +1,25 @@
 CHANGELOG
 
+0.5.2 -- December 1 2004
+* WARNING: Changed all method and accessor names from camel-case to underscore.
+* WARNING: Month.new( month, year ) is now Month.new( year, month )
+* fixed bug where Query::Equals was failing with a field with a different db
+  field name
+* fixed bug where Query#order_by was failing in the MockObjectStore
+* fixed bug where ContextualService was accepting both #setObjectStore and
+  #set_object_store. Now it only accepts #set_object_store
+* Merged ObjectType back into DomainObject
+* Added PrimaryKeyField which is included automatically with a DomainObject's
+  fields
+* Can do direct query comparisons with a primary key:
+  ObjectStore#get_users { |user| user.pk_id.gt( 100 ) }
+* You can generate a query without executing it by using Query.infer, and
+  then change it interactively with Query#and and Query#or.
+* DomainObject's selectively dispatch to ObjectStore: Client#get_invoices
+* Can run Lafcadio without RubyGems
+* Query inference handles implicit evaluations of boolean fields:
+  ObjectStore#get_users { |user| user.administrator }
+
 0.5.1 -- October 5 2004
 * WARNING: Moved class files into submodule files. This will only affect you if for some reason you included files like "lafcadio/domain/DomainObject" directly instead of just including "lafcadio"
 * BooleanField#toSql handles '1'/'0' enum properly

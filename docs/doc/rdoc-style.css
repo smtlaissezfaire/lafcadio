@@ -2,6 +2,7 @@
 body {
     margin: 0;
     padding: 0;
+    background: white;
 }
 
 h1,h2,h3,h4 { margin: 0; color: #efefef; background: transparent; }
@@ -160,7 +161,9 @@ div.method-source-code {
 div.method-source-code pre { color: #ffdead; overflow: hidden; }
 
 /* --- Ruby keyword styles --------------------- */
-/* (requires a hacked html_generator.rb to add more class-types) */
+
+.standalone-code { background: #221111; color: #ffdead; overflow: hidden; }
+
 .ruby-constant	{ color: #7fffd4; background: transparent; }
 .ruby-keyword	{ color: #00ffff; background: transparent; }
 .ruby-ivar		{ color: #eedd82; background: transparent; }

@@ -2,7 +2,7 @@ require 'rubygems'
 spec = Gem::Specification.new do |s|
 	s.add_dependency( 'log4r' )
 	s.name = 'lafcadio'
-	s.version = '0.5.1'
+	s.version = '0.5.2'
 	s.platform = Gem::Platform::RUBY
 	s.date = Time.now
 	s.summary = "Lafcadio is an object-relational mapping layer"
