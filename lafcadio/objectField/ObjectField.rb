@@ -27,10 +27,11 @@ class ObjectField
     @notNull = true
     @unique = false
     @default = nil
+    @englishNameOrNil = englishName
   end
   
   def englishName
-		EnglishUtil.camelCaseToEnglish(name).capitalize
+		@englishNameOrNil || EnglishUtil.camelCaseToEnglish(name).capitalize
   end
 
   def nullErrorMsg
