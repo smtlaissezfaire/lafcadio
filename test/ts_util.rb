@@ -185,14 +185,6 @@ class TestConfig < Test::Unit::TestCase
 		LafcadioConfig.set_values( 'domainFiles' => %w( ../test/mock/domain ) )
 		DomainObject.require_domain_file( 'User' )
 	end
-
-	def testSiteName
-		assert_equal 'Site Name', @config['siteName']
-	end
-
-	def testURL
-		assert_equal "http://test.url", @config['url']
-	end
 end
 
 class TestQueueHash < LafcadioTestCase

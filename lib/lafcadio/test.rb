@@ -13,7 +13,12 @@ class LafcadioTestCase < Test::Unit::TestCase
   	context.flush
     @mockObjectStore = MockObjectStore.new
 		ObjectStore.set_object_store @mockObjectStore
-		LafcadioConfig.set_filename 'lafcadio/test/testConfig.dat'
+		LafcadioConfig.set_values(
+			'classDefinitionDir' => '../test/testData', 'dbhost' => 'localhost',
+			'dbname' => 'test', 'dbpassword' => 'password', 'dbuser' => 'test',
+			'domainFiles' => %w( ../test/mock/domain ),
+			'logdir' => '../test/testOutput/', 'logSql' => 'n'
+		)
   end
 	
 	def default_test; end

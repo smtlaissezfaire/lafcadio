@@ -109,13 +109,17 @@ class TestDBBridge < Test::Unit::TestCase
 		if FileTest.exist?( logFilePath )
 			fail if Time.now - File.ctime( logFilePath ) < 5
 		end
-		LafcadioConfig.set_filename( '../test/testData/config_with_sql_logging.dat' )
+		LafcadioConfig.set_filename(
+			'../test/testData/config_with_sql_logging.dat'
+		)
+		LafcadioConfig.set_values( nil )
 		@dbb.execute_select( 'select * from clients' )
 		fail if Time.now - File.ctime( logFilePath ) > 5
 	end
 	
 	def testLogsSqlToDifferentFileName
 		LafcadioConfig.set_filename( '../test/testData/config_with_log_path.dat' )
+		LafcadioConfig.set_values( nil )
 		logFilePath = '../test/testOutput/another.sql'
 		@dbb.execute_select( 'select * from users' )
 		fail if Time.now - File.ctime( logFilePath ) > 5
