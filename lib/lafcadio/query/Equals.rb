@@ -6,21 +6,24 @@ module Lafcadio
 			def toSql
 				sql = "#{ dbFieldName } "
 				unless @searchTerm.nil?
-					sql += "= "
-					if @fieldName == @objectType.sqlPrimaryKeyName
-						sql += @searchTerm.to_s
-					else
-						field = getField
-						if @searchTerm.class <= ObjectField
-							sql += @searchTerm.db_table_and_field_name
-						else
-							sql += field.valueForSQL(@searchTerm).to_s
-						end
-					end
+					sql += "= " + r_val_string
 				else
 					sql += "is null"
 				end
 				sql
+			end
+
+			def r_val_string
+				if primaryKeyField?
+					@searchTerm.to_s
+				else
+					field = getField
+					if @searchTerm.class <= ObjectField
+						@searchTerm.db_table_and_field_name
+					else
+						field.valueForSQL(@searchTerm).to_s
+					end
+				end
 			end
 
 			def objectMeets(anObj)

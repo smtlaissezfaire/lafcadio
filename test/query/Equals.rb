@@ -44,4 +44,11 @@ class TestEquals < LafcadioTestCase
 		odd_user = User.new( 'email' => 'foobar', 'firstNames' => 'foobar' )
 		assert( equals.objectMeets( odd_user ) )
 	end
+	
+	def test_different_pk_name
+		equals1 = Query::Equals.new( 'pkId', 123, XmlSku )
+		assert_equal( 'some_other_table.some_other_id = 123', equals1.toSql )
+		equals2 = Query::Equals.new( 'some_other_id', 123, XmlSku )
+		assert_equal( 'some_other_table.some_other_id = 123', equals2.toSql )
+	end
 end

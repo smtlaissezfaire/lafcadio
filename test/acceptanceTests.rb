@@ -19,7 +19,7 @@ class AcceptanceTestCase < RUNIT::TestCase
 		Context.instance.setObjectStore( nil )
 	end
 
-	def domain_classes; [ TestBadRow, TestRow, TestChildRow ]; end
+	def domain_classes; [ TestBadRow, TestRow, TestChildRow, TestDiffPkRow ]; end
 	
 	def get_dbh
 		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
@@ -52,6 +52,25 @@ create table testbadrows (
 	end
 end
 
+class TestDiffPkRow < DomainObject
+	text 'text_field'
+
+	def self.create_table( dbh )
+		dbh.do( 'drop table if exists testdiffpkrows' )
+		createSql = <<-CREATE
+create table testdiffpkrows (
+	objId int not null auto_increment,
+	primary key (objId),
+	text_field text
+)
+		CREATE
+		dbh.do( createSql )
+	end
+	
+	def self.drop_table( dbh ); dbh.do( 'drop table testdiffpkrows' ); end
+
+	def self.sqlPrimaryKeyName; 'objId'; end
+end
 
 class TestRow < DomainObject
 	def self.create_table( dbh )
@@ -209,30 +228,23 @@ class AccTestEquals < AcceptanceTestCase
 	end
 end
 
-class AccTestTextField < AcceptanceTestCase
-	def testEscaping
-		text = <<-TEXT
-// ~  $ \\
-some other line
-apostrophe's
-		TEXT
-		@dbh.do( 'insert into testrows( text_field ) values( ? )', text )
-		testrow = @object_store.getTestRow( 1 )
-		testrow.commit
-		text2 = "Por favor, don't just forward the icon through email\n'cause then you won't be able to see 'em through the web interface."
-		@dbh.do( 'insert into testrows( text_field ) values( ? )', text2 )
-		testrow2 = @object_store.getTestRow( 2 )
-		assert_equal( text2, testrow2.text_field )
-		testrow2.commit
-		text3 = "\n'''the defense asked if two days of work"
-		test_row3 = TestRow.new( 'text_field' => text3 )
-		test_row3.commit
-		test_row3_prime = @object_store.getTestRow( 3 )
-		assert_equal( text3, test_row3_prime.text_field )
-	end
-end
-
 class AccTestObjectStore < AcceptanceTestCase
+	def test_diff_pk
+		mock = TestDiffPkRow.new( 'pkId' => 1, 'text_field' => 'sample text' )
+		mock_object_store = MockObjectStore.new( Context.instance )
+		mock_object_store.commit( mock )
+		testdiffpkrow1_prime = mock_object_store.getTestDiffPkRows( 1,
+		                                                            'objId' ).first
+		assert_equal( 'sample text', testdiffpkrow1_prime.text_field )
+		sql = <<-SQL
+insert into testdiffpkrows( objId, text_field )
+values( 1, 'sample text' )
+		SQL
+		@dbh.do( sql )
+		testdiffpkrow1 = @object_store.getTestDiffPkRows( 1, 'objId' ).first
+		assert_equal( 'sample text', testdiffpkrow1.text_field )
+	end
+
 	def test_large_result_set
 		num_rows = 1000
 		date_time_field = TestRow.getField( 'date_time' )
@@ -289,5 +301,28 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		assert_exception( FieldMatchError, error_msg ) {
 			@object_store.getAll( TestBadRow )
 		}
+	end
+end
+
+class AccTestTextField < AcceptanceTestCase
+	def testEscaping
+		text = <<-TEXT
+// ~  $ \\
+some other line
+apostrophe's
+		TEXT
+		@dbh.do( 'insert into testrows( text_field ) values( ? )', text )
+		testrow = @object_store.getTestRow( 1 )
+		testrow.commit
+		text2 = "Por favor, don't just forward the icon through email\n'cause then you won't be able to see 'em through the web interface."
+		@dbh.do( 'insert into testrows( text_field ) values( ? )', text2 )
+		testrow2 = @object_store.getTestRow( 2 )
+		assert_equal( text2, testrow2.text_field )
+		testrow2.commit
+		text3 = "\n'''the defense asked if two days of work"
+		test_row3 = TestRow.new( 'text_field' => text3 )
+		test_row3.commit
+		test_row3_prime = @object_store.getTestRow( 3 )
+		assert_equal( text3, test_row3_prime.text_field )
 	end
 end

@@ -25,10 +25,14 @@ module Lafcadio
 				end
 			end
 			
+			def primaryKeyField?
+				[ @objectType.sqlPrimaryKeyName, 'pkId' ].include?( @fieldName )
+			end
+			
 			def dbFieldName
-				if @objectType.sqlPrimaryKeyName == @fieldName
+				if primaryKeyField?
 					db_table = @objectType.tableName
-					db_field_name = @fieldName
+					db_field_name = @objectType.sqlPrimaryKeyName
 					"#{ db_table }.#{ db_field_name }"
 				else
 					getField.db_table_and_field_name
@@ -38,7 +42,7 @@ module Lafcadio
 			def getField
 				anObjectType = @objectType
 				field = nil
-				while(anObjectType < DomainObject || anObjectType < DomainObject) &&
+				while (anObjectType < DomainObject || anObjectType < DomainObject) &&
 							!field
 					field = anObjectType.getClassField @fieldName
 					anObjectType = anObjectType.superclass
