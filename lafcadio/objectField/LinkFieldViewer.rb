@@ -55,7 +55,6 @@ class LinkFieldViewer < FieldViewer
   end
 
 	def toAeFormRows
-		require 'test/mock/domain/User'
 		if @field.linkedType != User
 			super
 		else
