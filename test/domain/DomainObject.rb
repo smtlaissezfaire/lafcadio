@@ -1,7 +1,6 @@
 require 'lafcadio/test'
 require 'lafcadio/domain'
 require '../test/mock/domain'
-require '../test/mock/domain/XmlSku2'
 
 class TestDomainObject < LafcadioTestCase
 	def teardown

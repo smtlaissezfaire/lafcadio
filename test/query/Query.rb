@@ -1,5 +1,4 @@
 require 'lafcadio/test'
-require '../test/mock/domain/XmlSku'
 require '../test/mock/domain'
 require 'lafcadio/query'
 
