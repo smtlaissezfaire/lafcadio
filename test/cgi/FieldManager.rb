@@ -103,5 +103,13 @@ class TestFieldManager < LafcadioTestCase
 		assert_equal 9, date.month
 		assert_equal 10, date.day
 	end
+	
+	def testToHash
+		fm = fieldManager ({ 'a' => [ 'b' ], 'c' => [ 'd' ] })
+		hash = fm.to_hash
+		assert_equal 2, hash.size
+		assert_equal 'b', hash['a']
+		assert_equal 'd', hash['c']
+	end
 end
 

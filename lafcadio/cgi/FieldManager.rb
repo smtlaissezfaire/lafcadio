@@ -67,5 +67,11 @@ class FieldManager
 	def keys
 		@valueHash.keys
 	end
+
+	def to_hash
+		hash = {}
+		@valueHash.keys.each { |key| hash[key] = get key }
+		hash
+	end
 end
 
