@@ -131,7 +131,7 @@ module Lafcadio
 		
 		def group_query( query )
 			executeSelect( query.toSql )[0].collect { |val|
-				if query.field_name != query.objectType.sqlPrimaryKeyName
+				if query.field_name != query.objectType.sql_primary_key_name
 					a_field = query.objectType.getField( query.field_name )
 					a_field.valueFromSQL( val )
 				else
@@ -274,7 +274,7 @@ module Lafcadio
 
 		def deleteSql(objectType)
 			"delete from #{ objectType.tableName} " +
-					"where #{ objectType.sqlPrimaryKeyName }=#{ @obj.pkId }"
+					"where #{ objectType.sql_primary_key_name }=#{ @obj.pkId }"
 		end
 
 		def getNameValuePairs(objectType)
@@ -296,7 +296,7 @@ module Lafcadio
 			fields = objectType.classFields
 			nameValuePairs = getNameValuePairs(objectType)
 			if objectType.isBasedOn?
-				nameValuePairs[objectType.sqlPrimaryKeyName] = 'LAST_INSERT_ID()'
+				nameValuePairs[objectType.sql_primary_key_name] = 'LAST_INSERT_ID()'
 			end
 			fieldNameStr = nameValuePairs.keys.join ", "
 			fieldValueStr = nameValuePairs.values.join ", "
@@ -337,7 +337,7 @@ module Lafcadio
 			}
 			allNameValues = nameValueStrings.join ', '
 			"update #{ objectType.tableName} set #{allNameValues} " +
-					"where #{ objectType.sqlPrimaryKeyName}=#{@obj.pkId}"
+					"where #{ objectType.sql_primary_key_name}=#{@obj.pkId}"
 		end
 	end
 
@@ -713,7 +713,7 @@ module Lafcadio
 
 		def []( key )
 			if key == 'pkId'
-				if ( field_val = @rowHash[@objectType.sqlPrimaryKeyName] ).nil?
+				if ( field_val = @rowHash[@objectType.sql_primary_key_name] ).nil?
 					raise FieldMatchError, error_msg, caller
 				else
 					field_val.to_i
@@ -729,7 +729,7 @@ module Lafcadio
 		end
 
 		def error_msg
-			"The field \"" + @objectType.sqlPrimaryKeyName +
+			"The field \"" + @objectType.sql_primary_key_name +
 					"\" can\'t be found in the table \"" + 
 					@objectType.tableName + "\"."
 		end

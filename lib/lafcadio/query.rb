@@ -106,7 +106,7 @@ module Lafcadio
 				if pkIdOrCondition.class <= Condition
 					@condition = pkIdOrCondition
 				else
-					@condition = Query::Equals.new( objectType.sqlPrimaryKeyName,
+					@condition = Query::Equals.new( objectType.sql_primary_key_name,
 					                                pkIdOrCondition, objectType )
 				end
 			end
@@ -132,7 +132,7 @@ module Lafcadio
 		end
 
 		def sqlPrimaryKeyField(objectType)
-			"#{ objectType.tableName }.#{ objectType.sqlPrimaryKeyName }"
+			"#{ objectType.tableName }.#{ objectType.sql_primary_key_name }"
 		end
 
 		def tables
@@ -190,7 +190,7 @@ module Lafcadio
 			def dbFieldName
 				if primaryKeyField?
 					db_table = @objectType.tableName
-					db_field_name = @objectType.sqlPrimaryKeyName
+					db_field_name = @objectType.sql_primary_key_name
 					"#{ db_table }.#{ db_field_name }"
 				else
 					getField.db_table_and_field_name
@@ -219,7 +219,7 @@ module Lafcadio
 			end
 
 			def primaryKeyField?
-				[ @objectType.sqlPrimaryKeyName, 'pkId' ].include?( @fieldName )
+				[ @objectType.sql_primary_key_name, 'pkId' ].include?( @fieldName )
 			end
 		end
 
@@ -249,7 +249,7 @@ module Lafcadio
 			end
 
 			def toSql
-				not_pk = @fieldName != @objectType.sqlPrimaryKeyName
+				not_pk = @fieldName != @objectType.sql_primary_key_name
 				use_field_for_sql_value = ( not_pk &&
 				                            ( !( getField.class <= LinkField ) ||
 																		  @searchTerm.respond_to?( :objectType ) ) )
@@ -341,7 +341,7 @@ module Lafcadio
 			end
 
 			def objectMeets(anObj)
-				if @fieldName == @objectType.sqlPrimaryKeyName
+				if @fieldName == @objectType.sql_primary_key_name
 					object_value = anObj.pkId
 				else
 					object_value = anObj.send @fieldName
@@ -473,7 +473,7 @@ module Lafcadio
 					@field_name = field_name
 					@pk = false
 				else
-					@field_name = objectType.sqlPrimaryKeyName
+					@field_name = objectType.sql_primary_key_name
 					@pk = true
 				end
 			end

@@ -1,4 +1,4 @@
-<lafcadio_class_definition name="XmlSku" sqlPrimaryKeyName="some_other_id"
+<lafcadio_class_definition name="XmlSku" sql_primary_key_name="some_other_id"
                            tableName="some_other_table">
 	<field name="boolean1" class="BooleanField" enumType="ENUMS_CAPITAL_YES_NO"
 	       notNull="n" />

@@ -69,7 +69,7 @@ create table testdiffpkrows (
 	
 	def self.drop_table( dbh ); dbh.do( 'drop table testdiffpkrows' ); end
 
-	def self.sqlPrimaryKeyName; 'objId'; end
+	def self.sql_primary_key_name; 'objId'; end
 end
 
 class TestRow < DomainObject
@@ -103,7 +103,7 @@ create table testrows (
 		fields
 	end
 	
-	def TestRow.sqlPrimaryKeyName
+	def TestRow.sql_primary_key_name
 		'pkId'
 	end
 end
@@ -129,7 +129,7 @@ create table testchildrows (
 		fields
 	end
 	
-	def self.sqlPrimaryKeyName
+	def self.sql_primary_key_name
 		'pkId'
 	end
 end

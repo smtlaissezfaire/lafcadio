@@ -35,7 +35,7 @@ module Lafcadio
 			fields
 		end
 		
-		def possibleFieldAttributes
+		def possible_field_attributes
 			fieldAttr = []
 			fieldAttr << FieldAttribute.new( 'size', FieldAttribute::INTEGER )
 			fieldAttr << FieldAttribute.new( 'unique', FieldAttribute::BOOLEAN )
@@ -54,13 +54,13 @@ module Lafcadio
 		end
 		
 		def set_field_attributes( field, fieldElt )
-			possibleFieldAttributes.each { |fieldAttr|
+			possible_field_attributes.each { |fieldAttr|
 				fieldAttr.maybeSetFieldAttr( field, fieldElt )
 			}
 		end
 
-		def sqlPrimaryKeyName
-			@xmlDocRoot.attributes['sqlPrimaryKeyName']
+		def sql_primary_key_name
+			@xmlDocRoot.attributes['sql_primary_key_name']
 		end
 		
 		def tableName
@@ -216,7 +216,7 @@ module Lafcadio
 	# = Naming assumptions, and how to override them
 	# By default, Lafcadio assumes that every domain object is indexed by the
 	# field +pkId+ in the database schema. If you're dealing with a table that 
-	# uses a different field name, override DomainObject.sqlPrimaryKeyName.
+	# uses a different field name, override DomainObject.sql_primary_key_name.
 	# However, you will always use +pkId+ in your Ruby code.
 	#
 	# Lafcadio assumes that a domain class corresponds to a table whose name is 
@@ -601,14 +601,14 @@ module Lafcadio
 
 		# Returns the name of the primary key in the database, retrieving it from
 		# the class definition XML if necessary.
-		def sqlPrimaryKeyName( set_sql_primary_key_name = nil )
+		def sql_primary_key_name( set_sql_primary_key_name = nil )
 			if set_sql_primary_key_name
-				@sqlPrimaryKeyName = set_sql_primary_key_name
-			elsif @sqlPrimaryKeyName
-				@sqlPrimaryKeyName
+				@sql_primary_key_name = set_sql_primary_key_name
+			elsif @sql_primary_key_name
+				@sql_primary_key_name
 			else
 				try_load_xml_parser
-				if !@xmlParser.nil? && ( spkn = @xmlParser.sqlPrimaryKeyName )
+				if !@xmlParser.nil? && ( spkn = @xmlParser.sql_primary_key_name )
 					spkn
 				else
 					'pkId'

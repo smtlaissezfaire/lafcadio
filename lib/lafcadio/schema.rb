@@ -22,9 +22,9 @@ module Lafcadio
 
 		def toSql
 			createDefinitions = []
-			createDefinitions << "#{ @domainClass.sqlPrimaryKeyName } " +
+			createDefinitions << "#{ @domainClass.sql_primary_key_name } " +
 													 "int not null auto_increment"
-			createDefinitions << "primary key (#{ @domainClass.sqlPrimaryKeyName })"
+			createDefinitions << "primary key (#{ @domainClass.sql_primary_key_name })"
 			@domainClass.classFields.each { |field|
 				createDefinitions << definition_terms( field )
 			}

@@ -28,5 +28,5 @@ class XmlSku2 < Lafcadio::DomainObject
 	timeStamp  'timestamp1'
 	
 	tableName         'that_table'
-	sqlPrimaryKeyName 'xml_sku2_id'
+	sql_primary_key_name 'xml_sku2_id'
 end

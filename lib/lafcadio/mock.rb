@@ -65,7 +65,7 @@ module Lafcadio
 
 		def group_query( query )
 			if query.class == Query::Max
-				if ( query.field_name == query.objectType.sqlPrimaryKeyName ||
+				if ( query.field_name == query.objectType.sql_primary_key_name ||
 					query.field_name == 'rate' )
 					query.collect( @objects[query.objectType].values )
 				else
