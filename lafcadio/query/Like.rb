@@ -26,7 +26,9 @@ class Query
 
 		def objectMeets (anObj)
 			value = anObj.send @fieldName
-			value = value.objId.to_s if value.type <= DBObject
+			if value.type <= DomainObject || value.type == DomainObjectProxy
+				value = value.objId.to_s
+			end
 			if value.type <= Array
 				(value.index(@searchTerm) != nil)
 			else
