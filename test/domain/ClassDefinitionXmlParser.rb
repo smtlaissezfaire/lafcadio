@@ -43,7 +43,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		matchField( XmlSku, 'month1', MonthField )
 		matchField( XmlSku, 'subsetLink1', SubsetLinkField,
 		            { 'subset_field' => 'xmlSku' } )
-		matchField( XmlSku, 'text1', TextField, { 'unique' => true } )
+		matchField( XmlSku, 'text1', TextField )
 		matchField( XmlSku, 'text2', TextField )
 		matchField( XmlSku, 'textList1', TextListField,
 		            { 'db_field_name' => 'text_list1' } )

@@ -8,7 +8,7 @@ module Lafcadio
 		include Comparable
 
 		attr_reader :name, :object_type
-		attr_accessor :not_null, :unique, :db_field_name
+		attr_accessor :not_null, :db_field_name
 
 		def self.instantiate_from_xml( domain_class, fieldElt ) #:nodoc:
 			parameters = instantiation_parameters( fieldElt )
@@ -41,7 +41,6 @@ module Lafcadio
 			@name = name
 			@db_field_name = name
 			@not_null = true
-			@unique = false
 		end
 		
 		def <=>(other)
@@ -103,19 +102,6 @@ module Lafcadio
 				       "#{ object_type.name }##{ name } needs a " + value_type.name +
 				           " value.",
 				       caller )
-			end
-			verify_uniqueness(value, pk_id) if unique
-		end
-
-		def verify_uniqueness(value, pk_id) #:nodoc:
-			inferrer = Query::Inferrer.new( @object_type ) { |domain_obj|
-				Query.And( domain_obj.send( self.name ).equals( value ),
-									 domain_obj.pk_id.equals( pk_id ).not )
-			}
-			collisions = ObjectStore.get_object_store.get_subset( inferrer.execute )
-			if collisions.size > 0
-				notUniqueMsg = "That #{name} already exists."
-				raise FieldValueError, notUniqueMsg, caller
 			end
 		end
 

@@ -112,8 +112,7 @@ class TestDomainObject < LafcadioTestCase
 		matchField( XmlSku2, 'month1', MonthField )
 		matchField( XmlSku2, 'subsetLink1', SubsetLinkField,
 		            { 'subset_field' => 'xmlSku' } )
-		matchField( XmlSku2, 'text1', TextField,
-		            { 'unique' => true } )
+		matchField( XmlSku2, 'text1', TextField )
 		matchField( XmlSku2, 'text2', TextField )
 		matchField( XmlSku2, 'textList1', TextListField,
 		            { 'db_field_name' => 'text_list1' } )

@@ -13,34 +13,6 @@ class TestObjectField < LafcadioTestCase
 		@mockObjectStore.commit @user
 	end
 
-  def testUniqueness
-    field = ObjectField.new(Client, "name")
-    field.unique = true
-    errorCaught = false
-    begin
-      field.verify("clientName1", nil)
-    rescue
-      errorCaught = true
-			assert_not_nil $!.to_s =~ /That name already exists./, $!.to_s
-    end
-    assert errorCaught
-    field.verify("clientName2", nil)
-		errorCaught = false
-		begin
-			field.verify "clientName1", nil
-		rescue
-			errorCaught = true
-			assert_not_nil $!.to_s =~ /That name already exists./
-		end
-		assert errorCaught
-  end
-
-  def testUniqueAllowsEditsOfSameRow
-    field = ObjectField.new User, "email"
-    field.unique = true
-    field.verify("test@test.com", 1)
-  end
-
 	def testNameForSQL
 		field = ObjectField.new User, "id"
 		field.db_field_name = "pk_id"
