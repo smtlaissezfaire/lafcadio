@@ -57,7 +57,7 @@ module Lafcadio
 			dependent_classes = @dbObject.object_type.dependent_classes
 			dependent_classes.keys.each { |aClass|
 				field = dependent_classes[aClass]
-				collection = @objectStore.getFiltered( aClass.name, @dbObject,
+				collection = @objectStore.get_filtered( aClass.name, @dbObject,
 																							 field.name )
 				collection.each { |dependentObject|
 					if field.deleteCascade
@@ -407,7 +407,7 @@ module Lafcadio
 	# Since these triggers are executed in Ruby, they're easy to test. See
 	# DomainObject#pre_commit_trigger and DomainObject#post_commit_trigger for more.
 	class ObjectStore < ContextualService
-		def ObjectStore.setDbName(dbName) #:nodoc:
+		def ObjectStore.set_db_name(dbName) #:nodoc:
 			DbConnection.set_db_name dbName
 		end
 		
@@ -442,13 +442,13 @@ module Lafcadio
 
 		# Returns the DbBridge; this is useful in case you need to use raw SQL for a
 		# specific query.
-		def getDbBridge; @dbBridge; end
+		def get_db_bridge; @dbBridge; end
 		
 		def get_field_name( domain_object )
 			domain_object.object_type.bareName.decapitalize
 		end
 
-		def getFiltered(object_typeName, searchTerm, fieldName = nil) #:nodoc:
+		def get_filtered(object_typeName, searchTerm, fieldName = nil) #:nodoc:
 			object_type = DomainObject.get_object_type_from_string object_typeName
 			fieldName = get_field_name( searchTerm ) unless fieldName
 			if searchTerm.class <= DomainObject
@@ -456,50 +456,50 @@ module Lafcadio
 			else
 				cond_class = Query::Equals
 			end
-			getSubset( cond_class.new( fieldName, searchTerm, object_type ) )
+			get_subset( cond_class.new( fieldName, searchTerm, object_type ) )
 		end
 
-		def getMapMatch(object_type, mapped) #:nodoc:
+		def get_map_match(object_type, mapped) #:nodoc:
 			Query::Equals.new( get_field_name( mapped ), mapped, object_type )
 		end
 
-		def getMapObject(object_type, map1, map2) #:nodoc:
+		def get_map_object(object_type, map1, map2) #:nodoc:
 			unless map1 && map2
 				raise ArgumentError,
-						"ObjectStore#getMapObject needs two non-nil keys", caller
+						"ObjectStore#get_map_object needs two non-nil keys", caller
 			end
-			mapMatch1 = getMapMatch object_type, map1
-			mapMatch2 = getMapMatch object_type, map2
+			mapMatch1 = get_map_match object_type, map1
+			mapMatch2 = get_map_match object_type, map2
 			condition = Query::CompoundCondition.new mapMatch1, mapMatch2
-			getSubset(condition)[0]
+			get_subset(condition)[0]
 		end
 
-		def getMapped(searchTerm, resultTypeName) #:nodoc:
+		def get_mapped(searchTerm, resultTypeName) #:nodoc:
 			resultType = DomainObject.get_object_type_from_string resultTypeName
 			firstTypeName = searchTerm.class.bareName
 			secondTypeName = resultType.bareName
 			mapTypeName = firstTypeName + secondTypeName
-			getFiltered( mapTypeName, searchTerm ).collect { |mapObj|
+			get_filtered( mapTypeName, searchTerm ).collect { |mapObj|
 				mapObj.send( resultType.name.decapitalize )
 			}
 		end
 		
 		# Retrieves the maximum value across all instances of one domain class.
-		#   ObjectStore#getMax( Client )
+		#   ObjectStore#get_max( Client )
 		# returns the highest +pkId+ in the +clients+ table.
-		#   ObjectStore#getMax( Invoice, "rate" )
+		#   ObjectStore#get_max( Invoice, "rate" )
 		# will return the highest rate for all invoices.
-		def getMax( domain_class, field_name = nil )
+		def get_max( domain_class, field_name = nil )
 			@dbBridge.group_query( Query::Max.new( domain_class, field_name ) ).only
 		end
 
 		# Retrieves a collection of domain objects by +pkId+.
-		#   ObjectStore#getObjects( Clients, [ 1, 2, 3 ] )
-		def getObjects(object_type, pkIds)
-			getSubset Query::In.new('pkId', pkIds, object_type)
+		#   ObjectStore#get_objects( Clients, [ 1, 2, 3 ] )
+		def get_objects(object_type, pkIds)
+			get_subset Query::In.new('pkId', pkIds, object_type)
 		end
 
-		def getSubset(conditionOrQuery) #:nodoc:
+		def get_subset(conditionOrQuery) #:nodoc:
 			if conditionOrQuery.class <= Query::Condition
 				condition = conditionOrQuery
 				query = Query.new condition.object_type, condition
@@ -647,7 +647,7 @@ module Lafcadio
 				inferrer = Query::Inferrer.new( @domain_class ) { |obj|
 					@maybe_proc.call( obj )
 				}
-				@symbol = :getSubset
+				@symbol = :get_subset
 				@args = [ inferrer.execute ]
 			end
 
@@ -656,7 +656,7 @@ module Lafcadio
 				if !@maybe_proc.nil? && searchTerm.nil?
 					dispatch_get_plural_by_query_block
 				elsif @maybe_proc.nil? && ( !( searchTerm.nil? && fieldName.nil? ) )
-					@symbol = :getFiltered
+					@symbol = :get_filtered
 					@args = [ @domain_class.name, searchTerm, fieldName ]
 				else
 					raise( ArgumentError,
@@ -687,7 +687,7 @@ module Lafcadio
 					@symbol = :get
 					@args = [ object_type, @orig_args[0] ]
 				elsif @orig_args[0].class <= DomainObject
-					@symbol = :getMapObject
+					@symbol = :get_map_object
 					@args = [ object_type, @orig_args[0], @orig_args[1] ]
 				end
 			end

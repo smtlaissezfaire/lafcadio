@@ -50,7 +50,7 @@ class TestGMockObjectStore < LafcadioTestCase
 		10.times { User.new({ 'firstNames' => 'John' }).commit }
 		query = Query.new( User, Query::Equals.new( 'firstNames', 'John', User ) )
 		query.limit = (1..5)
-		assert_equal( 5, @mockObjectStore.getSubset( query ).size )
+		assert_equal( 5, @mockObjectStore.get_subset( query ).size )
 	end
 
 	def testDontChangeFieldsUntilCommit

@@ -38,11 +38,11 @@ class TestCompare < LafcadioTestCase
 		                                DomainObjectProxy.new( Client, 10 ),
 																		Invoice, Query::Compare::LESS_THAN )
 		assert_equal( 'invoices.client < 10', condition.toSql )
-		assert_equal( 0, @mockObjectStore.getSubset( condition ).size )
+		assert_equal( 0, @mockObjectStore.get_subset( condition ).size )
 		condition2 = Query::Compare.new( 'client', 10, Invoice,
 		                                 Query::Compare::LESS_THAN )
 		assert_equal( 'invoices.client < 10', condition2.toSql )
-		assert_equal( 0, @mockObjectStore.getSubset( condition2 ).size )		
+		assert_equal( 0, @mockObjectStore.get_subset( condition2 ).size )		
 	end
 	
 	def testLessThan

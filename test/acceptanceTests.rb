@@ -224,7 +224,7 @@ class AccTestEquals < AcceptanceTestCase
 		row = TestRow.new( 'text2' => 'some text' )
 		row.commit
 		cond = Query::Equals.new( 'text2', 'some text', TestRow )
-		assert_equal( 1, @object_store.getSubset( cond ).size )
+		assert_equal( 1, @object_store.get_subset( cond ).size )
 		@object_store.flush( row )
 		row_prime = @object_store.getTestRow( 1 )
 		assert_equal( 'some text', row_prime.text2 )
@@ -244,7 +244,7 @@ insert into testdiffpkrows( objId, text_field )
 values( 1, 'sample text' )
 		SQL
 		@dbh.do( sql )
-		assert_equal( 1, @object_store.getMax( TestDiffPkRow ) )
+		assert_equal( 1, @object_store.get_max( TestDiffPkRow ) )
 	end
 
 	def test_large_result_set
@@ -281,7 +281,7 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		row1.commit
 		row2 = TestRow.new( 'date_time' => Time.utc( 1999, 1, 1 ) )
 		row2.commit
-		assert_equal( y2k, @object_store.getMax( TestRow, 'date_time' ) )
+		assert_equal( y2k, @object_store.get_max( TestRow, 'date_time' ) )
 	end
 	
 	def test_query_field_comparison

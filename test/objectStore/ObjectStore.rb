@@ -159,7 +159,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 	
 	def testGetDbBridge
-		assert_equal( @mockDbBridge, @testObjectStore.getDbBridge )
+		assert_equal( @mockDbBridge, @testObjectStore.get_db_bridge )
 	end
 
 	def testGetInvoices
@@ -181,22 +181,22 @@ class TestObjectStore < LafcadioTestCase
 		option = TestOption.storedTestOption
 		iliOption = TestInventoryLineItemOption.storedTestInventoryLineItemOption
 		assert_equal 1, @testObjectStore.get_all(InventoryLineItemOption).size
-		assert_equal iliOption, @testObjectStore.getMapObject(InventoryLineItemOption,
+		assert_equal iliOption, @testObjectStore.get_map_object(InventoryLineItemOption,
 				ili, option)
 		begin
-			@testObjectStore.getMapObject InventoryLineItemOption, ili, nil
+			@testObjectStore.get_map_object InventoryLineItemOption, ili, nil
 			fail 'Should throw an error'
 		rescue ArgumentError
 			errorStr = $!.to_s
-			assert_equal "ObjectStore#getMapObject needs two non-nil keys", errorStr
+			assert_equal "ObjectStore#get_map_object needs two non-nil keys", errorStr
 		end 
 	end
 	
-	def test_getMapped
+	def test_get_mapped
 		ili = TestInventoryLineItem.storedTestInventoryLineItem
 		option = TestOption.storedTestOption
 		iliOption = TestInventoryLineItemOption.storedTestInventoryLineItemOption
-		collection = @testObjectStore.getMapped( ili, 'Option' )
+		collection = @testObjectStore.get_mapped( ili, 'Option' )
 		assert_equal( 1, collection.size )
 		option_prime = collection.first
 		assert_equal( Option, option_prime.object_type )
@@ -206,7 +206,7 @@ class TestObjectStore < LafcadioTestCase
 	def testGetObjects
 		@testObjectStore.commit Client.new( { "pkId" => 1, "name" => "clientName1" } )
 		@testObjectStore.commit Client.new( { "pkId" => 2, "name" => "clientName2" } )
-		coll = @testObjectStore.getObjects(Client, [ 1, 2 ])
+		coll = @testObjectStore.get_objects(Client, [ 1, 2 ])
 		assert_equal 2, coll.size
 		foundOne = false
 		foundTwo = false
@@ -216,20 +216,20 @@ class TestObjectStore < LafcadioTestCase
 		}
 		assert foundOne
 		assert foundTwo
-		coll2 = @testObjectStore.getObjects(Client, [ "1", "2" ])
+		coll2 = @testObjectStore.get_objects(Client, [ "1", "2" ])
 		assert_equal 2, coll.size
 	end
 
 	def testGetSubset
 		setTestClient
 		condition = Query::Equals.new 'name', 'clientName1', Client
-		assert_equal @client, @testObjectStore.getSubset(condition)[0]
+		assert_equal @client, @testObjectStore.get_subset(condition)[0]
 		query = Query.new Client, condition
-		assert_equal @client, @testObjectStore.getSubset(query)[0]
+		assert_equal @client, @testObjectStore.get_subset(query)[0]
 		query2 = Query.new( Client, Query::Equals.new( 'name', 'foobar', Client ) )
-		assert_equal( 0, @testObjectStore.getSubset( query2 ).size )
+		assert_equal( 0, @testObjectStore.get_subset( query2 ).size )
 		assert_equal( 1, @mockDbBridge.query_count[query2])
-		assert_equal( 0, @testObjectStore.getSubset( query2 ).size )
+		assert_equal( 0, @testObjectStore.get_subset( query2 ).size )
 		assert_equal( 1, @mockDbBridge.query_count[query])
 	end
 
@@ -245,12 +245,12 @@ class TestObjectStore < LafcadioTestCase
 
 	def testMax
 		setTestClient
-		assert_equal 1, @testObjectStore.getMax(Client)
+		assert_equal 1, @testObjectStore.get_max(Client)
 		Invoice.storedTestInvoice
-		assert_equal( 70, @testObjectStore.getMax( Invoice, 'rate' ) )
+		assert_equal( 70, @testObjectStore.get_max( Invoice, 'rate' ) )
 		xml_sku = XmlSku.new( 'pkId' => 25 )
 		xml_sku.commit
-		assert_equal( 25, @testObjectStore.getMax( XmlSku ) )
+		assert_equal( 25, @testObjectStore.get_max( XmlSku ) )
 	end
 
 	def testGetWithaNonLinkingField	

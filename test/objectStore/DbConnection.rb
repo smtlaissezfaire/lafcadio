@@ -21,7 +21,7 @@ class TestDbConnection < RUNIT::TestCase
   	DbConnection.set_connection_class( MockDbi )
   	DbConnection.flush
 		MockDbi.flushInstanceCount
-		ObjectStore.setDbName 'some_other_db'
+		ObjectStore.set_db_name 'some_other_db'
 		db = DbBridge.new
 		assert_equal 'some_other_db', MockDbi.dbName
     DbConnection.set_connection_class( DBI )

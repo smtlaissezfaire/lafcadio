@@ -120,7 +120,7 @@ module Lafcadio
 				Query.And( domain_obj.send( self.name ).equals( value ),
 									 domain_obj.pkId.equals( pkId ).not )
 			}
-			collisions = ObjectStore.get_object_store.getSubset( inferrer.execute )
+			collisions = ObjectStore.get_object_store.get_subset( inferrer.execute )
 			if collisions.size > 0
 				notUniqueMsg = "That #{english_name.downcase} already exists."
 				raise FieldValueError, notUniqueMsg, caller
