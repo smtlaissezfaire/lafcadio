@@ -97,12 +97,12 @@ create table testrows (
 	
 	def self.drop_table( dbh ); dbh.do( 'drop table testrows' ); end
 
-	text     'text_field'
-	dateTime 'date_time'
-	boolean  'bool_field'
-	blob     'blob_field'
-	text     'text2', { 'db_field_name' => 'text_field2' }
-	link     'test_diff_pk_row', { 'linked_type' => TestDiffPkRow }
+	text      'text_field'
+	date_time 'date_time'
+	boolean   'bool_field'
+	blob      'blob_field'
+	text      'text2', { 'db_field_name' => 'text_field2' }
+	link      'test_diff_pk_row', { 'linked_type' => TestDiffPkRow }
 
 	def TestRow.sql_primary_key_name
 		'pk_id'
