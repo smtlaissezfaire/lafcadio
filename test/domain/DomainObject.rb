@@ -311,7 +311,7 @@ class TestDomainObject < LafcadioTestCase
 	class MockDomainObject < DomainObject
 		@@classesInstantiated = false
 		
-		def MockDomainObject.getClassFields
+		def MockDomainObject.get_class_fields
 			raise "should be cached" if @@classesInstantiated
 			@@classesInstantiated = true
 			[]

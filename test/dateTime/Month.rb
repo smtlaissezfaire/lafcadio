@@ -58,8 +58,8 @@ class TestMonth < LafcadioTestCase
 	end
 	
 	def testStartDateAndEndDate
-		assert_equal( Date.new( 2000, 12, 1 ), @dec2000.startDate )
-		assert_equal( Date.new( 2000, 12, 31 ), @dec2000.endDate )
-		assert_equal( Date.new( 1999, 2, 28 ), Month.new( 2, 1999 ).endDate )
+		assert_equal( Date.new( 2000, 12, 1 ), @dec2000.start_date )
+		assert_equal( Date.new( 2000, 12, 31 ), @dec2000.end_date )
+		assert_equal( Date.new( 1999, 2, 28 ), Month.new( 2, 1999 ).end_date )
 	end
 end

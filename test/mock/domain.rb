@@ -34,4 +34,4 @@ class TestAttribute < LafcadioTestCase
 	end
 end
 
-class NoXml < Lafcadio::DomainObject; def NoXml.getClassFields; []; end; end
+class NoXml < Lafcadio::DomainObject; def NoXml.get_class_fields; []; end; end

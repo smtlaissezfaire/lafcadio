@@ -1,11 +1,11 @@
 module Lafcadio
-	# Represents a specific month in time. With the exception of Month.monthNames
+	# Represents a specific month in time. With the exception of Month.month_names
 	# (which returns a zero-based array), every usage of the month value assumes
 	# that 1 equals January and 12 equals December.
 	class Month
 		# Returns an array of the full names of months (in English). Note that
 		# "January" is the 0th element, and "December" is the 11th element.
-		def Month.monthNames
+		def Month.month_names
 			[ "January", "February", "March", "April", "May", "June", "July",
 			  "August", "September", "October", "November", "December" ]
 		end
@@ -55,8 +55,8 @@ module Lafcadio
 		end
 
 		# Returns the last Date of the month.
-		def endDate
-			self.next.startDate - 1
+		def end_date
+			self.next.start_date - 1
 		end
 
 		# Is this Month equal to +anOther+? +anOther+ must be another Month of the
@@ -81,13 +81,13 @@ module Lafcadio
 		end
 		
 		# Returns the first Date of the month.
-		def startDate
+		def start_date
 			Date.new( @year, @month, 1 )
 		end
 		
 		# Returns a string of the format "January 2001".
 		def to_s
-			Month.monthNames[@month-1][0..2] + " " + @year.to_s
+			Month.month_names[@month-1][0..2] + " " + @year.to_s
 		end
 	end
 end

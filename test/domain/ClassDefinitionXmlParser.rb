@@ -4,8 +4,8 @@ require '../test/mock/domain'
 require '../test/mock/domain/XmlSku'
 
 class TestClassDefinitionXmlParser < LafcadioTestCase
-	def getClassFields( domainClass, xml )
-		ClassDefinitionXmlParser.new( domainClass, xml ).getClassFields
+	def get_class_fields( domainClass, xml )
+		ClassDefinitionXmlParser.new( domainClass, xml ).get_class_fields
 	end
 
 	def matchField( domainClass, fieldName, fieldClass, attributes = nil )
@@ -54,7 +54,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 	
 	def testFieldNamesNeedToBeUnique
 		begin
-			getClassFields( XmlSku, <<-XML
+			get_class_fields( XmlSku, <<-XML
 				<lafcadio_class_definition name="XmlSku">
 					<field name="date1" class="DateField" notNull="n"/>
 					<field name="date1" class="DateField"/>
@@ -69,7 +69,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 	
 	def testUsefulErrorMessages
 		begin
-			getClassFields( XmlSku, <<-XML
+			get_class_fields( XmlSku, <<-XML
 				<lafcadio_class_definition name="XmlSku">
 					<field name="date1" notNull="n"/>
 				</lafcadio_class_definition>

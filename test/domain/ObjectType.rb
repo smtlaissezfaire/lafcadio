@@ -28,11 +28,11 @@ class TestObjectType < LafcadioTestCase
 		`mv ../test/testData/Attribute.xml ../test/testData/Attribute.xml.tmp`
 		begin
 			ObjectType.flush
-			Attribute.getClassFields
+			Attribute.get_class_fields
 			fail "Definitely needs to raise an Exception"
 		rescue MissingError
 			assert_equal( "Couldn't find either an XML class description file or " +
-			              "getClassFields method for Attribute", $!.to_s )
+			              "get_class_fields method for Attribute", $!.to_s )
 		end
 	end
 end

@@ -45,7 +45,7 @@ create table testbadrows (
 	
 	def self.drop_table( dbh ); dbh.do( 'drop table testbadrows' ); end
 
-	def self.getClassFields
+	def self.get_class_fields
 		fields = []
 		fields << TextField.new( self, 'text_field' )
 		fields
@@ -91,7 +91,7 @@ create table testrows (
 	
 	def self.drop_table( dbh ); dbh.do( 'drop table testrows' ); end
 
-	def TestRow.getClassFields
+	def TestRow.get_class_fields
 		fields = []
 		fields << TextField.new( self, 'text_field' )
 		fields << DateTimeField.new( self, 'date_time' )
@@ -123,7 +123,7 @@ create table testchildrows (
 	
 	def self.drop_table( dbh ); dbh.do( 'drop table testchildrows' ); end
 
-	def self.getClassFields
+	def self.get_class_fields
 		fields = []
 		fields << TextField.new( self, 'child_text_field' )
 		fields

@@ -26,7 +26,7 @@ module Lafcadio
 			field
 		end
 
-		def getClassFields
+		def get_class_fields
 			namesProcessed = {}
 			fields = []
 			@xmlDocRoot.elements.each('field') { |fieldElt|
@@ -159,11 +159,11 @@ module Lafcadio
 	#           <field name="password" class="TextField"/>
 	#           <field name="birthday" class="DateField"/>
 	#         </lafcadio_class_definition>
-	# 2. Overriding DomainObject.getClassFields. The method should return an Array
+	# 2. Overriding DomainObject.get_class_fields. The method should return an Array
 	#    of instances of ObjectField or its children. The order is unimportant.
 	#    For example:
 	#      class User < DomainObject 
-	#        def User.getClassFields 
+	#        def User.get_class_fields 
 	#          fields = [] 
 	#          fields << TextField.new(self, 'firstName') 
 	#          fields << TextField.new(self, 'lastName') 
@@ -268,7 +268,7 @@ module Lafcadio
 		def self.classFields #:nodoc:
 			classFields = @@classFields[self]
 			unless classFields
-				@@classFields[self] = self.getClassFields
+				@@classFields[self] = self.get_class_fields
 				classFields = @@classFields[self]
 			end
 			classFields
@@ -532,7 +532,7 @@ module Lafcadio
 		end
 		
 		def verify
-			self.class.getClassFields.each { |field|
+			self.class.get_class_fields.each { |field|
 				field.verify( self.send( field.name ), self.pkId )
 			}
 		end
@@ -585,14 +585,14 @@ module Lafcadio
 
 		# Returns an Array of ObjectField instances for this domain class, parsing
 		# them from XML if necessary.
-		def getClassFields
+		def get_class_fields
 			unless @classFields
 				try_load_xml_parser
 				if @xmlParser
-					@classFields = @xmlParser.getClassFields
+					@classFields = @xmlParser.get_class_fields
 				else
 					error_msg = "Couldn't find either an XML class description file " +
-											"or getClassFields method for " + @objectType.name
+											"or get_class_fields method for " + @objectType.name
 					raise MissingError, error_msg, caller
 				end
 			end

@@ -84,7 +84,7 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
 	end
 	
 	class InternalClientDiffPk < Client
-		def self.getClassFields; [ TextField.new( self, 'billingType' ) ]; end
+		def self.get_class_fields; [ TextField.new( self, 'billingType' ) ]; end
 		
 		def self.sqlPrimaryKeyName; 'primary_key'; end
 		
