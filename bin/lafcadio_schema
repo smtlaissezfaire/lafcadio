@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'lafcadio/schema/CreateTableStatement'
+require 'lafcadio/schema'
 require 'lafcadio/util'
 require 'getoptlong'
 include Lafcadio

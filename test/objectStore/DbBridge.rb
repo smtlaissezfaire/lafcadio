@@ -2,7 +2,7 @@ require '../test/mock/domain/InternalClient'
 require "runit/testcase"
 require '../test/mock/domain/Client'
 require '../test/mock/domain/LineItem'
-require 'lafcadio/query/Query'
+require 'lafcadio/query'
 
 class TestDBBridge < RUNIT::TestCase
 	include Lafcadio
