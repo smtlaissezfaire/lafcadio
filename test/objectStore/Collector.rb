@@ -76,4 +76,28 @@ class TestObjectCollector < LafcadioTestCase
 			assert_equal "Collector#getMapObject needs two non-nil keys", errorStr
 		end 
 	end
+	
+	def test_query_inference
+		client1 = Client.new( 'objId' => 1, 'name' => 'client 1' )
+		client1.commit
+		client2 = Client.new( 'objId' => 2, 'name' => 'client 2' )
+		client2.commit
+		client3 = Client.new( 'objId' => 3, 'name' => 'client 3' )
+		client3.commit
+		coll1 = @collector.getClients { |client| client.name.equals( 'client 1' ) }
+		assert_equal( 1, coll1.size )
+		assert_equal( 1, coll1[0].objId )
+		coll2 = @collector.getClients { |client| client.name.like( /^clie/ ) }
+		assert_equal( 3, coll2.size )
+		coll3 = @collector.getClients { |client| client.name.like( /^clie/ ).not }
+		assert_equal( 0, coll3.size )
+		begin
+			@collector.getClients( 'client 1', 'name' ) { |client|
+				client.name.equals( 'client 1' ).not
+			}
+			raise "Should raise ArgumentError"
+		rescue ArgumentError
+			# okay
+		end
+	end
 end

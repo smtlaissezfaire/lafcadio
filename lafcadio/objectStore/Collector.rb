@@ -1,5 +1,5 @@
+require 'lafcadio/query'
 require 'lafcadio/util/StrUtil'
-require 'lafcadio/query/Equals'
 
 # The Collector searches for certain collections of domain objects in the 
 # database. These are in-SQL queries that are executed, so the time savings can 
@@ -22,6 +22,20 @@ class Collector
   def initialize(objectStore = Context.instance.getObjectStore)
 		@objectStore = objectStore
   end
+
+	def dispatch_get_method( objectTypeName, searchTerm, fieldName )
+		if block_given? && searchTerm.nil?
+			domain_class = DomainUtil.getObjectTypeFromString( objectTypeName )
+			inferrer = Query::Inferrer.new( domain_class ) { |obj| yield( obj ) }
+			@objectStore.getSubset( inferrer.execute )
+		elsif !block_given? && !searchTerm.nil?
+			getFiltered(objectTypeName, searchTerm, fieldName)
+		else
+			raise( ArgumentError,
+						 "Shouldn't send both a query block and a search term",
+						 caller )
+		end
+	end
 
 	def getFiltered(objectTypeName, searchTerm, fieldName = nil)
 		require 'lafcadio/query/Link'
@@ -51,12 +65,18 @@ class Collector
 		coll
 	end
 
-	def method_missing(methodId, searchTerm, fieldName = nil)
+	def method_missing(methodId, searchTerm = nil, fieldName = nil)
 		require 'lafcadio/util/EnglishUtil'
 		methodName = methodId.id2name
 		if methodName =~ /^get(.*)$/
 			objectTypeName = EnglishUtil.singular($1)
-			getFiltered(objectTypeName, searchTerm, fieldName)
+			if block_given?
+				dispatch_get_method( objectTypeName, searchTerm, fieldName ) { |obj|
+					yield( obj )
+				}
+			else
+				dispatch_get_method( objectTypeName, searchTerm, fieldName )
+			end
 		else
 			super(methodId)
 		end
