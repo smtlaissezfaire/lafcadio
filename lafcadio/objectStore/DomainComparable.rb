@@ -2,10 +2,14 @@ module DomainComparable
 	include Comparable
 
 	def <=>(anOther)
-		if self.objectType == anOther.objectType
-			self.objId <=> anOther.objId
+		if anOther.respond_to?( 'objectType' )
+			if self.objectType == anOther.objectType
+				self.objId <=> anOther.objId
+			else
+				self.objectType.name <=> anOther.objectType.name
+			end
 		else
-			self.objectType.name <=> anOther.objectType.name
+			nil
 		end
 	end
 	
