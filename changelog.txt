@@ -51,3 +51,6 @@ Initial production release.
 * SQL logging can be toggled by editing the config file. Insert the line "logSql:y" in the file to turn it on, and make sure to set your logdir value as well.
 * Added QueueHash#==.
 * Fixed a bug in MockSmtp.lastSubject.
+
+0.3.2 -- October 27 2003
+* Fixed a bug in the includer (the class that allows for root-level includeable files to reduce requires) that made it only work if it was searching in the current directory.
