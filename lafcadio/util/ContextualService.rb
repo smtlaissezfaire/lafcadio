@@ -1,3 +1,5 @@
+require 'lafcadio/util/Context'
+
 class ContextualService
 	def ContextualService.method_missing (methodId)
 		methodName = methodId.id2name
