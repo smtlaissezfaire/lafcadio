@@ -63,6 +63,20 @@ class TestMockDBBridge < LafcadioTestCase
 		assert_equal client2, coll[0]
 	end
 
+	def test_group_query
+		assert_equal(
+			[ nil ], @mockDbBridge.group_query( Query::Max.new( Client ) )
+		)
+		@mockDbBridge.commit @client
+		assert_equal(
+			[ 1 ], @mockDbBridge.group_query( Query::Max.new( Client ) )
+		)
+		assert_equal(
+			[ 'clientName1' ],
+			@mockDbBridge.group_query( Query::Max.new( Client, 'name' ) )
+		)
+	end
+
   def testLastPkIdInserted
 		assert_equal nil, @mockDbBridge.last_pk_id_inserted
     client = Client.new( { "name" => "clientName1" } )

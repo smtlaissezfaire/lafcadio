@@ -77,10 +77,14 @@ module Lafcadio
 
 		def group_query( query )
 			if query.class == Query::Max
-				if ( query.field_name == 'pk_id' || query.field_name == 'rate' )
-					query.collect( @objects[query.domain_class].values )
+				dobjs_by_pk_id = @objects[query.domain_class]
+				if dobjs_by_pk_id
+					dobjs = dobjs_by_pk_id.values.sort_by { |dobj|
+						dobj.send( query.field_name )
+					}
+					[ dobjs.last.send( query.field_name ) ]
 				else
-					raise "Can't handle query with sql '#{ query.to_sql }'"
+					[ nil ]
 				end
 			end
 		end
