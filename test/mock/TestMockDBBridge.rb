@@ -39,8 +39,8 @@ class TestMockDBBridge < LafcadioTestCase
 		assert_equal client2, coll[0]
 	end
 
-	def getAll(objectType)
-		query = Query.new objectType
+	def getAll(object_type)
+		query = Query.new object_type
 		@mockDbBridge.getCollectionByQuery query
 	end
 
@@ -61,8 +61,8 @@ class TestMockDBBridge < LafcadioTestCase
 		assert_equal 2, @mockDbBridge.retrievalsByType[Client]
 	end
 
-	def get(objectType, pkId)
-		query = Query.new objectType, pkId
+	def get(object_type, pkId)
+		query = Query.new object_type, pkId
 		@mockDbBridge.getCollectionByQuery(query)[0]
 	end
 

@@ -54,7 +54,7 @@ module Lafcadio
 		end
 
 		def update_dependent_domain_objects
-			dependent_classes = @dbObject.objectType.dependent_classes
+			dependent_classes = @dbObject.object_type.dependent_classes
 			dependent_classes.keys.each { |aClass|
 				field = dependent_classes[aClass]
 				collection = @objectStore.getFiltered( aClass.name, @dbObject,
@@ -123,16 +123,16 @@ module Lafcadio
 		end
 		
 		def getCollectionByQuery(query)
-			objectType = query.objectType
+			object_type = query.object_type
 			executeSelect( query.toSql ).collect { |row_hash|
-				objectType.new( SqlValueConverter.new( objectType, row_hash ) )
+				object_type.new( SqlValueConverter.new( object_type, row_hash ) )
 			}
 		end
 		
 		def group_query( query )
 			executeSelect( query.toSql )[0].collect { |val|
-				if query.field_name != query.objectType.sql_primary_key_name
-					a_field = query.objectType.get_field( query.field_name )
+				if query.field_name != query.object_type.sql_primary_key_name
+					a_field = query.object_type.get_field( query.field_name )
 					a_field.valueFromSQL( val )
 				else
 					val.to_i
@@ -209,7 +209,7 @@ module Lafcadio
 	end
 
 	# The DomainObjectProxy is used when retrieving domain objects that are 
-	# linked to other domain objects with LinkFields. In terms of +objectType+ and 
+	# linked to other domain objects with LinkFields. In terms of +object_type+ and 
 	# +pkId+, a DomainObjectProxy instance looks to the outside world like the 
 	# domain object it's supposed to represent. It only retrieves its domain 
 	# object from the database when member data is requested.
@@ -217,20 +217,20 @@ module Lafcadio
 	# In normal usage you will probably never manipulate a DomainObjectProxy
 	# directly, but you may discover it by accident by calling
 	# DomainObjectProxy#class (or DomainObject#class) instead of
-	# DomainObjectProxy#objectType (or DomainObjectProxy#objectType).
+	# DomainObjectProxy#object_type (or DomainObjectProxy#object_type).
 	class DomainObjectProxy
 		include DomainComparable
 
-		attr_accessor :objectType, :pkId
+		attr_accessor :object_type, :pkId
 
-		def initialize(objectTypeOrDbObject, pkId = nil)
+		def initialize(object_typeOrDbObject, pkId = nil)
 			if pkId
-				@objectType = objectTypeOrDbObject
+				@object_type = object_typeOrDbObject
 				@pkId = pkId
-			elsif objectTypeOrDbObject.class < DomainObject
-				@dbObject = objectTypeOrDbObject
+			elsif object_typeOrDbObject.class < DomainObject
+				@dbObject = object_typeOrDbObject
 				@d_obj_retrieve_time = Time.now
-				@objectType = @dbObject.class
+				@object_type = @dbObject.class
 				@pkId = @dbObject.pkId
 			else
 				raise ArgumentError
@@ -241,7 +241,7 @@ module Lafcadio
 		def getDbObject
 			object_store = ObjectStore.get_object_store
 			if @dbObject.nil? || needs_refresh?
-				@dbObject = object_store.get(@objectType, @pkId)
+				@dbObject = object_store.get(@object_type, @pkId)
 								@d_obj_retrieve_time = Time.now
 
 			end
@@ -258,7 +258,7 @@ module Lafcadio
 
 		def needs_refresh?
 			object_store = ObjectStore.get_object_store
-			last_commit_time = object_store.last_commit_time( @objectType, @pkId )
+			last_commit_time = object_store.last_commit_time( @object_type, @pkId )
 			!last_commit_time.nil? && last_commit_time > @d_obj_retrieve_time
 		end
 		
@@ -272,14 +272,14 @@ module Lafcadio
 
 		def initialize(obj); @obj = obj; end
 
-		def deleteSql(objectType)
-			"delete from #{ objectType.table_name} " +
-					"where #{ objectType.sql_primary_key_name }=#{ @obj.pkId }"
+		def deleteSql(object_type)
+			"delete from #{ object_type.table_name} " +
+					"where #{ object_type.sql_primary_key_name }=#{ @obj.pkId }"
 		end
 
-		def getNameValuePairs(objectType)
+		def getNameValuePairs(object_type)
 			nameValues = []
-			objectType.class_fields.each { |field|
+			object_type.class_fields.each { |field|
 				value = @obj.send(field.name)
 				unless field.dbWillAutomaticallyWrite
 					nameValues << field.nameForSQL
@@ -292,15 +292,15 @@ module Lafcadio
 			QueueHash.new( *nameValues )
 		end
 
-		def insertSQL(objectType)
-			fields = objectType.class_fields
-			nameValuePairs = getNameValuePairs(objectType)
-			if objectType.is_based_on?
-				nameValuePairs[objectType.sql_primary_key_name] = 'LAST_INSERT_ID()'
+		def insertSQL(object_type)
+			fields = object_type.class_fields
+			nameValuePairs = getNameValuePairs(object_type)
+			if object_type.is_based_on?
+				nameValuePairs[object_type.sql_primary_key_name] = 'LAST_INSERT_ID()'
 			end
 			fieldNameStr = nameValuePairs.keys.join ", "
 			fieldValueStr = nameValuePairs.values.join ", "
-			"insert into #{ objectType.table_name}(#{fieldNameStr}) " +
+			"insert into #{ object_type.table_name}(#{fieldNameStr}) " +
 					"values(#{fieldValueStr})"
 		end
 
@@ -309,35 +309,35 @@ module Lafcadio
 			if @obj.errorMessages.size > 0
 				raise DomainObjectInitError, @obj.errorMessages, caller
 			end
-			@obj.class.selfAndConcreteSuperclasses.each { |objectType|
-				statements << statement_bind_value_pair( objectType )
+			@obj.class.selfAndConcreteSuperclasses.each { |object_type|
+				statements << statement_bind_value_pair( object_type )
  			}
 			statements.reverse
 		end
 
-		def statement_bind_value_pair( objectType )
+		def statement_bind_value_pair( object_type )
 			@bindValues = []
 			if @obj.pkId == nil
-				statement = insertSQL(objectType)
+				statement = insertSQL(object_type)
 			else
 				if @obj.delete
-					statement = deleteSql(objectType)
+					statement = deleteSql(object_type)
 				else
-					statement = updateSQL(objectType)
+					statement = updateSQL(object_type)
 				end
 			end
 			[statement, @bindValues]
 		end
 
-		def updateSQL(objectType)
+		def updateSQL(object_type)
 			nameValueStrings = []
-			nameValuePairs = getNameValuePairs(objectType)
+			nameValuePairs = getNameValuePairs(object_type)
 			nameValuePairs.each { |key, value|
 				nameValueStrings << "#{key}=#{ value }"
 			}
 			allNameValues = nameValueStrings.join ', '
-			"update #{ objectType.table_name} set #{allNameValues} " +
-					"where #{ objectType.sql_primary_key_name}=#{@obj.pkId}"
+			"update #{ object_type.table_name} set #{allNameValues} " +
+					"where #{ object_type.sql_primary_key_name}=#{@obj.pkId}"
 		end
 	end
 
@@ -430,46 +430,46 @@ module Lafcadio
 		end
 
 		# Returns the domain object corresponding to the domain class and pkId.
-		def get(objectType, pkId)
-			query = Query.new objectType, pkId
+		def get(object_type, pkId)
+			query = Query.new object_type, pkId
 			@cache.getByQuery( query )[0] ||
 			    ( raise( DomainObjectNotFoundError,
-					         "Can't find #{objectType} #{pkId}", caller ) )
+					         "Can't find #{object_type} #{pkId}", caller ) )
 		end
 
 		# Returns all domain objects for the given domain class.
-		def getAll(objectType); @cache.getByQuery( Query.new( objectType ) ); end
+		def getAll(object_type); @cache.getByQuery( Query.new( object_type ) ); end
 
 		# Returns the DbBridge; this is useful in case you need to use raw SQL for a
 		# specific query.
 		def getDbBridge; @dbBridge; end
 		
 		def get_field_name( domain_object )
-			domain_object.objectType.bareName.decapitalize
+			domain_object.object_type.bareName.decapitalize
 		end
 
-		def getFiltered(objectTypeName, searchTerm, fieldName = nil) #:nodoc:
-			objectType = DomainObject.get_object_type_from_string objectTypeName
+		def getFiltered(object_typeName, searchTerm, fieldName = nil) #:nodoc:
+			object_type = DomainObject.get_object_type_from_string object_typeName
 			fieldName = get_field_name( searchTerm ) unless fieldName
 			if searchTerm.class <= DomainObject
 				cond_class = Query::Link
 			else
 				cond_class = Query::Equals
 			end
-			getSubset( cond_class.new( fieldName, searchTerm, objectType ) )
+			getSubset( cond_class.new( fieldName, searchTerm, object_type ) )
 		end
 
-		def getMapMatch(objectType, mapped) #:nodoc:
-			Query::Equals.new( get_field_name( mapped ), mapped, objectType )
+		def getMapMatch(object_type, mapped) #:nodoc:
+			Query::Equals.new( get_field_name( mapped ), mapped, object_type )
 		end
 
-		def getMapObject(objectType, map1, map2) #:nodoc:
+		def getMapObject(object_type, map1, map2) #:nodoc:
 			unless map1 && map2
 				raise ArgumentError,
 						"ObjectStore#getMapObject needs two non-nil keys", caller
 			end
-			mapMatch1 = getMapMatch objectType, map1
-			mapMatch2 = getMapMatch objectType, map2
+			mapMatch1 = getMapMatch object_type, map1
+			mapMatch2 = getMapMatch object_type, map2
 			condition = Query::CompoundCondition.new mapMatch1, mapMatch2
 			getSubset(condition)[0]
 		end
@@ -495,14 +495,14 @@ module Lafcadio
 
 		# Retrieves a collection of domain objects by +pkId+.
 		#   ObjectStore#getObjects( Clients, [ 1, 2, 3 ] )
-		def getObjects(objectType, pkIds)
-			getSubset Query::In.new('pkId', pkIds, objectType)
+		def getObjects(object_type, pkIds)
+			getSubset Query::In.new('pkId', pkIds, object_type)
 		end
 
 		def getSubset(conditionOrQuery) #:nodoc:
 			if conditionOrQuery.class <= Query::Condition
 				condition = conditionOrQuery
-				query = Query.new condition.objectType, condition
+				query = Query.new condition.object_type, condition
 			else
 				query = conditionOrQuery
 			end
@@ -535,26 +535,26 @@ module Lafcadio
 
 			# Flushes a domain object.
 			def flush(dbObject)
-				hashByObjectType(dbObject.objectType).delete dbObject.pkId
-				flush_collection_cache( dbObject.objectType )
+				hashByObjectType(dbObject.object_type).delete dbObject.pkId
+				flush_collection_cache( dbObject.object_type )
 			end
 			
-			def flush_collection_cache( objectType )
+			def flush_collection_cache( object_type )
 				@collections_by_query.keys.each { |query|
-					if query.objectType == objectType
+					if query.object_type == object_type
 						@collections_by_query.delete( query )
 					end
 				}
 			end
 
 			# Returns a cached domain object, or nil if none is found.
-			def get(objectType, pkId)
-				hashByObjectType(objectType)[pkId].clone
+			def get(object_type, pkId)
+				hashByObjectType(object_type)[pkId].clone
 			end
 
 			# Returns an array of all domain objects of a given type.
-			def getAll(objectType)
-				hashByObjectType(objectType).values.collect { |d_obj| d_obj.clone }
+			def getAll(object_type)
+				hashByObjectType(object_type).values.collect { |d_obj| d_obj.clone }
 			end
 
 			def getByQuery( query )
@@ -567,17 +567,17 @@ module Lafcadio
 				end
 				collection = []
 				@collections_by_query[query].each { |pkId|
-					dobj = get( query.objectType, pkId )
+					dobj = get( query.object_type, pkId )
 					collection << dobj if dobj
 				}
 				collection
 			end
 
-			def hashByObjectType(objectType)
-				unless @objects[objectType]
-					@objects[objectType] = {}
+			def hashByObjectType(object_type)
+				unless @objects[object_type]
+					@objects[object_type] = {}
 				end
-				@objects[objectType]
+				@objects[object_type]
 			end
 
 			def last_commit_time( domain_class, pkId )
@@ -586,18 +586,18 @@ module Lafcadio
 			end
 			
 			def set_commit_time( d_obj )
-				by_domain_class = @commit_times[d_obj.objectType]
+				by_domain_class = @commit_times[d_obj.object_type]
 				if by_domain_class.nil?
 					by_domain_class = {}
-					@commit_times[d_obj.objectType] = by_domain_class
+					@commit_times[d_obj.object_type] = by_domain_class
 				end
 				by_domain_class[d_obj.pkId] = Time.now
 			end
 
 			# Saves a domain object.
 			def save(dbObject)
-				hashByObjectType(dbObject.objectType)[dbObject.pkId] = dbObject
-				flush_collection_cache( dbObject.objectType )
+				hashByObjectType(dbObject.object_type)[dbObject.pkId] = dbObject
+				flush_collection_cache( dbObject.object_type )
 			end
 			
 			def update_after_commit( committer ) #:nodoc:
@@ -669,10 +669,10 @@ module Lafcadio
 				begin
 					dispatch_get_singular
 				rescue CouldntMatchObjectTypeError
-					objectTypeName = English.singular( method_name_after_get )
+					object_typeName = English.singular( method_name_after_get )
 					begin
 						@domain_class = DomainObject.
-						                get_object_type_from_string( objectTypeName )
+						                get_object_type_from_string( object_typeName )
 						dispatch_get_plural
 					rescue CouldntMatchObjectTypeError
 						raise_no_method_error
@@ -681,14 +681,14 @@ module Lafcadio
 			end
 			
 			def dispatch_get_singular
-				objectType = DomainObject.
+				object_type = DomainObject.
 				             get_object_type_from_string( method_name_after_get )
 				if @orig_args[0].class <= Integer
 					@symbol = :get
-					@args = [ objectType, @orig_args[0] ]
+					@args = [ object_type, @orig_args[0] ]
 				elsif @orig_args[0].class <= DomainObject
 					@symbol = :getMapObject
-					@args = [ objectType, @orig_args[0], @orig_args[1] ]
+					@args = [ object_type, @orig_args[0], @orig_args[1] ]
 				end
 			end
 			
@@ -704,23 +704,23 @@ module Lafcadio
 	end
 
 	class SqlValueConverter #:nodoc:
-		attr_reader :objectType, :rowHash
+		attr_reader :object_type, :rowHash
 
-		def initialize(objectType, rowHash)
-			@objectType = objectType
+		def initialize(object_type, rowHash)
+			@object_type = object_type
 			@rowHash = rowHash
 		end
 
 		def []( key )
 			if key == 'pkId'
-				if ( field_val = @rowHash[@objectType.sql_primary_key_name] ).nil?
+				if ( field_val = @rowHash[@object_type.sql_primary_key_name] ).nil?
 					raise FieldMatchError, error_msg, caller
 				else
 					field_val.to_i
 				end
 			else
 				begin
-					field = @objectType.get_field( key )
+					field = @object_type.get_field( key )
 					field.valueFromSQL( @rowHash[ field.dbFieldName ] )
 				rescue MissingError
 					nil
@@ -729,9 +729,9 @@ module Lafcadio
 		end
 
 		def error_msg
-			"The field \"" + @objectType.sql_primary_key_name +
+			"The field \"" + @object_type.sql_primary_key_name +
 					"\" can\'t be found in the table \"" + 
-					@objectType.table_name + "\"."
+					@object_type.table_name + "\"."
 		end
 	end
 end

@@ -67,7 +67,7 @@ class TestDbConnection < RUNIT::TestCase
       end
     end
 
-    def getAll(objectType); []; end
+    def getAll(object_type); []; end
     
     def disconnect
     	@@connected = false

@@ -7,7 +7,7 @@ module Lafcadio
 	class ObjectField
 		include Comparable
 
-		attr_reader :name, :objectType
+		attr_reader :name, :object_type
 		attr_accessor :notNull, :unique, :dbFieldName
 
 		def self.instantiateFromXml( domainClass, fieldElt ) #:nodoc:
@@ -36,11 +36,11 @@ module Lafcadio
 			Object
 		end
 
-		# [objectType]  The domain class that this object field belongs to.
+		# [object_type]  The domain class that this object field belongs to.
 		# [name]        The name of this field.
 		# [englishName] The descriptive English name of this field. (Deprecated)
-		def initialize(objectType, name, englishName = nil )
-			@objectType = objectType
+		def initialize(object_type, name, englishName = nil )
+			@object_type = object_type
 			@name = name
 			@dbFieldName = name
 			@notNull = true
@@ -49,7 +49,7 @@ module Lafcadio
 		end
 		
 		def <=>(other)
-			if @objectType == other.objectType && name == other.name
+			if @object_type == other.object_type && name == other.name
 				0
 			else
 				object_id <=> other.object_id
@@ -59,7 +59,7 @@ module Lafcadio
 		def bind_write?; false; end #:nodoc:
 		
 		def db_table_and_field_name
-			"#{ objectType.table_name }.#{ dbFieldName }"
+			"#{ object_type.table_name }.#{ dbFieldName }"
 		end
 
 		def dbWillAutomaticallyWrite #:nodoc:
@@ -78,11 +78,11 @@ module Lafcadio
 		end
 
 		def nullErrorMsg #:nodoc:
-			"#{ self.objectType.name }##{ name } can not be nil."
+			"#{ self.object_type.name }##{ name } can not be nil."
 		end
 
 		def prevValue(pkId) #:nodoc:
-			prevObject = ObjectStore.get_object_store.get(@objectType, pkId)
+			prevObject = ObjectStore.get_object_store.get(@object_type, pkId)
 			prevObject.send(name)
 		end
 
@@ -108,7 +108,7 @@ module Lafcadio
 			valueType = self.class.valueType
 			unless value.class <= valueType
 				raise( FieldValueError, 
-				       "#{ objectType.name }##{ name } needs a " + valueType.name +
+				       "#{ object_type.name }##{ name } needs a " + valueType.name +
 				           " value.",
 				       caller )
 			end
@@ -116,7 +116,7 @@ module Lafcadio
 		end
 
 		def verifyUniqueness(value, pkId) #:nodoc:
-			inferrer = Query::Inferrer.new( @objectType ) { |domain_obj|
+			inferrer = Query::Inferrer.new( @object_type ) { |domain_obj|
 				Query.And( domain_obj.send( self.name ).equals( value ),
 									 domain_obj.pkId.equals( pkId ).not )
 			}
@@ -155,11 +155,11 @@ module Lafcadio
 	end
 
 	class AutoIncrementField < IntegerField # :nodoc:
-		attr_reader :objectType
+		attr_reader :object_type
 
-		def initialize(objectType, name, englishName = nil)
-			super(objectType, name, englishName)
-			@objectType = objectType
+		def initialize(object_type, name, englishName = nil)
+			super(object_type, name, englishName)
+			@object_type = object_type
 		end
 
 		def HTMLWidgetValueStr(value)
@@ -167,7 +167,7 @@ module Lafcadio
 				super value
 			else
 				highestValue = 0
-				ObjectStore.get_object_store.getAll(objectType).each { |obj|
+				ObjectStore.get_object_store.getAll(object_type).each { |obj|
 					aValue = obj.send(name).to_i
 					highestValue = aValue if aValue > highestValue
 				}
@@ -220,8 +220,8 @@ module Lafcadio
 
 		attr_accessor :enumType, :enums
 
-		def initialize(objectType, name, englishName = nil)
-			super(objectType, name, englishName)
+		def initialize(object_type, name, englishName = nil)
+			super(object_type, name, englishName)
 			@enumType = ENUMS_ONE_ZERO
 			@enums = nil
 		end
@@ -279,8 +279,8 @@ module Lafcadio
 
 		attr_accessor :range
 
-		def initialize(objectType, name = "date", englishName = nil)
-			super(objectType, name, englishName)
+		def initialize(object_type, name = "date", englishName = nil)
+			super(object_type, name, englishName)
 			@range = RANGE_NEAR_FUTURE
 		end
 
@@ -346,8 +346,8 @@ module Lafcadio
 			address =~ /^[^ @]+@[^ \.]+\.[^ ,]+$/
 		end
 
-		def initialize(objectType, name = "email", englishName = nil)
-			super(objectType, name, englishName)
+		def initialize(object_type, name = "email", englishName = nil)
+			super(object_type, name, englishName)
 		end
 
 		def nullErrorMsg #:nodoc:
@@ -358,7 +358,7 @@ module Lafcadio
 			super(value, pkId)
 			if !EmailField.validAddress(value)
 				raise( FieldValueError,
-				       "#{ objectType.name }##{ name } needs a valid email address.",
+				       "#{ object_type.name }##{ name } needs a valid email address.",
 				       caller )
 			end
 		end
@@ -407,13 +407,13 @@ module Lafcadio
 		
 		attr_reader :enums
 
-		# [objectType]  The domain class that this field belongs to.
+		# [object_type]  The domain class that this field belongs to.
 		# [name]        The name of this domain class.
 		# [enums]       An array of Strings representing the possible choices for
 		#               this field.
 		# [englishName] The English name of this field. (Deprecated)
-		def initialize(objectType, name, enums, englishName = nil)
-			super objectType, name, englishName
+		def initialize(object_type, name, enums, englishName = nil)
+			super object_type, name, englishName
 			if enums.class == Array 
 				@enums = QueueHash.newFromArray enums
 			else
@@ -430,7 +430,7 @@ module Lafcadio
 			if @enums[value].nil?
 				key_str = '[ ' +
 				          ( @enums.keys.map { |key| "\"#{ key }\"" } ).join(', ') + ' ]'
-				err_str = "#{ @objectType.name }##{ name } needs a value that is " +
+				err_str = "#{ @object_type.name }##{ name } needs a value that is " +
 				          "one of #{ key_str }"
 				raise( FieldValueError, err_str, caller )
 			end
@@ -459,20 +459,20 @@ module Lafcadio
 		attr_reader :linkedType
 		attr_accessor :deleteCascade
 
-		# [objectType]    The domain class that this field belongs to.
+		# [object_type]    The domain class that this field belongs to.
 		# [linkedType]    The domain class that this field points to.
 		# [name]          The name of this field.
 		# [englishName]   The English name of this field. (Deprecated)
 		# [deleteCascade] If this is true, deleting the domain object that is linked
 		#                 to will cause this domain object to be deleted as well.
-		def initialize( objectType, linkedType, name = nil, englishName = nil,
+		def initialize( object_type, linkedType, name = nil, englishName = nil,
 		                deleteCascade = false )
 			unless name
 				linkedType.name =~ /::/
 				name = $' || linkedType.name
 				name = name.decapitalize
 			end
-			super(objectType, name, englishName)
+			super(object_type, name, englishName)
 			( @linkedType, @deleteCascade ) = linkedType, deleteCascade
 		end
 
@@ -493,7 +493,7 @@ module Lafcadio
 
 		def verify_non_nil(value, pkId) #:nodoc:
 			super
-			if @linkedType != @objectType && pkId
+			if @linkedType != @object_type && pkId
 				subsetLinkField = @linkedType.class_fields.find { |field|
 					field.class == SubsetLinkField && field.subsetField == @name
 				}
@@ -505,7 +505,7 @@ module Lafcadio
 
 		def verify_subset_link_field( subsetLinkField, pkId )
 			begin
-				prevObj = ObjectStore.get_object_store.get(objectType, pkId)
+				prevObj = ObjectStore.get_object_store.get(object_type, pkId)
 				prevObjLinkedTo = prevObj.send(name)
 				possiblyMyObj = prevObjLinkedTo.send(subsetLinkField.name)
 				if possiblyMyObj && possiblyMyObj.pkId == pkId
@@ -550,8 +550,8 @@ module Lafcadio
 	# any of the 50 states of the United States, stored as each state's two-letter
 	# postal code.
 	class StateField < EnumField
-		def initialize(objectType, name = "state", englishName = nil)
-			super objectType, name, UsStates.states, englishName
+		def initialize(object_type, name = "state", englishName = nil)
+			super object_type, name, UsStates.states, englishName
 		end
 	end
 
@@ -570,9 +570,9 @@ module Lafcadio
 		
 		attr_accessor :subsetField
 
-		def initialize(objectType, linkedType, subsetField,
+		def initialize(object_type, linkedType, subsetField,
 				name = linkedType.name.downcase, englishName = nil)
-			super(objectType, linkedType, name, englishName)
+			super(object_type, linkedType, name, englishName)
 			@subsetField = subsetField
 		end
 	end
@@ -600,8 +600,8 @@ module Lafcadio
 	end
 
 	class TimeStampField < DateTimeField #:nodoc:
-		def initialize(objectType, name = 'timeStamp', englishName = nil)
-			super( objectType, name, englishName )
+		def initialize(object_type, name = 'timeStamp', englishName = nil)
+			super( object_type, name, englishName )
 			@notNull = false
 		end
 

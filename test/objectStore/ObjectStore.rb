@@ -57,7 +57,7 @@ class TestObjectStore < LafcadioTestCase
 				'referringClient' => client1Proxy })
 		@mockDbBridge.commit client2
 		client2Prime = @testObjectStore.getClient 2
-		assert_equal Client, client2Prime.referringClient.objectType
+		assert_equal Client, client2Prime.referringClient.object_type
 	end
 
 	def testDefersLoading
@@ -199,7 +199,7 @@ class TestObjectStore < LafcadioTestCase
 		collection = @testObjectStore.getMapped( ili, 'Option' )
 		assert_equal( 1, collection.size )
 		option_prime = collection.first
-		assert_equal( Option, option_prime.objectType )
+		assert_equal( Option, option_prime.object_type )
 		assert_equal( option, option_prime )
 	end
 

@@ -24,7 +24,7 @@ class TestSqlValueConverter < LafcadioTestCase
 		assert_equal DomainObjectProxy, converter['client'].class
 		proxy = converter['client']
 		assert_equal 1, proxy.pkId
-		assert_equal Client, proxy.objectType
+		assert_equal Client, proxy.object_type
   end
 
   def testConvertsPkId

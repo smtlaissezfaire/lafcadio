@@ -96,18 +96,18 @@ module Lafcadio
 		ASC		= 1
 		DESC 	= 2
 
-		attr_reader :objectType, :condition
+		attr_reader :object_type, :condition
 		attr_accessor :orderBy, :orderByOrder, :limit
 
-		def initialize(objectType, pkIdOrCondition = nil)
-			@objectType = objectType
+		def initialize(object_type, pkIdOrCondition = nil)
+			@object_type = object_type
 			( @condition, @orderBy, @limit ) = [ nil, nil, nil ]
 			if pkIdOrCondition
 				if pkIdOrCondition.class <= Condition
 					@condition = pkIdOrCondition
 				else
-					@condition = Query::Equals.new( objectType.sql_primary_key_name,
-					                                pkIdOrCondition, objectType )
+					@condition = Query::Equals.new( object_type.sql_primary_key_name,
+					                                pkIdOrCondition, object_type )
 				end
 			end
 			@orderByOrder = ASC
@@ -131,12 +131,12 @@ module Lafcadio
 			end
 		end
 
-		def sqlPrimaryKeyField(objectType)
-			"#{ objectType.table_name }.#{ objectType.sql_primary_key_name }"
+		def sqlPrimaryKeyField(object_type)
+			"#{ object_type.table_name }.#{ object_type.sql_primary_key_name }"
 		end
 
 		def tables
-			concrete_classes = objectType.selfAndConcreteSuperclasses.reverse
+			concrete_classes = object_type.selfAndConcreteSuperclasses.reverse
 			table_names = concrete_classes.collect { |domain_class|
 				domain_class.table_name
 			}
@@ -152,7 +152,7 @@ module Lafcadio
 		end
 
 		def whereClause
-			concrete_classes = objectType.selfAndConcreteSuperclasses.reverse
+			concrete_classes = object_type.selfAndConcreteSuperclasses.reverse
 			where_clauses = []
 			concrete_classes.each_with_index { |domain_class, i|
 				if i < concrete_classes.size - 1
@@ -171,26 +171,26 @@ module Lafcadio
 				Object
 			end
 
-			attr_reader :objectType
+			attr_reader :object_type
 
-			def initialize(fieldName, searchTerm, objectType)
+			def initialize(fieldName, searchTerm, object_type)
 				@fieldName = fieldName
 				@searchTerm = searchTerm
 				unless @searchTerm.class <= self.class.searchTermType
 					raise "Incorrect searchTerm type #{ searchTerm.class }"
 				end
-				@objectType = objectType
-				if @objectType
-					unless @objectType <= DomainObject
-						raise "Incorrect object type #{ @objectType.to_s }"
+				@object_type = object_type
+				if @object_type
+					unless @object_type <= DomainObject
+						raise "Incorrect object type #{ @object_type.to_s }"
 					end
 				end
 			end
 			
 			def dbFieldName
 				if primaryKeyField?
-					db_table = @objectType.table_name
-					db_field_name = @objectType.sql_primary_key_name
+					db_table = @object_type.table_name
+					db_field_name = @object_type.sql_primary_key_name
 					"#{ db_table }.#{ db_field_name }"
 				else
 					get_field.db_table_and_field_name
@@ -198,7 +198,7 @@ module Lafcadio
 			end
 			
 			def get_field
-				anObjectType = @objectType
+				anObjectType = @object_type
 				field = nil
 				while (anObjectType < DomainObject || anObjectType < DomainObject) &&
 							!field
@@ -209,7 +209,7 @@ module Lafcadio
 					field
 				else
 					errStr = "Couldn't find field \"#{ @fieldName }\" in " +
-									 "#{ @objectType } domain class"
+									 "#{ @object_type } domain class"
 					raise( MissingError, errStr, caller )
 				end
 			end
@@ -219,7 +219,7 @@ module Lafcadio
 			end
 
 			def primaryKeyField?
-				[ @objectType.sql_primary_key_name, 'pkId' ].include?( @fieldName )
+				[ @object_type.sql_primary_key_name, 'pkId' ].include?( @fieldName )
 			end
 		end
 
@@ -243,16 +243,16 @@ module Lafcadio
 				GREATER_THAN => Proc.new { |d1, d2| d1 > d2 }
 			}
 
-			def initialize(fieldName, searchTerm, objectType, compareType)
-				super fieldName, searchTerm, objectType
+			def initialize(fieldName, searchTerm, object_type, compareType)
+				super fieldName, searchTerm, object_type
 				@compareType = compareType
 			end
 
 			def toSql
-				not_pk = @fieldName != @objectType.sql_primary_key_name
+				not_pk = @fieldName != @object_type.sql_primary_key_name
 				use_field_for_sql_value = ( not_pk &&
 				                            ( !( get_field.class <= LinkField ) ||
-																		  @searchTerm.respond_to?( :objectType ) ) )
+																		  @searchTerm.respond_to?( :object_type ) ) )
 				search_val = ( use_field_for_sql_value ?
 				               get_field.valueForSQL( @searchTerm ).to_s :
 											 @searchTerm.to_s )
@@ -282,7 +282,7 @@ module Lafcadio
 					@compoundType = AND
 				end
 				@conditions = conditions
-				@objectType = conditions[0].objectType
+				@object_type = conditions[0].object_type
 			end
 
 			def objectMeets(anObj)
@@ -341,7 +341,7 @@ module Lafcadio
 			end
 
 			def objectMeets(anObj)
-				if @fieldName == @objectType.sql_primary_key_name
+				if @fieldName == @object_type.sql_primary_key_name
 					object_value = anObj.pkId
 				else
 					object_value = anObj.send @fieldName
@@ -399,8 +399,8 @@ module Lafcadio
 			POST_ONLY			= 3
 
 			def initialize(
-					fieldName, searchTerm, objectType, matchType = PRE_AND_POST)
-				super fieldName, searchTerm, objectType
+					fieldName, searchTerm, object_type, matchType = PRE_AND_POST)
+				super fieldName, searchTerm, object_type
 				@matchType = matchType
 			end
 			
@@ -440,13 +440,13 @@ module Lafcadio
 		end
 
 		class Link < Condition #:nodoc:
-			def initialize( fieldName, searchTerm, objectType )
+			def initialize( fieldName, searchTerm, object_type )
 				if searchTerm.pkId.nil?
 					raise ArgumentError,
 					      "Can't query using an uncommitted domain object as a search term",
 								caller
 				else
-					super( fieldName, searchTerm, objectType )
+					super( fieldName, searchTerm, object_type )
 				end
 			end
 		
@@ -467,13 +467,13 @@ module Lafcadio
 		class Max < Query #:nodoc:
 			attr_reader :field_name
 		
-			def initialize( objectType, field_name = nil )
-				super( objectType )
+			def initialize( object_type, field_name = nil )
+				super( object_type )
 				if field_name
 					@field_name = field_name
 					@pk = false
 				else
-					@field_name = objectType.sql_primary_key_name
+					@field_name = object_type.sql_primary_key_name
 					@pk = true
 				end
 			end
@@ -501,7 +501,7 @@ module Lafcadio
 				!@unCondition.objectMeets(obj)
 			end
 			
-			def objectType; @unCondition.objectType; end
+			def object_type; @unCondition.object_type; end
 
 			def toSql
 				"!(#{ @unCondition.toSql })"

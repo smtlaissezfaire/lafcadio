@@ -140,7 +140,7 @@ class TestDomainObject < LafcadioTestCase
 		invoice = Invoice.new hash
 		proxyPrime = invoice.client
 		assert_equal DomainObjectProxy, proxyPrime.class
-		assert_equal Client, proxyPrime.objectType
+		assert_equal Client, proxyPrime.object_type
 		assert_equal 99, proxyPrime.pkId
 		begin
 			proxyPrime.name

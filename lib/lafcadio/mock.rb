@@ -11,7 +11,7 @@ module Lafcadio
 		end
 
 		def commit(dbObject)
-			objectsByObjectType = get_objects_by_domain_class( dbObject.objectType )
+			objectsByObjectType = get_objects_by_domain_class( dbObject.object_type )
 			if dbObject.delete
 				objectsByObjectType.delete dbObject.pkId
 			else
@@ -20,15 +20,15 @@ module Lafcadio
 			end
 		end
 		
-		def _getAll(objectType)
-			@retrievalsByType[objectType] = @retrievalsByType[objectType] + 1
-			@objects[objectType] ? @objects[objectType].values : []
+		def _getAll(object_type)
+			@retrievalsByType[object_type] = @retrievalsByType[object_type] + 1
+			@objects[object_type] ? @objects[object_type].values : []
 		end
 		
 		def getCollectionByQuery(query)
 			@query_count[query] += 1
 			objects = []
-			_getAll( query.objectType ).each { |dbObj|
+			_getAll( query.object_type ).each { |dbObj|
 				if query.condition
 					objects << dbObj if query.condition.objectMeets(dbObj)
 				else
@@ -45,7 +45,7 @@ module Lafcadio
 			object_pkId = dbObject.pkId
 			unless object_pkId
 				maxpkId = 0
-				get_objects_by_domain_class( dbObject.objectType ).keys.each { |pkId|
+				get_objects_by_domain_class( dbObject.object_type ).keys.each { |pkId|
 					maxpkId = pkId if pkId > maxpkId
 				}
 				@lastPkIdInserted = maxpkId + 1
@@ -65,9 +65,9 @@ module Lafcadio
 
 		def group_query( query )
 			if query.class == Query::Max
-				if ( query.field_name == query.objectType.sql_primary_key_name ||
+				if ( query.field_name == query.object_type.sql_primary_key_name ||
 					query.field_name == 'rate' )
-					query.collect( @objects[query.objectType].values )
+					query.collect( @objects[query.object_type].values )
 				else
 					raise "Can't handle query with sql '#{ query.toSql }'"
 				end

@@ -14,8 +14,8 @@ class TestDbObjectCommitter < LafcadioTestCase
     context.set_object_store @testObjectStore
 	end
 	
-	def getFromDbBridge(objectType, pkId)
-		query = Query.new objectType, pkId
+	def getFromDbBridge(object_type, pkId)
+		query = Query.new object_type, pkId
 		@mockDBBridge.getCollectionByQuery(query)[0]
 	end
 	

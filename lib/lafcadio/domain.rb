@@ -122,14 +122,14 @@ module Lafcadio
 	module DomainComparable
 		include Comparable
 
-		# A DomainObject or DomainObjectProxy is compared by +objectType+ and by
+		# A DomainObject or DomainObjectProxy is compared by +object_type+ and by
 		# +pkId+. 
 		def <=>(anOther)
-			if anOther.respond_to?( 'objectType' )
-				if self.objectType == anOther.objectType
+			if anOther.respond_to?( 'object_type' )
+				if self.object_type == anOther.object_type
 					self.pkId <=> anOther.pkId
 				else
-					self.objectType.name <=> anOther.objectType.name
+					self.object_type.name <=> anOther.object_type.name
 				end
 			else
 				nil
@@ -295,7 +295,7 @@ module Lafcadio
 				if aClass != DomainObjectProxy &&
 						(!DomainObject.abstract_subclasses.index(aClass))
 					aClass.class_fields.each { |field|
-						if field.class <= LinkField && field.linkedType == self.objectType
+						if field.class <= LinkField && field.linkedType == self.object_type
 							dependent_classes[aClass] = field
 						end
 					}
@@ -340,16 +340,16 @@ module Lafcadio
 		end
 
 		def self.get_object_type_from_string(typeString) #:nodoc:
-			objectType = nil
+			object_type = nil
 			requireDomainFile( typeString )
 			subclasses.each { |subclass|
-				objectType = subclass if subclass.to_s == typeString
+				object_type = subclass if subclass.to_s == typeString
 			}
-			if objectType
-				objectType
+			if object_type
+				object_type
 			else
 				raise CouldntMatchObjectTypeError,
-						"couldn't match objectType #{typeString}", caller
+						"couldn't match object_type #{typeString}", caller
 			end
 		end
 
@@ -377,7 +377,7 @@ module Lafcadio
 			end
 		end
 
-		def self.objectType #:nodoc:
+		def self.object_type #:nodoc:
 			self
 		end
 
@@ -502,8 +502,8 @@ module Lafcadio
 		# Returns the subclass of DomainObject that this instance represents.
 		# Because of the way that proxying works, clients should call this method
 		# instead of Object.class.
-		def objectType
-			self.class.objectType
+		def object_type
+			self.class.object_type
 		end
 
 		# This template method is called before every commit. Subclasses can 
@@ -578,8 +578,8 @@ module Lafcadio
 
 		private_class_method :new
 
-		def initialize(objectType) #:nodoc:
-			@objectType = objectType
+		def initialize(object_type) #:nodoc:
+			@object_type = object_type
 			( @class_fields, @xmlParser, @table_name ) = [ nil, nil, nil ]
 		end
 
@@ -592,7 +592,7 @@ module Lafcadio
 					@class_fields = @xmlParser.get_class_fields
 				else
 					error_msg = "Couldn't find either an XML class description file " +
-											"or get_class_fields method for " + @objectType.name
+											"or get_class_fields method for " + @object_type.name
 					raise MissingError, error_msg, caller
 				end
 			end
@@ -630,7 +630,7 @@ module Lafcadio
 				if (!@xmlParser.nil? && table_name = @xmlParser.table_name)
 					table_name
 				else
-					table_name = @objectType.bareName
+					table_name = @object_type.bareName
 					table_name[0] = table_name[0..0].downcase
 					English.plural table_name
 				end
@@ -640,12 +640,12 @@ module Lafcadio
 		def try_load_xml_parser
 			require 'lafcadio/domain'
 			dirName = LafcadioConfig.new['classDefinitionDir']
-			xmlFileName = @objectType.bareName + '.xml'
+			xmlFileName = @object_type.bareName + '.xml'
 			xmlPath = File.join( dirName, xmlFileName )
 			xml = ''
 			begin
 				File.open( xmlPath ) { |file| xml = file.readlines.join }
-				@xmlParser = ClassDefinitionXmlParser.new( @objectType, xml )
+				@xmlParser = ClassDefinitionXmlParser.new( @object_type, xml )
 			rescue Errno::ENOENT
 				# no xml file, so no @xmlParser
 			end
