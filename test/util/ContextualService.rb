@@ -22,4 +22,13 @@ class TestContextualService < RUNIT::TestCase
 		assert_equal serviceB, ServiceB.getServiceB
 		assert ServiceA.getServiceA != ServiceB.getServiceB
 	end
+	
+	class Outer; class Inner < Lafcadio::ContextualService; end; end
+	
+	def test_handles_inner_class_child
+		inner = Outer::Inner.getInner
+		assert_equal( Outer::Inner, inner.class )
+		inner_prime = Outer::Inner.getInner
+		assert_equal( inner, inner_prime )
+	end
 end

@@ -24,9 +24,9 @@ module Lafcadio
 			@resources = {}
 		end
 		
-		def createInstance(resourceName) #:nodoc:
-			resourceClass = eval resourceName
-			resourceClass.new self
+		def createInstance( resourceName, service_class ) #:nodoc:
+			service_class = eval resourceName unless service_class
+			service_class.new self
 		end
 		
 		# Flushes all cached ContextualServices.
@@ -34,10 +34,10 @@ module Lafcadio
 			@resources = {}
 		end
 
-		def getResource(resourceName) #:nodoc:
+		def getResource( resourceName, service_class = nil ) #:nodoc:
 			resource = @resources[resourceName]
 			unless resource
-				resource = createInstance resourceName
+				resource = createInstance( resourceName, service_class )
 				setResource resourceName, resource
 			end
 			resource
@@ -46,7 +46,7 @@ module Lafcadio
 		def method_missing(methId, *args) #:nodoc:
 			methodName = methId.id2name
 			if methodName =~ /^get(.*)$/
-				getResource $1
+				getResource $1, *args
 			elsif methodName =~ /^set(.*)$/
 				setResource $1, args[0]
 			else

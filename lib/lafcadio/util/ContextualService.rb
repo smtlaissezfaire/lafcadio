@@ -11,7 +11,7 @@ module Lafcadio
 		def self.method_missing(methodId)
 			methodName = methodId.id2name
 			if methodName =~ /^get.*/
-				Context.instance.send(methodName)
+				Context.instance.send( methodName, self )
 			else
 				super methodId
 			end
