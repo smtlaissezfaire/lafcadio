@@ -1,6 +1,5 @@
 require 'lafcadio/objectField/ObjectField'
 require 'date'
-require 'lafcadio/objectField/DateFieldViewer'
 
 class DateField < ObjectField
 	RANGE_NEAR_FUTURE = 0
@@ -8,10 +7,6 @@ class DateField < ObjectField
 
   def DateField.valueType
     Date
-  end
-
-  def DateField.viewerType
-    DateFieldViewer
   end
 
 	attr_accessor :range

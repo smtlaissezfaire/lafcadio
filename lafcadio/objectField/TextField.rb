@@ -1,11 +1,6 @@
 require 'lafcadio/objectField/ObjectField'
-require 'lafcadio/objectField/TextFieldViewer'
 
 class TextField < ObjectField
-  def TextField.viewerType
-    TextFieldViewer
-  end
-
   attr_accessor :large, :size
 
   def initialize(objectType, name, englishName = nil)

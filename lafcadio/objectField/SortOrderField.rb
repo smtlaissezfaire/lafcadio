@@ -1,11 +1,6 @@
 require 'lafcadio/objectField/IntegerField'
 
 class SortOrderField < IntegerField
-	def SortOrderField.viewerType
-		require 'lafcadio/objectField/SortOrderFieldViewer'
-		SortOrderFieldViewer
-	end
-
 	attr_accessor :sortWithin
 
 	def initialize(objectType, name = "sortOrder", englishName = "Sort order")

@@ -1,11 +1,6 @@
 require 'lafcadio/objectField/LinkField'
-require 'lafcadio/objectField/SubsetLinkFieldViewer'
 
 class SubsetLinkField < LinkField
-  def SubsetLinkField.viewerType
-    SubsetLinkFieldViewer
-  end
-  
   def SubsetLinkField.instantiationParameters( fieldElt )
 		parameters = super( fieldElt )
 		parameters['subsetField'] = fieldElt.attributes['subsetField']

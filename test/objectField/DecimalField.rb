@@ -1,4 +1,3 @@
-require 'lafcadio/mock/MockFieldManager'
 require 'lafcadio/test/LafcadioTestCase'
 require 'test/mock/domain/Invoice'
 
@@ -8,13 +7,6 @@ class TestDecimalField < LafcadioTestCase
     @odf = DecimalField.new(Invoice, "hours", 2)
   end
   
-  def testvalueFromCGI
-    mfm = MockFieldManager.new( { "hours" => "1.1" } )
-    obj = @odf.valueFromCGI mfm
-    assert_equal(Float, obj.class)
-    assert_equal(1.1, obj)
-  end
-
   def testGetvalueFromSQL
     obj = @odf.valueFromSQL "1.1"
     assert_equal(1.1, obj)    
@@ -22,12 +14,6 @@ class TestDecimalField < LafcadioTestCase
 
 	def testValueForSQL
 		assert_equal 'null', @odf.valueForSQL(nil)
-	end
-
-	def testVerifiedValue
-		@odf.notNull = false
-		mfm = MockFieldManager.new({ 'hours' => '' })
-		assert_nil @odf.verifiedValue(mfm)
 	end
 
   def testNeedsNumeric

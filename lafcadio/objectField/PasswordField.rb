@@ -1,11 +1,6 @@
 require 'lafcadio/objectField/TextField'
 
 class PasswordField < TextField
-  def PasswordField.viewerType
-		require 'lafcadio/objectField/PasswordFieldViewer'
-    PasswordFieldViewer
-  end
-
 	def PasswordField.randomPassword
     chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".
 			  split(//)

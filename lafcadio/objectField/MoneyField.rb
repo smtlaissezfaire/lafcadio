@@ -1,12 +1,7 @@
-require 'lafcadio/objectField/MoneyFieldViewer'
 require 'lafcadio/objectField/DecimalField'
 require 'lafcadio/util/StrUtil'
 
 class MoneyField < DecimalField
-	def MoneyField.viewerType
-		MoneyFieldViewer
-	end
-	
 	def MoneyField.instantiateWithParameters( domainClass, parameters )
 		self.new( domainClass, parameters['name'], parameters['englishName'] )
 	end

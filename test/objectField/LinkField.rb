@@ -5,7 +5,6 @@ require 'test/mock/domain/InternalClient'
 require 'lafcadio/objectField/MoneyField'
 require 'test/mock/domain/Invoice'
 require 'test/mock/domain/LineItem'
-require 'lafcadio/mock/MockFieldManager'
 require 'lafcadio/objectField/FieldValueError'
 
 class TestLinkField < LafcadioTestCase
@@ -48,13 +47,6 @@ class TestLinkField < LafcadioTestCase
 		assert_equal 45, @olf.valueForSQL(clientProxy)
 	end
 
-  def testValueFromCGI
-		@mockObjectStore.addObject Client.getTestClient
-    olf = LinkField.new(nil, Client, "client", "Client")
-    mfm = MockFieldManager.new( { "client" => "1"} )
-    assert_not_nil olf.valueFromCGI(mfm)
-  end
-
   def testNameForSQL
     assert_equal("client", @olf.nameForSQL)
   end
@@ -73,10 +65,6 @@ class TestLinkField < LafcadioTestCase
 		invoice = Invoice.new( {} )
 		assert_equal '', lf.valueAsHTML(invoice)
   end
-
-	def testValueFromCGINil
-		@olf.valueFromCGI(MockFieldManager.new({}))
-	end
 
 	def testRespectsOtherSubsetLinks
 		invoice = Invoice.storedTestInvoice

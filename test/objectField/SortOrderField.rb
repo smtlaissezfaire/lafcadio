@@ -1,4 +1,3 @@
-require 'lafcadio/mock/MockFieldManager'
 require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/mock/MockObjectStore'
 require 'test/mock/domain/Option'
@@ -8,22 +7,6 @@ class TestSortOrderField < LafcadioTestCase
 	def setup
 		super
 		@sortOrderField = SortOrderField.new Option
-	end
-
-	def testValueFromCGI
-		mfm = MockFieldManager.new( { "objectType" => "Option",
-																		"attribute" => "1", "name" => "small" } )
-		assert_equal 2, @sortOrderField.valueFromCGI(mfm)
-		@mockObjectStore.addObject TestOption.getTestOption
-		assert_equal 3, @sortOrderField.valueFromCGI(mfm)
-	end
-
-	def testPrevValueFromCGI
-		fieldHash = { "objectType" => "Option", "attribute" => "1",
-									"name" => "small", "objId" => "1" }
-		mfm = MockFieldManager.new fieldHash
-		@mockObjectStore.addObject TestOption.getTestOption
-		assert_equal 1, @sortOrderField.valueFromCGI(mfm)
 	end
 
 	def setupThreeSpacedOptions

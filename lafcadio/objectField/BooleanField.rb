@@ -1,5 +1,4 @@
 require 'lafcadio/objectField/ObjectField'
-require 'lafcadio/objectField/BooleanFieldViewer'
 
 # BooleanField represents a boolean value. By default, it assumes that the table 
 # field represents true and false with the integers 1 and 0. For a field that 
@@ -28,10 +27,6 @@ require 'lafcadio/objectField/BooleanFieldViewer'
 class BooleanField < ObjectField
 	ENUMS_ONE_ZERO = 0
 	ENUMS_CAPITAL_YES_NO = 1
-
-	def BooleanField.viewerType
-		BooleanFieldViewer
-	end
 
 	attr_accessor :enumType, :enums
 

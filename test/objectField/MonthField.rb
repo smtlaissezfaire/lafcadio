@@ -1,19 +1,10 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'lafcadio/mock/MockFieldManager'
 require 'lafcadio/objectField/MonthField'
 
 class TestMonthField < LafcadioTestCase
 	def setup
 		super
 		@field = MonthField.new nil, "expirationDate"
-	end
-
-	def testValueFromCGI
-		fm = MockFieldManager.new({ 'expirationDate.month' => '12',
-																	'expirationDate.year' => '2005' })
-		value = @field.valueFromCGI fm
-		assert_equal 12, value.month
-		assert_equal 2005, value.year
 	end
 
 	def testVerifyMonths

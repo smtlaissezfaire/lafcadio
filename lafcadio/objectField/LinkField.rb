@@ -1,11 +1,6 @@
 require 'lafcadio/objectField/ObjectField'
 
 class LinkField < ObjectField
-  def LinkField.viewerType
-		require 'lafcadio/objectField/LinkFieldViewer'
-		LinkFieldViewer
-  end
-  
 	def LinkField.instantiationParameters( fieldElt )
 		parameters = super( fieldElt )
 		linkedTypeStr = fieldElt.attributes['linkedType']

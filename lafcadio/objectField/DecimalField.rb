@@ -1,6 +1,5 @@
 require 'lafcadio/objectField/ObjectField'
 require 'lafcadio/util/StrUtil'
-require 'lafcadio/objectField/DecimalFieldViewer'
 
 class DecimalField < ObjectField
   attr_reader :precision
@@ -9,10 +8,6 @@ class DecimalField < ObjectField
     Numeric
   end
 
-  def DecimalField.viewerType
-    DecimalFieldViewer
-  end
-  
   def DecimalField.instantiationParameters( fieldElt )
 		parameters = super( fieldElt )
 		parameters['precision'] = fieldElt.attributes['precision'].to_i

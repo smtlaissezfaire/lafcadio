@@ -3,7 +3,6 @@ require 'lafcadio/objectField/DateField'
 require 'lafcadio/test/LafcadioTestCase'
 require 'test/mock/domain/Invoice'
 require 'lafcadio/objectField/FieldValueError'
-require 'lafcadio/mock/MockFieldManager'
 
 class TestDateField < LafcadioTestCase
   def setup
@@ -40,11 +39,5 @@ class TestDateField < LafcadioTestCase
     assert_nil obj2
 		obj3 = @odf.valueFromSQL nil
 		assert_nil obj3
-  end
-
-  def testValueFromCGI
-    fm = MockFieldManager.new( { "date.year" => "2001", "date.month" => "1",
-				  "date.dom" => "30" } )
-    assert_equal(Date.new(2001, 1, 30), @odf.valueFromCGI(fm))
   end
 end

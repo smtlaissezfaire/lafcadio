@@ -2,11 +2,6 @@ require 'lafcadio/objectField/ObjectField'
 require 'lafcadio/util/FileManager'
 
 class ImageField < ObjectField
-  def ImageField.viewerType
-		require 'lafcadio/objectField/ImageFieldViewer'
-    ImageFieldViewer
-  end
-
   @@imgDir = "../html/img/"
 
   def initialize(objectType, name = "image", englishName = nil,

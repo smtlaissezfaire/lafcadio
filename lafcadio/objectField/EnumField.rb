@@ -1,11 +1,6 @@
 require 'lafcadio/objectField/TextField'
 
 class EnumField < TextField
-	def EnumField.viewerType
-		require 'lafcadio/objectField/EnumFieldViewer'
-		EnumFieldViewer
-	end
-	
 	def EnumField.instantiationParameters( fieldElt )
 		parameters = super( fieldElt )
 		if fieldElt.elements['enums'][1].attributes['key']

@@ -1,5 +1,4 @@
 require 'lafcadio/util/EnglishUtil'
-require 'lafcadio/objectField/FieldViewer'
 require 'lafcadio/objectField/FieldValueError'
 
 class ObjectField
@@ -13,10 +12,6 @@ class ObjectField
     Object
   end
 
-  def ObjectField.viewerType
-    FieldViewer
-  end
-  
   def ObjectField.instantiationParameters( fieldElt )
 		parameters = {}
 		parameters['name'] = fieldElt.attributes['name']
@@ -145,10 +140,6 @@ class ObjectField
   def javaScriptFunction
     nil
   end
-
-	def viewer(value, objId)
-		self.class.viewerType.new(value, self, objId)
-	end
 
 	def <=>(other)
 		if @objectType == other.objectType && name == other.name

@@ -1,4 +1,3 @@
-require 'lafcadio/mock/MockFieldManager'
 require 'lafcadio/test/LafcadioTestCase'
 require 'test/mock/domain/Client'
 require 'test/mock/domain/User'
@@ -36,14 +35,6 @@ class TestObjectField < LafcadioTestCase
 			assert_not_nil $!.to_s =~ /That client already exists./
 		end
 		assert errorCaught
-  end
-
-  def testValueFromCGIHandlesWriteOnce
-    field = ObjectField.new User, "email"
-    field.writeOnce = true
-    fm = MockFieldManager.new( { "objId" => "1", 'objectType' => 'Invoice'} )
-    valueFromCGI = field.valueFromCGI fm
-    assert_equal("test@test.com", valueFromCGI)
   end
 
   def testUniqueAllowsEditsOfSameRow

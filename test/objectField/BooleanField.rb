@@ -1,24 +1,11 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'lafcadio/cgi/FieldManager'
 require 'lafcadio/objectField/BooleanField'
-require 'lafcadio/mock/MockFieldManager'
 
 class TestBooleanField < LafcadioTestCase
   def setup
   	super
     @bf = BooleanField.new(nil, "administrator")
     @bf.default = false
-  end
-
-	def testValueFromCGI
-		fm = MockFieldManager.new {}
-		field = BooleanField.new nil, "hidden"
-		assert_equal false, field.valueFromCGI(fm)
-	end
-
-  def testDefault
-    fm = MockFieldManager.new({})
-    assert_equal(false, @bf.valueFromCGI(fm))
   end
 
   def testValueForSQL

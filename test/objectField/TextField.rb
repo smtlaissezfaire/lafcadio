@@ -1,4 +1,3 @@
-require 'lafcadio/mock/MockFieldManager'
 require 'lafcadio/test/LafcadioTestCase'
 require 'test/mock/domain/Client'
 
@@ -39,9 +38,4 @@ class TestTextField < LafcadioTestCase
 																	 "able to see 'em through the web " +
 																	 "interface." ) )
   end
-
-	def testValueFromCGIMakesBlankIntoNil
-		mfm = MockFieldManager.new({ 'name' => '' })
-		assert_nil @of.valueFromCGI(mfm)
-	end
 end
