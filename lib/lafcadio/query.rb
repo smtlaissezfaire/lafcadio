@@ -84,6 +84,8 @@
 #   invoices = object_store.getInvoices { |inv| inv.rate.equals( 50 ).not }
 #   # => "select * from invoices where rate != 50"
 
+require 'delegate'
+
 module Lafcadio
 	class Query
 		def self.And( *conditions ); CompoundCondition.new( *conditions ); end
@@ -234,6 +236,8 @@ module Lafcadio
 			def primary_key_field?
 				[ @object_type.sql_primary_key_name, 'pk_id' ].include?( @fieldName )
 			end
+			
+			def to_condition; self; end
 		end
 
 		class Compare < Condition #:nodoc:
@@ -386,7 +390,7 @@ module Lafcadio
 			
 			def execute
 				impostor = DomainObjectImpostor.new( @domain_class )
-				condition = @action.call( impostor )
+				condition = @action.call( impostor ).to_condition
 				query = Query.new( @domain_class, condition )
 			end
 		end
@@ -532,12 +536,12 @@ module Lafcadio
 			def register_compare_condition( compareStr, searchTerm)
 				compareVal = ObjectFieldImpostor.comparators[compareStr]
 				Compare.new( @db_field_name, searchTerm,
-										 @domainObjectImpostor.domain_class, compareVal )
+				             @domainObjectImpostor.domain_class, compareVal )
 			end
 			
 			def equals( searchTerm )
 				Equals.new( @db_field_name, field_or_field_name( searchTerm ),
-				            @domainObjectImpostor.domain_class )
+					          @domainObjectImpostor.domain_class )
 			end
 			
 			def field_or_field_name( search_term )
@@ -567,6 +571,17 @@ module Lafcadio
 				Query::In.new( @db_field_name, searchTerms,
 											 @domainObjectImpostor.domain_class )
 			end
+			
+			def to_condition
+				if @class_field.instance_of?( BooleanField )
+					Query::Equals.new( @db_field_name, true,
+					                   @domainObjectImpostor.domain_class )
+				else
+					raise
+				end
+			end
+			
+			def not; to_condition.not; end
 		end
 	end
 end

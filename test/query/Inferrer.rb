@@ -92,6 +92,19 @@ class TestQueryInferrer < LafcadioTestCase
 		assert_infer_match( desired_sql3, Invoice ) { |inv| inv.pk_id.gt( 10 ) }
 	end
 	
+	def test_implied_boolean_eval
+		desired_sql1 = 'select * from users where users.administrator = 1'
+		assert_infer_match( desired_sql1, User ) { |user| user.administrator }
+		desired_sql2 = 'select * from users where !(users.administrator = 1)'
+		assert_infer_match( desired_sql2, User ) { |user| user.administrator.not }
+		desired_sql3 =
+			"select * from users " +
+			"where (!(users.administrator = 1) and users.email = 'test@test.com')"
+		assert_infer_match( desired_sql3, User ) { |user|
+			Query.And( user.administrator.not, user.email.equals( 'test@test.com' ) )
+		}
+	end
+	
 	def testIn
 		desiredSql = "select * from invoices where invoices.pk_id in (1, 2, 3)"
 		assert_infer_match( desiredSql, Invoice ) { |inv|
