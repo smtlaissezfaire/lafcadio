@@ -26,7 +26,7 @@
 		</enums>
 	</field>
 	<field name="integer1" class="IntegerField" />
-	<field name="link1" class="LinkField" linkedType="User" />
+	<field name="link1" class="LinkField" linkedType="User" deleteCascade="y" />
 	<field name="money1" class="MoneyField"/>
 	<field name="month1" class="MonthField"/>
 	<field name="subsetLink1" class="SubsetLinkField" linkedType="Invoice"

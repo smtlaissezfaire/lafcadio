@@ -39,7 +39,8 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		matchField( XmlSku, 'enum2', EnumField,
 		            { 'enums' => QueueHash.new( '1', '2', '3', '4' ) } )
 		matchField( XmlSku, 'integer1', IntegerField )
-		matchField( XmlSku, 'link1', LinkField, { 'linkedType' => User } )
+		matchField( XmlSku, 'link1', LinkField,
+		            { 'linkedType' => User, 'deleteCascade' => true } )
 		matchField( XmlSku, 'money1', MoneyField )
 		matchField( XmlSku, 'month1', MonthField )
 		matchField( XmlSku, 'subsetLink1', SubsetLinkField,

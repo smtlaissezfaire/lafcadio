@@ -8,29 +8,32 @@ module Lafcadio
 			linkedTypeStr = fieldElt.attributes['linkedType']
 			linkedType = DomainObject.getObjectTypeFromString( linkedTypeStr )
 			parameters['linkedType'] = linkedType
+			parameters['deleteCascade'] = fieldElt.attributes['deleteCascade'] == 'y'
 			parameters
 		end
 
 		def LinkField.instantiateWithParameters( domainClass, parameters )
 			self.new( domainClass, parameters['linkedType'], parameters['name'],
-								parameters['englishName'] )
+								parameters['englishName'], parameters['deleteCascade'] )
 		end
 
 		attr_reader :linkedType
-		attr_accessor :listener, :objectStore, :newDuringEdit, :sortField
+		attr_accessor :listener, :objectStore, :newDuringEdit, :sortField,
+		              :deleteCascade
 
 		# [objectType] The domain class that this field belongs to.
 		# [linkedType] The domain class that this field points to.
 		# [name] The name of this field.
 		# [englishName] The English name of this field.
-		def initialize(objectType, linkedType, name = nil, englishName = nil)
+		def initialize( objectType, linkedType, name = nil, englishName = nil,
+		                deleteCascade = false )
 			unless name
 				linkedType.name =~ /::/
 				name = $' || linkedType.name
 				name = name.decapitalize
 			end
 			super(objectType, name, englishName)
-			@linkedType = linkedType
+			( @linkedType, @deleteCascade ) = linkedType, deleteCascade
 			@listener = nil
 			@newDuringEdit = true
 		end

@@ -18,6 +18,18 @@ class TestDbObjectCommitter < LafcadioTestCase
 		query = Query.new objectType, pkId
 		@mockDBBridge.getCollectionByQuery(query)[0]
 	end
+	
+	def test_delete_cascade
+		user = User.new( {} )
+		user.commit
+		assert( XmlSku.getField( 'link1' ).deleteCascade )
+		xml_sku = XmlSku.new( 'link1' => user )
+		xml_sku.commit
+		user.delete = true
+		committer = Committer.new( user, @mockDBBridge )
+		committer.execute
+		assert_equal( 0, @testObjectStore.getXmlSkus.size )
+	end
 
   def testDeleteSetsLinkFieldsToNil
 		client = Client.new({ 'pkId' => 1, 'name' => 'client name' })

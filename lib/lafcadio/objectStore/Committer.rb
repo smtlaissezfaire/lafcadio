@@ -42,7 +42,11 @@ module Lafcadio
 					collection = @objectStore.getFiltered( aClass.name, @dbObject,
 																								 field.name )
 					collection.each { |dependentObject|
-						eval %{ dependentObject.#{field.name} = nil }
+						if field.deleteCascade
+							dependentObject.delete = true
+						else
+							dependentObject.send( field.name + '=', nil )
+						end
 						@objectStore.commit(dependentObject)
 					}
 				}
