@@ -5,48 +5,30 @@ require 'test/mock/domain/LineItem'
 require 'lafcadio/query/Query'
 
 class TestDBBridge < RUNIT::TestCase
-  class MockResultSet
-    attr_writer :rowHashes
-
-    def initialize
-      @rowHashes = []
-      @cursor = 0
-    end
-
-    def each_hash
-      @rowHashes.each { |hash|
-        yield(hash)
-      }
-      return nil
-    end
-
-    def fetch_row
-      row = @rowHashes[@cursor].values
-      @cursor += 1
-      row
-    end
-  end
-
   class MockDB
     attr_reader :lastSQL, :sqlStatements
 
 		def initialize
 			@sqlStatements = []
 		end
+		
+		def do( sql )
+			logSql( sql )
+		end
+		
+		def logSql( sql )
+      @lastSQL = sql
+			@sqlStatements << sql
+		end
 
-    def query(str)
-      @lastSQL = str
-			@sqlStatements << str
+    def select_all(str)
+			logSql( str )
       if str == "select last_insert_id()"
-        mrs = MockResultSet.new
-				mrs.rowHashes = [ { "last_insert_id()" => '12' } ]
-        mrs
+				[ { 'last_insert_id()' => '12' } ]
 			elsif str == 'select max(objId) from clients'
-				mrs = MockResultSet.new
-				mrs.rowHashes = [ { 'max(objId)' => '1' } ]
-				mrs
+				[ { 'max(objId)' => '1' } ]
       else
-        MockResultSet.new
+				[]
       end
     end
 
@@ -79,31 +61,31 @@ class TestDBBridge < RUNIT::TestCase
     assert(sql.index("update clients set name='clientName1'") != nil, sql)
   end
 
-  class MockMysql
+  class MockDbi
     @@instances = 0
     @@dbName = nil
 
-		def MockMysql.flushInstanceCount
+		def MockDbi.connect( dbAndHost, user, password )
+			@@dbName = dbAndHost.split(':')[2]
+      @@instances += 1
+      raise "initialize me just once, please" if @@instances > 1
+      return new
+		end
+
+		def MockDbi.flushInstanceCount
 			@@instances = 0
 		end
 
-		def MockMysql.dbName
+		def MockDbi.dbName
 			@@dbName
 		end
-
-    def initialize(host, user, password)
-      @@instances += 1
-      raise "initialize me just once, please" if @@instances > 1
-    end
-
-    def select_db(dbName)
-    	@@dbName = dbName
-    end
   end
 
   def testConnectionPooling
-    0.upto(100) { |i| DbBridge.new(nil, MockMysql) }
+  	DbBridge.setConnectionClass( MockDbi )
+    100.times { DbBridge.new }
     DbBridge.flushConnection
+    DbBridge.setConnectionClass( DBI )
   end
 
   def testLastObjIdInserted
@@ -136,20 +118,23 @@ class TestDBBridge < RUNIT::TestCase
 	end
 	
 	def testDbName
-		MockMysql.flushInstanceCount
+  	DbBridge.setConnectionClass( MockDbi )
+  	DbBridge.flushConnection
+		MockDbi.flushInstanceCount
 		ObjectStore.setDbName 'some_other_db'
-		db = DbBridge.new nil, MockMysql
-		assert_equal 'some_other_db', MockMysql.dbName
+		db = DbBridge.new( nil )
+		assert_equal 'some_other_db', MockDbi.dbName
+    DbBridge.setConnectionClass( DBI )
 	end
 	
 	def testLogsSql
 		logFilePath = 'test/testOutput/sql'
-		@dbb.executeQuery( 'select * from users' )
+		@dbb.executeSelect( 'select * from users' )
 		if FileTest.exist?( logFilePath )
 			fail if Time.now - File.ctime( logFilePath ) < 5
 		end
 		LafcadioConfig.setFilename( 'test/testData/config_with_sql_logging.dat' )
-		@dbb.executeQuery( 'select * from clients' )
+		@dbb.executeSelect( 'select * from clients' )
 		fail if Time.now - File.ctime( logFilePath ) > 5
 	end
 end

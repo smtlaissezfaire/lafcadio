@@ -1,114 +1,120 @@
-require "mysql"
+require 'dbi'
 require 'lafcadio/util/LafcadioConfig'
 
 # The DbBridge manages the MySQL connection for the ObjectStore.
 class DbBridge
-  @@db = nil
+	@@dbh = nil
 	@@lastObjIdInserted = nil
 	@@dbName = nil
-
+	@@connectionClass = DBI
+	
 	def DbBridge.setDbName(dbName)
 		@@dbName = dbName
 	end
-
-  def DbBridge._load(aString)
-    aString =~ /db:/
-    dbString = $'
-    begin
-      db = Marshal.load(dbString)
+	
+	def DbBridge._load(aString)
+		aString =~ /dbh:/
+		dbString = $'
+		begin
+			dbh = Marshal.load(dbString)
 		rescue TypeError
-			db = nil
+			dbh = nil
 		end
-    new db
-  end
-
-  def DbBridge.flushConnection
-    @@db = nil
-  end
-
-  def initialize(db = nil, mysqlClass = Mysql)
-    if db == nil
-      if @@db == nil
-        config = LafcadioConfig.new
-					@@db = mysqlClass.new config['dbhost'], config['dbuser'],
-						config['dbpassword']
-				dbName = @@dbName || config["dbname"]
-        @@db.select_db(dbName)
-      end
-      @db = @@db
-    else
-      @db = db
-    end
-  end
-
+		new dbh
+	end
+	
+	def DbBridge.flushConnection
+		@@dbh = nil
+	end
+	
+	def DbBridge.setConnectionClass( aClass )
+		@@connectionClass = aClass
+	end
+	
+	def initialize(dbh = nil)
+		if dbh == nil
+			if @@dbh == nil
+				config = LafcadioConfig.new
+				dbName = @@dbName || config['dbname']
+				dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"
+				@@dbh = @@connectionClass.connect( dbAndHost, config['dbuser'],
+				                                   config['dbpassword'] )
+			end
+			@dbh = @@dbh
+		else
+			@dbh = dbh
+		end
+	end
+	
 	# Hook for logging: Useful for testing.
 	def maybeLog(sql)
 		require 'lafcadio/util/Logger'
 		config = LafcadioConfig.new
 		Logger.log sql, 'sql' if config['logSql'] == 'y'
 	end
-
-	# Sends a insert, update, or delete statement to the database. This is only 
+	
+	# Sends an insert, update, or delete statement to the database. This is only 
 	# called by Committer#execute, which handles a lot of Ruby-level details such 
 	# as triggers.
-  def commit(dbObject)
+	def commit(dbObject)
 		require 'lafcadio/objectStore/DomainObjectSqlMaker'
-    sqlMaker = DomainObjectSqlMaker.new(dbObject)
-		sqlMaker.sqlStatements.each { |sql|
-			executeQuery sql
-		}
-    if sqlMaker.sqlStatements[0] =~ /insert/
+		sqlMaker = DomainObjectSqlMaker.new(dbObject)
+		sqlMaker.sqlStatements.each { |sql| executeCommit( sql ) }
+		if sqlMaker.sqlStatements[0] =~ /insert/
 			sql = 'select last_insert_id()'
-			result = executeQuery sql
-      @@lastObjIdInserted = result.fetch_row[0].to_i
-    end
-  end
-
+			result = executeSelect( sql )
+			@@lastObjIdInserted = result[0]['last_insert_id()'].to_i
+		end
+	end
+	
+	def executeCommit( sql )
+		@dbh.do( sql )
+	end
+	
 	# When passed a query, executes that query and returns a Collection.
 	def getCollectionByQuery(query)
 		require 'lafcadio/objectStore/Collection'
 		require 'lafcadio/objectStore/SqlValueConverter'
 		objectType = query.objectType
 		coll = Collection.new objectType
-    objects = []
-		result = executeQuery query.toSql
-    result.each_hash { |row_hash|
-	    converter = SqlValueConverter.new(objectType, row_hash)
-  	  obj = objectType.new converter.execute
+		objects = []
+		result = executeSelect query.toSql
+		result.each { |row_hash|
+			converter = SqlValueConverter.new(objectType, row_hash)
+			obj = objectType.new converter.execute
 			objects << obj
-    }
+		}
 		coll = coll.concat objects
 		coll
 	end
-
-	def executeQuery(sql)
+	
+	def executeSelect(sql)
 		maybeLog sql
 		begin
-			result = @db.query sql
-		rescue MysqlError
-			raise $!.to_s + ": #{sql}"
-		end
-		result		
+			@dbh.select_all( sql )
+		rescue DBI::DatabaseError => e
+			raise $!.to_s + ": #{ e.errstr }"
+		end	
 	end
-
-  def _dump(aDepth)
+	
+	def _dump(aDepth)
 		if @db.respond_to? '_dump'
 			dbDump = @db._dump
 		else
 			dbDump = @db.class.to_s
 		end
-    "db:#{dbDump}"
-  end
-
+		"dbh:#{dbDump}"
+	end
+	
 	def lastObjIdInserted
 		@@lastObjIdInserted
 	end
-
+	
 	def getMax(objectType)
-		require 'lafcadio/query/Max'
+		require 'lafcadio/query'
 		sql = Query::Max.new(objectType).toSql
-		result = executeQuery sql
-		result.fetch_row[0].to_i
+		result = executeSelect sql
+		result[0]['max(objId)'].to_i
 	end
 end
 
