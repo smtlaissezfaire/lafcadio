@@ -145,13 +145,13 @@ module Lafcadio
 
 		def to_sql
 			clauses = [ "select #{ fields }", "from #{ tables }" ]
-			clauses << whereClause if whereClause
+			clauses << where_clause if where_clause
 			clauses << order_clause if order_clause
 			clauses << limit_clause if limit_clause
 			clauses.join ' '
 		end
 
-		def whereClause
+		def where_clause
 			concrete_classes = object_type.self_and_concrete_superclasses.reverse
 			where_clauses = []
 			concrete_classes.each_with_index { |domain_class, i|
@@ -167,7 +167,7 @@ module Lafcadio
 		end
 
 		class Condition #:nodoc:
-			def Condition.searchTermType
+			def Condition.search_term_type
 				Object
 			end
 
@@ -176,7 +176,7 @@ module Lafcadio
 			def initialize(fieldName, searchTerm, object_type)
 				@fieldName = fieldName
 				@searchTerm = searchTerm
-				unless @searchTerm.class <= self.class.searchTermType
+				unless @searchTerm.class <= self.class.search_term_type
 					raise "Incorrect searchTerm type #{ searchTerm.class }"
 				end
 				@object_type = object_type
@@ -187,8 +187,8 @@ module Lafcadio
 				end
 			end
 			
-			def dbFieldName
-				if primaryKeyField?
+			def db_field_name
+				if primary_key_field?
 					db_table = @object_type.table_name
 					db_field_name = @object_type.sql_primary_key_name
 					"#{ db_table }.#{ db_field_name }"
@@ -218,7 +218,7 @@ module Lafcadio
 				Query::Not.new( self )
 			end
 
-			def primaryKeyField?
+			def primary_key_field?
 				[ @object_type.sql_primary_key_name, 'pkId' ].include?( @fieldName )
 			end
 		end
@@ -256,7 +256,7 @@ module Lafcadio
 				search_val = ( use_field_for_sql_value ?
 				               get_field.value_for_sql( @searchTerm ).to_s :
 											 @searchTerm.to_s )
-				"#{ dbFieldName } #{ @@comparators[@compareType] } " + search_val
+				"#{ db_field_name } #{ @@comparators[@compareType] } " + search_val
 			end
 
 			def objectMeets(anObj)
@@ -328,7 +328,7 @@ module Lafcadio
 		
 		class Equals < Condition #:nodoc:
 			def r_val_string
-				if primaryKeyField?
+				if primary_key_field?
 					@searchTerm.to_s
 				else
 					field = get_field
@@ -356,7 +356,7 @@ module Lafcadio
 			end
 
 			def to_sql
-				sql = "#{ dbFieldName } "
+				sql = "#{ db_field_name } "
 				unless @searchTerm.nil?
 					sql += "= " + r_val_string
 				else
@@ -367,7 +367,7 @@ module Lafcadio
 		end
 
 		class In < Condition #:nodoc:
-			def self.searchTermType
+			def self.search_term_type
 				Array
 			end
 
@@ -377,7 +377,7 @@ module Lafcadio
 			end
 
 			def to_sql
-				"#{ dbFieldName } in (#{ @searchTerm.join(', ') })"
+				"#{ db_field_name } in (#{ @searchTerm.join(', ') })"
 			end
 		end
 
@@ -435,7 +435,7 @@ module Lafcadio
 				elsif @matchType == POST_ONLY
 					withWildcards += "%"
 				end
-				"#{ dbFieldName } like '#{ withWildcards }'"
+				"#{ db_field_name } like '#{ withWildcards }'"
 			end
 		end
 
@@ -450,7 +450,7 @@ module Lafcadio
 				end
 			end
 		
-			def self.searchTermType
+			def self.search_term_type
 				DomainObject
 			end
 
@@ -460,7 +460,7 @@ module Lafcadio
 			end
 
 			def to_sql
-				"#{ dbFieldName } = #{ @searchTerm.pkId }"
+				"#{ db_field_name } = #{ @searchTerm.pkId }"
 			end
 		end
 
@@ -525,7 +525,7 @@ module Lafcadio
 					@db_field_name = 'pkId'
 				else
 					@class_field = class_field_or_name
-					@db_field_name = class_field_or_name.dbFieldName
+					@db_field_name = class_field_or_name.db_field_name
 				end
 			end
 			
