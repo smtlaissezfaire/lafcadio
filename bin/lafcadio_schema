@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+require 'lafcadio/util/ClassUtil'
+
+if ARGV.size < 1
+	puts "lafcadio_schema domain_class_definition.rb"
+else
+	fileName = ARGV[0]
+	require "#{ fileName }"
+	fileName =~ /(\w*)\.rb/
+	className = $1
+	domainClass = ClassUtil.getClass( className )
+	createDefinitions = []
+	createDefinitions << "#{ domainClass.sqlPrimaryKeyName } " +
+	                     "int not null auto_increment"
+	createDefinitions << "primary key #{ domainClass.sqlPrimaryKeyName }"
+	domainClass.classFields.each { |field|
+		createDefinition = nil
+		if field.class == TextField
+			createDefinition = "#{ field.name } varchar(255)"
+			createDefinition += " not null" if field.notNull
+			createDefinition += " unique" if field.unique
+		end
+		createDefinitions << createDefinition if createDefinition
+	}
+	sql = <<-SQL
+create table #{ domainClass.tableName } (
+  #{ createDefinitions.join(",\n  ") }
+);
+	SQL
+	puts sql
+end
