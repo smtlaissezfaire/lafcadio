@@ -1,5 +1,6 @@
 require 'lafcadio/domain/MapObject'
 require 'test/mock/domain/InventoryLineItem'
+require 'test/mock/domain/Option'
 
 class InventoryLineItemOption < MapObject
 	def InventoryLineItemOption.classFields
