@@ -34,6 +34,9 @@ class TestDBBridge < RUNIT::TestCase
 				[ [ '1' ] ]
 			elsif str == 'select max(date) from invoices'
 				[ [ DBI::Date.new( 2001, 4, 5 ) ] ]
+			elsif str == 'select * from some_other_table'
+				[ OneTimeAccessHash.new( 'some_other_id' => '16', 'text1' => 'foobar',
+				                         'link1' => '1' ) ]
       else
 				[]
       end
@@ -49,6 +52,21 @@ class TestDBBridge < RUNIT::TestCase
     	@@connected
     end
   end
+
+	class OneTimeAccessHash < DelegateClass( Hash )
+		attr_reader :key_lookups
+	
+		def initialize( hash )
+			super( hash )
+			@key_lookups = Hash.new( 0 )
+		end
+		
+		def []( key )
+			@key_lookups[key] += 1
+			raise "Should only access #{ key } once" if @key_lookups[key] > 1
+			super( key )
+		end
+	end
 
   def setup
 		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
@@ -74,6 +92,17 @@ class TestDBBridge < RUNIT::TestCase
     sql = @mockDbh.lastSQL
     assert(sql.index("update clients set name='clientName1'") != nil, sql)
   end
+	
+	def test_passes_sql_value_converter_to_domain_class_init
+		query = Query.new( XmlSku )
+		xml_sku = @dbb.getCollectionByQuery( query ).only
+		assert_equal( 'foobar', xml_sku.text1 )
+		assert_equal( 'foobar', xml_sku.text1 )
+		assert_nil( xml_sku.date1 )
+		assert_nil( xml_sku.date1 )
+		assert_equal( DomainObjectProxy, xml_sku.link1.class )
+		assert_equal( 1, xml_sku.link1.pkId )
+	end
 
   class MockDbi
     @@instances = 0

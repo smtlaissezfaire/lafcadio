@@ -8,19 +8,17 @@ module Lafcadio
 			@rowHash = rowHash
 		end
 
-		def execute
-			require 'lafcadio/objectField/LinkField'
-			objectHash = {}
-			objectHash["pkId"] = rowHash[@objectType.sqlPrimaryKeyName].to_i
-			objectType.selfAndConcreteSuperclasses.each { |anObjectType|
-				anObjectType.classFields.each { |field|
-					key = field.name
-					stringValue = rowHash[field.dbFieldName]
-					obj = field.valueFromSQL stringValue
-					objectHash[key] = obj
-				}
-			}
-			objectHash
+		def []( key )
+			if key == 'pkId'
+				@rowHash[@objectType.sqlPrimaryKeyName].to_i
+			else
+				begin
+					field = @objectType.getField( key )
+					field.valueFromSQL( @rowHash[ key ] )
+				rescue MissingError
+					nil
+				end
+			end
 		end
 	end
 end

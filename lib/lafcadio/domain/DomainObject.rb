@@ -194,9 +194,9 @@ module Lafcadio
 			end
 		end
 
-		attr_accessor :errorMessages, :pkId, :lastCommit, :fields
+		attr_accessor :errorMessages, :pkId, :lastCommit, :fields, :fields_set
 		attr_reader :delete
-		protected :fields
+		protected :fields, :fields_set
 
 		# fieldHash should contain key-value associations for the different
 		# fields of this domain class. For example, instantiating a User class 
@@ -213,12 +213,12 @@ module Lafcadio
 		# If you're creating mock objects for unit tests, you can explicitly set 
 		# the pkId to represent objects that already exist in the database.
 		def initialize(fieldHash)
-			@pkId = fieldHash["pkId"] != nil ? fieldHash["pkId"].to_i : nil
+			@fieldHash = fieldHash
+			@pkId = fieldHash['pkId']
+			@pkId = @pkId.to_i unless @pkId.nil?
 			@errorMessages = []
 			@fields = {}
-			self.class.allFields.each { |field|
-				self.send("#{ field.name }=", fieldHash[field.name])
-			}
+			@fields_set = []
 		end
 		
 		def method_missing(methId, arg1 = nil)
@@ -236,17 +236,25 @@ module Lafcadio
 				end
 			}
 			if getter
+				unless @fields_set.include?( field )
+					set_field( field, @fieldHash[field.name] )
+				end
 				@fields[field.name]
 			elsif setter
-				if field.class <= LinkField
-					if arg1.class != DomainObjectProxy && arg1
-						arg1 = DomainObjectProxy.new(arg1)
-					end
-				end
-				@fields[field.name] = arg1
+				set_field( field, arg1 )
 			else
 				super(methId)
 			end
+		end
+		
+		def set_field( field, value )
+			if field.class <= LinkField
+				if value.class != DomainObjectProxy && value
+					value = DomainObjectProxy.new(value)
+				end
+			end
+			@fields[field.name] = value
+			@fields_set << field
 		end
 
 		def objectType
@@ -283,6 +291,7 @@ module Lafcadio
 		def clone
 			copy = super
 			copy.fields = @fields.clone
+			copy.fields_set = @fields_set.clone
 			copy
 		end
 		

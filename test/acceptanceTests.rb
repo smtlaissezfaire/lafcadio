@@ -202,6 +202,34 @@ apostrophe's
 end
 
 class AccTestObjectStore < AcceptanceTestCase
+	def test_large_result_set
+		num_rows = 1000
+		date_time_field = TestRow.getField( 'date_time' )
+		big_str = <<-BIG_STR
+'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+		BIG_STR
+		1.upto( num_rows ) { |i|
+			text = "'row #{ i }'"
+			date_time_str = date_time_field.valueForSQL( Time.now )
+			bool_val = ( i % 2 == 0 ) ? "'1'" : "'0'"
+			sql = <<-SQL
+insert into testrows( text_field, date_time, bool_field, blob_field )
+values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
+			SQL
+			@dbh.do( sql )
+		}
+		rows = @object_store.getTestRows
+		assert_equal( num_rows, rows.size )
+		1.upto( num_rows ) { |i|
+			row = rows[i-1]
+			assert_equal( i, row.pkId )
+			assert_equal( "row #{ i }", row.text_field )
+		}
+		result = @dbh.select_all( 'select * from testrows' )
+		assert_equal( num_rows, result.size )
+		result.each { |row_hash| value = row_hash['text_field'] }
+	end
+
 	def test_max
 		y2k = Time.utc( 2000, 1, 1 )
 		row1 = TestRow.new( 'date_time' => y2k )

@@ -100,7 +100,7 @@ module Lafcadio
 			result = executeSelect query.toSql
 			result.each { |row_hash|
 				converter = SqlValueConverter.new(objectType, row_hash)
-				obj = objectType.new converter.execute
+				obj = objectType.new converter
 				objects << obj
 			}
 			coll = coll.concat objects

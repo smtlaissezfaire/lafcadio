@@ -196,4 +196,39 @@ class TestDomainObject < LafcadioTestCase
 		client2 = Client.new( 'pkId' => 2, 'name' => 'someone else' )
 		assert( !client.eql?( client2 ) )
 	end
+	
+	def test_defers_field_copying
+		row_hash = OneTimeAccessHash.new( 'pkId' => '1', 'hours' => '36.5',
+		                                  'xmlSku' => nil )
+		converter = SqlValueConverter.new( Invoice, row_hash )
+		inv = Invoice.new( converter )
+		assert_equal( 1, row_hash.key_lookups['pkId'] )
+		assert_equal( 0, row_hash.key_lookups['hours'] )
+		assert_equal( 0, row_hash.key_lookups['xmlSku'] )
+		assert_equal( 36.5, inv.hours )
+		assert_equal( 1, row_hash.key_lookups['hours'] )
+		assert_nil( inv.xmlSku )
+		assert_equal( 1, row_hash.key_lookups['xmlSku'] )
+		assert_nil( inv.xmlSku )
+		assert_equal( 1, row_hash.key_lookups['xmlSku'] )
+		xml_sku_row_hash = OneTimeAccessHash.new( 'some_other_id' => '345' )
+		xml_sku_converter = SqlValueConverter.new( XmlSku, xml_sku_row_hash )
+		xml_sku = XmlSku.new( xml_sku_converter )
+		assert_equal( 345, xml_sku.pkId )
+	end
+	
+	class OneTimeAccessHash < DelegateClass( Hash )
+		attr_reader :key_lookups
+	
+		def initialize( hash )
+			super( hash )
+			@key_lookups = Hash.new( 0 )
+		end
+		
+		def []( key )
+			@key_lookups[key] += 1
+			raise "Should only access #{ key } once" if @key_lookups[key] > 1
+			super( key )
+		end
+	end
 end
