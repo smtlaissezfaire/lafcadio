@@ -1,5 +1,3 @@
-require 'lafcadio/util/ClassUtil'
-
 # Turns a hash of SQL key-value pairs into Ruby-native key-value pairs.
 class SqlValueConverter
   attr_reader :objectType, :rowHash

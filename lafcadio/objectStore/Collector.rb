@@ -42,7 +42,7 @@ class Collector
 		require 'lafcadio/util/DomainUtil'
 		objectType = DomainUtil.getObjectTypeFromString objectTypeName
 		unless fieldName
-			fieldName = ClassUtil.bareClassName(searchTerm.objectType)
+			fieldName = searchTerm.objectType.bareName
 			fieldName = StrUtil.decapitalize fieldName
 		end
 		if searchTerm.class <= DomainObject
@@ -56,8 +56,8 @@ class Collector
 	def getMapped(searchTerm, resultTypeName)
 		resultType = DomainUtil.getObjectTypeFromString resultTypeName
 		coll = []
-		firstTypeName = ClassUtil.bareClassName searchTerm.class
-		secondTypeName = ClassUtil.bareClassName resultType
+		firstTypeName = searchTerm.class.bareName
+		secondTypeName = resultType.bareName
 		mapTypeName = firstTypeName + secondTypeName
 		getFiltered(mapTypeName, searchTerm).each { |mapObj|
 			coll << mapObj.send(StrUtil.decapitalize(resultType.name))
@@ -89,7 +89,7 @@ class Collector
 	end
 
 	def getMapMatch(objectType, mapped)
-		fieldName = ClassUtil.bareClassName(mapped.objectType)
+		fieldName = mapped.objectType.bareName
 		fieldName = StrUtil.decapitalize fieldName
 		Query::Equals.new(fieldName, mapped, objectType)
 	end

@@ -23,7 +23,7 @@ class ObjectType
 	def initialize(objectType)
 		@objectType = objectType
 		dirName = LafcadioConfig.new['classDefinitionDir']
-		xmlFileName = ClassUtil.bareClassName( @objectType ) + '.xml'
+		xmlFileName = @objectType.bareName + '.xml'
 		xmlPath = File.join( dirName, xmlFileName )
 		xml = ''
 		begin
@@ -59,7 +59,7 @@ class ObjectType
 		if (!@xmlParser.nil? && tableName = @xmlParser.tableName)
 			tableName
 		else
-			tableName = ClassUtil.bareClassName @objectType
+			tableName = @objectType.bareName
 			tableName[0] = tableName[0..0].downcase
 			EnglishUtil.plural tableName
 		end

@@ -1,5 +1,4 @@
 require 'singleton'
-require 'lafcadio/util/ClassUtil'
 
 # The Context is a singleton object that manages ContextualServices. Each 
 # ContextualService is a service that connects in some way to external 

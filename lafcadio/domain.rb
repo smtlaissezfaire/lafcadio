@@ -66,7 +66,7 @@ class ClassDefinitionXmlParser
 		className = fieldElt.attributes['class']
 		name = fieldElt.attributes['name']
 		begin
-			fieldClass = ClassUtil.getClass( className )
+			fieldClass = Class.getClass( className )
 			register_name( name )
 			field = fieldClass.instantiateFromXml( @domainClass, fieldElt )
 			possibleFieldAttributes.each { |fieldAttr|
