@@ -39,6 +39,10 @@ module Lafcadio
 			@enums = nil
 		end
 
+		def falseEnum # :nodoc:
+			getEnums[false]
+		end
+
 		def getEnums( value = nil ) # :nodoc:
 			if @enums
 				@enums
@@ -55,16 +59,12 @@ module Lafcadio
 			end
 		end
 
-		def trueEnum( value = nil ) # :nodoc:
-			getEnums( value )[true]
-		end
-
-		def falseEnum # :nodoc:
-			getEnums[false]
-		end
-
 		def textEnumType # :nodoc:
 			@enumType == ENUMS_CAPITAL_YES_NO
+		end
+
+		def trueEnum( value = nil ) # :nodoc:
+			getEnums( value )[true]
 		end
 
 		def valueForSQL(value) # :nodoc:

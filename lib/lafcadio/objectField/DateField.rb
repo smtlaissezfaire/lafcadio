@@ -7,7 +7,7 @@ module Lafcadio
 		RANGE_NEAR_FUTURE = 0
 		RANGE_PAST = 1
 
-		def DateField.valueType # :nodoc:
+		def self.valueType # :nodoc:
 			Date
 		end
 
