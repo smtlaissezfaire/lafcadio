@@ -24,6 +24,8 @@
 			<enum key="3">4</enum>
 		</enums>
 	</field>
+	<field name="integer1" class="IntegerField" />
+	<field name="link1" class="LinkField" linkedType="User" />
 	
 	<field name="sku" class="TextField" size="16" unique="y"/>
 	<field name="standardPrice" class="MoneyField"/>

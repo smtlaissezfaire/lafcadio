@@ -22,6 +22,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 
 	def testClassFieldsFromXml
 		require 'lafcadio/objectField'
+		require 'test/mock/domain/User'
 		matchField( XmlSku, 'boolean1', BooleanField,
 		            { 'enumType' => BooleanField::ENUMS_CAPITAL_YES_NO } )
 		matchField( XmlSku, 'boolean2', BooleanField,
@@ -38,6 +39,8 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		            { 'enums' => QueueHash.new( 'a', 'a', 'b', 'b' ) } )
 		matchField( XmlSku, 'enum2', EnumField,
 		            { 'enums' => QueueHash.new( '1', '2', '3', '4' ) } )
+		matchField( XmlSku, 'integer1', IntegerField )
+		matchField( XmlSku, 'link1', LinkField, { 'linkedType' => User } )
 		
 		matchField( XmlSku, 'sku', TextField, { 'size' => 16, 'unique' => true } )
 		matchField( XmlSku, 'standardPrice', MoneyField )

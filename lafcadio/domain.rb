@@ -78,6 +78,9 @@ class ClassDefinitionXmlParser
 				}
 			end
 			fieldClass.new( @domainClass, name, enums, englishName )
+		elsif fieldClass == LinkField
+			linkedType = ClassUtil.getClass( fieldElt.attributes['linkedType'] )
+			fieldClass.new( @domainClass, linkedType, name, englishName )
 		else
 			fieldClass.new( @domainClass, name, englishName )
 		end
