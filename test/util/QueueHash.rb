@@ -50,4 +50,11 @@ class TestQueueHash < LafcadioTestCase
 		@qh.each { |name, value| str += name + value }
 		assert_equal 'qwerty', str
 	end
+	
+	def testEquality
+		qhPrime = QueueHash.new("q", "w", "e", "r", "t", "y")
+		assert_equal( @qh, qhPrime )
+		anotherQh = QueueHash.new( 'a', 's', 'd', 'f', 'g', 'h' )
+		assert( @qh != anotherQh )
+	end
 end

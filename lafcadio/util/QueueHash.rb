@@ -50,4 +50,16 @@ class QueueHash
 	def each
 		@pairs.each { |pair| yield pair[0], pair[1] }
 	end
+	
+	def ==( otherObj )
+		if otherObj.class == QueueHash && otherObj.size == size
+			match = true
+			(0...size).each { |i|
+				match &&= keys[i] == otherObj.keys[i] && values[i] == otherObj.values[i]
+			}
+			match
+		else
+			false
+		end
+	end
 end
