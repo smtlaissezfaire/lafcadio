@@ -330,6 +330,8 @@ module Lafcadio
 		def self.get_class_fields
 			if self.methods( false ).include?( 'get_class_fields' )
 				[ @@pk_fields[ self ] ]
+			elsif abstract_subclasses.include?( self )
+				[]
 			else
 				xmlParser = try_load_xml_parser
 				if xmlParser

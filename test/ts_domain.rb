@@ -397,6 +397,10 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal 'trade', ic.billingType
 	end
 	
+	def test_map_object
+		assert_equal( [], MapObject.get_class_fields )
+	end
+	
 	def testObjectLinksUpdateLive
 		invoice = Invoice.storedTestInvoice
 		client = Client.storedTestClient
