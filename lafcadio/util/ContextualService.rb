@@ -1,4 +1,13 @@
 class ContextualService
+	def ContextualService.method_missing (methodId)
+		methodName = methodId.id2name
+		if methodName =~ /^get.*/
+			Context.instance.send(methodName)
+		else
+			super methodId
+		end
+	end
+
 	def initialize (passKey)
 		if passKey.class != Context
 			raise ArgumentError,
