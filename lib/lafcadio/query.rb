@@ -187,15 +187,7 @@ module Lafcadio
 				end
 			end
 			
-			def db_field_name
-				if primary_key_field?
-					db_table = @object_type.table_name
-					db_field_name = @object_type.sql_primary_key_name
-					"#{ db_table }.#{ db_field_name }"
-				else
-					get_field.db_table_and_field_name
-				end
-			end
+			def db_field_name; get_field.db_table_and_field_name; end
 			
 			def get_field
 				anObjectType = @object_type
@@ -250,13 +242,12 @@ module Lafcadio
 			end
 
 			def to_sql
-				not_pk = @fieldName != @object_type.sql_primary_key_name
-				use_field_for_sql_value = ( not_pk &&
-				                            ( !( get_field.class <= LinkField ) ||
-																		  @searchTerm.respond_to?( :object_type ) ) )
-				search_val = ( use_field_for_sql_value ?
-				               get_field.value_for_sql( @searchTerm ).to_s :
-											 @searchTerm.to_s )
+				if ( get_field.kind_of?( LinkField ) &&
+				     !@searchTerm.respond_to?( :pk_id ) )
+					search_val = @searchTerm.to_s
+				else
+					search_val = get_field.value_for_sql( @searchTerm ).to_s
+				end
 				"#{ db_field_name } #{ @@comparators[@compareType] } " + search_val
 			end
 
@@ -314,15 +305,11 @@ module Lafcadio
 			
 			def method_missing( methId, *args )
 				fieldName = methId.id2name
-				if fieldName == 'pk_id'
-					ObjectFieldImpostor.new( self, fieldName )
-				else
-					begin
-						classField = @domain_class.get_field( fieldName )
-						ObjectFieldImpostor.new( self, classField )
-					rescue MissingError
-						super( methId, *args )
-					end
+				begin
+					classField = @domain_class.get_field( fieldName )
+					ObjectFieldImpostor.new( self, classField )
+				rescue MissingError
+					super( methId, *args )
 				end
 			end
 		end

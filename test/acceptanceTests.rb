@@ -237,7 +237,7 @@ class AccTestObjectStore < AcceptanceTestCase
 		mock_object_store = MockObjectStore.new
 		mock_object_store.commit( mock )
 		testdiffpkrow1_prime = mock_object_store.getTestDiffPkRows( 1,
-		                                                            'objId' ).first
+		                                                            'pk_id' ).first
 		assert_equal( 'sample text', testdiffpkrow1_prime.text_field )
 		sql = <<-SQL
 insert into testdiffpkrows( objId, text_field )
