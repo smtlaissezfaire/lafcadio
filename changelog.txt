@@ -1,5 +1,33 @@
 CHANGELOG
 
+0.6.0 -- January 2 2005
+* WARNING: Removed AutoIncrementField, MockSession, MoneyField, PasswordField,
+  Query::Link
+* WARNING: Removed DateField#range, Number#precision_format,
+  ObjectField#english_name, ObjectField#null_error_msg, ObjectField#unique, 
+	String#increment_filename, String#line_wrap, String#split_keep_in_betweens
+* WARNING: Moved Array#only to Extensions library at
+  http://extensions.rubyforge.org/ . Also, Class#get_class was moved to
+	Extensions as Module.by_name, and Class#barename was moved to Extensions as
+	Module#basename
+* DomainObject methods can dispatch to ObjectStore, for example:
+  Client#get_invoices dispatches to ObjectStore#get_invoices( client )
+* Can run Lafcadio without including external libraries with Rubygems
+* Query inference can implicitly do boolean evaluations for for boolean fields,
+  for example: ObjectStore#get_users { |user| user.is_admin }
+* LafcadioTestCase is a child of Test::Unit::TestCase
+* ContextualService.flush removes the cached version of the service
+* Querying against a TextListField, you can call include? as if the value were
+  an Array, for example:
+	ObjectStore#get_clients { |client| client.names.include?( 'John Doe' ) }
+* Files from test/mock/domain/ all folded into test/mock/domain.rb
+* Useful error if you don't pass a regexp to a Like clause
+* Fixed lots of problesm with non-default SQL primary keys
+* ObjectStore#get_objects raises an exception unless its second arg is an array
+  of ints
+* All references to "object_type" changed to "domain_class"
+* All test case files folded into ts_*.rb files
+
 0.5.2 -- December 1 2004
 * WARNING: Changed all method and accessor names from camel-case to underscore.
 * WARNING: Month.new( month, year ) is now Month.new( year, month )
