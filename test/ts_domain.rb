@@ -197,6 +197,13 @@ class TestDomainObject < LafcadioTestCase
 		matchField( XmlSku2, 'timestamp1', TimeStampField )
 	end
 	
+	def test_class_fields_named_as_symbols
+		matchField(
+			XmlSku3, 'boolean2', BooleanField,
+			{ 'enums' => { true => 'yin', false => 'yang' } }
+		)
+	end
+	
 	def testClone
 		client1 = newTestClientWithoutPkId
 		client2 = client1.clone

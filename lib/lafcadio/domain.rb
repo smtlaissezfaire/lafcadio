@@ -288,7 +288,7 @@ module Lafcadio
 				class_fields = [ @@pk_fields[self] ]
 				@@class_fields[self] = class_fields
 			end
-			att_hash['name'] = name
+			att_hash['name'] = name == String ? name : name.to_s
 			field = field_class.instantiate_with_parameters( self, att_hash )
 			att_hash.each { |field_name, value|
 				setter = field_name + '='

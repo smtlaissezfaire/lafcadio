@@ -268,8 +268,13 @@ class XmlSku2 < Lafcadio::DomainObject
 end
 
 class XmlSku3 < Lafcadio::DomainObject
-	boolean    'boolean1',
-	           { 'enum_type' => Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO }
+	boolean	'boolean1',
+	        { 'enum_type' => Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO }
+	boolean	:boolean2,
+	        {
+						'enums' => { true => 'yin', false => 'yang' },
+						'english_name' => 'boolean 2'
+					}
 
 	def self.sql_primary_key_name; 'xml_sku3_id'; end
 	
