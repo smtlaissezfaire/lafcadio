@@ -14,6 +14,8 @@ spec = Gem::Specification.new do |s|
 	s.email = 'sera@fhwang.net'
 	s.homepage = 'http://lafcadio.rubyforge.org/'
 	s.autorequire = 'lafcadio'
+	s.executables = [ 'bin/lafcadio_schema' ]
+	s.bindir = 'bin'
 end
 if $0==__FILE__
   Gem::Builder.new(spec).build
