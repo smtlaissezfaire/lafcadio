@@ -106,9 +106,7 @@ class TestDomainObject < LafcadioTestCase
 		end
 	end
 	
-	def newTestClientWithoutPkId
-		Client.new( { "name" => "clientName" } )
-	end
+	def newTestClientWithoutPkId; Client.new( "name" => "clientName" ); end
 
 	def testAssignProxies
 		invoice = Invoice.storedTestInvoice
@@ -216,10 +214,10 @@ class TestDomainObject < LafcadioTestCase
 	
 	def testCreateWithLinkedProxies
 		clientProxy = DomainObjectProxy.new Client, 99
-		hash = { 'client' => clientProxy, 'rate' => 70,
-				'date' => Date.new(2001, 4, 5), 'hours' => 36.5, 'invoice_num' => 1,
-				'pk_id' => 1 }
-		invoice = Invoice.new hash
+		invoice = Invoice.new(
+			'client' => clientProxy, 'rate' => 70, 'date' => Date.new(2001, 4, 5),
+			'hours' => 36.5, 'pk_id' => 1
+		)
 		proxyPrime = invoice.client
 		assert_equal DomainObjectProxy, proxyPrime.class
 		assert_equal Client, proxyPrime.domain_class
@@ -323,6 +321,12 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal 1, invoice.pk_id
 		assert_equal 1, client.pk_id
 		assert invoice != client
+	end
+	
+	def test_fails_if_bad_hash
+		assert_raise( ArgumentError ) {
+			Client.new( 'not-a-field' => 'something' )
+		}
 	end
 
 	def test_get_domain_class_from_string

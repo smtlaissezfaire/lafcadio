@@ -24,7 +24,7 @@ class Client < Lafcadio::DomainObject
 	include Lafcadio
 	
   def Client.getTestClient
-    Client.new( { "name" => "clientName1", 'pk_id' => 1 } )
+    Client.new( "name" => "clientName1", 'pk_id' => 1 )
   end
 
 	def Client.storedTestClient
@@ -76,10 +76,10 @@ class Invoice < Lafcadio::DomainObject
 	include Lafcadio
 
   def Invoice.getTestInvoice
-    hash = { "client" => Client.getTestClient, "rate" => 70,
-             "date" => Date.new(2001, 4, 5), "hours" => 36.5, 
-						 "invoice_num" => 1, "pk_id" => 1 }
-    Invoice.new hash
+    Invoice.new(
+			"client" => Client.getTestClient, "rate" => 70,
+			"date" => Date.new(2001, 4, 5), "hours" => 36.5, "pk_id" => 1
+		)
   end
 
 	def Invoice.storedTestInvoice
@@ -220,10 +220,7 @@ end
 
 class User < Lafcadio::DomainObject
   def User.fieldHash
-    fieldHash = { "salutation" => "Mr", "firstNames" => "Francis",
-		  "lastName" => "Hwang", "phone" => "", "address1" => "",
-		  "address2" => "", "city" => "", "state" => "", "zip" => "",
-		  "email" => "test@test.com", "password" => "mypassword!" }
+    { "firstNames" => "Francis", "email" => "test@test.com" }
   end
 
   def User.getTestUser

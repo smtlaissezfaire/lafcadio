@@ -449,10 +449,10 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
   end
 
   def testCommitSQLWithInvoice
-    hash = { "client" => Client.getTestClient, "rate" => 70,
-             "date" => Date.new(2001, 4, 5), "hours" => 36.5, 
-						 "invoice_num" => 1, "pk_id" => 1 }
-    invoice = Invoice.new hash
+    invoice = Invoice.new(
+    	"client" => Client.getTestClient, "rate" => 70,
+			"date" => Date.new(2001, 4, 5), "hours" => 36.5, "pk_id" => 1
+		)
     update_sql = DomainObjectSqlMaker.new(invoice).sql_statements[0]
     assert_not_nil(update_sql =~ /update invoices/, update_sql)
     assert_not_nil(update_sql =~ /pk_id=1/, update_sql)
@@ -570,9 +570,9 @@ class TestGMockObjectStore < LafcadioTestCase
 	end
 
 	def test_order_by
-		client1 = Client.new( 'pkId' => 1, 'name' => 'zzz' )
+		client1 = Client.new( 'pk_id' => 1, 'name' => 'zzz' )
 		client1.commit
-		client2 = Client.new( 'pkId' => 2, 'name' => 'aaa' )
+		client2 = Client.new( 'pk_id' => 2, 'name' => 'aaa' )
 		client2.commit
 		query = Query.new Client
 		query.order_by = 'name'
@@ -796,12 +796,13 @@ class TestObjectStore < LafcadioTestCase
 	def testGetInvoices
 		client = Client.getTestClient
 		client.commit
-		inv1 = Invoice.new({ 'invoiceNum' => 1, 'client' => client,
-				'date' => Date.today, 'rate' => 30, 'hours' => 40 })
-		
-				@testObjectStore.commit inv1
-		inv2 = Invoice.new({ 'invoiceNum' => 2, 'client' => client,
-				'date' => Date.today - 7, 'rate' => 30, 'hours' => 40 })
+		inv1 = Invoice.new(
+			'client' => client, 'date' => Date.today, 'rate' => 30, 'hours' => 40
+		)
+		@testObjectStore.commit inv1
+		inv2 = Invoice.new(
+			'client' => client, 'date' => Date.today - 7, 'rate' => 30, 'hours' => 40
+		)
 		@testObjectStore.commit inv2
 		coll = @testObjectStore.get_invoices(client)
 		assert_equal 2, coll.size

@@ -297,11 +297,9 @@ class TestObjectField < LafcadioTestCase
 	def setup
 		super
 		@client = Client.storedTestClient
-		@user = User.new({ "salutation" => "Mr", "firstNames" => "Francis",
-				"lastName" => "Hwang", "phone" => "", "address1" => "",
-				"address2" => "", "city" => "", "state" => "",
-				"zip" => "", "email" => "test@test.com",
-				"password" => "mypassword!", "pk_id" => 1 })
+		@user = User.new(
+			"firstNames" => "Francis", "email" => "test@test.com", "pk_id" => 1
+		)
 		@mockObjectStore.commit @user
 	end
 

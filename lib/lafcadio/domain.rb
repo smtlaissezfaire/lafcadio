@@ -508,6 +508,15 @@ module Lafcadio
 		# If you're creating mock objects for unit tests, you can explicitly set 
 		# the +pk_id+ to represent objects that already exist in the database.
 		def initialize(fieldHash)
+			if fieldHash.respond_to? :keys
+				fieldHash.keys.each { |key|
+					begin
+						self.class.get_field( key )
+					rescue MissingError
+						raise ArgumentError, "Invalid field name #{ key }"
+					end
+				}
+			end
 			@fieldHash = fieldHash
 			@error_messages = []
 			@fields = {}
