@@ -316,31 +316,21 @@ module Lafcadio
 		
 		class Equals < Condition #:nodoc:
 			def r_val_string
-				if primary_key_field?
-					@searchTerm.to_s
+				field = get_field
+				if @searchTerm.class <= ObjectField
+					@searchTerm.db_table_and_field_name
 				else
-					field = get_field
-					if @searchTerm.class <= ObjectField
-						@searchTerm.db_table_and_field_name
-					else
-						field.value_for_sql(@searchTerm).to_s
-					end
+					field.value_for_sql(@searchTerm).to_s
 				end
 			end
 
 			def object_meets(anObj)
-				if @fieldName == @object_type.sql_primary_key_name
-					object_value = anObj.pk_id
-				else
-					object_value = anObj.send @fieldName
-				end
-				compare_value =
 				if @searchTerm.class <= ObjectField
 					compare_value = anObj.send( @searchTerm.name )
 				else
 					compare_value = @searchTerm
 				end
-				compare_value == object_value
+				compare_value == anObj.send( @fieldName )
 			end
 
 			def to_sql
@@ -455,28 +445,21 @@ module Lafcadio
 		class Max < Query #:nodoc:
 			attr_reader :field_name
 		
-			def initialize( object_type, field_name = nil )
+			def initialize( object_type, field_name = 'pk_id' )
 				super( object_type )
-				if field_name
-					@field_name = field_name
-					@pk = false
-				else
-					@field_name = object_type.sql_primary_key_name
-					@pk = true
-				end
+				@field_name = field_name
 			end
 		
 			def collect( coll )
-				fn = @pk ? 'pk_id': @field_name
 				max = coll.inject( nil ) { |max, d_obj|
-					a_value = d_obj.send( fn )
+					a_value = d_obj.send( @field_name )
 					( max.nil? || a_value > max ) ? a_value : max
 				}
 				[ max ]
 			end
 		
 			def fields
-				"max(#{ @field_name })"
+				"max(#{ @object_type.get_field( @field_name ).db_field_name })"
 			end
 		end
 

@@ -489,7 +489,7 @@ module Lafcadio
 		# returns the highest +pk_id+ in the +clients+ table.
 		#   ObjectStore#get_max( Invoice, "rate" )
 		# will return the highest rate for all invoices.
-		def get_max( domain_class, field_name = nil )
+		def get_max( domain_class, field_name = 'pk_id' )
 			@dbBridge.group_query( Query::Max.new( domain_class, field_name ) ).only
 		end
 

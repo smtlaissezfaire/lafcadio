@@ -45,7 +45,7 @@ class TestDomainObject < LafcadioTestCase
 	def testCachesClassFields
 		2.times { MockDomainObject.class_fields }
 	end
-
+	
 	def test_checks_fields_at_all_states
 		LafcadioConfig.set_values(
 			'checkFields' => 'onAllStates',
@@ -278,7 +278,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 	
 	def testHandlesClassWithoutXml
-		assert_equal( 'pk_id', NoXml.sql_primary_key_name )
+		assert_equal( 'no_xml_id', NoXml.sql_primary_key_name )
 		assert_equal( 'noXmls', NoXml.table_name )
 	end
 	

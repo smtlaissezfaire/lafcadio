@@ -36,4 +36,6 @@ end
 
 class NoXml < Lafcadio::DomainObject
 	def NoXml.get_class_fields; super; end
+	
+	sql_primary_key_name 'no_xml_id'
 end

@@ -385,7 +385,7 @@ module Lafcadio
 		def self.is_concrete? #:nodoc:
 		  (self != DomainObject && abstract_subclasses.index(self).nil?)
 		end
-
+		
 		def self.method_missing( methodId, *args ) #:nodoc:
 			method_name = methodId.id2name
 			maybe_field_class_name = ( method_name.gsub( /^(.)/ ) { $&.upcase } ) +
