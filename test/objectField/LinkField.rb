@@ -60,12 +60,6 @@ class TestLinkField < LafcadioTestCase
 		assert_nil @olf.valueFromSQL(nil)
   end
 
-  def testvalueAsHTMLNil
-		lf = LinkField.new(Invoice, Client)
-		invoice = Invoice.new( {} )
-		assert_equal '', lf.valueAsHTML(invoice)
-  end
-
 	def testRespectsOtherSubsetLinks
 		invoice = Invoice.storedTestInvoice
 		client = Client.storedTestClient

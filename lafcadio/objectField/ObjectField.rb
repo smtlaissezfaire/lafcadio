@@ -110,10 +110,6 @@ class ObjectField
     string
   end
 
-  def valueAsHTML(dbObject)
-    dbObject.send(name)
-  end
-
   def setDefault(linkField, fieldName)
     linkField.listener = self
     @defaultFieldName = fieldName

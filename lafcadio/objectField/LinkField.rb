@@ -50,11 +50,6 @@ class LinkField < ObjectField
 		string != nil ? DomainObjectProxy.new(@linkedType, string.to_i) : nil
   end
 
-  def valueAsHTML(dbObject)
-    obj = super(dbObject)
-    obj != nil ? obj.name : ""
-  end
-
 	def verify(value, objId)
 		super
 		if @linkedType != @objectType && objId
