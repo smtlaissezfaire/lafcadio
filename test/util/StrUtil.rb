@@ -46,4 +46,10 @@ class TestStrUtil < RUNIT::TestCase
 		result = StrUtil.splitKeepInBetweens('the quick  brown fox', /\s+/)
 		assert_equal ['the', ' ', 'quick', '  ', 'brown', ' ', 'fox' ], result
 	end
+
+	def testLineWrap
+		qbr = 'the quick brown fox jumped over the lazy dog.'
+		result = StrUtil.lineWrap (qbr, 10)
+		assert_equal "the quick\nbrown fox\njumped\nover the\nlazy dog.", result
+	end
 end

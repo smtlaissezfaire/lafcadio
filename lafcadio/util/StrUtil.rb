@@ -76,4 +76,19 @@ class StrUtil
 		result << string unless string == ''
 		result
 	end
+	
+	def StrUtil.lineWrap (string, lineLength)
+		words = string.split ' '
+		line = ''
+		lines = []
+		words.each { |word|
+			if line.length + word.length + 1 > lineLength
+				lines << line
+				line = ''
+			end
+			line = line != '' ? "#{ line } #{ word }" : word
+		}
+		lines << line
+		lines.join "\n"
+	end
 end
