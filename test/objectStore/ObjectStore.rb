@@ -1,6 +1,4 @@
 require '../test/mock/domain'
-require '../test/mock/domain/InventoryLineItem'
-require '../test/mock/domain/InventoryLineItemOption'
 require '../test/mock/domain/Option'
 require 'lafcadio/test'
 require 'lafcadio/mock'
