@@ -151,6 +151,20 @@ class AccTestDomainObjInheritance < AcceptanceTestCase
 	end
 end
 
+class AccTestDomainObjectProxy < AcceptanceTestCase
+	def test_correct_hashing
+		test_row = TestRow.new( 'text_field' => 'some text' )
+		test_row.commit
+		coll = @object_store.getTestRows { |test_row|
+			test_row.text_field.equals( 'some text' )
+		}
+		assert_equal( 1, coll.size )
+		test_row_prime = coll.first
+		proxy = DomainObjectProxy.new( test_row_prime )
+		assert_equal( proxy.hash, test_row_prime.hash )
+	end
+end
+
 class AccTestTextField < AcceptanceTestCase
 	def testEscaping
 		text = <<-TEXT

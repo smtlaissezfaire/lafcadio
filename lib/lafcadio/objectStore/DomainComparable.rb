@@ -17,5 +17,7 @@ module Lafcadio
 		def eql?(otherObj)
 			self == otherObj
 		end
+
+		def hash; "#{ self.class.name } #{ objId }".hash; end
 	end
 end

@@ -189,4 +189,14 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal( 'Invoice',
 		              DomainObject.getObjectTypeFromString( 'Invoice' ).name )
 	end
+	
+	def test_hash_and_eql
+		client = Client.new( 'objId' => 1, 'name' => 'client name' )
+		client_prime = Client.new( 'objId' => 1, 'name' => 'client name' )
+		assert_equal( client.hash, client_prime.hash )
+		assert( client.eql?( client_prime ) )
+		assert( client_prime.eql?( client ) )
+		client2 = Client.new( 'objId' => 2, 'name' => 'someone else' )
+		assert( !client.eql?( client2 ) )
+	end
 end
