@@ -385,11 +385,5 @@ module Lafcadio
 			@fields[field.name] = value
 			@fields_set << field
 		end
-
-		# By default, to_s is considered an invalid operation for domain objects,
-		# and will raise an error. This behavior can be overridden by subclasses.
-		def to_s
-			raise "Don't make me into a string unless the type asks"
-		end
 	end
 end

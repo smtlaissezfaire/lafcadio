@@ -280,4 +280,8 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal( 'that_table', XmlSku2.tableName )
 		assert_equal( 'xml_sku2_id', XmlSku2.sqlPrimaryKeyName )
 	end
+	
+	def test_to_s
+		assert_match( /Client/, newTestClientWithoutPkId.to_s )
+	end
 end
