@@ -29,7 +29,8 @@ class Emailer < ContextualService
 				smtp.sendmail(msg, email.fromAddress, [ email.toAddress ])
 			}
 			@@messagesSent << email
-		rescue Net::ProtoFatalError, TimeoutError, Errno::ECONNREFUSED
+		rescue Net::ProtoFatalError, TimeoutError, Errno::ECONNREFUSED,
+				Errno::ECONNRESET
 			# whatever
 		end
 	end

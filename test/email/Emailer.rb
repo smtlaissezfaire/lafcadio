@@ -23,5 +23,7 @@ class TestEmailer < RUNIT::TestCase
 		emailer.sendEmail email
 		MockSmtp.setError Errno::ECONNREFUSED.new, 'john.doe@email.com'
 		emailer.sendEmail email
+		MockSmtp.setError Errno::ECONNRESET.new, 'john.doe@email.com'
+		emailer.sendEmail email
 	end
 end
