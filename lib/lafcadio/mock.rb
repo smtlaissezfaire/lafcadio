@@ -11,6 +11,9 @@ module Lafcadio
 		end
 
 		def commit(db_object)
+			if db_object.pk_id and !db_object.pk_id.is_a?( Integer )
+				raise ArgumentError
+			end
 			objects_by_domain_class = get_objects_by_domain_class(
 				db_object.domain_class
 			)

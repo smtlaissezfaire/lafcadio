@@ -1,3 +1,4 @@
+require 'lafcadio/domain'
 require 'lafcadio/query'
 require 'lafcadio/test'
 require '../test/mock/domain'
@@ -17,6 +18,11 @@ class TestMockDBBridge < LafcadioTestCase
 	def get_all(object_type)
 		query = Query.new object_type
 		@mockDbBridge.get_collection_by_query query
+	end
+	
+	def test_commit
+		bad_client = Client.new( 'pk_id' => '1', 'name' => 'my name' )
+		assert_raise( ArgumentError ) { @mockDbBridge.commit( bad_client ) }
 	end
 
 	def testDelete
