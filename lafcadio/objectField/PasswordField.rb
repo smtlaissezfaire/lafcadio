@@ -1,12 +1,8 @@
-require 'lafcadio/objectField/ObjectField'
-require 'lafcadio/html/TR'
-require 'lafcadio/objectField/PasswordFieldViewer'
-require 'lafcadio/objectField/FieldValueError'
 require 'lafcadio/objectField/TextField'
-require 'lafcadio/objectField/PasswordField'
 
 class PasswordField < TextField
   def PasswordField.viewerType
+		require 'lafcadio/objectField/PasswordFieldViewer'
     PasswordFieldViewer
   end
 
@@ -28,6 +24,7 @@ class PasswordField < TextField
   end
 
   def valueFromCGI (fieldManager)
+		require 'lafcadio/objectField/FieldValueError'
     if firstTime (fieldManager) && @autoGenerate
 			value = PasswordField.randomPassword
 		else

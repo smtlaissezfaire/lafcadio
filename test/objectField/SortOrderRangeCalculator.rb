@@ -1,6 +1,7 @@
 require 'lafcadio/test/LafcadioTestCase'
 require 'test/mock/domain/Attribute'
 require 'lafcadio/mock/MockObjectStore'
+require 'lafcadio/objectField/SortOrderRangeCalculator'
 
 class TestSortOrderRangeCalculator < LafcadioTestCase
 	def setupThreeSpacedOptions

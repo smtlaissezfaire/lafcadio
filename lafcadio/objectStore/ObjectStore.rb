@@ -1,11 +1,5 @@
-require 'lafcadio/objectStore/Collector'
-require 'lafcadio/objectStore/CouldntMatchObjectTypeError'
-require 'lafcadio/objectStore/Retriever'
-require 'lafcadio/objectStore/Committer'
 require 'lafcadio/objectStore/DbBridge'
-require 'lafcadio/util/Context'
 require 'lafcadio/util/ContextualService'
-require 'lafcadio/util/DomainUtil'
 
 class ObjectStore < ContextualService
 	def ObjectStore.setDbName (dbName)
@@ -14,6 +8,8 @@ class ObjectStore < ContextualService
   
   def initialize (context, dbBridge = nil)
   	super context
+		require 'lafcadio/objectStore/Collector'
+		require 'lafcadio/objectStore/Retriever'
 		@dbBridge = dbBridge == nil ? DbBridge.new : dbBridge
 		@retriever = ObjectStore::Retriever.new(@dbBridge)
 		@collector = Collector.new self
@@ -34,6 +30,7 @@ class ObjectStore < ContextualService
 	end
 
   def commit (dbObject)
+		require 'lafcadio/objectStore/Committer'
   	committer = Committer.new dbObject, @dbBridge
   	committer.execute
 		if committer.commitType == Committer::UPDATE ||
@@ -59,6 +56,8 @@ class ObjectStore < ContextualService
 	end
 
 	def method_missing (methodId, *args)
+		require 'lafcadio/util/DomainUtil'
+		require 'lafcadio/objectStore/CouldntMatchObjectTypeError'
 		methodName = methodId.id2name
 		begin
 			methodName =~ /^get(.*)$/

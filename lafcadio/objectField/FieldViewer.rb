@@ -1,9 +1,3 @@
-require 'lafcadio/html/TR'
-require 'lafcadio/html/TD'
-require 'lafcadio/html/Input'
-require 'lafcadio/util/StrUtil'
-require 'lafcadio/html/Strong'
-
 class FieldViewer
   def initialize (value, field, objId)
     @value = value
@@ -16,6 +10,7 @@ class FieldViewer
   end
 
   def toHTMLWidget
+		require 'lafcadio/html/Input'
 		input = HTML::Input.new({ 'name' => @field.name,
 															'value' => self.HTMLWidgetValueStr,
 															'size' => textBoxSize })
@@ -27,6 +22,8 @@ class FieldViewer
   end
 
   def toHTMLRow (rightContent, label = @field.englishName)
+		require 'lafcadio/html/TD'
+		require 'lafcadio/html/TR'
     leftContent = @field.hideLabel ? "" : label.downcase + ":"
     if leftContent == "" && (rightContent == "" || rightContent == nil)
       nil

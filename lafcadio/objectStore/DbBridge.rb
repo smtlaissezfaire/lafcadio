@@ -1,8 +1,3 @@
-require 'lafcadio/query/Max'
-require 'lafcadio/query/Query'
-require 'lafcadio/objectStore/Collection'
-require 'lafcadio/objectStore/DomainObjectSqlMaker'
-require 'lafcadio/objectStore/SqlValueConverter'
 require "mysql"
 
 class DbBridge
@@ -51,6 +46,7 @@ class DbBridge
 	end
 
   def commit(dbObject)
+		require 'lafcadio/objectStore/DomainObjectSqlMaker'
     sqlMaker = DomainObjectSqlMaker.new(dbObject)
 		sqlMaker.sqlStatements.each { |sql|
 			executeQuery sql
@@ -63,6 +59,8 @@ class DbBridge
   end
 
 	def getCollectionByQuery (query)
+		require 'lafcadio/objectStore/Collection'
+		require 'lafcadio/objectStore/SqlValueConverter'
 		objectType = query.objectType
 		coll = Collection.new objectType
     objects = []
@@ -100,6 +98,7 @@ class DbBridge
 	end
 
 	def getMax (objectType)
+		require 'lafcadio/query/Max'
 		sql = Query::Max.new(objectType).toSql
 		result = executeQuery sql
 		result.fetch_row[0].to_i

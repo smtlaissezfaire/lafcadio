@@ -1,11 +1,8 @@
 require 'lafcadio/objectField/IntegerField'
-require 'lafcadio/html/A'
-require 'lafcadio/objectField/SortOrderRangeCalculator'
-require 'lafcadio/objectField/SortOrderFieldViewer'
-require 'lafcadio/objectField/SortOrderField'
 
 class SortOrderField < IntegerField
 	def SortOrderField.viewerType
+		require 'lafcadio/objectField/SortOrderFieldViewer'
 		SortOrderFieldViewer
 	end
 
@@ -30,6 +27,7 @@ class SortOrderField < IntegerField
 	end
 
 	def glyph (direction, objId)
+		require 'lafcadio/html/A'
 		href = "/cgi-bin/editSortOrder.rb?objectType=Option&objId=#{objId}&" +
 				"direction=#{direction}"
 		arrow = direction == "up" ? "^" : "v"
@@ -48,6 +46,7 @@ class SortOrderField < IntegerField
 	end
 
 	def valueAsHTML (dbObject)
+		require 'lafcadio/objectField/SortOrderRangeCalculator'
 		calculator = SortOrderRangeCalculator.new self, allRelatedObjects(dbObject)
 		sortOrderRange = calculator.execute
 		sortOrder = super dbObject

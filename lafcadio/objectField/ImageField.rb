@@ -1,11 +1,9 @@
 require 'lafcadio/objectField/ObjectField'
 require 'lafcadio/util/FileManager'
-require 'lafcadio/cgi/ImageUpload'
-require 'lafcadio/objectField/ImageFieldViewer'
-require 'lafcadio/html/IMG'
 
 class ImageField < ObjectField
   def ImageField.viewerType
+		require 'lafcadio/objectField/ImageFieldViewer'
     ImageFieldViewer
   end
 
@@ -18,7 +16,8 @@ class ImageField < ObjectField
   end
 
   def valueFromCGI (fieldManager)
-    value = super fieldManager
+		require 'lafcadio/cgi/ImageUpload'
+		value = super fieldManager
 		if value.type <= ImageUpload
       if value.desiredFilename == ""
         value = fieldManager.get("#{name}.prev")
@@ -41,6 +40,7 @@ class ImageField < ObjectField
   end
 
   def valueAsHTML (dbObject)
+		require 'lafcadio/html/IMG'
     filename = super dbObject
 		if filename != "" && filename != nil
 			HTML::IMG.new({ 'src' => "/img/#{filename}" }).toHTML

@@ -4,6 +4,7 @@ require 'test/mock/domain/Client'
 require 'test/mock/domain/Invoice'
 require 'lafcadio/objectStore/DomainObjectInitError'
 require 'test/mock/domain/User'
+require 'lafcadio/objectStore/DomainObjectSqlMaker'
 
 class TestDomainObjectSqlMaker < LafcadioTestCase
   def testFieldNamesForSQL

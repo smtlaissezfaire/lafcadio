@@ -1,7 +1,6 @@
-require 'lafcadio/domain/ObjectType'
-require 'lafcadio/util/ClassUtil'
 require 'lafcadio/objectField/LinkField'
 require 'lafcadio/objectStore/DomainComparable'
+require 'lafcadio/objectStore/DomainObjectProxy'
 
 class DomainObject
 	COMMIT_ADD = 1
@@ -31,6 +30,7 @@ class DomainObject
 	end
 
 	def DomainObject.method_missing (methodId)
+		require 'lafcadio/domain/ObjectType'
 		ObjectType.new(self).send(methodId.id2name)
 	end
 
@@ -47,6 +47,7 @@ class DomainObject
 	end
 
   def DomainObject.dependentClasses
+		require 'lafcadio/util/ClassUtil'
     dependentClasses = {}
 		ClassUtil.subclasses(DomainObject).each { |aClass|
 			if aClass != DomainObjectProxy &&

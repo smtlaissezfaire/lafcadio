@@ -5,6 +5,7 @@ require 'lafcadio/objectField/ImageField'
 
 class MockFieldManager < FieldManager
   def initialize (initHash = {})
+  	require 'lafcadio/util/DomainUtil'
 		@valueHash = HashOfArrays.new
     @imageFields = []
     objTypeString = initHash["objectType"]

@@ -48,6 +48,7 @@ class MockFileManager
   end
 
   def uniqueFilename (dir, firstGuess)
+  	require 'lafcadio/util/StrUtil'
     filename = firstGuess
     while exists(dir, filename)
       filename = StrUtil.incrementFilename filename

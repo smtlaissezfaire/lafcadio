@@ -1,5 +1,6 @@
 require 'lafcadio/test/LafcadioTestCase'
 require 'test/mock/domain/Client'
+require 'lafcadio/query/Max'
 
 class TestQuery < LafcadioTestCase
 	def testToSql

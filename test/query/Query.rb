@@ -3,6 +3,7 @@ require 'test/mock/domain/LineItem'
 require 'test/mock/domain/SKU'
 require 'test/mock/domain/User'
 require 'test/mock/domain/InternalClient'
+require 'lafcadio/query/In'
 
 class TestQuery < LafcadioTestCase
 	def testGetAll

@@ -1,9 +1,5 @@
-require 'lafcadio/query/CompoundCondition'
-require 'lafcadio/query/In'
-require 'lafcadio/util/EnglishUtil'
 require 'lafcadio/util/StrUtil'
 require 'lafcadio/query/Equals'
-require 'lafcadio/query/Link'
 
 class Collector
   def initialize (objectStore = Context.instance.getObjectStore)
@@ -11,8 +7,8 @@ class Collector
   end
 
 	def getFiltered (objectTypeName, searchTerm, fieldName = nil)
+		require 'lafcadio/query/Link'
 		require 'lafcadio/util/DomainUtil'
-
 		objectType = DomainUtil.getObjectTypeFromString objectTypeName
 		unless fieldName
 			fieldName = ClassUtil.bareClassName(searchTerm.objectType)
@@ -39,6 +35,7 @@ class Collector
 	end
 
 	def method_missing (methodId, searchTerm, fieldName = nil)
+		require 'lafcadio/util/EnglishUtil'
 		methodName = methodId.id2name
 		if methodName =~ /^get(.*)$/
 			objectTypeName = EnglishUtil.singular ($1)
@@ -49,6 +46,7 @@ class Collector
 	end
 
 	def getObjects (objectType, objIds)
+		require 'lafcadio/query/In'
 		condition = Query::In.new ('objId', objIds, objectType)
 		@objectStore.getSubset condition
 	end
@@ -60,6 +58,7 @@ class Collector
 	end
 
 	def getMapObject (objectType, map1, map2)
+		require 'lafcadio/query/CompoundCondition'
 		unless map1 && map2
 			raise ArgumentError,
 					"Collector#getMapObject needs two non-nil keys", caller

@@ -1,9 +1,8 @@
-require 'lafcadio/objectStore/CouldntMatchObjectTypeError'
-require 'lafcadio/domain/DomainObject'
-require 'lafcadio/util/ClassUtil'
-
 class DomainUtil
   def DomainUtil.getObjectTypeFromString (typeString)
+		require 'lafcadio/util/ClassUtil'
+		require 'lafcadio/domain/DomainObject'
+		require 'lafcadio/objectStore/CouldntMatchObjectTypeError'
 		require 'lafcadio/util/Config'
     objectType = nil
 		typeString =~ /([^\:]*)$/

@@ -1,11 +1,9 @@
-require 'lafcadio/objectStore/DomainObjectProxy'
-require 'lafcadio/objectStore/DomainObjectInitError'
 require 'lafcadio/objectField/ObjectField'
-require 'lafcadio/objectField/LinkFieldViewer'
 
 class LinkField < ObjectField
   def LinkField.viewerType
-    LinkFieldViewer
+		require 'lafcadio/objectField/LinkFieldViewer'
+		LinkFieldViewer
   end
 
   attr_reader :linkedType
@@ -24,6 +22,7 @@ class LinkField < ObjectField
   end
 
   def valueForSQL (value)
+		require 'lafcadio/objectStore/DomainObjectInitError'
 		if value == nil
 			"null"
 		elsif value.objId
@@ -43,6 +42,7 @@ class LinkField < ObjectField
   end
 
   def valueFromSQL (string)
+		require 'lafcadio/objectStore/DomainObjectProxy'
 		string != nil ? DomainObjectProxy.new(@linkedType, string.to_i) : nil
   end
 

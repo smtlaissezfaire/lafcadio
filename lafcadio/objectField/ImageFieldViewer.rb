@@ -20,6 +20,7 @@ class ImageFieldViewer < FieldViewer
 	end
 
 	def currentImageHTML
+		require 'lafcadio/html/HTML'
 		if @value != nil
 			html = HTML::HTML.new
 			html << "current #{StrUtil.decapitalize(@field.englishName)}:"

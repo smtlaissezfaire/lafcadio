@@ -1,6 +1,5 @@
 require 'lafcadio/html/TR'
 require 'lafcadio/html/ContainerElement'
-require 'lafcadio/html/Form'
 
 class HTML < Array
 	class Table < ContainerElement
@@ -15,7 +14,8 @@ class HTML < Array
   	attr_accessor :bgColor, :cellPadding, :cellSpacing, :border
 
 	  def << (element)
-  	  if element != nil
+			require 'lafcadio/html/Form'
+			if element != nil
 				if element.type <= HTML::TR || element.type <= HTML::Form
 					super element
 				else

@@ -1,3 +1,4 @@
+require 'lafcadio/html/Input'
 require 'lafcadio/html/Select'
 
 class DateWidget

@@ -1,10 +1,9 @@
 require 'cgi'
-require 'lafcadio/util/HashOfArrays'
 require 'date'
-require 'lafcadio/util/ClassUtil'
 
 class FieldManager
   def initialize (cgi = nil)
+		require 'lafcadio/util/HashOfArrays'
     cgi = CGI.new if cgi == nil
 		@valueHash = HashOfArrays.new
     cgi.keys.each { |key|
@@ -48,6 +47,7 @@ class FieldManager
   end
 
   def getObjectType (key = "objectType")
+  	require 'lafcadio/util/DomainUtil'
 		objTypeString = get key
 		if (objTypeString && objTypeString != '')
 			DomainUtil.getObjectTypeFromString get(key)
