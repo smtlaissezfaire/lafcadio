@@ -67,5 +67,20 @@ class Query
 			Equals.new( @classField.dbFieldName, searchTerm,
 			            @domainObjectImpostor.domainClass )
 		end
+		
+		def =~( regexp )
+			if regexp.source =~ /^\^(.*)/
+				searchTerm = $1
+				matchType = Query::Like::POST_ONLY
+			elsif regexp.source =~ /(.*)\$$/
+				searchTerm = $1
+				matchType = Query::Like::PRE_ONLY
+			else
+				searchTerm = regexp.source
+				matchType = Query::Like::PRE_AND_POST
+			end
+			Query::Like.new( @classField.dbFieldName, searchTerm,
+			                 @domainObjectImpostor.domainClass, matchType )
+		end
 	end
 end

@@ -70,4 +70,13 @@ class TestQueryInferrer < LafcadioTestCase
 			inv.in( 'objId', [ 1, 2, 3 ] )
 		}
 	end
+	
+	def testLike	
+		desiredSql1 = "select * from users where email like '%hotmail%'"
+		assert_infer_match( desiredSql1, User ) { |user| user.email =~ /hotmail/ }
+		desiredSql2 = "select * from users where email like 'hotmail%'"
+		assert_infer_match( desiredSql2, User ) { |user| user.email =~ /^hotmail/ }
+		desiredSql3 = "select * from users where email like '%hotmail'"
+		assert_infer_match( desiredSql3, User ) { |user| user.email =~ /hotmail$/ }
+	end
 end
