@@ -52,7 +52,10 @@ class TestQuery < LafcadioTestCase
 
 	def testLimit
 		query = Query.new Client
-		query.limit =(10..29)
-		assert_equal 'select * from clients limit 10, 29', query.toSql
+		query.limit = 0..9
+		assert_equal 'select * from clients limit 0, 10', query.toSql
+		query2 = Query.new Client
+		query2.limit = 10..19
+		assert_equal 'select * from clients limit 10, 10', query2.toSql
 	end
 end

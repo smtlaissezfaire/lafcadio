@@ -26,7 +26,9 @@ module Lafcadio
 
 		def hash; toSql.hash; end
 		
-		def limitClause; "limit #{ @limit.begin }, #{ @limit.end }" if @limit; end
+		def limitClause
+			"limit #{ @limit.begin }, #{ @limit.end - @limit.begin + 1 }" if @limit
+		end
 
 		def orderClause
 			if @orderBy
