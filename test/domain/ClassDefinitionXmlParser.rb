@@ -30,7 +30,9 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		matchField( XmlSku, 'date1', DateField, { 'notNull' => false } )
 		matchField( XmlSku, 'date2', DateField,
 		            { 'range' => DateField::RANGE_PAST } )
-	
+		matchField( XmlSku, 'dateTime1', DateTimeField )
+		matchField( XmlSku, 'decimal1', DecimalField,
+		            { 'precision' => 4, 'englishName' => 'decimal 1' } )
 
 		matchField( XmlSku, 'sku', TextField, { 'size' => 16, 'unique' => true } )
 		matchField( XmlSku, 'standardPrice', MoneyField )

@@ -8,7 +8,10 @@
 	</field>
 	<field name="date1" class="DateField" notNull="n"/>
 	<field name="date2" class="DateField" range="RANGE_PAST" />
-
+	<field name="dateTime1" class="DateTimeField" />
+	<field name="decimal1" class="DecimalField" precision="4"
+	       englishName="decimal 1" />
+	
 	<field name="sku" class="TextField" size="16" unique="y"/>
 	<field name="standardPrice" class="MoneyField"/>
 	<field name="description" class="TextField" notNull="n"/>

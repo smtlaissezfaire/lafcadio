@@ -67,13 +67,15 @@ class ClassDefinitionXmlParser
 			name = fieldElt.attributes['name']
 			raise InvalidDataError if namesProcessed[name]
 			englishName = fieldElt.attributes['englishName']
-			field = fieldClass.new( @domainClass, name, englishName )
+			if fieldClass != DecimalField
+				field = fieldClass.new( @domainClass, name, englishName )
+			else
+				precision = fieldElt.attributes['precision'].to_i
+				field = fieldClass.new( @domainClass, name, precision, englishName )
+			end
 			possibleFieldAttributes.each { |fieldAttr|
 				fieldAttr.maybeSetFieldAttr( field, fieldElt )
 			}
-			if ( size = fieldElt.attributes['size'] )
-				field.size = size.to_i
-			end
 			fields << field
 			namesProcessed[name] = true
 		}
