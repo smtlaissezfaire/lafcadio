@@ -4,8 +4,6 @@ require_gem 'log4r'
 require 'lafcadio/domain'
 require 'lafcadio/query'
 require 'lafcadio/util'
-require 'lafcadio/includer'
-Includer.include( 'objectStore' )
 
 module Lafcadio
 	class Committer #:nodoc:

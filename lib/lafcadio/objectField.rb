@@ -1,5 +1,3 @@
-require 'lafcadio/includer'
-Includer.include( 'objectField' )
 require 'date'
 require 'lafcadio/dateTime'
 require 'lafcadio/util'

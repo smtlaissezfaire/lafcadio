@@ -84,9 +84,6 @@
 #   invoices = object_store.getInvoices { |inv| inv.rate.equals( 50 ).not }
 #   # => "select * from invoices where rate != 50"
 
-require 'lafcadio/includer'
-Includer.include( 'query' )
-
 module Lafcadio
 	class Query
 		def self.And( *conditions ); CompoundCondition.new( *conditions ); end
