@@ -4,7 +4,7 @@ require '../test/mock/domain/Client'
 require '../test/mock/domain/LineItem'
 require 'lafcadio/query'
 
-class TestDBBridge < RUNIT::TestCase
+class TestDBBridge < Test::Unit::TestCase
 	include Lafcadio
 
   class MockDbh

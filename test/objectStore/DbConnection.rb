@@ -1,7 +1,7 @@
 require 'lafcadio/objectStore'
-require 'runit/testcase'
+require 'test/unit'
 
-class TestDbConnection < RUNIT::TestCase
+class TestDbConnection < Test::Unit::TestCase
 	include Lafcadio
 
   def setup

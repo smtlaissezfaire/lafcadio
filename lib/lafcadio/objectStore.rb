@@ -1,3 +1,4 @@
+require 'dbi'
 require 'lafcadio/domain'
 require 'lafcadio/query'
 require 'lafcadio/util'

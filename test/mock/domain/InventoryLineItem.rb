@@ -3,10 +3,9 @@ require 'lafcadio/domain'
 class InventoryLineItem < Lafcadio::DomainObject
 end
 
-require 'runit/testcase'
 require '../test/mock/domain/SKU'
 
-class TestInventoryLineItem < RUNIT::TestCase
+class TestInventoryLineItem
 	def TestInventoryLineItem.getTestInventoryLineItem
 		InventoryLineItem.new({ 'pk_id' => 1, 'sku' => TestSKU.getTestSKU })
 	end

@@ -1,7 +1,7 @@
 require 'lafcadio/util'
-require 'runit/testcase'
+require 'test/unit'
 
-class TestNumeric < RUNIT::TestCase
+class TestNumeric < Test::Unit::TestCase
   def testPrecisionFormat
     assert_equal("24.550", 24.55.precision_format(3))
     assert_equal("24.5", 24.55.precision_format(1))

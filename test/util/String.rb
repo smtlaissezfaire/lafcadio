@@ -1,7 +1,7 @@
 require 'lafcadio/util'
-require 'runit/testcase'
+require 'test/unit'
 
-class TestString < RUNIT::TestCase
+class TestString < Test::Unit::TestCase
   def testIncrementsFilename
     assert_equal "john_1.jpg", ("john.jpg".increment_filename)
     assert_equal "john_2.jpg", ("john_1.jpg".increment_filename)

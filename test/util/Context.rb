@@ -1,8 +1,8 @@
-require 'runit/testcase'
+require 'test/unit'
 require 'lafcadio/util'
 require 'lafcadio/mock'
 
-class TestContext < RUNIT::TestCase
+class TestContext < Test::Unit::TestCase
 	include Lafcadio
 
 	def setup

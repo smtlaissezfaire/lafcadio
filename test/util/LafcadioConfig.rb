@@ -1,12 +1,16 @@
 require 'lafcadio/util'
-require 'runit/testcase'
+require 'test/unit'
 
-class TestConfig < RUNIT::TestCase
+class TestConfig < Test::Unit::TestCase
 	include Lafcadio
 
 	def setup
 		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
 		@config = LafcadioConfig.new
+	end
+	
+	def teardown
+		LafcadioConfig.set_values( nil )
 	end
 
 	def testURL

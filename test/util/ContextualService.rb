@@ -1,4 +1,4 @@
-require 'runit/testcase'
+require 'test/unit'
 require 'lafcadio/util'
 
 include Lafcadio
@@ -8,7 +8,7 @@ end
 class ServiceB < ContextualService
 end
 	
-class TestContextualService < RUNIT::TestCase
+class TestContextualService < Test::Unit::TestCase
 	def testClassMethodAccess
 		context = Context.instance
 		serviceA = ServiceA.get_service_a
