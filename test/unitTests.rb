@@ -1,3 +1,5 @@
+require '../test/depend'
+
 test_base = '../test/'
 dir = Dir.new test_base
 dir.each { |entry|

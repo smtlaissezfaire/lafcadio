@@ -1,3 +1,5 @@
+require 'lafcadio/depend'
+
 dir = Dir.new 'lafcadio/'
 dir.each { |entry|
 	if ![ '.', '..', 'CVS' ].index(entry) && entry !~ /~$/

@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'ubygems'
+require 'lafcadio/depend'
 require 'lafcadio/schema'
 require 'lafcadio/util'
 require 'getoptlong'

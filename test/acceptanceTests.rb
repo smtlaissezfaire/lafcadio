@@ -1,3 +1,4 @@
+require '../test/depend'
 require 'dbi'
 require 'lafcadio/domain'
 require 'lafcadio/objectStore'

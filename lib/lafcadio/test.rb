@@ -1,4 +1,4 @@
-require 'runit/testcase'
+require 'lafcadio/depend'
 require 'lafcadio/mock'
 require 'lafcadio/util'
 
