@@ -17,22 +17,22 @@ module Lafcadio
 				@objectType = conditions[0].objectType
 			end
 
+			def objectMeets(anObj)
+				if @compoundType == AND
+					@conditions.inject( true ) { |result, cond|
+						result && cond.objectMeets( anObj )
+					}
+				else
+					@conditions.inject( false ) { |result, cond|
+						result || cond.objectMeets( anObj )
+					}
+				end
+			end
+
 			def toSql
 				booleanString = @compoundType == AND ? 'and' : 'or'
 				subSqlStrings = @conditions.collect { |cond| cond.toSql }
 				"(#{ subSqlStrings.join(" #{ booleanString } ") })"
-			end
-
-			def objectMeets(anObj)
-				if @compoundType == AND
-					om = true
-					@conditions.each { |cond| om = om && cond.objectMeets(anObj) }
-					om
-				else
-					om = false
-					@conditions.each { |cond| om = om || cond.objectMeets(anObj) }
-					om
-				end
 			end
 		end
 	end

@@ -10,9 +10,6 @@ module Lafcadio
 		def []( key )
 			if key == 'pkId'
 				if ( field_val = @rowHash[@objectType.sqlPrimaryKeyName] ).nil?
-					error_msg = "The field \"" + @objectType.sqlPrimaryKeyName +
-					            "\" can\'t be found in the table \"" + 
-					            @objectType.tableName + "\"."
 					raise FieldMatchError, error_msg, caller
 				else
 					field_val.to_i
@@ -25,6 +22,12 @@ module Lafcadio
 					nil
 				end
 			end
+		end
+
+		def error_msg
+			"The field \"" + @objectType.sqlPrimaryKeyName +
+					"\" can\'t be found in the table \"" + 
+					@objectType.tableName + "\"."
 		end
 	end
 end

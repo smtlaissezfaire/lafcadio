@@ -15,31 +15,26 @@ module Lafcadio
 				GREATER_THAN => '>'
 			}
 
-			def initialize(fieldName, searchTerm, objectType, compareType)
-				super fieldName, searchTerm, objectType
-				@compareType = compareType
-			end
-
-			def toSql
-				useFieldForSqlValue = false
-				if @fieldName != @objectType.sqlPrimaryKeyName
-					field = getField
-					useFieldForSqlValue = true unless field.class <= LinkField
-				end
-				if useFieldForSqlValue
-					"#{ dbFieldName } #{ @@comparators[@compareType] } " +
-							field.valueForSQL(@searchTerm).to_s
-				else
-					"#{ dbFieldName } #{ @@comparators[@compareType] } #{ @searchTerm }"
-				end
-			end
-
 			@@mockComparators = {
 				LESS_THAN => Proc.new { |d1, d2| d1 < d2 },
 				LESS_THAN_OR_EQUAL => Proc.new { |d1, d2| d1 <= d2 },
 				GREATER_THAN_OR_EQUAL => Proc.new { |d1, d2| d1 >= d2 },
 				GREATER_THAN => Proc.new { |d1, d2| d1 > d2 }
 			}
+
+			def initialize(fieldName, searchTerm, objectType, compareType)
+				super fieldName, searchTerm, objectType
+				@compareType = compareType
+			end
+
+			def toSql
+				useFieldForSqlValue = ( @fieldName != @objectType.sqlPrimaryKeyName &&
+				                        !( getField.class <= LinkField ) )
+				search_val = ( useFieldForSqlValue ?
+				               getField.valueForSQL(@searchTerm).to_s :
+				               @searchTerm.to_s )
+				"#{ dbFieldName } #{ @@comparators[@compareType] } " + search_val
+			end
 
 			def objectMeets(anObj)
 				value = anObj.send @fieldName
