@@ -132,28 +132,6 @@ module Lafcadio
 		end
 	end
 
-	class AutoIncrementField < IntegerField # :nodoc:
-		attr_reader :object_type
-
-		def initialize( object_type, name )
-			super( object_type, name )
-			@object_type = object_type
-		end
-
-		def html_widget_value_str(value)
-			if value != nil
-				super value
-			else
-				highestValue = 0
-				ObjectStore.get_object_store.get_all(object_type).each { |obj|
-					aValue = obj.send(name).to_i
-					highestValue = aValue if aValue > highestValue
-				}
-			 (highestValue + 1).to_s
-			end
-		end
-	end
-
 	# BlobField stores a string value and expects to store its value in a BLOB
 	# field in the database.
 	class BlobField < ObjectField

@@ -89,9 +89,7 @@ class Invoice < Lafcadio::DomainObject
 		inv
 	end
 
-  def name
-    invoice_num.to_s
-  end
+  def name; pk_id.to_s; end
 end
 
 class NoXml < Lafcadio::DomainObject

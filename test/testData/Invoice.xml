@@ -1,6 +1,4 @@
 <lafcadio_class_definition name="Invoice">
-	<field name="invoice_num" class="AutoIncrementField"
-	       english_name="Invoice No." />
 	<field name="client" class="LinkField" linked_type="Client" />
 	<field name="date" class="DateField" />
 	<field name="timestamp1" class="TimeStampField" />
