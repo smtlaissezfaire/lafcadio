@@ -20,6 +20,21 @@ Initial alpha release.
 * Condition#toSql can deal with fields of superclasses
 
 0.1.3 -- August 11 2003
+Initial beta release.
 * Wrote lots of RDoc comments.
 * Added DomainObject#commit.
 * Renamed Config to LafcadioConfig.
+
+0.2.0 -- September 25 2003
+Initial production release.
+* Removed .DS_Store files (these are Mac OS X files that got into the package by accident).
+* FieldManager uses CGI#params[] instead of CGI#[].
+* DomainObject caches class fields
+* Fixed a bug with ObjectField.englishName.
+* Fixed a bug where ObjectField#verify failed with a notNull field and a false value.
+* Children of DomainObject can safely be compared to nil.
+* Values in DomainObjects can be set through a DomainObjectProxy.
+* Fixed a bug where Query::Equals#toSql failed with a boolean field and a false value.
+
+0.2.1 -- October 6 2003
+* Updated changelog.txt and the version number in lafcadio/lafcadio.rb.

@@ -1,3 +1,3 @@
 module Lafcadio
-	Version = "0.1.3"
+	Version = "0.2.1"
 end
