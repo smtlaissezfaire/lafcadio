@@ -18,3 +18,8 @@ Initial alpha release.
 * MockEmailer calls Email#verifySendable before pretending to send an email. 
 * DateTimeField#valueFromSQL throws an informative error if it gets an unparseable string.
 * Condition#toSql can deal with fields of superclasses
+
+0.1.3 -- August 11 2003
+* Wrote lots of RDoc comments.
+* Added DomainObject#commit.
+* Renamed Config to LafcadioConfig.
