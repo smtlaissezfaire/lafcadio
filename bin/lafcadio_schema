@@ -23,7 +23,7 @@ if ( ( optArray = opts.get ) && ARGV.size >= 1 )
 			fileName =~ /(\w*)\.rb/
 			className = $1
 		end
-		domainClass = Class.get_class( className )
+		domainClass = Class.by_name( className )
 		if domainClass
 			statement = CreateTableStatement.new( domainClass )
 			puts statement.to_sql
