@@ -27,7 +27,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		matchField( XmlSku, 'boolean2', BooleanField,
 		            { 'enums' => { true => 'yin', false => 'yang' },
 		              'english_name' => 'boolean 2' } )
-		matchField( XmlSku, 'date1', DateField, { 'notNull' => false } )
+		matchField( XmlSku, 'date1', DateField, { 'not_null' => false } )
 		matchField( XmlSku, 'date2', DateField,
 		            { 'range' => DateField::RANGE_PAST } )
 		matchField( XmlSku, 'dateTime1', DateTimeField )
@@ -56,7 +56,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		begin
 			get_class_fields( XmlSku, <<-XML
 				<lafcadio_class_definition name="XmlSku">
-					<field name="date1" class="DateField" notNull="n"/>
+					<field name="date1" class="DateField" not_null="n"/>
 					<field name="date1" class="DateField"/>
 				</lafcadio_class_definition>
 			XML
@@ -71,7 +71,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		begin
 			get_class_fields( XmlSku, <<-XML
 				<lafcadio_class_definition name="XmlSku">
-					<field name="date1" notNull="n"/>
+					<field name="date1" not_null="n"/>
 				</lafcadio_class_definition>
 			XML
 			)

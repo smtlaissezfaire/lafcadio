@@ -15,7 +15,7 @@ module Lafcadio
 			definitionTerms = []
 			definitionTerms << field.db_field_name
 			definitionTerms << type_clause( field )
-			definitionTerms << 'not null' if field.notNull
+			definitionTerms << 'not null' if field.not_null
 			definitionTerms << 'unique' if field.unique
 			definitionTerms.join( ' ' )
 		end

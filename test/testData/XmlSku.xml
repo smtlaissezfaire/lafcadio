@@ -1,42 +1,42 @@
 <lafcadio_class_definition name="XmlSku" sql_primary_key_name="some_other_id"
                            table_name="some_other_table">
 	<field name="boolean1" class="BooleanField" enumType="ENUMS_CAPITAL_YES_NO"
-	       notNull="n" />
+	       not_null="n" />
 	<field name="boolean2" class="BooleanField" english_name="boolean 2"
-	       notNull="n">
+	       not_null="n">
 		<enums>
 			<enum key="true">yin</enum>
 			<enum key="false">yang</enum>
 		</enums>
 	</field>
-	<field name="date1" class="DateField" notNull="n"/>
-	<field name="date2" class="DateField" range="RANGE_PAST" notNull="n"/>
-	<field name="dateTime1" class="DateTimeField" notNull="n"/>
+	<field name="date1" class="DateField" not_null="n"/>
+	<field name="date2" class="DateField" range="RANGE_PAST" not_null="n"/>
+	<field name="dateTime1" class="DateTimeField" not_null="n"/>
 	<field name="decimal1" class="DecimalField" english_name="decimal 1"
-	       notNull="n"/>
-	<field name="email1" class="EmailField" notNull="n"/>
-	<field name="enum1" class="EnumField" notNull="n">
+	       not_null="n"/>
+	<field name="email1" class="EmailField" not_null="n"/>
+	<field name="enum1" class="EnumField" not_null="n">
 		<enums>
 			<enum>a</enum>
 			<enum>b</enum>
 		</enums>
 	</field>
-	<field name="enum2" class="EnumField" notNull="n">
+	<field name="enum2" class="EnumField" not_null="n">
 		<enums>
 			<enum key="1">2</enum>
 			<enum key="3">4</enum>
 		</enums>
 	</field>
-	<field name="integer1" class="IntegerField" notNull="n" />
+	<field name="integer1" class="IntegerField" not_null="n" />
 	<field name="link1" class="LinkField" linkedType="User" deleteCascade="y" 
-	       notNull="n" />
-	<field name="money1" class="MoneyField" notNull="n" />
-	<field name="month1" class="MonthField" notNull="n" />
+	       not_null="n" />
+	<field name="money1" class="MoneyField" not_null="n" />
+	<field name="month1" class="MonthField" not_null="n" />
 	<field name="subsetLink1" class="SubsetLinkField" linkedType="Invoice"
-	       subsetField="xmlSku" notNull="n" />
+	       subsetField="xmlSku" not_null="n" />
 	<field name="text1" class="TextField" size="16" unique="y"
-	                    db_field_name="text_one" notNull="n" />
-	<field name="text2" class="TextField" large="y" notNull="n" />
+	                    db_field_name="text_one" not_null="n" />
+	<field name="text2" class="TextField" large="y" not_null="n" />
 	<field name="textList1" class="TextListField" db_field_name="text_list1"
-	       notNull="n" />
+	       not_null="n" />
 </lafcadio_class_definition>

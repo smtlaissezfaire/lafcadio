@@ -54,11 +54,11 @@ class TestMockDBBridge < LafcadioTestCase
   end
 
 	def testRetrievalsByType
-		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
+		assert_equal 0, @mockDbBridge.retrievals_by_type[Client]
 		get_all Client
-		assert_equal 1, @mockDbBridge.retrievalsByType[Client]
+		assert_equal 1, @mockDbBridge.retrievals_by_type[Client]
 		get_all Client
-		assert_equal 2, @mockDbBridge.retrievalsByType[Client]
+		assert_equal 2, @mockDbBridge.retrievals_by_type[Client]
 	end
 
 	def get(object_type, pk_id)

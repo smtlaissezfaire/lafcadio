@@ -2,11 +2,11 @@ require 'lafcadio/objectStore'
 
 module Lafcadio
 	class MockDbBridge #:nodoc:
-		attr_reader :last_pk_id_inserted, :retrievalsByType, :query_count
+		attr_reader :last_pk_id_inserted, :retrievals_by_type, :query_count
 
 		def initialize
 			@objects = {}
-			@retrievalsByType = Hash.new 0
+			@retrievals_by_type = Hash.new 0
 			@query_count = Hash.new( 0 )
 		end
 
@@ -21,7 +21,7 @@ module Lafcadio
 		end
 		
 		def _get_all(object_type)
-			@retrievalsByType[object_type] = @retrievalsByType[object_type] + 1
+			@retrievals_by_type[object_type] = @retrievals_by_type[object_type] + 1
 			@objects[object_type] ? @objects[object_type].values : []
 		end
 		

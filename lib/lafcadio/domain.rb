@@ -39,7 +39,7 @@ module Lafcadio
 			fieldAttr = []
 			fieldAttr << FieldAttribute.new( 'size', FieldAttribute::INTEGER )
 			fieldAttr << FieldAttribute.new( 'unique', FieldAttribute::BOOLEAN )
-			fieldAttr << FieldAttribute.new( 'notNull', FieldAttribute::BOOLEAN )
+			fieldAttr << FieldAttribute.new( 'not_null', FieldAttribute::BOOLEAN )
 			fieldAttr << FieldAttribute.new( 'enumType', FieldAttribute::ENUM,
 																			 BooleanField )
 			fieldAttr << FieldAttribute.new( 'enums', FieldAttribute::HASH )
@@ -411,7 +411,7 @@ module Lafcadio
 			@@subclassHash.keys
 		end
 
-		attr_accessor :error_messages, :pk_id, :lastCommit, :fields, :fields_set
+		attr_accessor :error_messages, :pk_id, :last_commit, :fields, :fields_set
 		attr_reader :delete
 		protected :fields, :fields_set
 

@@ -8,7 +8,7 @@ class XmlSku2 < Lafcadio::DomainObject
 	boolean    'boolean2',
 	           { 'enums' => { true => 'yin', false => 'yang' },
 		           'english_name' => 'boolean 2' }
-	date       'date1', { 'notNull' => false }
+	date       'date1', { 'not_null' => false }
 	date       'date2', { 'range' => Lafcadio::DateField::RANGE_PAST }
 	dateTime   'dateTime1'
 	decimal    'decimal1', { 'precision' => 4, 'english_name' => 'decimal 1' }

@@ -23,7 +23,7 @@ module Lafcadio
 		def execute
 			@dbObject.verify if LafcadioConfig.new()['checkFields'] == 'onCommit'
 			set_commit_type
-			@dbObject.lastCommit = get_last_commit
+			@dbObject.last_commit = get_last_commit
 			@dbObject.pre_commit_trigger
 			update_dependent_domain_objects if @dbObject.delete
 			@dbBridge.commit @dbObject

@@ -16,9 +16,9 @@ class TestDateField < LafcadioTestCase
 
   def testNotNull
     odf1 = DateField.new nil
-    assert(odf1.notNull)
-    odf1.notNull = false
-    assert(!odf1.notNull)
+    assert(odf1.not_null)
+    odf1.not_null = false
+    assert(!odf1.not_null)
   end
 
   def testCatchesBadFormat

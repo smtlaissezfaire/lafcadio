@@ -22,13 +22,13 @@ class TestObjectStore < LafcadioTestCase
 
 	def testCaching
 		@testObjectStore.get_all Invoice
-		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
-		assert_equal 1, @mockDbBridge.retrievalsByType[Invoice]
+		assert_equal 0, @mockDbBridge.retrievals_by_type[Client]
+		assert_equal 1, @mockDbBridge.retrievals_by_type[Invoice]
 		@testObjectStore.get_all Invoice
-		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
-		assert_equal 1, @mockDbBridge.retrievalsByType[Invoice]
+		assert_equal 0, @mockDbBridge.retrievals_by_type[Client]
+		assert_equal 1, @mockDbBridge.retrievals_by_type[Invoice]
 		@testObjectStore.get_all Client
-		assert_equal 1, @mockDbBridge.retrievalsByType[Client]
+		assert_equal 1, @mockDbBridge.retrievals_by_type[Client]
 	end
 
 	def test_commit_returns_dobj
@@ -62,8 +62,8 @@ class TestObjectStore < LafcadioTestCase
 
 	def testDefersLoading
 		@testObjectStore.get_all Invoice
-		assert_equal 0, @mockDbBridge.retrievalsByType[Client]
-		assert_equal 1, @mockDbBridge.retrievalsByType[Invoice]
+		assert_equal 0, @mockDbBridge.retrievals_by_type[Client]
+		assert_equal 1, @mockDbBridge.retrievals_by_type[Invoice]
 	end
 
 	def testDeleteClearsCachedValue

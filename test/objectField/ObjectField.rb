@@ -64,7 +64,7 @@ class TestObjectField < LafcadioTestCase
 	
 	def testValueFromSql
 		of = ObjectField.new nil, 'someField'
-		of.notNull = false
+		of.not_null = false
 		valueFromSql = of.value_from_sql(nil)
 		assert_equal NilClass, valueFromSql.class
 		assert_equal nil, valueFromSql

@@ -91,7 +91,7 @@ class TestDomainObject < LafcadioTestCase
 		matchField( XmlSku2, 'boolean2', BooleanField,
 		            { 'enums' => { true => 'yin', false => 'yang' },
 		              'english_name' => 'boolean 2' } )
-		matchField( XmlSku2, 'date1', DateField, { 'notNull' => false } )
+		matchField( XmlSku2, 'date1', DateField, { 'not_null' => false } )
 		matchField( XmlSku2, 'date2', DateField,
 		            { 'range' => DateField::RANGE_PAST } )
 		matchField( XmlSku2, 'dateTime1', DateTimeField )

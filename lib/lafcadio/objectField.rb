@@ -8,7 +8,7 @@ module Lafcadio
 		include Comparable
 
 		attr_reader :name, :object_type
-		attr_accessor :notNull, :unique, :db_field_name
+		attr_accessor :not_null, :unique, :db_field_name
 
 		def self.instantiate_from_xml( domainClass, fieldElt ) #:nodoc:
 			parameters = instantiation_parameters( fieldElt )
@@ -43,7 +43,7 @@ module Lafcadio
 			@object_type = object_type
 			@name = name
 			@db_field_name = name
-			@notNull = true
+			@not_null = true
 			@unique = false
 			@english_nameOrNil = english_name
 		end
@@ -98,7 +98,7 @@ module Lafcadio
 		end
 
 		def verify(value, pk_id) #:nodoc:
-			if value.nil? && notNull
+			if value.nil? && not_null
 				raise FieldValueError, null_error_msg, caller
 			end
 			verify_non_nil( value, pk_id ) if value
@@ -602,7 +602,7 @@ module Lafcadio
 	class TimeStampField < DateTimeField #:nodoc:
 		def initialize(object_type, name = 'timeStamp', english_name = nil)
 			super( object_type, name, english_name )
-			@notNull = false
+			@not_null = false
 		end
 
 		def db_will_automatically_write

@@ -17,7 +17,7 @@ class TestEnumField < LafcadioTestCase
 	
 	def testValueForSql
 		field = EnumField.new User, "salutation", [ 'Mr', 'Mrs', 'Miss', 'Ms' ]
-		field.notNull = true
+		field.not_null = true
 		assert_equal 'null', field.value_for_sql('')
 	end
 	
@@ -25,7 +25,7 @@ class TestEnumField < LafcadioTestCase
 		field = TestEnumField.getTestEnumField
 		field.verify( 'AX', 1 )
 		assert_exception( FieldValueError ) { field.verify( 'IOU', 1 ) }
-		field.notNull = false
+		field.not_null = false
 		field.verify( nil, 1 )
 	end
 end
