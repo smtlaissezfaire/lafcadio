@@ -432,10 +432,9 @@ module Lafcadio
 					require "#{ domainDir }#{ fileName }"
 				end
 			}
-			if (domainFilesStr = LafcadioConfig.new['domainFiles'])
-				domainFilesStr.split(',').each { |domainFile|
-					require domainFile
-				}
+			if (domainFiles = LafcadioConfig.new['domainFiles'])
+				domainFiles = domainFiles.split( ',' ) if domainFiles.is_a? String
+				domainFiles.each { |domainFile| require domainFile }
 			end
 		end
 

@@ -182,6 +182,8 @@ class TestConfig < Test::Unit::TestCase
 		assert_equal( 'test', config['dbuser'] )
 		assert_equal( 'localhost', config['dbhost'] )
 		assert( config['domainDirs'].include?( 'lafcadio/domain/' ) )
+		LafcadioConfig.set_values( 'domainFiles' => %w( ../test/mock/domain ) )
+		DomainObject.require_domain_file( 'User' )
 	end
 
 	def testSiteName
