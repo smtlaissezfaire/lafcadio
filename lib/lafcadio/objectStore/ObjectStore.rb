@@ -104,7 +104,10 @@ module Lafcadio
 			coll
 		end
 		
-		def getMax( domain_class ); @dbBridge.getMax( domain_class ); end
+		def getMax( domain_class, field_name = 'pkId' )
+			query = Query::Max.new( domain_class, field_name )
+			@dbBridge.group_query( query ).only
+		end
 
 		def getObjects(objectType, pkIds)
 			require 'lafcadio/query/In'

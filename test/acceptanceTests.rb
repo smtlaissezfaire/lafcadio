@@ -200,3 +200,14 @@ apostrophe's
 		assert_equal( text3, test_row3_prime.text_field )
 	end
 end
+
+class AccTestObjectStore < AcceptanceTestCase
+	def test_max
+		y2k = Time.utc( 2000, 1, 1 )
+		row1 = TestRow.new( 'date_time' => y2k )
+		row1.commit
+		row2 = TestRow.new( 'date_time' => Time.utc( 1999, 1, 1 ) )
+		row2.commit
+		assert_equal( y2k, @object_store.getMax( TestRow, 'date_time' ) )
+	end
+end

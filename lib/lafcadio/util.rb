@@ -1,6 +1,16 @@
 require 'lafcadio/includer'
 Includer.include( 'util' )
 
+class Array
+	def only
+		if size != 1
+			raise "Expected single-value Array but Array has #{ size } members"
+		else
+			first
+		end
+	end
+end
+
 class Class < Module
 	# Given a String, returns a class object by the same name.
 	def self.getClass(className)

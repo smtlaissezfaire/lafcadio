@@ -120,6 +120,8 @@ class TestObjectStore < LafcadioTestCase
 	def testMax
 		setTestClient
 		assert_equal 1, @testObjectStore.getMax(Client)
+		Invoice.storedTestInvoice
+		assert_equal( 70, @testObjectStore.getMax( Invoice, 'rate' ) )
 	end
 
 	def testSelfLinking

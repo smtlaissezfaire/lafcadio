@@ -57,13 +57,11 @@ module Lafcadio
 			end
 			coll
 		end
-
-		def getMax(objectType)
-			max = nil
-			@objects[objectType].keys.each { |pkId|
-				max = pkId if !max || pkId > max
-			}
-			max
+		
+		def group_query( query )
+			if query.class == Query::Max
+				query.collect( @objects[query.objectType].values )
+			end
 		end
 	end
 end

@@ -124,11 +124,18 @@ module Lafcadio
 			@@lastPkIdInserted
 		end
 		
-		def getMax(objectType)
-			require 'lafcadio/query'
-			sql = Query::Max.new(objectType).toSql
-			result = executeSelect sql
-			result[0]['max(pkId)'].to_i
+		def group_query( query )
+			row = executeSelect( query.toSql )[0]
+			result = []
+			row.each { |val|
+				if query.field_name != 'pkId'
+					a_field = query.objectType.getField( query.field_name )
+					result << a_field.valueFromSQL( val )
+				else
+					result << val.to_i
+				end
+			}
+			result
 		end
 	end
 end

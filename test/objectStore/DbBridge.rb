@@ -31,7 +31,9 @@ class TestDBBridge < RUNIT::TestCase
       if str == "select last_insert_id()"
 				[ { 'last_insert_id()' => '12' } ]
 			elsif str == 'select max(pkId) from clients'
-				[ { 'max(pkId)' => '1' } ]
+				[ [ '1' ] ]
+			elsif str == 'select max(date) from invoices'
+				[ [ DBI::Date.new( 2001, 4, 5 ) ] ]
       else
 				[]
       end
@@ -125,8 +127,12 @@ class TestDBBridge < RUNIT::TestCase
 		assert_not_nil sql2 =~ /update internalClients set/, sql2
 	end
 
-	def testGetMax
-		assert 1, @dbb.getMax(Client)
+	def test_group_query
+		query = Query::Max.new( Client )
+		assert_equal( 1, @dbb.group_query( query ).only )
+		invoice = Invoice.storedTestInvoice
+		query2 = Query::Max.new( Invoice, 'date' )
+		assert_equal( invoice.date, @dbb.group_query( query2 ).only )
 	end
 	
 	def testDbName
