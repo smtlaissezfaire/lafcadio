@@ -1,10 +1,10 @@
 require 'lafcadio/test'
 require 'lafcadio/domain'
 
+class XmlSku < DomainObject
+end
+
 class TestClassDefinitionXmlParser < LafcadioTestCase
-	class XmlSku < DomainObject
-	end
-	
 	def execute( domainClass, xml )
 		ClassDefinitionXmlParser.new( domainClass, xml ).execute
 	end
@@ -43,6 +43,8 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		matchField( XmlSku, 'link1', LinkField, { 'linkedType' => User } )
 		matchField( XmlSku, 'money1', MoneyField )
 		matchField( XmlSku, 'month1', MonthField )
+		matchField( XmlSku, 'subsetLink1', SubsetLinkField,
+		            { 'subsetField' => 'xmlSku' } )
 		matchField( XmlSku, 'text1', TextField, { 'size' => 16, 'unique' => true } )
 		matchField( XmlSku, 'text2', TextField, { 'large' => true } )
 		matchField( XmlSku, 'textList1', TextListField )

@@ -1,0 +1,3 @@
+<lafcadio_class_definition name="Attribute">
+	<field name="name" class="TextField" />
+</lafcadio_class_definition>

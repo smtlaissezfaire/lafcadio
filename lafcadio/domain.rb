@@ -80,6 +80,7 @@ class ClassDefinitionXmlParser
 	end
 	
 	def possibleFieldAttributes
+		require 'lafcadio/objectField'
 		fieldAttr = []
 		fieldAttr << FieldAttribute.new( 'size', FieldAttribute::INTEGER )
 		fieldAttr << FieldAttribute.new( 'unique', FieldAttribute::BOOLEAN )

@@ -2,6 +2,7 @@ require 'lafcadio/domain/DomainObject'
 require 'lafcadio/test/LafcadioTestCase'
 require 'date'
 require 'test/mock/domain/Client'
+require 'test/domain/ClassDefinitionXmlParser'
 
 class Invoice < DomainObject
   def Invoice.getTestInvoice
@@ -34,8 +35,9 @@ class Invoice < DomainObject
     hoursField = DecimalField.new(Invoice, "hours", 2)
     paidField = DateField.new(Invoice, "paid", "Paid")
     paidField.notNull = false
+		xmlSku = LinkField.new( self, XmlSku )
     [ invoiceNumField, clientField, dateField, rateField, hoursField,
-      paidField ]
+      paidField, xmlSku ]
   end
 
   def name

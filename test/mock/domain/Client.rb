@@ -5,20 +5,6 @@ require 'lafcadio/objectField/TextField'
 require 'lafcadio/objectField/MoneyField'
 
 class Client < DomainObject
-  def Client.classFields
-		fields = [ TextField.new(Client, "name") ]
-    standardRateField = MoneyField.new(Client, "standard_rate",
-				"Standard Rate")
-    standardRateField.notNull = false
-		fields << standardRateField
-		fields <<(LinkField.new(self, Client, 'referringClient'))
-		priorityInvoice = SubsetLinkField.new self, Invoice, 'client',
-				'priorityInvoice'
-		priorityInvoice.notNull = false
-		fields << priorityInvoice
-		fields
-  end
-  
   def Client.getTestClient
     Client.new( { "name" => "clientName1", 'objId' => 1 } )
   end

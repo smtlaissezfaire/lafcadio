@@ -5,6 +5,17 @@ class SubsetLinkField < LinkField
   def SubsetLinkField.viewerType
     SubsetLinkFieldViewer
   end
+  
+  def SubsetLinkField.instantiationParameters( fieldElt )
+		parameters = super( fieldElt )
+		parameters['subsetField'] = fieldElt.attributes['subsetField']
+		parameters
+  end
+  
+  def SubsetLinkField.instantiateWithParameters( domainClass, parameters )
+		self.new( domainClass, parameters['linkedType'], parameters['subsetField'],
+		          parameters['name'], parameters['englishName'] )
+  end
 
   attr_accessor :subsetField
 

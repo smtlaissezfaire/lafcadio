@@ -9,7 +9,7 @@ require 'lafcadio/objectStore/DomainObjectSqlMaker'
 class TestDomainObjectSqlMaker < LafcadioTestCase
   def testFieldNamesForSQL
     sqlMaker = DomainObjectSqlMaker.new Invoice.getTestInvoice
-    assert_equal(6, sqlMaker.getNameValuePairs(Invoice).size)
+    assert_equal(7, sqlMaker.getNameValuePairs(Invoice).size)
   end
 
   def testInsertUpdateAndDelete
