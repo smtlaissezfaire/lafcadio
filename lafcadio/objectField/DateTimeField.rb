@@ -7,7 +7,11 @@ class DateTimeField < ObjectField
 		if (valueStr =~ /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/) ||
 				(valueStr =~ /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/)
 			if $1.to_i != 0
-				value = Time.local $1, $2, $3, $4, $5, $6
+				begin
+					value = Time.local $1, $2, $3, $4, $5, $6
+				rescue ArgumentError
+					raise ArgumentError, "argument out of range: #{ valueStr }", caller
+				end
 			end
 		end
 		value

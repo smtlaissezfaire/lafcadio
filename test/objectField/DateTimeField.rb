@@ -24,4 +24,13 @@ class TestDateTimeField < LafcadioTestCase
 		assert_equal "'2002-08-24 13:08:22'", @dateTimeField.valueForSQL (@aug24)
 		assert_equal "null", @dateTimeField.valueForSQL(nil)
 	end
+	
+	def testValueFromSqlThrowsInformativeError
+		begin
+			@dateTimeField.valueFromSQL '2002-13-30 01:01:01'
+			fail 'should throw an ArgumentError'
+		rescue ArgumentError
+			assert_not_nil $!.to_s =~ /2002-13-30/, $!.to_s
+		end
+	end
 end
