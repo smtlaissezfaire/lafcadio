@@ -107,7 +107,6 @@ class TestDomainObject < LafcadioTestCase
 		matchField( XmlSku2, 'integer1', IntegerField )
 		matchField( XmlSku2, 'link1', LinkField,
 		            { 'linked_type' => User, 'delete_cascade' => true } )
-		matchField( XmlSku2, 'money1', MoneyField )
 		matchField( XmlSku2, 'month1', MonthField )
 		matchField( XmlSku2, 'subsetLink1', SubsetLinkField,
 		            { 'subset_field' => 'xmlSku' } )

@@ -1,8 +1,8 @@
 <lafcadio_class_definition name="SKU">
 	<field name="sku" class="TextField" english_name="SKU" size="16" unique="y" />
-	<field name="standardPrice" class="MoneyField" />
+	<field name="standardPrice" class="IntegerField" />
 	<field name="description" class="TextField" notNull="n" />
-	<field name="salePrice" class="MoneyField" notNull="n" />
+	<field name="salePrice" class="IntegerField" notNull="n" />
 	<field name="onSaleUntil" class="DateField" notNull="n" />
 	<field name="size" class="TextField" notNull="n" />
 </lafcadio_class_definition>

@@ -464,9 +464,6 @@ module Lafcadio
 		end
 	end
 
-	class MoneyField < DecimalField #:nodoc:
-	end
-
 	# Accepts a Month as a value. This field automatically saves in MySQL as a 
 	# date corresponding to the first day of the month.
 	class MonthField < DateField

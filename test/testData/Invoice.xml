@@ -2,7 +2,7 @@
 	<field name="client" class="LinkField" linked_type="Client" />
 	<field name="date" class="DateField" />
 	<field name="timestamp1" class="TimeStampField" />
-	<field name="rate" class="MoneyField" />
+	<field name="rate" class="IntegerField" />
 	<field name="hours" class="DecimalField" precision="2" />
 	<field name="paid" class="DateField" notNull="n" />
 	<field name="xmlSku" class="LinkField" linked_type="XmlSku" />

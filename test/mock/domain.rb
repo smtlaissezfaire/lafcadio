@@ -256,7 +256,6 @@ class XmlSku2 < Lafcadio::DomainObject
 	           { 'enums' => Lafcadio::QueueHash.new( '1', '2', '3', '4' ) }
 	integer    'integer1'
 	link       'link1', { 'linked_type' => User, 'delete_cascade' => true }
-	money      'money1'
 	month      'month1'
 	subsetLink 'subsetLink1', { 'subset_field' => 'xmlSku' }
 	text       'text1', { 'size' => 16, 'unique' => true }

@@ -32,7 +32,6 @@
 	       not_null="n" />
 	<field name="link2" class="LinkField" linked_type="Invoice"
 	       db_field_name="an_invoice" />
-	<field name="money1" class="MoneyField" not_null="n" />
 	<field name="month1" class="MonthField" not_null="n" />
 	<field name="subsetLink1" class="SubsetLinkField" linked_type="Invoice"
 	       subset_field="xmlSku" not_null="n" />

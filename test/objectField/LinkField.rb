@@ -12,7 +12,6 @@ class TestLinkField < LafcadioTestCase
 		@mockObjectStore.commit Client.new(
 				{ "pk_id" => 2, "name" => "clientName2" } )
     @fieldWithListener = LinkField.new(nil, Client, "client", "Client")
-    rateField = MoneyField.new nil, "rate"
   end
 
   def testNames
