@@ -1,4 +1,4 @@
-require 'lafcadio/util/Context'
+require 'lafcadio/util'
 
 module Lafcadio
 	# A ContextualService is a service that is managed by the Context. 

@@ -1,5 +1,5 @@
 require 'runit/testcase'
-require 'lafcadio/util/Context'
+require 'lafcadio/util'
 require 'lafcadio/mock'
 require 'lafcadio/util/LafcadioConfig'
 
