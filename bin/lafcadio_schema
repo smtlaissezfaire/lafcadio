@@ -6,11 +6,12 @@ require 'lafcadio/schema/CreateTableStatement'
 if ARGV.size < 1
 	puts "lafcadio_schema domain_class_definition.rb"
 else
-	fileName = ARGV[0]
-	require "#{ fileName }"
-	fileName =~ /(\w*)\.rb/
-	className = $1
-	domainClass = ClassUtil.getClass( className )
-	statement = CreateTableStatement.new( domainClass )
-	puts statement.toSql
+	ARGV.each { |fileName|
+		require "#{ fileName }"
+		fileName =~ /(\w*)\.rb/
+		className = $1
+		domainClass = ClassUtil.getClass( className )
+		statement = CreateTableStatement.new( domainClass )
+		puts statement.toSql
+	}
 end
