@@ -18,7 +18,7 @@ class TestGMockObjectStore < LafcadioTestCase
 				'name' => 'client 20' } )
 		assert_equal 'client 20', @mockObjectStore.get(Client, 20).name
 	end
-
+	
 	def testUpdate
 		@mockObjectStore.commit Client.new( { 'pk_id' => 100,
 				'name' => 'client 100' } )

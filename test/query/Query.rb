@@ -58,4 +58,23 @@ class TestQuery < LafcadioTestCase
 		query2.limit = 10..19
 		assert_equal 'select * from clients limit 10, 10', query2.to_sql
 	end
+	
+	def test_infer
+		query = Query.infer( Invoice ) { |inv| inv.rate.equals( 75 ) }
+		assert_equal( Query, query.class )
+		assert_equal( 'select * from invoices where invoices.rate = 75',
+		              query.to_sql )
+		query = query.and { |inv| inv.date.gt( Date.new( 2004, 1, 1 ) ) }
+		assert_equal(
+			'select * from invoices where (invoices.rate = 75 and ' +
+					"invoices.date > '2004-01-01')",
+			query.to_sql
+		)
+		query = query.or { |inv| inv.hours.lte( 10 ) }
+		assert_equal(
+			'select * from invoices where ((invoices.rate = 75 and ' +
+					"invoices.date > '2004-01-01') or invoices.hours <= 10)",
+			query.to_sql
+		)
+	end
 end

@@ -161,7 +161,7 @@ class TestObjectStore < LafcadioTestCase
 	def testGetDbBridge
 		assert_equal( @mockDbBridge, @testObjectStore.get_db_bridge )
 	end
-
+	
 	def testGetInvoices
 		client = Client.getTestClient
 		client.commit

@@ -88,6 +88,13 @@ module Lafcadio
 	class Query
 		def self.And( *conditions ); CompoundCondition.new( *conditions ); end
 		
+		def self.infer( domain_class, &action )
+			inferrer = Query::Inferrer.new( domain_class ) { |obj|
+				action.call( obj )
+			}
+			inferrer.execute
+		end
+		
 		def self.Or( *conditions )
 			conditions << CompoundCondition::OR
 			CompoundCondition.new( *conditions)
@@ -113,6 +120,15 @@ module Lafcadio
 			@order_by_order = ASC
 		end
 		
+		def and( &action ); compound( CompoundCondition::AND, action ); end
+		
+		def compound( comp_type, action )
+			rquery = Query.infer( @object_type ) { |dobj| action.call( dobj ) }
+			comp_cond = Query::CompoundCondition.new( @condition, rquery.condition,
+			                                          comp_type )
+			comp_cond.query
+		end
+		
 		def eql?( other ); other.class <= Query && other.to_sql == to_sql; end
 
 		def fields; '*'; end
@@ -123,6 +139,8 @@ module Lafcadio
 			"limit #{ @limit.begin }, #{ @limit.end - @limit.begin + 1 }" if @limit
 		end
 
+		def or( &action ); compound( CompoundCondition::OR, action ); end
+		
 		def order_clause
 			if @order_by
 				clause = "order by #{ @order_by } "
@@ -206,6 +224,8 @@ module Lafcadio
 					raise( MissingError, errStr, caller )
 				end
 			end
+			
+			def query; Query.new( @object_type, self ); end
 			
 			def not
 				Query::Not.new( self )
