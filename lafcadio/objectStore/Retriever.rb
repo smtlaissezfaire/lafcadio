@@ -31,15 +31,13 @@ class ObjectStore < ContextualService
 
 		# Returns all domain objects for the given domain class.
 		def getAll(objectType)
-			require 'lafcadio/objectStore/Collection'
 			unless @objectTypesFullyRetrieved.index(objectType)
 				@objectTypesFullyRetrieved << objectType
 				query = Query.new objectType
 				newObjects = @dbBridge.getCollectionByQuery(query)
 				newObjects.each { |dbObj| @cache.save dbObj }
 			end
-			coll = Collection.new(objectType)
-			coll.concat(@cache.getAll(objectType))
+			@cache.getAll(objectType)
 		end
 
 		# Flushes one domain object from its cache.

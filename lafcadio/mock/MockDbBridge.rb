@@ -1,5 +1,3 @@
-require 'lafcadio/objectStore/Collection'
-
 class MockDbBridge
 	attr_reader :lastObjIdInserted, :retrievalsByType
 
@@ -33,27 +31,22 @@ class MockDbBridge
 		end
   end
 	
-	def collection(objectType, objects)
-		coll = Collection.new objectType
-		coll = coll.concat objects
-		coll
-	end
+	def collection(objectType, objects); objects; end
 
 	def _getAll(objectType)
 		@retrievalsByType[objectType] = @retrievalsByType[objectType] + 1
-		coll = Collection.new objectType
-		coll = coll.concat(@objects[objectType].values) if @objects[objectType]
-		coll
+		@objects[objectType] ? @objects[objectType].values : []
 	end
 
 	def getCollectionByQuery(query)
 		objectType = query.objectType
 		condition = query.condition
-		objects = _getAll(objectType).filter { |dbObj|
+		objects = []
+		_getAll( objectType ).each { |dbObj|
 			if condition
-				condition.objectMeets(dbObj)
+				objects << dbObj if condition.objectMeets(dbObj)
 			else
-				true
+				objects << dbObj
 			end
 		}
 		coll = collection( objectType, objects )

@@ -38,8 +38,8 @@ class Committer
       dependentClasses = @dbObject.objectType.dependentClasses
       dependentClasses.keys.each { |aClass|
         field = dependentClasses[aClass]
-        collection = @objectStore.getAll(aClass).filterObjects(
-        		field.name, @dbObject)
+				collection = @objectStore.getFiltered( aClass.name, @dbObject,
+				                                       field.name )
         collection.each { |dependentObject|
 					eval %{ dependentObject.#{field.name} = nil }
 					@objectStore.commit(dependentObject)

@@ -55,7 +55,7 @@ class Collector
 
 	def getMapped(searchTerm, resultTypeName)
 		resultType = DomainUtil.getObjectTypeFromString resultTypeName
-		coll = Collection.new resultType
+		coll = []
 		firstTypeName = ClassUtil.bareClassName searchTerm.class
 		secondTypeName = ClassUtil.bareClassName resultType
 		mapTypeName = firstTypeName + secondTypeName

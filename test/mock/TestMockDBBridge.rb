@@ -49,7 +49,7 @@ class TestMockDBBridge < LafcadioTestCase
 	end
 
   def test_returnsCollection
-    assert_equal(Collection, getAll(Client).class)
+    assert_equal(Array, getAll(Client).class)
   end
 
 	def testRetrievalsByType

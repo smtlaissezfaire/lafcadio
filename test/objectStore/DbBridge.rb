@@ -35,9 +35,7 @@ class TestDBBridge < RUNIT::TestCase
       end
     end
 
-    def getAll(objectType)
-      Collection.new objectType
-    end
+    def getAll(objectType); []; end
     
     def disconnect
     	@@connected = false
@@ -111,7 +109,7 @@ class TestDBBridge < RUNIT::TestCase
 	def testGetAll
 		query = Query.new Domain::LineItem
 		coll = @dbb.getCollectionByQuery query
-		assert_equal Collection, coll.class
+		assert_equal Array, coll.class
 	end
 
 	def testCommitsForInheritedObjects

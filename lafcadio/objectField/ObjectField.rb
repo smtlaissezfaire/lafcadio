@@ -64,9 +64,11 @@ class ObjectField
   end
 
   def verifyUniqueness(value, objId)
-    collection = ObjectStore.getObjectStore.getAll(@objectType)
-    collisions = collection.filterObjects(self.name, value)
-    collisions = collisions.removeObjects("objId", objId)
+		inferrer = Query::Inferrer.new( @objectType ) { |domain_obj|
+			Query.And( domain_obj.send( self.name ).equals( value ),
+			           domain_obj.objId.equals( objId ).not )
+		}
+		collisions = ObjectStore.getObjectStore.getSubset( inferrer.execute )
     if collisions.size > 0
 			if @notUniqueMsg
 				notUniqueMsg = @notUniqueMsg

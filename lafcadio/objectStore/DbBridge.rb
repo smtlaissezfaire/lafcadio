@@ -78,10 +78,9 @@ class DbBridge
 	
 	# When passed a query, executes that query and returns a Collection.
 	def getCollectionByQuery(query)
-		require 'lafcadio/objectStore/Collection'
 		require 'lafcadio/objectStore/SqlValueConverter'
 		objectType = query.objectType
-		coll = Collection.new objectType
+		coll = []
 		objects = []
 		result = executeSelect query.toSql
 		result.each { |row_hash|
