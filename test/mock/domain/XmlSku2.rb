@@ -24,7 +24,7 @@ class XmlSku2 < Lafcadio::DomainObject
 	subsetLink 'subsetLink1', { 'subsetField' => 'xmlSku' }
 	text       'text1', { 'size' => 16, 'unique' => true }
 	text       'text2', { 'large' => true }
-	textList   'textList1', { 'dbFieldName' => 'text_list1' }
+	textList   'textList1', { 'db_field_name' => 'text_list1' }
 	timeStamp  'timestamp1'
 	
 	table_name         'that_table'

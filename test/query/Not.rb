@@ -17,8 +17,8 @@ class TestNot < LafcadioTestCase
 
 	def testObjectsMeets
 		user = User.getTestUser
-		assert !@not.objectMeets(user)
+		assert !@not.object_meets(user)
 		user2 = User.new({ 'email' => 'jane.doe@email.com' })
-		assert @not.objectMeets(user2)
+		assert @not.object_meets(user2)
 	end
 end

@@ -30,7 +30,7 @@ module Lafcadio
 			objects = []
 			_get_all( query.object_type ).each { |dbObj|
 				if query.condition
-					objects << dbObj if query.condition.objectMeets(dbObj)
+					objects << dbObj if query.condition.object_meets(dbObj)
 				else
 					objects << dbObj
 				end

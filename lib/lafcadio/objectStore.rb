@@ -721,7 +721,7 @@ module Lafcadio
 			else
 				begin
 					field = @object_type.get_field( key )
-					field.value_from_sql( @rowHash[ field.dbFieldName ] )
+					field.value_from_sql( @rowHash[ field.db_field_name ] )
 				rescue MissingError
 					nil
 				end

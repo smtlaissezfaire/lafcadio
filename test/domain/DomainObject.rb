@@ -113,7 +113,7 @@ class TestDomainObject < LafcadioTestCase
 		            { 'unique' => true } )
 		matchField( XmlSku2, 'text2', TextField )
 		matchField( XmlSku2, 'textList1', TextListField,
-		            { 'dbFieldName' => 'text_list1' } )
+		            { 'db_field_name' => 'text_list1' } )
 		matchField( XmlSku2, 'timestamp1', TimeStampField )
 	end
 	

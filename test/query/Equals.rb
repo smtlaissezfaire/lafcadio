@@ -42,7 +42,7 @@ class TestEquals < LafcadioTestCase
 		equals = Query::Equals.new( 'firstNames', email_field, User )
 		assert_equal( 'users.firstNames = users.email', equals.to_sql )
 		odd_user = User.new( 'email' => 'foobar', 'firstNames' => 'foobar' )
-		assert( equals.objectMeets( odd_user ) )
+		assert( equals.object_meets( odd_user ) )
 	end
 	
 	def test_different_pk_name

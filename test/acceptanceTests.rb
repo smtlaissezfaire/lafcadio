@@ -98,7 +98,7 @@ create table testrows (
 		fields << BooleanField.new( self, 'bool_field' )
 		fields << BlobField.new( self, 'blob_field' )
 		text2 = TextField.new( self, 'text2' )
-		text2.dbFieldName = 'text_field2'
+		text2.db_field_name = 'text_field2'
 		fields << text2
 		fields
 	end
@@ -220,7 +220,7 @@ class AccTestDomainObjectProxy < AcceptanceTestCase
 end
 
 class AccTestEquals < AcceptanceTestCase
-	def test_dbFieldName
+	def test_db_field_name
 		row = TestRow.new( 'text2' => 'some text' )
 		row.commit
 		cond = Query::Equals.new( 'text2', 'some text', TestRow )

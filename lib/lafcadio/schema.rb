@@ -13,7 +13,7 @@ module Lafcadio
 		
 		def definition_terms( field )
 			definitionTerms = []
-			definitionTerms << field.dbFieldName
+			definitionTerms << field.db_field_name
 			definitionTerms << typeClause( field )
 			definitionTerms << 'not null' if field.notNull
 			definitionTerms << 'unique' if field.unique

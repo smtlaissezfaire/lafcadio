@@ -23,10 +23,10 @@ class TestLike < LafcadioTestCase
 		like4 = Query::Like.new('client', '1', Invoice)
 		client212 = Client.new({ 'pkId' => 212 })
 		invoiceWith212 = Invoice.new({ 'client' => client212 })
-		assert like4.objectMeets(invoiceWith212)
+		assert like4.object_meets(invoiceWith212)
 		client234 = Client.new({ 'pkId' => 234 })
 		invoiceWith234 = Invoice.new({ 'client' => client234 })
-		assert !like4.objectMeets(invoiceWith234)
+		assert !like4.object_meets(invoiceWith234)
 	end
 	
 	def testFieldBelongingToSuperclass

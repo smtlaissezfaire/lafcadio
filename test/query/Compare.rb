@@ -56,7 +56,7 @@ class TestCompare < LafcadioTestCase
 		invoice.date = nil
 		dc = Query::Compare.new(
 				'date', Date.today, Invoice, Query::Compare::LESS_THAN)
-		assert !dc.objectMeets(invoice)
+		assert !dc.object_meets(invoice)
 	end
 
 	def testMockComparators
@@ -72,27 +72,27 @@ class TestCompare < LafcadioTestCase
 		invoice3.date = date3
 		dc1 = Query::Compare.new(
 				'date', date2, Invoice, Query::Compare::LESS_THAN)
-		assert dc1.objectMeets(invoice1)
-		assert !dc1.objectMeets(invoice2)
-		assert !dc1.objectMeets(invoice3)
+		assert dc1.object_meets(invoice1)
+		assert !dc1.object_meets(invoice2)
+		assert !dc1.object_meets(invoice3)
 		dc2 = Query::Compare.new(
 				'date', date2, Invoice,
 				Query::Compare::LESS_THAN_OR_EQUAL)
-		assert dc2.objectMeets(invoice1)
-		assert dc2.objectMeets(invoice2)
-		assert !dc2.objectMeets(invoice3)
+		assert dc2.object_meets(invoice1)
+		assert dc2.object_meets(invoice2)
+		assert !dc2.object_meets(invoice3)
 		dc3 = Query::Compare.new(
 				'date', date2, Invoice,
 				Query::Compare::GREATER_THAN)
-		assert !dc3.objectMeets(invoice1)
-		assert !dc3.objectMeets(invoice2)
-		assert dc3.objectMeets(invoice3)
+		assert !dc3.object_meets(invoice1)
+		assert !dc3.object_meets(invoice2)
+		assert dc3.object_meets(invoice3)
 		dc4 = Query::Compare.new(
 				'date', date2, Invoice,
 				Query::Compare::GREATER_THAN_OR_EQUAL)
-		assert !dc4.objectMeets(invoice1)
-		assert dc4.objectMeets(invoice2)
-		assert dc4.objectMeets(invoice3)
+		assert !dc4.object_meets(invoice1)
+		assert dc4.object_meets(invoice2)
+		assert dc4.object_meets(invoice3)
 	end
 
 	def testNumericalSearchingOfaLinkField

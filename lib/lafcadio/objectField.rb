@@ -8,7 +8,7 @@ module Lafcadio
 		include Comparable
 
 		attr_reader :name, :object_type
-		attr_accessor :notNull, :unique, :dbFieldName
+		attr_accessor :notNull, :unique, :db_field_name
 
 		def self.instantiate_from_xml( domainClass, fieldElt ) #:nodoc:
 			parameters = instantiation_parameters( fieldElt )
@@ -18,8 +18,8 @@ module Lafcadio
 		def self.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
 			instance = self.new( domainClass, parameters['name'],
 			                     parameters['english_name'] )
-			if ( dbFieldName = parameters['dbFieldName'] )
-				instance.dbFieldName = dbFieldName
+			if ( db_field_name = parameters['db_field_name'] )
+				instance.db_field_name = db_field_name
 			end
 			instance
 		end
@@ -28,7 +28,7 @@ module Lafcadio
 			parameters = {}
 			parameters['name'] = fieldElt.attributes['name']
 			parameters['english_name'] = fieldElt.attributes['english_name']
-			parameters['dbFieldName'] = fieldElt.attributes['dbFieldName']
+			parameters['db_field_name'] = fieldElt.attributes['db_field_name']
 			parameters
 		end
 		
@@ -42,7 +42,7 @@ module Lafcadio
 		def initialize(object_type, name, english_name = nil )
 			@object_type = object_type
 			@name = name
-			@dbFieldName = name
+			@db_field_name = name
 			@notNull = true
 			@unique = false
 			@english_nameOrNil = english_name
@@ -59,7 +59,7 @@ module Lafcadio
 		def bind_write?; false; end #:nodoc:
 		
 		def db_table_and_field_name
-			"#{ object_type.table_name }.#{ dbFieldName }"
+			"#{ object_type.table_name }.#{ db_field_name }"
 		end
 
 		def db_will_automatically_write #:nodoc:
@@ -72,9 +72,9 @@ module Lafcadio
 
 		# Returns the name that this field is referenced by in the MySQL table. By 
 		# default this is the same as the name; to override it, set 
-		# ObjectField#dbFieldName.
+		# ObjectField#db_field_name.
 		def name_for_sql
-			dbFieldName
+			db_field_name
 		end
 
 		def null_error_msg #:nodoc:

@@ -44,7 +44,7 @@ class TestObjectField < LafcadioTestCase
 
 	def testNameForSQL
 		field = ObjectField.new User, "id"
-		field.dbFieldName = "pkId"
+		field.db_field_name = "pkId"
 		assert_equal "pkId", field.name_for_sql
 	end
 

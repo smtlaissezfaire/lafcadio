@@ -48,7 +48,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		matchField( XmlSku, 'text1', TextField, { 'unique' => true } )
 		matchField( XmlSku, 'text2', TextField )
 		matchField( XmlSku, 'textList1', TextListField,
-		            { 'dbFieldName' => 'text_list1' } )
+		            { 'db_field_name' => 'text_list1' } )
 		matchField( Invoice, 'timestamp1', TimeStampField )
 	end
 	

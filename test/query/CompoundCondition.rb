@@ -30,22 +30,22 @@ class TestCompoundCondition < LafcadioTestCase
 		              condition.to_sql )
 		invoice = Invoice.new({ 'pkId' => 1, 'date' => Date.new(2003, 1, 1),
 				'rate' => 10, 'hours' => 10 })
-		assert condition.objectMeets(invoice)
+		assert condition.object_meets(invoice)
 		invoice.hours = 10.5
-		assert !condition.objectMeets(invoice)
+		assert !condition.object_meets(invoice)
 	end
 
 	def testOr
 		email = Query::Equals.new('email', 'test@test.com', User)
 		fname = Query::Equals.new('firstNames', 'John', User)
 		user = User.getTestUser
-		assert email.objectMeets(user)
-		assert !fname.objectMeets(user)
+		assert email.object_meets(user)
+		assert !fname.object_meets(user)
 		compound = Query::CompoundCondition.new(email, fname,
 				Query::CompoundCondition::OR)
 		assert_equal( "(users.email = 'test@test.com' or " +
 		              "users.firstNames = 'John')",
 		              compound.to_sql )
-		assert compound.objectMeets(user)
+		assert compound.object_meets(user)
 	end
 end

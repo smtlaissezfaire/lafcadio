@@ -259,7 +259,7 @@ module Lafcadio
 				"#{ db_field_name } #{ @@comparators[@compareType] } " + search_val
 			end
 
-			def objectMeets(anObj)
+			def object_meets(anObj)
 				value = anObj.send @fieldName
 				value = value.pkId if value.class <= DomainObject
 				if value
@@ -285,14 +285,14 @@ module Lafcadio
 				@object_type = conditions[0].object_type
 			end
 
-			def objectMeets(anObj)
+			def object_meets(anObj)
 				if @compoundType == AND
 					@conditions.inject( true ) { |result, cond|
-						result && cond.objectMeets( anObj )
+						result && cond.object_meets( anObj )
 					}
 				else
 					@conditions.inject( false ) { |result, cond|
-						result || cond.objectMeets( anObj )
+						result || cond.object_meets( anObj )
 					}
 				end
 			end
@@ -340,7 +340,7 @@ module Lafcadio
 				end
 			end
 
-			def objectMeets(anObj)
+			def object_meets(anObj)
 				if @fieldName == @object_type.sql_primary_key_name
 					object_value = anObj.pkId
 				else
@@ -371,7 +371,7 @@ module Lafcadio
 				Array
 			end
 
-			def objectMeets(anObj)
+			def object_meets(anObj)
 				value = anObj.send @fieldName
 				@searchTerm.index(value) != nil
 			end
@@ -414,7 +414,7 @@ module Lafcadio
 				end
 			end
 
-			def objectMeets(anObj)
+			def object_meets(anObj)
 				value = anObj.send @fieldName
 				if value.class <= DomainObject || value.class == DomainObjectProxy
 					value = value.pkId.to_s
@@ -454,7 +454,7 @@ module Lafcadio
 				DomainObject
 			end
 
-			def objectMeets(anObj)
+			def object_meets(anObj)
 				value = anObj.send @fieldName
 				value ? value.pkId == @searchTerm.pkId : false
 			end
@@ -497,8 +497,8 @@ module Lafcadio
 				@unCondition = unCondition
 			end
 
-			def objectMeets(obj)
-				!@unCondition.objectMeets(obj)
+			def object_meets(obj)
+				!@unCondition.object_meets(obj)
 			end
 			
 			def object_type; @unCondition.object_type; end
