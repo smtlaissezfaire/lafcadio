@@ -19,6 +19,8 @@ class TestContextualService < RUNIT::TestCase
 		context.set_service_b serviceB
 		assert_equal serviceB, ServiceB.get_service_b
 		assert ServiceA.get_service_a != ServiceB.get_service_b
+		assert_exception( NoMethodError ) { context.setServiceA }
+		assert_exception( NoMethodError ) { context.getServiceA }
 	end
 	
 	class Outer; class Inner < Lafcadio::ContextualService; end; end

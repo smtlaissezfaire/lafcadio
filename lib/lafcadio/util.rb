@@ -62,12 +62,10 @@ module Lafcadio
 			@init_procs = {}
 		end
 		
-		def create_instance( resourceName, service_class ) #:nodoc:
+		def create_instance( service_class ) #:nodoc:
 			if ( proc = @init_procs[service_class] )
 				proc.call
 			else
-				resourceName = resourceName.underscore_to_camel_case
-				service_class = eval resourceName unless service_class
 				service_class.new
 			end
 		end
@@ -77,21 +75,28 @@ module Lafcadio
 			@resources = {}
 		end
 
-		def get_resource( resourceName, service_class = nil ) #:nodoc:
-			resource = @resources[resourceName.underscore_to_camel_case]
+		def get_resource( service_class ) #:nodoc:
+			resource = @resources[service_class]
 			unless resource
-				resource = create_instance( resourceName, service_class )
-				set_resource resourceName.underscore_to_camel_case, resource
+				resource = create_instance( service_class )
+				set_resource service_class, resource
 			end
 			resource
 		end
 
 		def method_missing(methId, *args) #:nodoc:
 			methodName = methId.id2name
-			if methodName =~ /^get_(.*)$/
-				get_resource $1, *args
-			elsif methodName =~ /^set(.*)$/
-				set_resource $1.underscore_to_camel_case, args[0]
+			if methodName =~ /^get_(.*)/ || methodName =~ /^set_(.*)/
+				begin
+					service_class = Kernel.const_get( $1.underscore_to_camel_case )
+				rescue NameError
+					service_class = args.first
+				end
+				if methodName =~ /^get_(.*)/
+					get_resource( service_class )
+				else
+					set_resource( service_class, *args )
+				end
 			else
 				super
 			end
