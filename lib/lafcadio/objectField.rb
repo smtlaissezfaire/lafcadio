@@ -415,7 +415,7 @@ module Lafcadio
 		def initialize(object_type, name, enums, english_name = nil)
 			super object_type, name, english_name
 			if enums.class == Array 
-				@enums = QueueHash.newFromArray enums
+				@enums = QueueHash.new_from_array enums
 			else
 				@enums = enums
 			end

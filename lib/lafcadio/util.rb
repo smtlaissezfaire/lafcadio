@@ -170,24 +170,24 @@ module Lafcadio
 		# words.
 		#
 		# Examples:
-		#   English.properNoun("bosnia and herzegovina") ->
+		#   English.proper_noun("bosnia and herzegovina") ->
 		#     "Bosnia and Herzegovina"
-		#   English.properNoun("macedonia, the former yugoslav republic of") ->
+		#   English.proper_noun("macedonia, the former yugoslav republic of") ->
 		#     "Macedonia, the Former Yugoslav Republic of"
-		#   English.properNoun("virgin islands, u.s.") ->
+		#   English.proper_noun("virgin islands, u.s.") ->
 		#     "Virgin Islands, U.S."
-		def self.properNoun(string)
-			properNoun = ""
+		def self.proper_noun(string)
+			proper_noun = ""
 			while(matchIndex = string =~ /[\. ]/)
 				word = string[0..matchIndex-1]
 				word = word.capitalize unless [ 'and', 'the', 'of' ].index(word) != nil
-				properNoun += word + $&
+				proper_noun += word + $&
 				string = string[matchIndex+1..string.length]
 			end
 			word = string
 			word = word.capitalize unless [ 'and', 'the', 'of' ].index(word) != nil
-			properNoun += word
-			properNoun
+			proper_noun += word
+			proper_noun
 		end
 
 		# Given a format for a template sentence, generates the sentence while 
@@ -217,7 +217,7 @@ module Lafcadio
 			sentence.gsub!( /%is/, isVerb )
 			name = English.plural name if number != 1
 			sentence.gsub!( /%nam/, name )
-			article = startsWithVowelSound(name) ? 'an' : 'a'
+			article = starts_with_vowel_sound(name) ? 'an' : 'a'
 			sentence.gsub!( /%a/, article )
 			sentence
 		end
@@ -235,7 +235,7 @@ module Lafcadio
 		
 		# Does this word start with a vowel sound? "User" and "usury" don't, but 
 		# "ugly" does.
-		def self.startsWithVowelSound(word)
+		def self.starts_with_vowel_sound(word)
 			uSomethingUMatch = word =~ /^u[^aeiuo][aeiou]/
 			# 'user' and 'usury' don't start with a vowel sound
 			word =~ /^[aeiou]/ && !uSomethingUMatch
@@ -257,7 +257,7 @@ module Lafcadio
 	
 		def self.set_filename(filename); @@filename = filename; end
 		
-		def self.setValues( value_hash ); @@value_hash = value_hash; end
+		def self.set_values( value_hash ); @@value_hash = value_hash; end
 
 		def initialize
 			if @@value_hash
@@ -278,7 +278,7 @@ module Lafcadio
 	class QueueHash < DelegateClass( Array )
 		# Creates a QueueHash with all the elements in <tt>array</tt> as keys, and 
 		# each value initially set to be the same as the corresponding key.
-		def self.newFromArray(array)
+		def self.new_from_array(array)
 			new( *( ( array.map { |elt| [ elt, elt ] } ).flatten ) )
 		end
 

@@ -32,20 +32,20 @@ class TestEnglish < LafcadioTestCase
   end
 
 	def testProperNoun
-		assert_equal "Albania", English.properNoun("albania")
+		assert_equal "Albania", English.proper_noun("albania")
 		assert_equal "Bosnia and Herzegovina",
-				English.properNoun("bosnia and herzegovina")
-		assert_equal "Faroe Islands", English.properNoun("faroe islands")
+				English.proper_noun("bosnia and herzegovina")
+		assert_equal "Faroe Islands", English.proper_noun("faroe islands")
 		assert_equal "Macedonia, the Former Yugoslav Republic of",
-				English.properNoun("macedonia, the former yugoslav republic of")
+				English.proper_noun("macedonia, the former yugoslav republic of")
 		assert_equal "Virgin Islands, U.S.",
-				English.properNoun("virgin islands, u.s.")
+				English.proper_noun("virgin islands, u.s.")
 	end
 
 	def testStartsWithVowelSound
-		assert English.startsWithVowelSound('order')
-		assert !English.startsWithVowelSound('catalogOrder')
-		assert !English.startsWithVowelSound('user')
+		assert English.starts_with_vowel_sound('order')
+		assert !English.starts_with_vowel_sound('catalogOrder')
+		assert !English.starts_with_vowel_sound('user')
 	end
 
 	def testSingular

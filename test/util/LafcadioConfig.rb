@@ -19,7 +19,7 @@ class TestConfig < RUNIT::TestCase
 	
 	def test_define_in_code
 		LafcadioConfig.set_filename( nil )
-		LafcadioConfig.setValues(
+		LafcadioConfig.set_values(
 			'dbuser' => 'test', 'dbhost' => 'localhost',
 		  'domainDirs' => [ 'lafcadio/domain/', '../test/mock/domain/' ]
 		)

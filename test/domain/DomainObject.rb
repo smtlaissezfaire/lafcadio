@@ -9,7 +9,7 @@ require '../test/mock/domain/XmlSku2'
 class TestDomainObject < LafcadioTestCase
 	def teardown
 		super
-		LafcadioConfig.setValues( nil )
+		LafcadioConfig.set_values( nil )
 	end
 
 	def matchField( domainClass, fieldName, fieldClass, attributes = nil )
@@ -44,7 +44,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def test_checks_fields_at_all_states
-		LafcadioConfig.setValues( 'checkFields' => 'onAllStates',
+		LafcadioConfig.set_values( 'checkFields' => 'onAllStates',
 		                          'classDefinitionDir' => '../test/testData' )
 		client = Client.new( 'name' => 'client name' )
 		assert_exception( FieldValueError ) { client.name = nil }
@@ -52,14 +52,14 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def test_checks_fields_on_commit
-		LafcadioConfig.setValues( 'checkFields' => 'onCommit',
+		LafcadioConfig.set_values( 'checkFields' => 'onCommit',
 		                          'classDefinitionDir' => '../test/testData' )
 		client = Client.new( {} )
 		assert_exception( FieldValueError ) { client.commit }
 	end
 
 	def test_checks_fields_on_instantiation
-		LafcadioConfig.setValues( 'checkFields' => 'onInstantiate',
+		LafcadioConfig.set_values( 'checkFields' => 'onInstantiate',
 		                          'classDefinitionDir' => '../test/testData' )
 		first_client = Client.new( 'name' => 'first client' )
 		first_client.commit
