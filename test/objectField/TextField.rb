@@ -37,5 +37,11 @@ class TestTextField < LafcadioTestCase
 									                 "through email\n'cause then you won't be " +
 																	 "able to see 'em through the web " +
 																	 "interface." ) )
+		assert_equal( "'three: '''''''", @of.valueForSQL( "three: '''" ) )
+		assert_equal( "''''''''", @of.valueForSQL( "'''" ) )
+		assert_equal( "''''''''''''", @of.valueForSQL( "'''''" ) )
+		assert_equal( "'\n''''''the defense asked if two days of work'",
+		              @of.valueForSQL( "\n'''the defense asked if two days of " +
+									                 "work" ) )
   end
 end

@@ -166,5 +166,10 @@ apostrophe's
 		testrow2 = @object_store.getTestRow( 2 )
 		assert_equal( text2, testrow2.text_field )
 		testrow2.commit
+		text3 = "\n'''the defense asked if two days of work"
+		test_row3 = TestRow.new( 'text_field' => text3 )
+		test_row3.commit
+		test_row3_prime = @object_store.getTestRow( 3 )
+		assert_equal( text3, test_row3_prime.text_field )
 	end
 end

@@ -11,7 +11,7 @@ module Lafcadio
 
 		def valueForSQL(value)
 			if value
-				value = value.gsub( /(^|[^\\\n])(?=')/ ) { $& + "'" }
+				value = value.gsub(/(\\?')/) { |m| m.length == 1 ? "''" : m }
 				value = value.gsub(/\\/) { '\\\\' }
 				"'#{value}'"
 			else
