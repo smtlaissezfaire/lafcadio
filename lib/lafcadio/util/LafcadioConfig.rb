@@ -12,9 +12,7 @@ module Lafcadio
 	class LafcadioConfig < Hash
 		@@value_hash = nil
 	
-		def LafcadioConfig.setFilename(filename)
-			@@filename = filename
-		end
+		def self.setFilename(filename); @@filename = filename; end
 		
 		def self.setValues( value_hash ); @@value_hash = value_hash; end
 
@@ -22,8 +20,7 @@ module Lafcadio
 			if @@value_hash
 				@@value_hash.each { |key, value| self[key] = value }
 			else
-				file = File.new @@filename
-				file.each_line { |line|
+				File.new( @@filename ).each_line { |line|
 					line.chomp =~ /^(.*?):(.*)$/
 					self[$1] = $2
 				}
