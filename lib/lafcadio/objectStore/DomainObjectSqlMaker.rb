@@ -1,4 +1,5 @@
 require 'lafcadio/objectStore/DomainObjectInitError'
+require 'lafcadio/util'
 
 module Lafcadio
 	class DomainObjectSqlMaker #:nodoc:
@@ -6,20 +7,12 @@ module Lafcadio
 
 		def initialize(obj); @obj = obj; end
 
-		def insertSQL(objectType)
-			fields = objectType.classFields
-			nameValuePairs = getNameValuePairs(objectType)
-			if objectType.isBasedOn?
-				nameValuePairs[objectType.sqlPrimaryKeyName] = 'LAST_INSERT_ID()'
-			end
-			fieldNameStr = nameValuePairs.keys.join ", "
-			fieldValueStr = nameValuePairs.values.join ", "
-			"insert into #{ objectType.tableName}(#{fieldNameStr}) " +
-					"values(#{fieldValueStr})"
+		def deleteSql(objectType)
+			"delete from #{ objectType.tableName} " +
+					"where #{ objectType.sqlPrimaryKeyName }=#{ @obj.pkId }"
 		end
 
 		def getNameValuePairs(objectType)
-			require 'lafcadio/util/QueueHash'
 			nameValues = []
 			objectType.classFields.each { |field|
 				value = @obj.send(field.name)
@@ -34,6 +27,43 @@ module Lafcadio
 			QueueHash.new( *nameValues )
 		end
 
+		def insertSQL(objectType)
+			fields = objectType.classFields
+			nameValuePairs = getNameValuePairs(objectType)
+			if objectType.isBasedOn?
+				nameValuePairs[objectType.sqlPrimaryKeyName] = 'LAST_INSERT_ID()'
+			end
+			fieldNameStr = nameValuePairs.keys.join ", "
+			fieldValueStr = nameValuePairs.values.join ", "
+			"insert into #{ objectType.tableName}(#{fieldNameStr}) " +
+					"values(#{fieldValueStr})"
+		end
+
+		def sqlStatements
+			statements = []
+			if @obj.errorMessages.size > 0
+				raise DomainObjectInitError, @obj.errorMessages, caller
+			end
+			@obj.class.selfAndConcreteSuperclasses.each { |objectType|
+				statements << statement_bind_value_pair( objectType )
+ 			}
+			statements.reverse
+		end
+
+		def statement_bind_value_pair( objectType )
+			@bindValues = []
+			if @obj.pkId == nil
+				statement = insertSQL(objectType)
+			else
+				if @obj.delete
+					statement = deleteSql(objectType)
+				else
+					statement = updateSQL(objectType)
+				end
+			end
+			[statement, @bindValues]
+		end
+
 		def updateSQL(objectType)
 			nameValueStrings = []
 			nameValuePairs = getNameValuePairs(objectType)
@@ -43,32 +73,6 @@ module Lafcadio
 			allNameValues = nameValueStrings.join ', '
 			"update #{ objectType.tableName} set #{allNameValues} " +
 					"where #{ objectType.sqlPrimaryKeyName}=#{@obj.pkId}"
-		end
-
-		def deleteSql(objectType)
-			"delete from #{ objectType.tableName} " +
-					"where #{ objectType.sqlPrimaryKeyName }=#{ @obj.pkId }"
-		end
-
-		def sqlStatements
-			statements = []
-			if @obj.errorMessages.size > 0
-				raise DomainObjectInitError, @obj.errorMessages, caller
-			end
-			@obj.class.selfAndConcreteSuperclasses.each { |objectType|
-				@bindValues = []
-				if @obj.pkId == nil
-					statement = insertSQL(objectType)
-				else
-					if @obj.delete
-						statement = deleteSql(objectType)
-					else
-						statement = updateSQL(objectType)
-					end
-				end
-				statements << [statement, @bindValues]
- 			}
-			statements.reverse
 		end
 	end
 end

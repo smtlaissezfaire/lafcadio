@@ -41,6 +41,10 @@ module Lafcadio
 			@dbObject
 		end
 
+		def hash
+			getDbObject.hash
+		end
+
 		def method_missing(methodId, *args)
 			getDbObject.send(methodId.id2name, *args)
 		end
@@ -53,10 +57,6 @@ module Lafcadio
 		
 		def to_s
 			getDbObject.to_s
-		end
-
-		def hash
-			getDbObject.hash
 		end
 	end
 end
