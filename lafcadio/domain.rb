@@ -1,5 +1,6 @@
 require 'lafcadio/includer'
 Includer.include( 'domain' )
+require 'lafcadio/objectField'
 
 class ClassDefinitionXmlParser
 	class InvalidDataError < ArgumentError
@@ -80,7 +81,6 @@ class ClassDefinitionXmlParser
 	end
 	
 	def possibleFieldAttributes
-		require 'lafcadio/objectField'
 		fieldAttr = []
 		fieldAttr << FieldAttribute.new( 'size', FieldAttribute::INTEGER )
 		fieldAttr << FieldAttribute.new( 'unique', FieldAttribute::BOOLEAN )
