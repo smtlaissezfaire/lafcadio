@@ -1,10 +1,11 @@
 module Lafcadio
 	class MockDbBridge
-		attr_reader :lastPkIdInserted, :retrievalsByType
+		attr_reader :lastPkIdInserted, :retrievalsByType, :query_count
 
 		def initialize
 			@objects = {}
 			@retrievalsByType = Hash.new 0
+			@query_count = Hash.new( 0 )
 		end
 
 		def addObject(dbObject)
@@ -41,6 +42,7 @@ module Lafcadio
 		end
 
 		def getCollectionByQuery(query)
+			@query_count[query] += 1
 			objectType = query.objectType
 			condition = query.condition
 			objects = []

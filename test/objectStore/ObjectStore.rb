@@ -128,6 +128,11 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal @client, @testObjectStore.getSubset(condition)[0]
 		query = Query.new Client, condition
 		assert_equal @client, @testObjectStore.getSubset(query)[0]
+		query2 = Query.new( Client, Query::Equals.new( 'name', 'foobar', Client ) )
+		assert_equal( 0, @testObjectStore.getSubset( query2 ).size )
+		assert_equal( 1, @mockDbBridge.query_count[query2])
+		assert_equal( 0, @testObjectStore.getSubset( query2 ).size )
+		assert_equal( 1, @mockDbBridge.query_count[query])
 	end
 
 	def testMax

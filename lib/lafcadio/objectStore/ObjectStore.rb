@@ -126,7 +126,7 @@ module Lafcadio
 			else
 				query = conditionOrQuery
 			end
-			@dbBridge.getCollectionByQuery query
+			@cache.getByQuery( query )
 		end
 		
 		def last_commit_time( domain_class, pkId )
