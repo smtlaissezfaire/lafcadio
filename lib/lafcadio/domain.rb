@@ -243,6 +243,9 @@ module Lafcadio
 	class DomainObject
 		@@subclassHash = {}
 		@@class_fields = {}
+		@@pk_fields =    Hash.new { |hash, key|
+		                   hash[key] = PrimaryKeyField.new( key )
+		                 }
 
 		COMMIT_ADD = 1
 		COMMIT_EDIT = 2
@@ -277,7 +280,7 @@ module Lafcadio
 		def self.create_field( field_class, name, att_hash )
 			class_fields = @@class_fields[self]
 			if class_fields.nil?
-				class_fields = [ PrimaryKeyField.new( self ) ]
+				class_fields = [ @@pk_fields[self] ]
 				@@class_fields[self] = class_fields
 			end
 			att_hash['name'] = name
@@ -320,7 +323,7 @@ module Lafcadio
 		# them from XML if necessary.
 		def self.get_class_fields
 			if self.methods( false ).include?( 'get_class_fields' )
-				[ PrimaryKeyField.new( self ) ]
+				[ @@pk_fields[ self ] ]
 			else
 				xmlParser = try_load_xml_parser
 				if xmlParser
@@ -373,7 +376,7 @@ module Lafcadio
 						"couldn't match object_type #{typeString}", caller
 			end
 		end
-
+		
 		def self.inherited(subclass) #:nodoc:
 			@@subclassHash[subclass] = true
 		end

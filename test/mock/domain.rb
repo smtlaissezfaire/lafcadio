@@ -46,6 +46,14 @@ class Client < Lafcadio::DomainObject
   end
 end
 
+class DiffSqlPrimaryKey < Lafcadio::DomainObject
+	def self.get_class_fields
+		super.concat( [ Lafcadio::TextField.new( self, 'text' ) ] )
+	end
+	
+	sql_primary_key_name 'objId'
+end
+
 module Domain
 	class LineItem < Lafcadio::DomainObject
 		def subtotal

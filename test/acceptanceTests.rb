@@ -56,8 +56,6 @@ create table testbadrows (
 end
 
 class TestDiffPkRow < DomainObject
-	text 'text_field'
-
 	def self.create_table( dbh )
 		dbh.do( 'drop table if exists testdiffpkrows' )
 		createSql = <<-CREATE
@@ -72,6 +70,10 @@ create table testdiffpkrows (
 	
 	def self.drop_table( dbh ); dbh.do( 'drop table testdiffpkrows' ); end
 
+	def self.get_class_fields
+		super.concat( [ TextField.new( self, 'text_field' ) ] )
+	end
+	
 	sql_primary_key_name 'objId'
 end
 
@@ -184,6 +186,13 @@ class AccTestDateTimeField < AcceptanceTestCase
 		@dbh.do( 'insert into testrows( ) values( )' )
 		test_row2 = @object_store.get_test_row( 2 )
 		assert_nil( test_row2.date_time )
+	end
+end
+
+class AccTestDomainObject < AcceptanceTestCase
+	def test_sql_primary_key_name
+		assert_equal( TestDiffPkRow.sql_primary_key_name,
+		              TestDiffPkRow.get_class_fields.first.db_field_name )
 	end
 end
 

@@ -335,6 +335,11 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal Fixnum, Client.getTestClient.pk_id.class
 	end
 
+	def test_sql_primary_key_name
+		assert_equal( DiffSqlPrimaryKey.sql_primary_key_name,
+		              DiffSqlPrimaryKey.get_class_fields.first.db_field_name )
+	end
+
 	def testTableName
 		assert_equal( "users", User.table_name )
 		assert_equal( "lineItems", Domain::LineItem.table_name )
