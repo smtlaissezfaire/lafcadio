@@ -6,6 +6,8 @@ require 'lafcadio/util'
 class ObjectType
 	@@instances = {}
 	
+	def self.flush; @@instances = {}; end
+	
 	def ObjectType.getObjectType( aClass )
 		instance = @@instances[aClass]
 		if instance.nil?
@@ -57,7 +59,13 @@ class ObjectType
   
   def getClassFields
 		unless @classFields
-			@classFields = @xmlParser.getClassFields
+			if @xmlParser
+				@classFields = @xmlParser.getClassFields
+			else
+				error_msg = "Couldn't find either an XML class description file or " +
+										"getClassFields method for " + @objectType.name
+				raise MissingError, error_msg, caller
+			end
 		end
 		@classFields
   end
