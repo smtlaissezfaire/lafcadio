@@ -1,5 +1,4 @@
 require 'lafcadio/test'
-require '../test/mock/domain/Invoice'
 require '../test/mock/domain'
 
 class TestDomainObjectProxy < LafcadioTestCase

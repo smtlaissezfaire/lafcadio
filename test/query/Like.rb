@@ -1,7 +1,6 @@
 require 'lafcadio/test'
 require 'lafcadio/query'
 require '../test/mock/domain'
-require '../test/mock/domain/Invoice'
 
 class TestLike < LafcadioTestCase
 	def setup

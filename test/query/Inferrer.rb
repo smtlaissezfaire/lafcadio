@@ -1,6 +1,5 @@
 require 'lafcadio/query'
 require 'lafcadio/test'
-require '../test/mock/domain/Invoice'
 require '../test/mock/domain'
 
 class TestQueryInferrer < LafcadioTestCase
