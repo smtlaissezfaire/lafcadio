@@ -1,5 +1,5 @@
 require 'lafcadio/objectField/DateField'
-require 'lafcadio/dateTime/Month'
+require 'lafcadio/dateTime'
 
 module Lafcadio
 	# Accepts a Month as a value. This field automatically saves in MySQL as a 

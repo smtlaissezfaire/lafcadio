@@ -1,4 +1,4 @@
-require 'lafcadio/dateTime/Month'
+require 'lafcadio/dateTime'
 require 'lafcadio/test/LafcadioTestCase'
 
 class TestMonth < LafcadioTestCase
