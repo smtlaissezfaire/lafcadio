@@ -88,7 +88,8 @@ create table testrows (
 	date_time datetime,
 	bool_field tinyint,
 	blob_field blob,
-	text_field2 text
+	text_field2 text,
+	test_diff_pk_row int
 )
 		CREATE
 		dbh.do( createSql )
@@ -96,18 +97,13 @@ create table testrows (
 	
 	def self.drop_table( dbh ); dbh.do( 'drop table testrows' ); end
 
-	def TestRow.get_class_fields
-		fields = super
-		fields << TextField.new( self, 'text_field' )
-		fields << DateTimeField.new( self, 'date_time' )
-		fields << BooleanField.new( self, 'bool_field' )
-		fields << BlobField.new( self, 'blob_field' )
-		text2 = TextField.new( self, 'text2' )
-		text2.db_field_name = 'text_field2'
-		fields << text2
-		fields
-	end
-	
+	text     'text_field'
+	dateTime 'date_time'
+	boolean  'bool_field'
+	blob     'blob_field'
+	text     'text2', { 'db_field_name' => 'text_field2' }
+	link     'test_diff_pk_row', { 'linked_type' => TestDiffPkRow }
+
 	def TestRow.sql_primary_key_name
 		'pk_id'
 	end
@@ -193,6 +189,15 @@ class AccTestDomainObject < AcceptanceTestCase
 	def test_sql_primary_key_name
 		assert_equal( TestDiffPkRow.sql_primary_key_name,
 		              TestDiffPkRow.get_class_fields.first.db_field_name )
+	end
+
+	def test_one_liners
+		assert(
+			TestRow.class_fields.any? { |field|
+				field.is_a?( LinkField ) && field.name == 'test_diff_pk_row'
+			},
+			TestRow.class_fields.inspect
+		)
 	end
 end
 

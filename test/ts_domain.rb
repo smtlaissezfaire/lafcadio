@@ -20,6 +20,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 
 	def testClassFieldsFromXml
 		require 'lafcadio/objectField'
+		XmlSku.class_fields
 		matchField( XmlSku, 'boolean1', BooleanField,
 		            { 'enum_type' => BooleanField::ENUMS_CAPITAL_YES_NO } )
 		matchField( XmlSku, 'boolean2', BooleanField,
@@ -171,6 +172,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 	
 	def test_class_fields_from_one_line_class_methods
+		XmlSku2.class_fields
 		matchField( XmlSku2, 'boolean1', BooleanField,
 		            { 'enum_type' => BooleanField::ENUMS_CAPITAL_YES_NO } )
 		matchField( XmlSku2, 'boolean2', BooleanField,

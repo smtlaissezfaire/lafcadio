@@ -1,3 +1,4 @@
+require 'extensions/module'
 require 'lafcadio/objectField'
 require 'lafcadio/util'
 require 'rexml/document'

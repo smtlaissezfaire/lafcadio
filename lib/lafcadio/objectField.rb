@@ -424,7 +424,7 @@ module Lafcadio
 			unless name
 				linked_type.name =~ /::/
 				name = $' || linked_type.name
-				name = name.decapitalize
+				name = name.camel_case_to_underscore
 			end
 			super( domain_class, name )
 			( @linked_type, @delete_cascade ) = linked_type, delete_cascade

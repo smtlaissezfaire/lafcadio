@@ -220,9 +220,9 @@ class TestLinkField < LafcadioTestCase
   def testNames
     assert_equal("client", @olf.name)
 		caLinkField = LinkField.new nil, InternalClient
-		assert_equal "internalClient", caLinkField.name
+		assert_equal "internal_client", caLinkField.name
 		liLinkField = LinkField.new nil, Domain::LineItem
-		assert_equal "lineItem", liLinkField.name
+		assert_equal "line_item", liLinkField.name
   end
 
 	def testRespectsOtherSubsetLinks
