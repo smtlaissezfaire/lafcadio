@@ -42,7 +42,12 @@ class DomainObject
 	# method to return an array of ObjectField instances. You don't have to define
 	# an ObjectField instance for "objId".
 	def DomainObject.getClassFields
-		ClassDefinitionXmlParser.new( self ).execute
+		dirName = LafcadioConfig.new['classDefinitionDir']
+		xmlFileName = ClassUtil.bareClassName( self ) + '.xml'
+		xmlPath = File.join( dirName, xmlFileName )
+		xml = ''
+		File.open( xmlPath ) { |file| xml = file.readlines.join }
+		ClassDefinitionXmlParser.new( self, xml ).execute
 	end
 	
 	def DomainObject.classFields

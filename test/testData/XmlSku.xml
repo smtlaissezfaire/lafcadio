@@ -6,10 +6,12 @@
 			<enum value="false">yang</enum>
 		</enums>
 	</field>
+	<field name="date1" class="DateField" notNull="n"/>
+	<field name="date2" class="DateField" range="RANGE_PAST" />
+
 	<field name="sku" class="TextField" size="16" unique="y"/>
 	<field name="standardPrice" class="MoneyField"/>
 	<field name="description" class="TextField" notNull="n"/>
 	<field name="salePrice" class="MoneyField" notNull="n"/>
-	<field name="onSaleUntil" class="DateField" notNull="n"/>
 	<field name="size" class="TextField" notNull="n"/>
 </lafcadio_class_definition>

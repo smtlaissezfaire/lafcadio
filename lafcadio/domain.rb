@@ -2,6 +2,9 @@ require 'lafcadio/includer'
 Includer.include( 'domain' )
 
 class ClassDefinitionXmlParser
+	class InvalidDataError < ArgumentError
+	end
+
 	class FieldAttribute
 		INTEGER = 1
 		BOOLEAN = 2
@@ -48,25 +51,23 @@ class ClassDefinitionXmlParser
 		end
 	end
 
-	def initialize( domainClass )
-		@domainClass = domainClass
+	def initialize( domainClass, xml )
+		@domainClass = domainClass; @xml = xml
 	end
 	
 	def execute
 		require 'rexml/document'
 		require 'lafcadio/util'
 		
+		namesProcessed = {}
 		fields = []
-		dirName = LafcadioConfig.new['classDefinitionDir']
-		xmlFileName = ClassUtil.bareClassName( @domainClass ) + '.xml'
-		xmlPath = File.join( dirName, xmlFileName )
-		file = File.new( xmlPath )
-		rexmlDoc = REXML::Document.new( file )
+		rexmlDoc = REXML::Document.new( @xml )
 		rexmlDoc.root.elements.each('field') { |fieldElt|
 			fieldClass = ClassUtil.getClass( fieldElt.attributes['class'] )
+			name = fieldElt.attributes['name']
+			raise InvalidDataError if namesProcessed[name]
 			englishName = fieldElt.attributes['englishName']
-			field = fieldClass.new( @domainClass, fieldElt.attributes['name'],
-			                        englishName )
+			field = fieldClass.new( @domainClass, name, englishName )
 			possibleFieldAttributes.each { |fieldAttr|
 				fieldAttr.maybeSetFieldAttr( field, fieldElt )
 			}
@@ -74,6 +75,7 @@ class ClassDefinitionXmlParser
 				field.size = size.to_i
 			end
 			fields << field
+			namesProcessed[name] = true
 		}
 		fields
 	end
@@ -86,5 +88,7 @@ class ClassDefinitionXmlParser
 		fieldAttr << FieldAttribute.new( 'enumType', FieldAttribute::ENUM,
 		                                 BooleanField )
 		fieldAttr << FieldAttribute.new( 'enums', FieldAttribute::HASH )
+		fieldAttr << FieldAttribute.new( 'range', FieldAttribute::ENUM,
+		                                 DateField )
 	end
 end
