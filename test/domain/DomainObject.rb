@@ -296,7 +296,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def test_override_class_defaults_from_one_liners
-		assert_equal( 'that_table', XmlSku2.tableName )
+		assert_equal( 'that_table', XmlSku2.table_name )
 		assert_equal( 'xml_sku2_id', XmlSku2.sql_primary_key_name )
 	end
 	

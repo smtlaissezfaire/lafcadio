@@ -84,7 +84,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 	def testSetPkNameAndTableNameInXml
 		assert_equal( 'some_other_id', XmlSku.sql_primary_key_name )
 		assert_equal( 'pkId', Attribute.sql_primary_key_name )
-		assert_equal( 'some_other_table', XmlSku.tableName )
-		assert_equal( 'attributes', Attribute.tableName )
+		assert_equal( 'some_other_table', XmlSku.table_name )
+		assert_equal( 'attributes', Attribute.table_name )
 	end
 end

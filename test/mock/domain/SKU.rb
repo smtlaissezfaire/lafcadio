@@ -2,7 +2,7 @@ require 'lafcadio/domain'
 require 'lafcadio/util'
 
 class SKU < Lafcadio::DomainObject
-  def SKU.tableName
+  def SKU.table_name
     "skus"
   end
 

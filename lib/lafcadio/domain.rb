@@ -63,8 +63,8 @@ module Lafcadio
 			@xmlDocRoot.attributes['sql_primary_key_name']
 		end
 		
-		def tableName
-			@xmlDocRoot.attributes['tableName']
+		def table_name
+			@xmlDocRoot.attributes['table_name']
 		end
 		
 		class FieldAttribute
@@ -223,7 +223,7 @@ module Lafcadio
 	# the plural of the class name, and whose first letter is lowercase. A User 
 	# class is assumed to be stored in a "users" table, while a ProductCategory 
 	# class is assumed to be stored in a "productCategories" table. Override
-	# DomainObject.tableName to override this behavior.
+	# DomainObject.table_name to override this behavior.
 	#
 	# = Inheritance
 	# Domain classes can inherit from other domain classes; they have all the 
@@ -580,7 +580,7 @@ module Lafcadio
 
 		def initialize(objectType) #:nodoc:
 			@objectType = objectType
-			( @classFields, @xmlParser, @tableName ) = [ nil, nil, nil ]
+			( @classFields, @xmlParser, @table_name ) = [ nil, nil, nil ]
 		end
 
 		# Returns an Array of ObjectField instances for this domain class, parsing
@@ -620,19 +620,19 @@ module Lafcadio
 		# pluralized, and with the first letter lowercase. A User class is
 		# assumed to be stored in a "users" table, while a ProductCategory class is
 		# assumed to be stored in a "productCategories" table.
-		def tableName( set_table_name = nil )
+		def table_name( set_table_name = nil )
 			if set_table_name
-				@tableName = set_table_name
-			elsif @tableName
-				@tableName
+				@table_name = set_table_name
+			elsif @table_name
+				@table_name
 			else
 				try_load_xml_parser
-				if (!@xmlParser.nil? && tableName = @xmlParser.tableName)
-					tableName
+				if (!@xmlParser.nil? && table_name = @xmlParser.table_name)
+					table_name
 				else
-					tableName = @objectType.bareName
-					tableName[0] = tableName[0..0].downcase
-					English.plural tableName
+					table_name = @objectType.bareName
+					table_name[0] = table_name[0..0].downcase
+					English.plural table_name
 				end
 			end
 		end

@@ -59,7 +59,7 @@ module Lafcadio
 		def bind_write?; false; end #:nodoc:
 		
 		def db_table_and_field_name
-			"#{ objectType.tableName }.#{ dbFieldName }"
+			"#{ objectType.table_name }.#{ dbFieldName }"
 		end
 
 		def dbWillAutomaticallyWrite #:nodoc:

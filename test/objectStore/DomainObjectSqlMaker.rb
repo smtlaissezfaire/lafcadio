@@ -88,7 +88,7 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
 		
 		def self.sql_primary_key_name; 'primary_key'; end
 		
-		def self.tableName; 'internalClients'; end
+		def self.table_name; 'internalClients'; end
 	end
 
 	def test_inheritance_insert

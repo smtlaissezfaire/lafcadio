@@ -29,7 +29,7 @@ module Lafcadio
 				createDefinitions << definition_terms( field )
 			}
 			<<-SQL
-	create table #{ @domainClass.tableName } (
+	create table #{ @domainClass.table_name } (
 		#{ createDefinitions.join(",\n  ") }
 	);
 			SQL

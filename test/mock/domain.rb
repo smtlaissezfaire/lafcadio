@@ -3,7 +3,7 @@ require 'lafcadio/domain'
 require '../test/mock/domain/Option'
 
 class Attribute < Lafcadio::DomainObject
-	def Attribute.tableName
+	def Attribute.table_name
 		"attributes"
 	end
 

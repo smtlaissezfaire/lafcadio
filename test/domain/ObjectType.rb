@@ -13,15 +13,15 @@ class TestObjectType < LafcadioTestCase
 	end
 
 	def testTableName
-		assert_equal( "users", ObjectType.getObjectType(User).tableName )
+		assert_equal( "users", ObjectType.getObjectType(User).table_name )
 		assert_equal( "lineItems",
-		              ObjectType.getObjectType(Domain::LineItem).tableName )
+		              ObjectType.getObjectType(Domain::LineItem).table_name )
 	end
 	
 	def testHandlesClassWithoutXml
 		ot = ObjectType.getObjectType( NoXml )
 		assert_equal( 'pkId', ot.sql_primary_key_name )
-		assert_equal( 'noXmls', ot.tableName )
+		assert_equal( 'noXmls', ot.table_name )
 	end
 	
 	def test_informative_error_if_missing_class_data

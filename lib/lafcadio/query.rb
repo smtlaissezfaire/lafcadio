@@ -132,13 +132,13 @@ module Lafcadio
 		end
 
 		def sqlPrimaryKeyField(objectType)
-			"#{ objectType.tableName }.#{ objectType.sql_primary_key_name }"
+			"#{ objectType.table_name }.#{ objectType.sql_primary_key_name }"
 		end
 
 		def tables
 			concrete_classes = objectType.selfAndConcreteSuperclasses.reverse
 			table_names = concrete_classes.collect { |domain_class|
-				domain_class.tableName
+				domain_class.table_name
 			}
 			table_names.join( ', ' )
 		end
@@ -189,7 +189,7 @@ module Lafcadio
 			
 			def dbFieldName
 				if primaryKeyField?
-					db_table = @objectType.tableName
+					db_table = @objectType.table_name
 					db_field_name = @objectType.sql_primary_key_name
 					"#{ db_table }.#{ db_field_name }"
 				else

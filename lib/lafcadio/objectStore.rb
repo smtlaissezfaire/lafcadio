@@ -273,7 +273,7 @@ module Lafcadio
 		def initialize(obj); @obj = obj; end
 
 		def deleteSql(objectType)
-			"delete from #{ objectType.tableName} " +
+			"delete from #{ objectType.table_name} " +
 					"where #{ objectType.sql_primary_key_name }=#{ @obj.pkId }"
 		end
 
@@ -300,7 +300,7 @@ module Lafcadio
 			end
 			fieldNameStr = nameValuePairs.keys.join ", "
 			fieldValueStr = nameValuePairs.values.join ", "
-			"insert into #{ objectType.tableName}(#{fieldNameStr}) " +
+			"insert into #{ objectType.table_name}(#{fieldNameStr}) " +
 					"values(#{fieldValueStr})"
 		end
 
@@ -336,7 +336,7 @@ module Lafcadio
 				nameValueStrings << "#{key}=#{ value }"
 			}
 			allNameValues = nameValueStrings.join ', '
-			"update #{ objectType.tableName} set #{allNameValues} " +
+			"update #{ objectType.table_name} set #{allNameValues} " +
 					"where #{ objectType.sql_primary_key_name}=#{@obj.pkId}"
 		end
 	end
@@ -731,7 +731,7 @@ module Lafcadio
 		def error_msg
 			"The field \"" + @objectType.sql_primary_key_name +
 					"\" can\'t be found in the table \"" + 
-					@objectType.tableName + "\"."
+					@objectType.table_name + "\"."
 		end
 	end
 end
