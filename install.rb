@@ -3,7 +3,7 @@
 #                                                                              #
 #  Name: install.rb                                                            #
 #  Author: Sean E Russell <ser@germane-software.com>                           #
-#  Version: $Id: install.rb,v 1.1 2003/06/27 23:25:35 fhwang Exp $
+#  Version: $Id: install.rb,v 1.1 2003/10/08 03:26:07 francis Exp $
 #  Date: *2002-174                                                             #
 #  Description:                                                                #
 #    This is a generic installation script for pure ruby sources.  Features    #
