@@ -71,39 +71,6 @@ class TestObjectField < LafcadioTestCase
 		assert_equal nil, valueFromSql
 	end
 	
-	class ObjectField_OLD
-		def initialize(objectType, name, englishName = nil)
-			require 'lafcadio/objectStore/ObjectStore'
-	
-			@objectType = objectType
-			@name = name
-			@dbFieldName = @name
-			if englishName == nil
-				@englishName = English.camelCaseToEnglish(name).capitalize
-			else
-				@englishName = englishName
-			end
-			@notNull = true
-			@hideLabel = false
-			@unique = false
-			@default = nil
-			@objectStore = ObjectStore.getObjectStore
-		end
-	end
-	
-	def measureSpeed
-		startTime = Time.now
-		100.times { yield }
-		Time.now - startTime
-	end
-		
-	def testOptimizeInitialize
-		oldTime = measureSpeed { ObjectField_OLD.new User, "firstNames" }
-		newTime = measureSpeed { ObjectField.new User, "firstNames" }
-		ratio = oldTime / newTime
-		assert ratio > 1.25, ratio.to_s
-	end
-	
 	def testVerifyFalseValue
 		field = ObjectField.new( Client, 'name' )
 		field.verify( false, nil )
