@@ -2,10 +2,13 @@
 
 require 'lafcadio/util/ClassUtil'
 require 'lafcadio/schema/CreateTableStatement'
+require 'lafcadio/util'
+require 'getoptlong'
 
-if ARGV.size < 1
-	puts "lafcadio_schema domain_class_definition.rb"
-else
+opts = GetoptLong.new( [ '--config', '-c', GetoptLong::REQUIRED_ARGUMENT ] )
+if ( ( optArray = opts.get ) && ARGV.size >= 1 )
+	configFile = optArray[1]
+	LafcadioConfig.setFilename( configFile )
 	ARGV.each { |fileName|
 		require "#{ fileName }"
 		fileName =~ /(\w*)\.rb/
@@ -18,4 +21,6 @@ else
 			puts "No domain class in #{ fileName }"
 		end
 	}
+else
+	puts "lafcadio_schema -c config domain1.rb {, domain2.rb, domain3.rb ... }"
 end
