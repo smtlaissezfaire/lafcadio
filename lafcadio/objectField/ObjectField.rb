@@ -110,11 +110,6 @@ class ObjectField
     string
   end
 
-  def setDefault(linkField, fieldName)
-    linkField.listener = self
-    @defaultFieldName = fieldName
-  end
-
   def javaScriptFunction
     nil
   end

@@ -17,7 +17,6 @@ class TestLinkField < LafcadioTestCase
 				{ "objId" => 2, "name" => "clientName2" } )
     @fieldWithListener = LinkField.new(nil, Client, "client", "Client")
     rateField = MoneyField.new nil, "rate"
-    rateField.setDefault(@fieldWithListener, "standard_rate")
   end
 
   def testNames
