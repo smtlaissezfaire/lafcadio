@@ -1,10 +1,8 @@
 require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/query'
-require 'lafcadio/query/Equals'
 require 'date'
 require '../test/mock/domain/User'
 require '../test/mock/domain/Invoice'
-require 'lafcadio/query/CompoundCondition'
 
 class TestCompoundCondition < LafcadioTestCase
 	def testCompareAndBooleanEquals		

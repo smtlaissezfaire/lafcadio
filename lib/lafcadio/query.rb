@@ -141,6 +141,40 @@ module Lafcadio
 			end
 		end
 
+		class CompoundCondition < Condition #:nodoc:
+			AND = 1
+			OR  = 2
+		
+			def initialize(*conditions)
+				if( [ AND, OR ].index(conditions.last) )
+					@compoundType = conditions.last
+					conditions.pop
+				else
+					@compoundType = AND
+				end
+				@conditions = conditions
+				@objectType = conditions[0].objectType
+			end
+
+			def objectMeets(anObj)
+				if @compoundType == AND
+					@conditions.inject( true ) { |result, cond|
+						result && cond.objectMeets( anObj )
+					}
+				else
+					@conditions.inject( false ) { |result, cond|
+						result || cond.objectMeets( anObj )
+					}
+				end
+			end
+
+			def toSql
+				booleanString = @compoundType == AND ? 'and' : 'or'
+				subSqlStrings = @conditions.collect { |cond| cond.toSql }
+				"(#{ subSqlStrings.join(" #{ booleanString } ") })"
+			end
+		end
+
 		class DomainObjectImpostor #:nodoc:
 			attr_reader :domainClass
 		
@@ -163,6 +197,46 @@ module Lafcadio
 			end
 		end
 		
+		class Equals < Condition #:nodoc:
+			def r_val_string
+				if primaryKeyField?
+					@searchTerm.to_s
+				else
+					field = getField
+					if @searchTerm.class <= ObjectField
+						@searchTerm.db_table_and_field_name
+					else
+						field.valueForSQL(@searchTerm).to_s
+					end
+				end
+			end
+
+			def objectMeets(anObj)
+				if @fieldName == @objectType.sqlPrimaryKeyName
+					object_value = anObj.pkId
+				else
+					object_value = anObj.send @fieldName
+				end
+				compare_value =
+				if @searchTerm.class <= ObjectField
+					compare_value = anObj.send( @searchTerm.name )
+				else
+					compare_value = @searchTerm
+				end
+				compare_value == object_value
+			end
+
+			def toSql
+				sql = "#{ dbFieldName } "
+				unless @searchTerm.nil?
+					sql += "= " + r_val_string
+				else
+					sql += "is null"
+				end
+				sql
+			end
+		end
+
 		class Inferrer #:nodoc:
 			def initialize( domainClass, &action )
 				@domainClass = domainClass; @action = action

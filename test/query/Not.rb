@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'lafcadio/query/Equals'
+require 'lafcadio/query'
 require '../test/mock/domain/User'
 require 'lafcadio/query/Not'
 
