@@ -30,7 +30,7 @@ class FileManager
 	end
 
 	def FileManager.write(filename, contents)
-		File.open(filename, File::CREAT | File::WRONLY) { |file|
+		File.open( filename, File::TRUNC | File::CREAT | File::WRONLY ) { |file|
 			file.puts contents
 		}
 	end
