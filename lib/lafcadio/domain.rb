@@ -622,9 +622,11 @@ module Lafcadio
 		end
 		
 		def verify
-			self.class.get_class_fields.each { |field|
-				field.verify( self.send( field.name ), self.pk_id )
-			}
+			if ObjectStore.get_object_store.mock?
+				self.class.get_class_fields.each { |field|
+					field.verify( self.send( field.name ), self.pk_id )
+				}
+			end
 		end
 	end
 

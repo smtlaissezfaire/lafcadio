@@ -94,5 +94,9 @@ module Lafcadio
 		def initialize # :nodoc:
 			super( MockDbBridge.new )
 		end
+		
+		def mock? # :nodoc:
+			true
+		end
 	end
 end

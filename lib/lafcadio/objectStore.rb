@@ -522,6 +522,10 @@ module Lafcadio
 			dispatch = MethodDispatch.new( methodId, proc, *args )
 			self.send( dispatch.symbol, *dispatch.args )
 		end
+		
+		def mock? #:nodoc:
+			false
+		end
 
 		def respond_to?( symbol, include_private = false )
 			begin

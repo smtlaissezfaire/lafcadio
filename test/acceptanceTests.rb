@@ -10,12 +10,14 @@ include Lafcadio
 class AcceptanceTestCase < Test::Unit::TestCase
 	def setup
 		super
+		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
 		@dbh = get_dbh
 		domain_classes.each { |domain_class| domain_class.create_table( @dbh ) }
 		@object_store = ObjectStore.get_object_store
 	end
 	
 	def teardown
+		LafcadioConfig.set_values( nil )
 		domain_classes.each { |domain_class| domain_class.drop_table( @dbh ) }
 		ObjectStore.set_object_store( nil )
 	end
@@ -25,7 +27,6 @@ class AcceptanceTestCase < Test::Unit::TestCase
 	def domain_classes; [ TestBadRow, TestRow, TestChildRow, TestDiffPkRow ]; end
 	
 	def get_dbh
-		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
 		config = LafcadioConfig.new
 		dbName = config['dbname']
 		dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"
@@ -192,6 +193,14 @@ class AccTestDateTimeField < AcceptanceTestCase
 end
 
 class AccTestDomainObject < AcceptanceTestCase
+	def test_dont_check_field_values_if_using_real_object_store
+		LafcadioConfig.set_values(
+			'checkFields' => 'onAllStates',
+			'classDefinitionDir' => '../test/testData'
+		)
+		TestChildRow.new( {} )
+	end
+
 	def test_sql_primary_key_name
 		assert_equal( TestDiffPkRow.sql_primary_key_name,
 		              TestDiffPkRow.get_class_fields.first.db_field_name )
