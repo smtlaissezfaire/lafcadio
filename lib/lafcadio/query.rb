@@ -97,7 +97,7 @@ module Lafcadio
 		DESC 	= 2
 
 		attr_reader :object_type, :condition
-		attr_accessor :order_by, :order_byOrder, :limit
+		attr_accessor :order_by, :order_by_order, :limit
 
 		def initialize(object_type, pk_idOrCondition = nil)
 			@object_type = object_type
@@ -110,7 +110,7 @@ module Lafcadio
 					                                pk_idOrCondition, object_type )
 				end
 			end
-			@order_byOrder = ASC
+			@order_by_order = ASC
 		end
 		
 		def eql?( other ); other.class <= Query && other.to_sql == to_sql; end
@@ -126,7 +126,7 @@ module Lafcadio
 		def order_clause
 			if @order_by
 				clause = "order by #{ @order_by } "
-				clause += @order_byOrder == ASC ? 'asc' : 'desc'
+				clause += @order_by_order == ASC ? 'asc' : 'desc'
 				clause
 			end
 		end
