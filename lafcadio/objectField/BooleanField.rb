@@ -40,18 +40,22 @@ class BooleanField < ObjectField
 		@enumType = ENUMS_ONE_ZERO
 	end
 
-	def getEnums
+	def getEnums( value = nil )
 		if @enums
 			@enums
 		elsif @enumType == ENUMS_ONE_ZERO
-			{ true => 1, false => 0 }
+			if value.class == String
+				{ true => '1', false => '0' }
+			else
+				{ true => 1, false => 0 }
+			end
 		elsif @enumType == ENUMS_CAPITAL_YES_NO
 			{ true => 'Y', false => 'N' }
 		end
 	end
 
-	def trueEnum
-		getEnums[true]
+	def trueEnum( value = nil )
+		getEnums( value )[true]
 	end
 
 	def falseEnum
@@ -72,7 +76,7 @@ class BooleanField < ObjectField
   end
 
 	def valueFromSQL(value, lookupLink = true)
-		value == trueEnum
+		value == trueEnum( value )
 	end
 
 	def valueFromCGI(fieldManager)

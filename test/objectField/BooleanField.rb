@@ -27,7 +27,9 @@ class TestBooleanField < LafcadioTestCase
 
 	def testValueFromSQL
 		assert_equal true, @bf.valueFromSQL(1)
+		assert_equal true, @bf.valueFromSQL('1')
 		assert_equal false, @bf.valueFromSQL(0)
+		assert_equal false, @bf.valueFromSQL('0')
 	end
 
 	def testWithDifferentEnums
