@@ -24,14 +24,14 @@ module Lafcadio
 			@resources = {}
 		end
 		
-		# Flushes all cached ContextualServices.
-		def flush
-			@resources = {}
-		end
-		
 		def createInstance(resourceName) #:nodoc:
 			resourceClass = eval resourceName
 			resourceClass.new self
+		end
+		
+		# Flushes all cached ContextualServices.
+		def flush
+			@resources = {}
 		end
 
 		def getResource(resourceName) #:nodoc:
@@ -41,10 +41,6 @@ module Lafcadio
 				setResource resourceName, resource
 			end
 			resource
-		end
-		
-		def setResource(resourceName, resource) #:nodoc:
-			@resources[resourceName] = resource
 		end
 
 		def method_missing(methId, *args) #:nodoc:
@@ -57,5 +53,9 @@ module Lafcadio
 				super
 			end
 		end	
+		
+		def setResource(resourceName, resource) #:nodoc:
+			@resources[resourceName] = resource
+		end
 	end
 end
