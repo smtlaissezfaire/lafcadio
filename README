@@ -1,1 +1,11 @@
-Lafcadio is an object-relational mapping layer for Ruby and MySQL.http://rubyforge.org/projects/lafcadio/INSTALLATION1. You will need to install Ruby/MySQL, which can be found athttp://www.tmtm.org/ja/ruby/mysql/README_en.html. (Please note thatRuby/MySQL and MySQL/Ruby are not the same thing.)2. As root, run "./install.rb", which will copy the Ruby files into the rightsubdirectory. You can run "./install.rb --help" for information.
+Lafcadio is an object-relational mapping layer for Ruby and MySQL.
+
+http://rubyforge.org/projects/lafcadio/
+
+REQUIREMENTS:
+* Ruby DBI ( http://ruby-dbi.sourceforge.net/ )
+* REXML ( http://www.germane-software.com/software/rexml/ ). If you're using Ruby 1.8 or later you already have REXML.
+
+INSTALLATION:
+As root, run "./install.rb", which will copy the Ruby files into the right
+subdirectory. You can run "./install.rb --help" for information.
