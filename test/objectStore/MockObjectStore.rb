@@ -52,4 +52,16 @@ class TestGMockObjectStore < LafcadioTestCase
 		query.limit = (1..5)
 		assert_equal( 5, @mockObjectStore.getSubset( query ).size )
 	end
+
+	def testDontChangeFieldsUntilCommit
+		user = User.getTestUser
+		user.commit
+		user_prime = @mockObjectStore.getUser( 1 )
+		assert( user.id != user_prime.id )
+		new_email = "another@email.com"
+		user_prime.email = new_email
+		assert( new_email != @mockObjectStore.getUser( 1 ).email )
+		user_prime.commit
+		assert_equal( new_email, @mockObjectStore.getUser( 1 ).email )
+	end
 end

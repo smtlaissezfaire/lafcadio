@@ -16,22 +16,35 @@ module Lafcadio
 				@objectType = objectTypeOrDbObject
 				@pkId = pkId
 			elsif objectTypeOrDbObject.class < DomainObject
-				dbObject = objectTypeOrDbObject
-				@objectType = dbObject.class
-				@pkId = dbObject.pkId
+				@dbObject = objectTypeOrDbObject
+				@d_obj_retrieve_time = Time.now
+				@objectType = @dbObject.class
+				@pkId = @dbObject.pkId
 			else
 				raise ArgumentError
 			end
 		end
 
 		def getDbObject
-			Context.instance.getObjectStore.get(@objectType, @pkId)
+			object_store = ObjectStore.getObjectStore
+			if @dbObject.nil? || needs_refresh?
+				@dbObject = object_store.get(@objectType, @pkId)
+								@d_obj_retrieve_time = Time.now
+
+			end
+			@dbObject
 		end
 
 		def method_missing(methodId, *args)
 			getDbObject.send(methodId.id2name, *args)
 		end
 
+		def needs_refresh?
+			object_store = ObjectStore.getObjectStore
+			last_commit_time = object_store.last_commit_time( @objectType, @pkId )
+			!last_commit_time.nil? && last_commit_time > @d_obj_retrieve_time
+		end
+		
 		def to_s
 			getDbObject.to_s
 		end

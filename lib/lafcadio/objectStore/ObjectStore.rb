@@ -128,6 +128,10 @@ module Lafcadio
 			end
 			@dbBridge.getCollectionByQuery query
 		end
+		
+		def last_commit_time( domain_class, pkId )
+			@cache.last_commit_time( domain_class, pkId )
+		end
 
 		def method_missing(methodId, *args)
 			proc = block_given? ? ( proc { |obj| yield( obj ) } ) : nil
@@ -147,6 +151,7 @@ module Lafcadio
 			elsif committer.commitType == Committer::DELETE
 				@cache.flush( committer.dbObject )
 			end
+			@cache.set_commit_time( committer.dbObject )
 		end
 	end
 end
