@@ -1,6 +1,5 @@
 require 'runit/testcase'
 require 'lafcadio/util'
-require 'lafcadio/util/ContextualService'
 
 class TestContextualService < RUNIT::TestCase
 	include Lafcadio

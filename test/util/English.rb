@@ -1,5 +1,5 @@
 require 'lafcadio/test'
-require 'lafcadio/util/English'
+require 'lafcadio/util'
 
 class TestEnglish < LafcadioTestCase
   def testCamelCaseToEnglish
