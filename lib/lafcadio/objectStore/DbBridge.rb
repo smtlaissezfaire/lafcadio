@@ -74,16 +74,16 @@ module Lafcadio
 		def commit(dbObject)
 			require 'lafcadio/objectStore/DomainObjectSqlMaker'
 			sqlMaker = DomainObjectSqlMaker.new(dbObject)
-			sqlMaker.sqlStatements.each { |sql| executeCommit( sql ) }
-			if sqlMaker.sqlStatements[0] =~ /insert/
+			sqlMaker.sqlStatements.each { |sql, binds| executeCommit( sql, binds ) }
+			if sqlMaker.sqlStatements[0].first =~ /insert/
 				sql = 'select last_insert_id()'
 				result = executeSelect( sql )
 				@@lastObjIdInserted = result[0]['last_insert_id()'].to_i
 			end
 		end
 		
-		def executeCommit( sql )
-			@dbh.do( sql )
+		def executeCommit( sql, binds )
+			@dbh.do( sql, *binds )
 		end
 		
 		# When passed a query, executes that query and returns a Collection.

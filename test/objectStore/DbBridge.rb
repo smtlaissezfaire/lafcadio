@@ -17,7 +17,7 @@ class TestDBBridge < RUNIT::TestCase
 			@@connected = true
 		end
 		
-		def do( sql )
+		def do( sql, *binds )
 			logSql( sql )
 		end
 		

@@ -18,13 +18,16 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
     insertSql = DomainObjectSqlMaker.new(client1a).sqlStatements[0]
     values["objId"] = 1
     client1b = Client.new values
-    updateSql = DomainObjectSqlMaker.new(client1b).sqlStatements[0]
-    assert_not_nil updateSql.index("update")
+    updateSql = DomainObjectSqlMaker.new(client1b).sqlStatements[0][0]
+		assert_match( /update/, updateSql )
     assert_not_nil updateSql.index("objId")
     client1b.delete = true
-    deleteSql = DomainObjectSqlMaker.new(client1b).sqlStatements[0]
+    deleteSql = DomainObjectSqlMaker.new(client1b).sqlStatements[0][0]
     assert_not_nil deleteSql.index("delete")
     assert_not_nil deleteSql.index("objId")
+		binds = DomainObjectSqlMaker.new(client1b).sqlStatements[0][1]
+		assert_not_nil( binds )
+		assert_equal( 0, binds.size )
   end
 
   def testCantCommitInvalidObj
@@ -42,7 +45,7 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
   def testCommitSQLWithApostrophe
     client = Client.new( { "name" => "T'est name" } )
     assert_equal("T'est name", client.name)
-    sql = DomainObjectSqlMaker.new(client).sqlStatements[0]
+    sql = DomainObjectSqlMaker.new(client).sqlStatements[0][0]
     assert_equal("T'est name", client.name)
     assert_not_nil sql.index("'T''est name'"), sql
   end

@@ -4,8 +4,11 @@ module Lafcadio
 	# Generates the necessary SQL for committing one domain object to the 
 	# database.
 	class DomainObjectSqlMaker
+		attr_reader :bindValues
+
 		def initialize(obj)
 			@obj = obj
+			@bindValues = []
 		end
 
 		def insertSQL(objectType)
@@ -25,6 +28,9 @@ module Lafcadio
 				unless field.dbWillAutomaticallyWrite
 					nameValues << field.nameForSQL
 					nameValues <<(field.valueForSQL(value))
+				end
+				if field.bind_write?
+					@bindValues << value
 				end
 			}
 			QueueHash.new *nameValues
@@ -61,8 +67,8 @@ module Lafcadio
 						statement = updateSQL(objectType)
 					end
 				end
-				statements << statement
-			}
+				statements << [statement, @bindValues]
+ 			}
 			statements
 		end
 	end

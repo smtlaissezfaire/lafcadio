@@ -37,7 +37,8 @@ create table testrows (
 	primary key (pkId),
 	text_field text,
 	date_time datetime,
-	bool_field tinyint
+	bool_field tinyint,
+	blob_field blob
 )
 		CREATE
 		dbh.do( createSql )
@@ -50,11 +51,40 @@ create table testrows (
 		fields << TextField.new( self, 'text_field' )
 		fields << DateTimeField.new( self, 'date_time' )
 		fields << BooleanField.new( self, 'bool_field' )
+		fields << BlobField.new( self, 'blob_field' )
 		fields
 	end
 	
 	def TestRow.sqlPrimaryKeyName
 		'pkId'
+	end
+end
+
+class AccTestBlobField < AcceptanceTestCase
+	def test_delete
+		test_str = 'The quick brown fox jumped over the lazy dog.'
+		@dbh.do( 'insert into testrows( blob_field ) values( ? )', test_str )
+		test_row = @object_store.getTestRow( 1 )
+		test_row.delete = true
+		test_row.commit
+		assert_equal( 0, @object_store.getAll( TestRow ).size )
+	end
+
+	def test_insert
+		test_str = 'The quick brown fox jumped over the lazy dog.'
+		test_row = TestRow.new( 'blob_field' => test_str )
+		test_row.commit
+		@object_store.flush( test_row )
+		test_row_prime = @object_store.getTestRow( 1 )
+		assert_equal( test_str, test_row_prime.blob_field )
+	end
+	
+	def test_nil_commit
+		test_row = TestRow.new( {} )
+		test_row.commit
+		@object_store.flush( test_row )
+		test_row_prime = @object_store.getTestRow( 1 )
+		assert_nil( test_row_prime.blob_field )
 	end
 end
 

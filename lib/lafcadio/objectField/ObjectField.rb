@@ -42,6 +42,8 @@ module Lafcadio
 			@englishNameOrNil = englishName
 		end
 		
+		def bind_write?; false; end
+		
 		def englishName
 			@englishNameOrNil || English.camelCaseToEnglish(name).capitalize
 		end
