@@ -57,6 +57,13 @@ class TestContextualService < Test::Unit::TestCase
 		assert( service_a != ServiceA.get_service_a )
 	end
 	
+	def test_garbage
+		assert_raise( NoMethodError ) { ObjectStore.get_something_or_other }
+		assert_raise( NoMethodError ) { ObjectStore.get_service_a }
+		assert_raise( NoMethodError ) { ObjectStore.set_something_or_other( 999 ) }
+		assert_raise( NoMethodError ) { ObjectStore.set_service_b }
+	end
+
 	def test_handles_inner_class_child
 		inner = Outer::Inner.get_inner
 		assert_equal( Outer::Inner, inner.class )

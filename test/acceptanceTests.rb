@@ -174,6 +174,12 @@ class AccTestBooleanField < AcceptanceTestCase
 	end
 end
 
+class AccTestContextualService < AcceptanceTestCase
+	def test_get_garbage
+		assert_raise( NoMethodError ) { ObjectStore.get_something_or_other }
+	end
+end
+
 class AccTestDateTimeField < AcceptanceTestCase
 	def test_value_from_sql
 		@dbh.do( 'insert into testrows( date_time ) values( "2004-01-01" )' )

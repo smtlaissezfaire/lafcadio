@@ -65,15 +65,17 @@ module Lafcadio
 	# For example: ObjectStore.getObjectStore
 	class ContextualService
 		def self.flush; Context.instance.set_resource( self, nil ); end
-	
-		def self.method_missing( methodId, *args )
-			methodName = methodId.id2name
-			if methodName =~ /^get_(.*)/ || methodName =~ /^set_(.*)/
-				if methodName =~ /^get_(.*)/
-					Context.instance.get_resource( self )
-				else
-					Context.instance.set_resource( self, *args )
-				end
+
+		def self.method_missing( symbol, *args )
+			method_name = symbol.id2name
+			target = nil
+			if method_name =~ /^get_(.*)/
+				target = :get_resource if $1.underscore_to_camel_case == basename
+			elsif method_name =~ /^set_(.*)/
+				target = :set_resource if $1.underscore_to_camel_case == basename
+			end
+			if target
+				Context.instance.send( target, self, *args )
 			else
 				super
 			end
