@@ -768,6 +768,20 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 1, @testObjectStore.get_all(Client).size
 	end
 	
+	def test_get_all_caches_for_later_subset_gets
+		client = Client.getTestClient
+		client.commit
+		assert_equal( 1, @testObjectStore.get_all( Client ).size )
+		assert_equal( 1, @mockDbBridge.query_count[ 'select * from clients' ])
+		assert_equal( client, @testObjectStore.get_client( 1 ) )
+		assert_equal(
+			0,
+			@mockDbBridge.query_count[
+				'select * from clients where clients.pk_id = 1'
+			]
+		)
+	end
+	
 	def testGetDbBridge
 		assert_equal( @mockDbBridge, @testObjectStore.get_db_bridge )
 	end

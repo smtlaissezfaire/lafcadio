@@ -147,6 +147,44 @@ class TestCompoundCondition < LafcadioTestCase
 end
 
 class TestCondition < LafcadioTestCase
+	def test_eql?
+		equals1 = Query::Equals.new( 'pk_id', 1, Client )
+		equals2 = Query::Equals.new( 'pk_id', 1, Client )
+		assert( equals1.eql?( equals2 ) )
+		assert( equals2.eql?( equals1 ) )
+		compound = Query::CompoundCondition.new(
+			Query::Equals.new( 'pk_id', 1, Client ),
+			Query::Like.new( 'name', 'name', Client )
+		)
+		assert( !equals1.eql?( compound ) )
+	end
+
+	def test_implies?
+		equals1 = Query::Equals.new( 'pk_id', 1, Client )
+		equals2 = Query::Equals.new( 'pk_id', 1, Client )
+		assert( equals1.implies?( equals2 ) )
+		compound1 = Query::CompoundCondition.new(
+			Query::Equals.new( 'pk_id', 1, Client ),
+			Query::Like.new( 'name', 'name', Client )
+		)
+		assert( compound1.implies?( equals1 ) )
+		assert( !equals1.implies?( compound1 ) )
+		compound2 = Query::CompoundCondition.new(
+			Query::Equals.new( 'pk_id', 1, Client ),
+			Query::Like.new( 'name', 'name', Client ),
+			Query::CompoundCondition::OR
+		)
+		assert( !compound2.implies?( equals1 ) )
+		assert( equals1.implies?( compound2 ) )
+		compound3 = Query::CompoundCondition.new(
+			Query::Equals.new( 'pk_id', 99, Client ),
+			Query::Like.new( 'name', 'name', Client ),
+			Query::CompoundCondition::OR
+		)
+		assert( !compound3.implies?( equals1 ) )
+		assert( !equals1.implies?( compound3 ) )
+	end
+	
 	def testRaisesExceptionIfInitHasWrongArguments
 		cond = Query::Condition.new( 'att name', 'name', Attribute )
 		begin
@@ -403,6 +441,36 @@ class TestLike < LafcadioTestCase
 end
 
 class TestQuery < LafcadioTestCase
+	def test_implies?
+		query1 = Query.new( Client )
+		assert( query1.implies?( query1 ) )
+		query2 = Query.new( Client, 1 )
+		assert( query2.implies?( query2 ) )
+		assert( !query1.implies?( query2 ) )
+		assert( query2.implies?( query1 ) )
+		query3 = Query.infer( Client ) { |client|
+			Query.And( client.pk_id.equals( 1 ), client.name.like( /client/ ) )
+		}
+		assert( query3.implies?( query3 ) )
+		assert( query3.implies?( query1 ) )
+		assert( !query1.implies?( query3 ) )
+		assert( query3.implies?( query2 ) )
+		assert( !query2.implies?( query3 ) )
+		query4 = Query.new( Invoice )
+		assert( query4.implies?( query4 ) )
+		[ query1, query2, query3 ].each_with_index { |other_query, i|
+			assert( !query4.implies?( other_query ), i )
+			assert( !other_query.implies?( query4 ), i )
+		}
+		query5 = Query.infer( Client ) { |client|
+			Query.Or( client.pk_id.equals( 1 ), client.name.like( /client/ ) )
+		}
+		assert( query5.implies?( query1 ) )
+		[ query2, query3, query4 ].each_with_index { |other_query, i|
+			assert( !query5.implies?( other_query ), i )
+		}
+	end
+
 	def testToSql
 		query = Query::Max.new(Client)
 		assert_equal 'select max(pk_id) from clients', query.to_sql

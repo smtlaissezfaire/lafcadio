@@ -140,6 +140,8 @@ module Lafcadio
 		def limit_clause
 			"limit #{ @limit.begin }, #{ @limit.end - @limit.begin + 1 }" if @limit
 		end
+		
+		def object_meets( dobj ); @condition.object_meets( dobj ); end
 
 		def or( &action ); compound( CompoundCondition::OR, action ); end
 		
@@ -148,6 +150,18 @@ module Lafcadio
 				clause = "order by #{ @order_by } "
 				clause += @order_by_order == ASC ? 'asc' : 'desc'
 				clause
+			end
+		end
+		
+		def implies?( other_query )
+			if other_query == self
+				true
+			elsif @domain_class == other_query.domain_class
+				if other_query.condition.nil? and !self.condition.nil?
+					true
+				else
+					self.condition and self.condition.implies?( other_query.condition )
+				end
 			end
 		end
 
@@ -207,7 +221,18 @@ module Lafcadio
 				end
 			end
 			
+			def implies?( other_condition )
+				self.eql?( other_condition ) or (
+					other_condition.respond_to?( :implied_by? ) and 
+							other_condition.implied_by?( self )
+				)
+			end
+			
 			def db_field_name; get_field.db_table_and_field_name; end
+			
+			def eql?( other_cond )
+				other_cond.is_a?( Condition ) and other_cond.to_sql == to_sql
+			end
 			
 			def get_field
 				a_domain_class = @domain_class
@@ -285,20 +310,38 @@ module Lafcadio
 		class CompoundCondition < Condition #:nodoc:
 			AND = 1
 			OR  = 2
-		
+			
 			def initialize(*conditions)
 				if( [ AND, OR ].index(conditions.last) )
-					@compoundType = conditions.last
+					@compound_type = conditions.last
 					conditions.pop
 				else
-					@compoundType = AND
+					@compound_type = AND
 				end
 				@conditions = conditions
 				@domain_class = conditions[0].domain_class
 			end
+			
+			def implied_by?( other_condition )
+				@compound_type == OR && @conditions.any? { |cond|
+					cond.implies?( other_condition )
+				}
+			end
+			
+			def implies?( other_condition )
+				super( other_condition ) or (
+					@compound_type == AND and @conditions.any? { |cond|
+						cond.implies?( other_condition )
+					}
+				) or (
+					@compound_type == OR and @conditions.all? { |cond|
+						cond.implies?( other_condition )
+					}
+				)
+			end
 
 			def object_meets(anObj)
-				if @compoundType == AND
+				if @compound_type == AND
 					@conditions.inject( true ) { |result, cond|
 						result && cond.object_meets( anObj )
 					}
@@ -310,7 +353,7 @@ module Lafcadio
 			end
 
 			def to_sql
-				booleanString = @compoundType == AND ? 'and' : 'or'
+				booleanString = @compound_type == AND ? 'and' : 'or'
 				subSqlStrings = @conditions.collect { |cond| cond.to_sql }
 				"(#{ subSqlStrings.join(" #{ booleanString } ") })"
 			end

@@ -573,11 +573,23 @@ module Lafcadio
 
 			def get_by_query( query )
 				unless @collections_by_query[query]
-					newObjects = @dbBridge.get_collection_by_query(query)
-					newObjects.each { |dbObj| save dbObj }
-					@collections_by_query[query] = newObjects.collect { |dobj|
-						dobj.pk_id
-					}
+					superset_query, pk_ids =
+						@collections_by_query.find { |other_query, pk_ids|
+							query.implies?( other_query )
+						}
+					if pk_ids
+						@collections_by_query[query] = ( pk_ids.collect { |pk_id|
+							get( query.domain_class, pk_id )
+						} ).select { |dobj| query.object_meets( dobj ) }.collect { |dobj|
+							dobj.pk_id
+						}
+					elsif @collections_by_query.values
+						newObjects = @dbBridge.get_collection_by_query(query)
+						newObjects.each { |dbObj| save dbObj }
+						@collections_by_query[query] = newObjects.collect { |dobj|
+							dobj.pk_id
+						}
+					end
 				end
 				collection = []
 				@collections_by_query[query].each { |pk_id|
