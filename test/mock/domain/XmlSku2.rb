@@ -4,7 +4,7 @@ require '../test/mock/domain/User'
 
 class XmlSku2 < Lafcadio::DomainObject
 	boolean    'boolean1',
-	           { 'enumType' => Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO }
+	           { 'enum_type' => Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO }
 	boolean    'boolean2',
 	           { 'enums' => { true => 'yin', false => 'yang' },
 		           'english_name' => 'boolean 2' }
@@ -18,7 +18,7 @@ class XmlSku2 < Lafcadio::DomainObject
 	enum       'enum2',
 	           { 'enums' => Lafcadio::QueueHash.new( '1', '2', '3', '4' ) }
 	integer    'integer1'
-	link       'link1', { 'linkedType' => User, 'deleteCascade' => true }
+	link       'link1', { 'linked_type' => User, 'delete_cascade' => true }
 	money      'money1'
 	month      'month1'
 	subsetLink 'subsetLink1', { 'subsetField' => 'xmlSku' }

@@ -60,7 +60,7 @@ module Lafcadio
 				collection = @objectStore.get_filtered( aClass.name, @dbObject,
 																							 field.name )
 				collection.each { |dependentObject|
-					if field.deleteCascade
+					if field.delete_cascade
 						dependentObject.delete = true
 					else
 						dependentObject.send( field.name + '=', nil )

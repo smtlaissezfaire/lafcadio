@@ -22,7 +22,7 @@ class TestDbObjectCommitter < LafcadioTestCase
 	def test_delete_cascade
 		user = User.new( {} )
 		user.commit
-		assert( XmlSku.get_field( 'link1' ).deleteCascade )
+		assert( XmlSku.get_field( 'link1' ).delete_cascade )
 		xml_sku = XmlSku.new( 'link1' => user )
 		xml_sku.commit
 		user.delete = true

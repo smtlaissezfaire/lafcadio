@@ -1,6 +1,6 @@
 <lafcadio_class_definition name="XmlSku" sql_primary_key_name="some_other_id"
                            table_name="some_other_table">
-	<field name="boolean1" class="BooleanField" enumType="ENUMS_CAPITAL_YES_NO"
+	<field name="boolean1" class="BooleanField" enum_type="ENUMS_CAPITAL_YES_NO"
 	       not_null="n" />
 	<field name="boolean2" class="BooleanField" english_name="boolean 2"
 	       not_null="n">
@@ -28,11 +28,11 @@
 		</enums>
 	</field>
 	<field name="integer1" class="IntegerField" not_null="n" />
-	<field name="link1" class="LinkField" linkedType="User" deleteCascade="y" 
+	<field name="link1" class="LinkField" linked_type="User" delete_cascade="y" 
 	       not_null="n" />
 	<field name="money1" class="MoneyField" not_null="n" />
 	<field name="month1" class="MonthField" not_null="n" />
-	<field name="subsetLink1" class="SubsetLinkField" linkedType="Invoice"
+	<field name="subsetLink1" class="SubsetLinkField" linked_type="Invoice"
 	       subsetField="xmlSku" not_null="n" />
 	<field name="text1" class="TextField" size="16" unique="y"
 	                    db_field_name="text_one" not_null="n" />

@@ -87,7 +87,7 @@ class TestDomainObject < LafcadioTestCase
 	
 	def test_class_fields_from_one_line_class_methods
 		matchField( XmlSku2, 'boolean1', BooleanField,
-		            { 'enumType' => BooleanField::ENUMS_CAPITAL_YES_NO } )
+		            { 'enum_type' => BooleanField::ENUMS_CAPITAL_YES_NO } )
 		matchField( XmlSku2, 'boolean2', BooleanField,
 		            { 'enums' => { true => 'yin', false => 'yang' },
 		              'english_name' => 'boolean 2' } )
@@ -104,7 +104,7 @@ class TestDomainObject < LafcadioTestCase
 		            { 'enums' => QueueHash.new( '1', '2', '3', '4' ) } )
 		matchField( XmlSku2, 'integer1', IntegerField )
 		matchField( XmlSku2, 'link1', LinkField,
-		            { 'linkedType' => User, 'deleteCascade' => true } )
+		            { 'linked_type' => User, 'delete_cascade' => true } )
 		matchField( XmlSku2, 'money1', MoneyField )
 		matchField( XmlSku2, 'month1', MonthField )
 		matchField( XmlSku2, 'subsetLink1', SubsetLinkField,

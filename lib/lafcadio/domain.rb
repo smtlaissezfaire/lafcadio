@@ -40,7 +40,7 @@ module Lafcadio
 			fieldAttr << FieldAttribute.new( 'size', FieldAttribute::INTEGER )
 			fieldAttr << FieldAttribute.new( 'unique', FieldAttribute::BOOLEAN )
 			fieldAttr << FieldAttribute.new( 'not_null', FieldAttribute::BOOLEAN )
-			fieldAttr << FieldAttribute.new( 'enumType', FieldAttribute::ENUM,
+			fieldAttr << FieldAttribute.new( 'enum_type', FieldAttribute::ENUM,
 																			 BooleanField )
 			fieldAttr << FieldAttribute.new( 'enums', FieldAttribute::HASH )
 			fieldAttr << FieldAttribute.new( 'range', FieldAttribute::ENUM,
@@ -192,8 +192,8 @@ module Lafcadio
 	#   <lafcadio_class_definition name="Message">
 	#     <field name="subject" class="TextField" />
 	#     <field name="body" class="TextField" />
-	#     <field name="author" class="LinkField" linkedType="User" />
-	#     <field name="recipient" class="LinkField" linkedType="User" />
+	#     <field name="author" class="LinkField" linked_type="User" />
+	#     <field name="recipient" class="LinkField" linked_type="User" />
 	#     <field name="dateSent" class="DateField" />
 	#   </lafcadio_class_definition>
  	#
@@ -295,7 +295,7 @@ module Lafcadio
 				if aClass != DomainObjectProxy &&
 						(!DomainObject.abstract_subclasses.index(aClass))
 					aClass.class_fields.each { |field|
-						if field.class <= LinkField && field.linkedType == self.object_type
+						if field.class <= LinkField && field.linked_type == self.object_type
 							dependent_classes[aClass] = field
 						end
 					}

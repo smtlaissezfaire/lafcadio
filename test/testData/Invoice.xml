@@ -1,11 +1,11 @@
 <lafcadio_class_definition name="Invoice">
 	<field name="invoice_num" class="AutoIncrementField"
 	       english_name="Invoice No." />
-	<field name="client" class="LinkField" linkedType="Client" />
+	<field name="client" class="LinkField" linked_type="Client" />
 	<field name="date" class="DateField" />
 	<field name="timestamp1" class="TimeStampField" />
 	<field name="rate" class="MoneyField" />
 	<field name="hours" class="DecimalField" precision="2" />
 	<field name="paid" class="DateField" notNull="n" />
-	<field name="xmlSku" class="LinkField" linkedType="XmlSku" />
+	<field name="xmlSku" class="LinkField" linked_type="XmlSku" />
 </lafcadio_class_definition>

@@ -2,9 +2,9 @@
 	<field name="name" class="TextField" />
 	<field name="standard_rate" class="MoneyField" english_name="Standard Rate"
 	       not_null="n"/>
-	<field name="referringClient" class="LinkField" linkedType="Client"
+	<field name="referringClient" class="LinkField" linked_type="Client"
 	       not_null="n"/>
-	<field name="priorityInvoice" class="SubsetLinkField" linkedType="Invoice"
+	<field name="priorityInvoice" class="SubsetLinkField" linked_type="Invoice"
 	       subsetField="client" not_null="n" />
 	<field name="notes" class="BlobField" not_null="n"/>
 </lafcadio_class_definition>

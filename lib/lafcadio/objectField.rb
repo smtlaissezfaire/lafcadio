@@ -198,8 +198,8 @@ module Lafcadio
 	#   * BooleanField::ENUMS_CAPITAL_YES_NO (uses characters 'Y' and 'N')
 	# In the XML class definition, this field would look like
 	#   <field name="field_name" class="BooleanField"
-	#          enumType="ENUMS_CAPITAL_YES_NO"/>
-	# If you're defining a field in Ruby, simply set BooleanField#enumType to one
+	#          enum_type="ENUMS_CAPITAL_YES_NO"/>
+	# If you're defining a field in Ruby, simply set BooleanField#enum_type to one
 	# of the values.
 	#
 	# For more fine-grained specification you can pass specific values in. Use
@@ -213,16 +213,16 @@ module Lafcadio
 	# If you're defining the field in Ruby, set BooleanField#enums to a hash.
 	#   myBooleanField.enums = { true => 'yin', false => 'yang' }
 	#
-	# +enums+ takes precedence over +enumType+.
+	# +enums+ takes precedence over +enum_type+.
 	class BooleanField < ObjectField
 		ENUMS_ONE_ZERO = 0
 		ENUMS_CAPITAL_YES_NO = 1
 
-		attr_accessor :enumType, :enums
+		attr_accessor :enum_type, :enums
 
 		def initialize(object_type, name, english_name = nil)
 			super(object_type, name, english_name)
-			@enumType = ENUMS_ONE_ZERO
+			@enum_type = ENUMS_ONE_ZERO
 			@enums = nil
 		end
 
@@ -233,13 +233,13 @@ module Lafcadio
 		def get_enums( value = nil ) # :nodoc:
 			if @enums
 				@enums
-			elsif @enumType == ENUMS_ONE_ZERO
+			elsif @enum_type == ENUMS_ONE_ZERO
 				if value.class == String
 					{ true => '1', false => '0' }
 				else
 					{ true => 1, false => 0 }
 				end
-			elsif @enumType == ENUMS_CAPITAL_YES_NO
+			elsif @enum_type == ENUMS_CAPITAL_YES_NO
 				{ true => 'Y', false => 'N' }
 			else
 				raise MissingError
@@ -247,7 +247,7 @@ module Lafcadio
 		end
 
 		def text_enum_type # :nodoc:
-			@enums ? @enums[true].class == String : @enumType == ENUMS_CAPITAL_YES_NO
+			@enums ? @enums[true].class == String : @enum_type == ENUMS_CAPITAL_YES_NO
 		end
 
 		def true_enum( value = nil ) # :nodoc:
@@ -443,41 +443,41 @@ module Lafcadio
 	# A LinkField is used to link from one domain class to another.
 	class LinkField < ObjectField
 		def self.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
-			self.new( domainClass, parameters['linkedType'], parameters['name'],
-								parameters['english_name'], parameters['deleteCascade'] )
+			self.new( domainClass, parameters['linked_type'], parameters['name'],
+								parameters['english_name'], parameters['delete_cascade'] )
 		end
 
 		def self.instantiation_parameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
-			linkedTypeStr = fieldElt.attributes['linkedType']
-			linkedType = DomainObject.get_object_type_from_string( linkedTypeStr )
-			parameters['linkedType'] = linkedType
-			parameters['deleteCascade'] = fieldElt.attributes['deleteCascade'] == 'y'
+			linked_typeStr = fieldElt.attributes['linked_type']
+			linked_type = DomainObject.get_object_type_from_string( linked_typeStr )
+			parameters['linked_type'] = linked_type
+			parameters['delete_cascade'] = fieldElt.attributes['delete_cascade'] == 'y'
 			parameters
 		end
 
-		attr_reader :linkedType
-		attr_accessor :deleteCascade
+		attr_reader :linked_type
+		attr_accessor :delete_cascade
 
 		# [object_type]    The domain class that this field belongs to.
-		# [linkedType]    The domain class that this field points to.
+		# [linked_type]    The domain class that this field points to.
 		# [name]          The name of this field.
 		# [english_name]   The English name of this field. (Deprecated)
-		# [deleteCascade] If this is true, deleting the domain object that is linked
+		# [delete_cascade] If this is true, deleting the domain object that is linked
 		#                 to will cause this domain object to be deleted as well.
-		def initialize( object_type, linkedType, name = nil, english_name = nil,
-		                deleteCascade = false )
+		def initialize( object_type, linked_type, name = nil, english_name = nil,
+		                delete_cascade = false )
 			unless name
-				linkedType.name =~ /::/
-				name = $' || linkedType.name
+				linked_type.name =~ /::/
+				name = $' || linked_type.name
 				name = name.decapitalize
 			end
 			super(object_type, name, english_name)
-			( @linkedType, @deleteCascade ) = linkedType, deleteCascade
+			( @linked_type, @delete_cascade ) = linked_type, delete_cascade
 		end
 
 		def value_from_sql(string) #:nodoc:
-			string != nil ? DomainObjectProxy.new(@linkedType, string.to_i) : nil
+			string != nil ? DomainObjectProxy.new(@linked_type, string.to_i) : nil
 		end
 
 		def value_for_sql(value) #:nodoc:
@@ -493,8 +493,8 @@ module Lafcadio
 
 		def verify_non_nil(value, pk_id) #:nodoc:
 			super
-			if @linkedType != @object_type && pk_id
-				subsetLinkField = @linkedType.class_fields.find { |field|
+			if @linked_type != @object_type && pk_id
+				subsetLinkField = @linked_type.class_fields.find { |field|
 					field.class == SubsetLinkField && field.subsetField == @name
 				}
 				if subsetLinkField
@@ -557,7 +557,7 @@ module Lafcadio
 
 	class SubsetLinkField < LinkField #:nodoc:
 		def self.instantiate_with_parameters( domainClass, parameters )
-			self.new( domainClass, parameters['linkedType'],
+			self.new( domainClass, parameters['linked_type'],
 			          parameters['subsetField'], parameters['name'],
 								parameters['english_name'] )
 		end
@@ -570,9 +570,9 @@ module Lafcadio
 		
 		attr_accessor :subsetField
 
-		def initialize(object_type, linkedType, subsetField,
-				name = linkedType.name.downcase, english_name = nil)
-			super(object_type, linkedType, name, english_name)
+		def initialize(object_type, linked_type, subsetField,
+				name = linked_type.name.downcase, english_name = nil)
+			super(object_type, linked_type, name, english_name)
 			@subsetField = subsetField
 		end
 	end

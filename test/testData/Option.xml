@@ -1,5 +1,5 @@
 <lafcadio_class_definition name="Option">
-	<field name="attribute" class="LinkField" linkedType="Attribute"
+	<field name="attribute" class="LinkField" linked_type="Attribute"
 	       newDuringEdit="n" />
 	<field name="name" class="TextField" />
 </lafcadio_class_definition>

@@ -20,7 +20,7 @@ class TestBooleanField < LafcadioTestCase
 
 	def testWithDifferentEnums
 		bf2 = BooleanField.new nil, 'whatever'
-		bf2.enumType = BooleanField::ENUMS_CAPITAL_YES_NO
+		bf2.enum_type = BooleanField::ENUMS_CAPITAL_YES_NO
 		assert_equal("'N'", bf2.value_for_sql(false))
 		assert_equal true, bf2.value_from_sql('Y')
 		assert_equal false, bf2.value_from_sql('N')
@@ -31,7 +31,7 @@ class TestBooleanField < LafcadioTestCase
 	end
 	
 	def test_raise_error_if_no_enums_available
-		@bf.enumType = 999
+		@bf.enum_type = 999
 		begin
 			@bf.get_enums
 			fail "should raise MissingError"

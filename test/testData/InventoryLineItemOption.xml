@@ -1,6 +1,6 @@
 <lafcadio_class_definition name="InventoryLineItemOption">
 	<field name="inventoryLineItem" class="LinkField"
-	       linkedType="InventoryLineItem" />
-	<field name="option" class="LinkField" linkedType="Option"
+	       linked_type="InventoryLineItem" />
+	<field name="option" class="LinkField" linked_type="Option"
 	       dbFieldName="optionId" />
 </lafcadio_class_definition>
