@@ -17,7 +17,7 @@ module Lafcadio
 			end
 		end
 
-		# The passKey needs to be the Context instance, or else this method fails. 
+		# The +passKey+ needs to be the Context instance, or else this method fails. 
 		# Note that this isn't hard security of any kind; it's simply a gentle 
 		# reminder to users of a ContextualService that the class should not be 
 		# instantiated directly.

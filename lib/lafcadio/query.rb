@@ -1,3 +1,89 @@
+# = Overview
+# By passing a block to ObjectStore, you can write complex, ad-hoc queries in
+# Ruby. This involves a few more keystrokes than writing raw SQL, but also makes
+# it easier to change queries at runtime, and these queries can also be fully
+# tested against the MockObjectStore.
+#   big_invoices = object_store.getInvoices { |inv| inv.rate.gt( 50 ) }
+#   # => "select * from invoices where rate > 50"
+# This a full-fledged block, so you can pass in values from the calling context.
+#   date = Date.new( 2004, 1, 1 )
+#   recent_invoices = object_store.getInvoices { |inv| inv.date.gt( date ) }
+#   # => "select * from invoices where date > '2004-01-01'"
+# 
+# = Query operators
+# You can compare fields either to simple values, or to other fields in the same
+# table.
+#   paid_immediately = object_store.getInvoices { |inv|
+#     inv.date.equals( inv.paid )
+#   }
+#   # => "select * from invoices where date = paid"
+#
+# == Numerical comparisons: +lt+, +lte+, +gte+, +gt+
+# +lt+, +lte+, +gte+, and +gt+ stand for "less than", "less than or equal",
+# "greater than or equal", and "greater than", respectively.
+#   tiny_invoices = object_store.getInvoices { |inv| inv.rate.lte( 25 ) }
+#   # => "select * from invoices where rate <= 25"
+# These comparators work on fields that contain numbers, dates, and even
+# references to other domain objects.
+#   for_1st_ten_clients = object_store.getInvoices { |inv|
+#     inv.client.lte( 10 )
+#   }
+#   # => "select * from invoices where client <= 10"
+#
+# == Equality: +equals+
+#   full_week_invs = object_store.getInvoices { |inv| inv.hours.equals( 40 ) }
+#   # => "select * from invoices where hours = 40"
+# If you're comparing to a domain object you should pass in the object itself.
+#   client = object_store.getClient( 99 )
+#   invoices = object_store.getInvoices { |inv| inv.client.equals( client ) }
+#   # => "select * from invoices where client = 99"
+# 
+# == Inclusion: +in+
+#   first_three_invs = object_store.getInvoices { |inv| inv.pkId.in( 1, 2, 3 ) }
+#   # => "select * from invoices where pkId in ( 1, 2, 3 )"
+#
+# == Text comparison: +like+
+#   fname_starts_with_a = object_store.getUsers { |user|
+#     user.fname.like( /^a/ )
+#   }
+#   # => "select * from users where fname like 'a%'"
+#   fname_ends_with_a = object_store.getUsers { |user|
+#     user.fname.like( /a$/ )
+#   }
+#   # => "select * from users where fname like '%a'"
+#   fname_contains_a = object_store.getUsers { |user|
+#     user.fname.like( /a/ )
+#   }
+#   # => "select * from users where fname like '%a%'"
+# Please note that although we're using the Regexp operators here, these aren't
+# full-fledged regexps. Only ^ and $ work for this.
+#
+# == Compound conditions: <tt>Query.And</tt> and <tt>Query.Or</tt>
+#   invoices = object_store.getInvoices { |inv|
+#     Query.And( inv.hours.equals( 40 ), inv.rate.equals( 50 ) )
+#   }
+#   # => "select * from invoices where (hours = 40 and rate = 50)"
+#   client99 = object_store.getClient( 99 )
+#   invoices = object_store.getInvoices { |inv|
+#     Query.Or( inv.hours.equals( 40 ),
+#               inv.rate.equals( 50 ),
+#               inv.client.equals( client99 ) )
+#   }
+#   # => "select * from invoices where (hours = 40 or rate = 50 or client = 99)"
+# Note that both compound operators can take 2 or more arguments. Also, they can
+# be nested:
+#   invoices = object_store.getInvoices { |inv|
+#     Query.And( inv.hours.equals( 40 ),
+#                Query.Or( inv.rate.equals( 50 ),
+#                          inv.client.equals( client99 ) ) )
+#   }
+#   # => "select * from invoices where (hours = 40 and 
+#   #     (rate = 50 or client = 99))"
+#
+# == Negation: +not+
+#   invoices = object_store.getInvoices { |inv| inv.rate.equals( 50 ).not }
+#   # => "select * from invoices where rate != 50"
+
 require 'lafcadio/includer'
 Includer.include( 'query' )
 
@@ -10,7 +96,7 @@ module Lafcadio
 			CompoundCondition.new( *conditions)
 		end
 
-		class DomainObjectImpostor
+		class DomainObjectImpostor #:nodoc:
 			attr_reader :domainClass
 		
 			def initialize( domainClass )
@@ -32,7 +118,7 @@ module Lafcadio
 			end
 		end
 		
-		class Inferrer
+		class Inferrer #:nodoc:
 			def initialize( domainClass, &action )
 				@domainClass = domainClass; @action = action
 			end
@@ -44,7 +130,7 @@ module Lafcadio
 			end
 		end
 		
-		class ObjectFieldImpostor
+		class ObjectFieldImpostor #:nodoc:
 			def ObjectFieldImpostor.comparators
 				{ 
 					'lt' => Compare::LESS_THAN, 'lte' => Compare::LESS_THAN_OR_EQUAL,

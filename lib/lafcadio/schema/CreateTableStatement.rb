@@ -1,5 +1,5 @@
 module Lafcadio
-	class CreateTableStatement
+	class CreateTableStatement #:nodoc:
 		def initialize( domainClass )
 			@domainClass = domainClass
 		end

@@ -2,14 +2,7 @@ require 'lafcadio/util'
 
 module Lafcadio
 	class Query
-		# The abstract base class for all the other subconditions. Subclasses need 
-		# to define two different methods:
-		# [toSql] Returns a string that would be inserted after the word "where" in 
-		#         a SQL query.
-		# [objectMeets(anObj)] When passed a domain object, returns a boolean value 
-		#                      indicating whether that object passed this 
-		#                      condition. For use in testing.
-		class Condition
+		class Condition #:nodoc:
 			def Condition.searchTermType
 				Object
 			end

@@ -2,6 +2,8 @@ require 'lafcadio/includer'
 Includer.include( 'util' )
 
 class Array
+	# If this array has one element, returns that element; otherwise, raises an
+	# error.
 	def only
 		if size != 1
 			raise "Expected single-value Array but Array has #{ size } members"
@@ -136,12 +138,20 @@ class String
 		lines.join "\n"
 	end
 	
+	# Turns a numeric string into U.S. format if it's not already formatted that
+	# way.
+	#
+	#   "10,00".numericStringToUsFormat -> "10.00"
+	#   "10.00".numericStringToUsFormat -> "10.00"
 	def numericStringToUsFormat
 		numericString = clone
 		numericString.gsub!(/,/, '.') if numericString =~ /,\d{2}$/
 		numericString
 	end
 
+	# Left-pads a string with +fillChar+ up to +size+ size.
+	#
+	#   "a".pad( 10, "+") -> "+++++++++a"
 	def pad(size, fillChar)
 		string = clone
 		while string.length < size

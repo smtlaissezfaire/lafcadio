@@ -1,17 +1,11 @@
 module Lafcadio
-	# Manages the generation of SQL for one query.
-	class Query
+	class Query #:nodoc:
 		ASC		= 1
 		DESC 	= 2
 
 		attr_reader :objectType, :condition
 		attr_accessor :orderBy, :orderByOrder, :limit
 
-		# [objectType] The domain class being searched.
-		# [pkIdOrCondition] If this is an Integer, it will search for only the 
-		#                    object with that pkId. If this is a Condition, it 
-		#                    will search for a collection that matches that 
-		#                    condition.
 		def initialize(objectType, pkIdOrCondition = nil)
 			@objectType = objectType
 			( @condition, @orderBy, @limit ) = [ nil, nil, nil ]

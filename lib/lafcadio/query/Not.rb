@@ -2,8 +2,7 @@ require 'lafcadio/query/Condition'
 
 module Lafcadio
 	class Query
-		# Returns the opposite of a given condition.
-		class Not < Condition
+		class Not < Condition #:nodoc:
 			def initialize(unCondition)
 				@unCondition = unCondition
 			end

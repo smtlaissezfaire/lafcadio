@@ -2,8 +2,7 @@ require 'lafcadio/query/Condition'
 
 module Lafcadio
 	class Query
-		# Compares numeric fields.
-		class Compare < Condition
+		class Compare < Condition #:nodoc:
 			LESS_THAN							= 1
 			LESS_THAN_OR_EQUAL		= 2
 			GREATER_THAN_OR_EQUAL = 3

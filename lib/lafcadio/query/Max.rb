@@ -1,6 +1,6 @@
 module Lafcadio
 	class Query
-		class Max < Query
+		class Max < Query #:nodoc:
 			attr_reader :field_name
 		
 			def initialize( objectType, field_name = 'pkId' )

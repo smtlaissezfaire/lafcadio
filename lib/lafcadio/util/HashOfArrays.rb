@@ -1,6 +1,5 @@
 module Lafcadio
-	# A hash where each value is guaranteed to be an array or nil.
-	class HashOfArrays
+	class HashOfArrays #:nodoc:
 		def initialize
 			@values = {}
 		end

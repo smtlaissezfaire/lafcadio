@@ -2,8 +2,7 @@ require 'lafcadio/query/Condition'
 
 module Lafcadio
 	class Query
-		# Tests whether a field value is in a given range of values.
-		class In < Condition
+		class In < Condition #:nodoc:
 			def In.searchTermType
 				Array
 			end

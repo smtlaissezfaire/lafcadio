@@ -2,8 +2,7 @@ require 'lafcadio/query/Condition'
 
 module Lafcadio
 	class Query
-		# Tests a link field against a given domain object.
-		class Link < Condition
+		class Link < Condition #:nodoc:
 			def Link.searchTermType
 				DomainObject
 			end

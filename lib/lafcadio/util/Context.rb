@@ -29,12 +29,12 @@ module Lafcadio
 			@resources = {}
 		end
 		
-		def createInstance(resourceName)
+		def createInstance(resourceName) #:nodoc:
 			resourceClass = eval resourceName
 			resourceClass.new self
 		end
 
-		def getResource(resourceName)
+		def getResource(resourceName) #:nodoc:
 			resource = @resources[resourceName]
 			unless resource
 				resource = createInstance resourceName
@@ -43,11 +43,11 @@ module Lafcadio
 			resource
 		end
 		
-		def setResource(resourceName, resource)
+		def setResource(resourceName, resource) #:nodoc:
 			@resources[resourceName] = resource
 		end
 
-		def method_missing(methId, *args)
+		def method_missing(methId, *args) #:nodoc:
 			methodName = methId.id2name
 			if methodName =~ /^get(.*)$/
 				getResource $1

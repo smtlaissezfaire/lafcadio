@@ -2,8 +2,7 @@ require 'lafcadio/query/Condition'
 
 module Lafcadio
 	class Query
-		# Tests whether a field is equal to a given value.
-		class Equals < Condition
+		class Equals < Condition #:nodoc:
 			def toSql
 				sql = "#{ dbFieldName } "
 				unless @searchTerm.nil?

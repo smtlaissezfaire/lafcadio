@@ -49,7 +49,7 @@ module Lafcadio
 	# is the same as
 	#   select * from invoices
 	#   where (date >= '2003-01-01' and rate = 10 and hours = 10)
-	# See Query::Inferrer for more.
+	# See lafcadio/query.rb for more.
 	#
 	# = SQL Logging
 	# Lafcadio uses log4r to log all of its SQL statements. The simplest way to
