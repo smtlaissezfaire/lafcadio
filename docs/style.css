@@ -13,6 +13,10 @@ blockquote {
 	font-family: Verdana, sans-serif; background-color: #dddddd; padding: 0.5em;
 	margin: 1em 0em 0em 0em
 }
+pre {
+	background-color: #dddddd; padding: 0.5em;
+	margin: 1em 0em 0em 0em
+}
 .beta_note {
 	font-family: Verdana, sans-serif; border-style: solid; padding: 0.5em;
 	margin: 1em 0em 0em 0em; border-width: 2px; border-color: #dddddd
