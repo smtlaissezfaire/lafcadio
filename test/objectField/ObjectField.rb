@@ -77,6 +77,6 @@ class TestObjectField < LafcadioTestCase
 	
 	def testEnglishName
 		field = ObjectField.new( Client, 'name', 'client name' )
-		assert_equal( 'client name', field.englishName )
+		assert_equal( 'client name', field.english_name )
 	end
 end

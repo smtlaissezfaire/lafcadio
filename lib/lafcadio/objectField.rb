@@ -11,41 +11,41 @@ module Lafcadio
 		attr_accessor :notNull, :unique, :dbFieldName
 
 		def self.instantiate_from_xml( domainClass, fieldElt ) #:nodoc:
-			parameters = instantiationParameters( fieldElt )
+			parameters = instantiation_parameters( fieldElt )
 			instantiate_with_parameters( domainClass, parameters )
 		end
 
 		def self.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
 			instance = self.new( domainClass, parameters['name'],
-			                     parameters['englishName'] )
+			                     parameters['english_name'] )
 			if ( dbFieldName = parameters['dbFieldName'] )
 				instance.dbFieldName = dbFieldName
 			end
 			instance
 		end
 
-		def self.instantiationParameters( fieldElt ) #:nodoc:
+		def self.instantiation_parameters( fieldElt ) #:nodoc:
 			parameters = {}
 			parameters['name'] = fieldElt.attributes['name']
-			parameters['englishName'] = fieldElt.attributes['englishName']
+			parameters['english_name'] = fieldElt.attributes['english_name']
 			parameters['dbFieldName'] = fieldElt.attributes['dbFieldName']
 			parameters
 		end
 		
-		def self.valueType #:nodoc:
+		def self.value_type #:nodoc:
 			Object
 		end
 
 		# [object_type]  The domain class that this object field belongs to.
 		# [name]        The name of this field.
-		# [englishName] The descriptive English name of this field. (Deprecated)
-		def initialize(object_type, name, englishName = nil )
+		# [english_name] The descriptive English name of this field. (Deprecated)
+		def initialize(object_type, name, english_name = nil )
 			@object_type = object_type
 			@name = name
 			@dbFieldName = name
 			@notNull = true
 			@unique = false
-			@englishNameOrNil = englishName
+			@english_nameOrNil = english_name
 		end
 		
 		def <=>(other)
@@ -62,12 +62,12 @@ module Lafcadio
 			"#{ object_type.table_name }.#{ dbFieldName }"
 		end
 
-		def dbWillAutomaticallyWrite #:nodoc:
+		def db_will_automatically_write #:nodoc:
 			false
 		end
 
-		def englishName #:nodoc:
-			@englishNameOrNil || English.camelCaseToEnglish(name).capitalize
+		def english_name #:nodoc:
+			@english_nameOrNil || English.camelCaseToEnglish(name).capitalize
 		end
 
 		# Returns the name that this field is referenced by in the MySQL table. By 
@@ -105,10 +105,10 @@ module Lafcadio
 		end
 
 		def verify_non_nil( value, pkId )
-			valueType = self.class.valueType
-			unless value.class <= valueType
+			value_type = self.class.value_type
+			unless value.class <= value_type
 				raise( FieldValueError, 
-				       "#{ object_type.name }##{ name } needs a " + valueType.name +
+				       "#{ object_type.name }##{ name } needs a " + value_type.name +
 				           " value.",
 				       caller )
 			end
@@ -122,7 +122,7 @@ module Lafcadio
 			}
 			collisions = ObjectStore.get_object_store.getSubset( inferrer.execute )
 			if collisions.size > 0
-				notUniqueMsg = "That #{englishName.downcase} already exists."
+				notUniqueMsg = "That #{english_name.downcase} already exists."
 				raise FieldValueError, notUniqueMsg, caller
 			end
 		end
@@ -157,8 +157,8 @@ module Lafcadio
 	class AutoIncrementField < IntegerField # :nodoc:
 		attr_reader :object_type
 
-		def initialize(object_type, name, englishName = nil)
-			super(object_type, name, englishName)
+		def initialize(object_type, name, english_name = nil)
+			super(object_type, name, english_name)
 			@object_type = object_type
 		end
 
@@ -181,7 +181,7 @@ module Lafcadio
 	class BlobField < ObjectField
 		attr_accessor :size
 		
-		def self.valueType; String; end
+		def self.value_type; String; end
 
 		def bind_write?; true; end #:nodoc:
 
@@ -220,8 +220,8 @@ module Lafcadio
 
 		attr_accessor :enumType, :enums
 
-		def initialize(object_type, name, englishName = nil)
-			super(object_type, name, englishName)
+		def initialize(object_type, name, english_name = nil)
+			super(object_type, name, english_name)
 			@enumType = ENUMS_ONE_ZERO
 			@enums = nil
 		end
@@ -273,14 +273,14 @@ module Lafcadio
 		RANGE_NEAR_FUTURE = 0
 		RANGE_PAST = 1
 
-		def self.valueType # :nodoc:
+		def self.value_type # :nodoc:
 			Date
 		end
 
 		attr_accessor :range
 
-		def initialize(object_type, name = "date", englishName = nil)
-			super(object_type, name, englishName)
+		def initialize(object_type, name = "date", english_name = nil)
+			super(object_type, name, english_name)
 			@range = RANGE_NEAR_FUTURE
 		end
 
@@ -321,10 +321,10 @@ module Lafcadio
 	# DecimalField represents a decimal value.
 	class DecimalField < ObjectField
 		def self.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
-			self.new( domainClass, parameters['name'], parameters['englishName'] )
+			self.new( domainClass, parameters['name'], parameters['english_name'] )
 		end
 
-		def self.valueType #:nodoc:
+		def self.value_type #:nodoc:
 			Numeric
 		end
 
@@ -346,8 +346,8 @@ module Lafcadio
 			address =~ /^[^ @]+@[^ \.]+\.[^ ,]+$/
 		end
 
-		def initialize(object_type, name = "email", englishName = nil)
-			super(object_type, name, englishName)
+		def initialize(object_type, name = "email", english_name = nil)
+			super(object_type, name, english_name)
 		end
 
 		def nullErrorMsg #:nodoc:
@@ -380,7 +380,7 @@ module Lafcadio
 	class EnumField < TextField
 		def self.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
 			self.new( domainClass, parameters['name'], parameters['enums'],
-								parameters['englishName'] )
+								parameters['english_name'] )
 		end
 
 		def self.enum_queue_hash( fieldElt )
@@ -392,7 +392,7 @@ module Lafcadio
 			QueueHash.new( *enumValues )
 		end
 
-		def self.instantiationParameters( fieldElt ) #:nodoc:
+		def self.instantiation_parameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			if fieldElt.elements['enums'][1].attributes['key']
 				parameters['enums'] = enum_queue_hash( fieldElt )
@@ -411,9 +411,9 @@ module Lafcadio
 		# [name]        The name of this domain class.
 		# [enums]       An array of Strings representing the possible choices for
 		#               this field.
-		# [englishName] The English name of this field. (Deprecated)
-		def initialize(object_type, name, enums, englishName = nil)
-			super object_type, name, englishName
+		# [english_name] The English name of this field. (Deprecated)
+		def initialize(object_type, name, enums, english_name = nil)
+			super object_type, name, english_name
 			if enums.class == Array 
 				@enums = QueueHash.newFromArray enums
 			else
@@ -444,10 +444,10 @@ module Lafcadio
 	class LinkField < ObjectField
 		def LinkField.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
 			self.new( domainClass, parameters['linkedType'], parameters['name'],
-								parameters['englishName'], parameters['deleteCascade'] )
+								parameters['english_name'], parameters['deleteCascade'] )
 		end
 
-		def LinkField.instantiationParameters( fieldElt ) #:nodoc:
+		def LinkField.instantiation_parameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			linkedTypeStr = fieldElt.attributes['linkedType']
 			linkedType = DomainObject.get_object_type_from_string( linkedTypeStr )
@@ -462,17 +462,17 @@ module Lafcadio
 		# [object_type]    The domain class that this field belongs to.
 		# [linkedType]    The domain class that this field points to.
 		# [name]          The name of this field.
-		# [englishName]   The English name of this field. (Deprecated)
+		# [english_name]   The English name of this field. (Deprecated)
 		# [deleteCascade] If this is true, deleting the domain object that is linked
 		#                 to will cause this domain object to be deleted as well.
-		def initialize( object_type, linkedType, name = nil, englishName = nil,
+		def initialize( object_type, linkedType, name = nil, english_name = nil,
 		                deleteCascade = false )
 			unless name
 				linkedType.name =~ /::/
 				name = $' || linkedType.name
 				name = name.decapitalize
 			end
-			super(object_type, name, englishName)
+			super(object_type, name, english_name)
 			( @linkedType, @deleteCascade ) = linkedType, deleteCascade
 		end
 
@@ -524,7 +524,7 @@ module Lafcadio
 	# Accepts a Month as a value. This field automatically saves in MySQL as a 
 	# date corresponding to the first day of the month.
 	class MonthField < DateField
-		def self.valueType #:nodoc:
+		def self.value_type #:nodoc:
 			Month
 		end
 
@@ -550,8 +550,8 @@ module Lafcadio
 	# any of the 50 states of the United States, stored as each state's two-letter
 	# postal code.
 	class StateField < EnumField
-		def initialize(object_type, name = "state", englishName = nil)
-			super object_type, name, UsStates.states, englishName
+		def initialize(object_type, name = "state", english_name = nil)
+			super object_type, name, UsStates.states, english_name
 		end
 	end
 
@@ -559,10 +559,10 @@ module Lafcadio
 		def self.instantiate_with_parameters( domainClass, parameters )
 			self.new( domainClass, parameters['linkedType'],
 			          parameters['subsetField'], parameters['name'],
-								parameters['englishName'] )
+								parameters['english_name'] )
 		end
 
-		def self.instantiationParameters( fieldElt )
+		def self.instantiation_parameters( fieldElt )
 			parameters = super( fieldElt )
 			parameters['subsetField'] = fieldElt.attributes['subsetField']
 			parameters
@@ -571,8 +571,8 @@ module Lafcadio
 		attr_accessor :subsetField
 
 		def initialize(object_type, linkedType, subsetField,
-				name = linkedType.name.downcase, englishName = nil)
-			super(object_type, linkedType, name, englishName)
+				name = linkedType.name.downcase, english_name = nil)
+			super(object_type, linkedType, name, english_name)
 			@subsetField = subsetField
 		end
 	end
@@ -582,7 +582,7 @@ module Lafcadio
 	# For example, a SQL field with the value "john,bill,dave", then the Ruby 
 	# field will have the value <tt>[ "john", "bill", "dave" ]</tt>.
 	class TextListField < ObjectField
-		def self.valueType #:nodoc:
+		def self.value_type #:nodoc:
 			Array
 		end
 
@@ -600,12 +600,12 @@ module Lafcadio
 	end
 
 	class TimeStampField < DateTimeField #:nodoc:
-		def initialize(object_type, name = 'timeStamp', englishName = nil)
-			super( object_type, name, englishName )
+		def initialize(object_type, name = 'timeStamp', english_name = nil)
+			super( object_type, name, english_name )
 			@notNull = false
 		end
 
-		def dbWillAutomaticallyWrite
+		def db_will_automatically_write
 			true
 		end
 	end

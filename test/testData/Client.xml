@@ -1,6 +1,6 @@
 <lafcadio_class_definition name="Client">
 	<field name="name" class="TextField" />
-	<field name="standard_rate" class="MoneyField" englishName="Standard Rate"
+	<field name="standard_rate" class="MoneyField" english_name="Standard Rate"
 	       notNull="n"/>
 	<field name="referringClient" class="LinkField" linkedType="Client"
 	       notNull="n"/>

@@ -6,7 +6,7 @@ class SKU < Lafcadio::DomainObject
     "skus"
   end
 
-  def SKU.englishName
+  def SKU.english_name
 		"SKU"
 	end
 

@@ -281,7 +281,7 @@ module Lafcadio
 			nameValues = []
 			object_type.class_fields.each { |field|
 				value = @obj.send(field.name)
-				unless field.dbWillAutomaticallyWrite
+				unless field.db_will_automatically_write
 					nameValues << field.nameForSQL
 					nameValues <<(field.valueForSQL(value))
 				end

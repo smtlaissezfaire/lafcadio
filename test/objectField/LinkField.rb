@@ -19,7 +19,7 @@ class TestLinkField < LafcadioTestCase
   end
 
   def testNames
-    assert_equal("Client", @olf.englishName)
+    assert_equal("Client", @olf.english_name)
     assert_equal("client", @olf.name)
 		caLinkField = LinkField.new nil, InternalClient
 		assert_equal "internalClient", caLinkField.name

@@ -26,13 +26,13 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		            { 'enumType' => BooleanField::ENUMS_CAPITAL_YES_NO } )
 		matchField( XmlSku, 'boolean2', BooleanField,
 		            { 'enums' => { true => 'yin', false => 'yang' },
-		              'englishName' => 'boolean 2' } )
+		              'english_name' => 'boolean 2' } )
 		matchField( XmlSku, 'date1', DateField, { 'notNull' => false } )
 		matchField( XmlSku, 'date2', DateField,
 		            { 'range' => DateField::RANGE_PAST } )
 		matchField( XmlSku, 'dateTime1', DateTimeField )
 		matchField( XmlSku, 'decimal1', DecimalField,
-		            { 'englishName' => 'decimal 1' } )
+		            { 'english_name' => 'decimal 1' } )
 		matchField( XmlSku, 'email1', EmailField )
 		matchField( XmlSku, 'enum1', EnumField,
 		            { 'enums' => QueueHash.new( 'a', 'a', 'b', 'b' ) } )

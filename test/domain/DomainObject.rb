@@ -90,13 +90,13 @@ class TestDomainObject < LafcadioTestCase
 		            { 'enumType' => BooleanField::ENUMS_CAPITAL_YES_NO } )
 		matchField( XmlSku2, 'boolean2', BooleanField,
 		            { 'enums' => { true => 'yin', false => 'yang' },
-		              'englishName' => 'boolean 2' } )
+		              'english_name' => 'boolean 2' } )
 		matchField( XmlSku2, 'date1', DateField, { 'notNull' => false } )
 		matchField( XmlSku2, 'date2', DateField,
 		            { 'range' => DateField::RANGE_PAST } )
 		matchField( XmlSku2, 'dateTime1', DateTimeField )
 		matchField( XmlSku2, 'decimal1', DecimalField,
-		            { 'englishName' => 'decimal 1' } )
+		            { 'english_name' => 'decimal 1' } )
 		matchField( XmlSku2, 'email1', EmailField )
 		matchField( XmlSku2, 'enum1', EnumField,
 		            { 'enums' => QueueHash.new( 'a', 'a', 'b', 'b' ) } )

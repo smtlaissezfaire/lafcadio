@@ -2,7 +2,7 @@
                            table_name="some_other_table">
 	<field name="boolean1" class="BooleanField" enumType="ENUMS_CAPITAL_YES_NO"
 	       notNull="n" />
-	<field name="boolean2" class="BooleanField" englishName="boolean 2"
+	<field name="boolean2" class="BooleanField" english_name="boolean 2"
 	       notNull="n">
 		<enums>
 			<enum key="true">yin</enum>
@@ -12,7 +12,7 @@
 	<field name="date1" class="DateField" notNull="n"/>
 	<field name="date2" class="DateField" range="RANGE_PAST" notNull="n"/>
 	<field name="dateTime1" class="DateTimeField" notNull="n"/>
-	<field name="decimal1" class="DecimalField" englishName="decimal 1"
+	<field name="decimal1" class="DecimalField" english_name="decimal 1"
 	       notNull="n"/>
 	<field name="email1" class="EmailField" notNull="n"/>
 	<field name="enum1" class="EnumField" notNull="n">
