@@ -26,7 +26,7 @@ class TestQuery < LafcadioTestCase
 	def testGetSubsetWithCondition
 		condition = Query::In.new('client', [ 1, 2, 3 ], Invoice)
 		query = Query.new Invoice, condition
-		assert_equal 'select * from invoices where client in(1,2,3)', query.toSql
+		assert_equal 'select * from invoices where client in (1, 2, 3)', query.toSql
 	end
 
 	def testTableJoinsForInheritance

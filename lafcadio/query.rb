@@ -30,6 +30,10 @@ class Query
 				super( methId, *args )
 			end
 		end
+		
+		def in( fieldName, searchTerms )
+			Query::In.new( fieldName, searchTerms, @domainClass )
+		end
 	end
 	
 	class ObjectFieldImpostor

@@ -8,7 +8,7 @@ class Query
 		end
 
 		def toSql
-			"#{ @fieldName } in(#{ @searchTerm.join(',') })"
+			"#{ @fieldName } in (#{ @searchTerm.join(', ') })"
 		end
 
 		def objectMeets(anObj)

@@ -63,4 +63,11 @@ class TestQueryInferrer < LafcadioTestCase
 		desiredSql = "select * from invoices where hours = 10"
 		assert_infer_match( desiredSql, Invoice ) { |inv| inv.hours == 10 }
 	end
+	
+	def testIn
+		desiredSql = "select * from invoices where objId in (1, 2, 3)"
+		assert_infer_match( desiredSql, Invoice ) { |inv|
+			inv.in( 'objId', [ 1, 2, 3 ] )
+		}
+	end
 end
