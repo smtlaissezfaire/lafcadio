@@ -1,0 +1,1 @@
+Lafcadio is an object-relational mapping layer for Ruby and MySQL.https://sourceforge.net/projects/lafcadio/INSTALLATIONRun "./bin/install.rb --help" for information.

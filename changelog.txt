@@ -3,7 +3,7 @@ CHANGELOG
 0.1.0 -- July 1 2003
 Initial alpha release.
 
-0.1.1 -- July 25 2003
+0.1.1 -- July 27 2003
 * extracted DomainUtil from ClassUtil.
 * extended sprintf-style support in DateFormatter.
 * you can set a BooleanField's enums directly with BooleanField#enums
