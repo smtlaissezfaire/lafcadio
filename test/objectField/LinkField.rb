@@ -2,7 +2,6 @@ require 'lafcadio/objectStore'
 require 'lafcadio/test'
 require '../test/mock/domain'
 require 'lafcadio/objectField'
-require '../test/mock/domain/LineItem'
 
 class TestLinkField < LafcadioTestCase
   def setup

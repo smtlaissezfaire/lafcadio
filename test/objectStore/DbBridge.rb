@@ -1,6 +1,5 @@
 require "runit/testcase"
 require '../test/mock/domain'
-require '../test/mock/domain/LineItem'
 require 'lafcadio/query'
 
 class TestDBBridge < Test::Unit::TestCase

@@ -1,7 +1,6 @@
 require 'lafcadio/objectField'
 require 'lafcadio/domain'
 require 'lafcadio/test'
-require '../test/mock/domain/Option'
 
 class Attribute < Lafcadio::DomainObject
 	def Attribute.table_name
@@ -47,6 +46,14 @@ class Client < Lafcadio::DomainObject
   end
 end
 
+module Domain
+	class LineItem < Lafcadio::DomainObject
+		def subtotal
+			@quantity * @price
+		end
+	end
+end
+
 class InternalClient < Client; end
 
 class InventoryLineItem < Lafcadio::DomainObject; end
@@ -83,6 +90,56 @@ class NoXml < Lafcadio::DomainObject
 	def NoXml.get_class_fields; super; end
 	
 	sql_primary_key_name 'no_xml_id'
+end
+
+class Option < Lafcadio::DomainObject
+	def addEditHomepage
+		"admin/ae.rhtml?objectType=Attribute&pk_id=#{attribute.pk_id}"
+	end
+end
+
+class SKU < Lafcadio::DomainObject
+  def SKU.table_name
+    "skus"
+  end
+
+  def SKU.english_name
+		"SKU"
+	end
+
+	def SKU.addEditButtons(fieldManager)
+		aeButtons = QueueHash.new
+		aeButtons["Add another product"] = "cgi-bin/addEdit.rb?objectType=Product"
+		aeButtons["Add another SKU"] =
+				"cgi-bin/addEdit.rb?objectType=SKU&" +
+				"product=#{fieldManager.get('product')}"
+		aeButtons["Submit"] = "admin/catalogMgmt.rhtml"
+		aeButtons
+	end
+
+	def productNamePlusDescription
+		productNamePlusDescription = product.name
+		if description != nil
+			productNamePlusDescription += " - #{description}"
+		end
+		productNamePlusDescription
+	end
+
+	def onSale
+		salePrice != nil && onSaleUntil != nil && Date.today <= onSaleUntil
+	end
+
+	def price
+		if onSale
+			salePrice
+		else
+			standardPrice
+		end
+	end
+
+	def name
+		sku
+	end
 end
 
 class TestAttribute < LafcadioTestCase
@@ -124,5 +181,31 @@ class TestInventoryLineItemOption < LafcadioTestCase
 		ilio.option = TestOption.storedTestOption
 		ObjectStore.get_object_store.commit ilio
 		ilio
+	end
+end
+
+class TestOption < LafcadioTestCase
+	def TestOption.getTestOption
+		Option.new( { "attribute" => TestAttribute.getTestAttribute,
+				"name" => "option name", "pk_id" => 1 } )
+	end
+
+	def TestOption.storedTestOption
+		opt = getTestOption
+		opt.attribute = TestAttribute.storedTestAttribute
+		ObjectStore.get_object_store.commit opt
+		opt
+	end
+end
+
+class TestSKU
+	def TestSKU.getTestSKU
+		SKU.new({ 'pk_id' => 1, 'sku' => 'sku0001', 'standardPrice' => 99.95 })
+	end
+
+	def TestSKU.storedTestSKU
+		sku = TestSKU.getTestSKU
+		Lafcadio::ObjectStore.get_object_store.commit sku
+		sku
 	end
 end
