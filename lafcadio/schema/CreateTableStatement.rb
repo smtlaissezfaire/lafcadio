@@ -10,7 +10,17 @@ class CreateTableStatement
 		require 'lafcadio/objectField/IntegerField'
 		require 'lafcadio/objectField/DateField'
 		require 'lafcadio/objectField/ImageField'
-		if ( field.class <= TextField || field.class <= ImageField )
+		require 'lafcadio/objectField/EnumField'
+		require 'lafcadio/objectField/TextListField'
+		require 'lafcadio/objectField/BooleanField'
+		require 'lafcadio/objectField/DateTimeField'
+		if ( field.class <= EnumField )
+			singleQuotedValues = field.enums.keys.collect! { |enumValue|
+				"'#{ enumValue }'"
+			}
+			"enum( #{ singleQuotedValues.join( ', ' ) } )"
+		elsif ( field.class <= TextField || field.class <= ImageField ||
+		        field.class <= TextListField )
 			'varchar(255)'
 		elsif field.class <= DecimalField
 			"float(10, #{ field.precision })"
@@ -20,6 +30,8 @@ class CreateTableStatement
 			'date'
 		elsif field.class <= BooleanField
 			'bool'
+		elsif field.class <= DateTimeField
+			'datetime'
 		end
 	end
 	
