@@ -24,9 +24,11 @@ class DomainUtil
 				require "#{ domainDir }#{ fileName }"
 			end
 		}
-		LafcadioConfig.new['domainFiles'].split(',').each { |domainFile|
-			require domainFile
-		}
+		if (domainFilesStr = LafcadioConfig.new['domainFiles'])
+			domainFilesStr.split(',').each { |domainFile|
+				require domainFile
+			}
+		end
 		DomainObject.subclasses.each { |subclass|
 			objectType = subclass if subclass.to_s == typeString
 		}

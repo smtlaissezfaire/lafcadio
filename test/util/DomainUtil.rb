@@ -16,4 +16,10 @@ class TestDomainUtil < LafcadioTestCase
 		assert_equal( Class, attributeClass.class )
 		assert_equal( 'Attribute', attributeClass.to_s )
 	end
+	
+	def testGetObjectTypeFromStringWithoutDomainFile
+		LafcadioConfig.setFilename 'test/testData/config_no_domain_file.dat'
+		assert_equal( 'Invoice',
+		              DomainUtil.getObjectTypeFromString( 'Invoice' ).name )
+	end
 end
