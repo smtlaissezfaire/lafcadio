@@ -264,6 +264,14 @@ values( 1, 'sample text' )
 		assert_equal( 1, @object_store.get_max( TestDiffPkRow ) )
 	end
 
+	def test_get_by_domain_class
+		diff_pk_row = TestDiffPkRow.new( 'text_field' => 'sample text' )
+		diff_pk_row.commit
+		test_row = TestRow.new( 'test_diff_pk_row' => diff_pk_row )
+		test_row.commit
+		assert_equal( 1, @object_store.get_test_rows( diff_pk_row ).size )
+	end
+
 	def test_large_result_set
 		num_rows = 1000
 		date_time_field = TestRow.get_field( 'date_time' )

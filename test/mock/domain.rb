@@ -175,15 +175,17 @@ end
 
 class TestInventoryLineItemOption < LafcadioTestCase
 	def TestInventoryLineItemOption.getTestInventoryLineItemOption
-		fieldHash = { 'pk_id' => 1, 'inventoryLineItem' =>
-											TestInventoryLineItem.getTestInventoryLineItem,
-									'option' => TestOption.getTestOption }
-		InventoryLineItemOption.new fieldHash
+		InventoryLineItemOption.new(
+			'pk_id' => 1,
+			'inventory_line_item' => TestInventoryLineItem.getTestInventoryLineItem,
+			'option' => TestOption.getTestOption
+		)
 	end
 
 	def TestInventoryLineItemOption.storedTestInventoryLineItemOption
 		ilio = TestInventoryLineItemOption.getTestInventoryLineItemOption
-		ilio.inventoryLineItem = TestInventoryLineItem.storedTestInventoryLineItem
+		ilio.inventory_line_item =
+				TestInventoryLineItem.storedTestInventoryLineItem
 		ilio.option = TestOption.storedTestOption
 		ObjectStore.get_object_store.commit ilio
 		ilio
@@ -256,6 +258,7 @@ class XmlSku2 < Lafcadio::DomainObject
 	           { 'enums' => Lafcadio::QueueHash.new( '1', '2', '3', '4' ) }
 	integer    'integer1'
 	link       'link1', { 'linked_type' => User, 'delete_cascade' => true }
+	link       'xml_sku', { 'linked_type' => XmlSku }
 	month      'month1'
 	subsetLink 'subsetLink1', { 'subset_field' => 'xmlSku' }
 	text       'text1', { 'size' => 16, 'unique' => true }

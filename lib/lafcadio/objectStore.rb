@@ -443,7 +443,7 @@ module Lafcadio
 		def get_db_bridge; @dbBridge; end
 		
 		def get_field_name( domain_object )
-			domain_object.domain_class.basename.decapitalize
+			domain_object.domain_class.basename.camel_case_to_underscore
 		end
 
 		def get_filtered(domain_class_name, searchTerm, fieldName = nil) #:nodoc:
