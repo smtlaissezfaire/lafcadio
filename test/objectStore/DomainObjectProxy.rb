@@ -45,4 +45,10 @@ class TestDomainObjectProxy < LafcadioTestCase
 		assert (@clientProxy.eql? (@client))
 		assert_equal(@mockObjectStore.getClient(1).hash, @clientProxy.hash)
 	end
+
+	def testFieldSettable
+		@clientProxy.name = 'new client name'
+		client = @clientProxy.getDbObject
+		assert_equal( 'new client name', client.name )
+	end
 end

@@ -25,8 +25,8 @@ class DomainObjectProxy
 		Context.instance.getObjectStore.get(@objectType, @objId)
 	end
 
-	def method_missing(methodId)
-		getDbObject.send(methodId.id2name)
+	def method_missing(methodId, *args)
+		getDbObject.send(methodId.id2name, *args)
 	end
 
 	def to_s
