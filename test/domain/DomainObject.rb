@@ -64,6 +64,10 @@ class TestDomainObject < LafcadioTestCase
 		assert_exception( FieldValueError ) {
 			XmlSku.new( 'enum1' => 'c', 'email1' => 'bill@bill.bill' )
 		}
+		assert_exception( FieldValueError ) {
+			XmlSku.new( 'textList1' => 'a,b,c', 'email1' => 'bill@bill.bill',
+			            'enum1' => 'a', 'enum2' => '1' )
+		}
 	end
 	
 	def test_class_fields_from_one_line_class_methods

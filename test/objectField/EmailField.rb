@@ -10,6 +10,8 @@ class TestEmailField < LafcadioTestCase
 		rescue FieldValueError
 			# ok
 		end
+		field.notNull = false
+		field.verify( nil, 1 )
 	end
 
 	def testValidAddress

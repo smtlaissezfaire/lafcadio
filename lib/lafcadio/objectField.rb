@@ -101,16 +101,18 @@ module Lafcadio
 			if value.nil? && notNull
 				raise FieldValueError, nullErrorMsg, caller
 			end
-			if value
-				valueType = self.class.valueType
-				unless value.class <= valueType
-					raise( FieldValueError, 
-					       "#{ objectType.name }##{ name } needs a " + valueType.name +
-								     " value.",
-					       caller )
-				end
-				verifyUniqueness(value, pkId) if unique
+			verify_non_nil( value, pkId ) if value
+		end
+
+		def verify_non_nil( value, pkId )
+			valueType = self.class.valueType
+			unless value.class <= valueType
+				raise( FieldValueError, 
+				       "#{ objectType.name }##{ name } needs a " + valueType.name +
+				           " value.",
+				       caller )
 			end
+			verifyUniqueness(value, pkId) if unique
 		end
 
 		def verifyUniqueness(value, pkId) #:nodoc:
@@ -352,7 +354,7 @@ module Lafcadio
 			"Please enter an email address."
 		end
 
-		def verify(value, pkId) #:nodoc:
+		def verify_non_nil(value, pkId) #:nodoc:
 			super(value, pkId)
 			if !EmailField.validAddress(value)
 				raise( FieldValueError,
@@ -423,7 +425,7 @@ module Lafcadio
 			value != '' ?(super(value)) : 'null'
 		end
 		
-		def verify( value, pkId ) #:nodoc:
+		def verify_non_nil( value, pkId ) #:nodoc:
 			super
 			if @enums[value].nil?
 				key_str = '[ ' +
@@ -489,7 +491,7 @@ module Lafcadio
 			end
 		end
 
-		def verify(value, pkId) #:nodoc:
+		def verify_non_nil(value, pkId) #:nodoc:
 			super
 			if @linkedType != @objectType && pkId
 				subsetLinkField = @linkedType.classFields.find { |field|
@@ -580,6 +582,10 @@ module Lafcadio
 	# For example, a SQL field with the value "john,bill,dave", then the Ruby 
 	# field will have the value <tt>[ "john", "bill", "dave" ]</tt>.
 	class TextListField < ObjectField
+		def self.valueType #:nodoc:
+			Array
+		end
+
 		def valueForSQL(objectValue) #:nodoc:
 			"'" + objectValue.join(',') + "'"
 		end
