@@ -1,5 +1,5 @@
 require 'lafcadio/domain'
-require 'lafcadio/util/QueueHash'
+require 'lafcadio/util'
 
 class SKU < Lafcadio::DomainObject
   def SKU.tableName

@@ -1,9 +1,10 @@
+require 'lafcadio/util'
+
 module Lafcadio
 	class UsStates
 		# Returns a QueueHash of states, with two-letter postal codes as keys and 
 		# state names as values.
 		def self.states
-			require 'lafcadio/util/QueueHash'
 			QueueHash.new( 'AL', 'Alabama', 'AK', 'Alaska', 'AZ', 'Arizona',
 			               'AR', 'Arkansas', 'CA', 'California', 'CO', 'Colorado',
 			               'CT', 'Connecticut', 'DE', 'Delaware',

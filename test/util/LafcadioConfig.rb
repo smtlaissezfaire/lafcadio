@@ -1,4 +1,4 @@
-require 'lafcadio/util/LafcadioConfig'
+require 'lafcadio/util'
 require 'runit/testcase'
 
 class TestConfig < RUNIT::TestCase

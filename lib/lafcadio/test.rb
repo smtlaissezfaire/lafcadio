@@ -1,6 +1,6 @@
 require 'runit/testcase'
 require 'lafcadio/mock'
-require 'lafcadio/util/LafcadioConfig'
+require 'lafcadio/util'
 
 # A test case that sets up a number of mock services. In writing an application 
 # that uses Lafcadio you may find it convenient to inherit from this class.

@@ -407,7 +407,6 @@ module Lafcadio
 		#               this field.
 		# [englishName] The English name of this field. (Deprecated)
 		def initialize(objectType, name, enums, englishName = nil)
-			require 'lafcadio/util/QueueHash'
 			super objectType, name, englishName
 			if enums.class == Array 
 				@enums = QueueHash.newFromArray enums

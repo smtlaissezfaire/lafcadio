@@ -1,5 +1,5 @@
 require 'lafcadio/test'
-require 'lafcadio/util/QueueHash'
+require 'lafcadio/util'
 
 class TestQueueHash < LafcadioTestCase
   def setup
