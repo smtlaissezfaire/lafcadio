@@ -64,7 +64,9 @@ class ClassDefinitionXmlParser
 		rexmlDoc = REXML::Document.new( file )
 		rexmlDoc.root.elements.each('field') { |fieldElt|
 			fieldClass = ClassUtil.getClass( fieldElt.attributes['class'] )
-			field = fieldClass.new( @domainClass, fieldElt.attributes['name'] )
+			englishName = fieldElt.attributes['englishName']
+			field = fieldClass.new( @domainClass, fieldElt.attributes['name'],
+			                        englishName )
 			possibleFieldAttributes.each { |fieldAttr|
 				fieldAttr.maybeSetFieldAttr( field, fieldElt )
 			}

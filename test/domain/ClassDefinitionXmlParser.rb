@@ -21,7 +21,8 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		matchField( XmlSku, 'boolean1', BooleanField,
 		            { 'enumType' => BooleanField::ENUMS_CAPITAL_YES_NO } )
 		matchField( XmlSku, 'boolean2', BooleanField,
-		            { 'enums' => { true => 'yin', false => 'yang' } } )
+		            { 'enums' => { true => 'yin', false => 'yang' },
+		              'englishName' => 'boolean 2' } )
 
 		matchField( XmlSku, 'sku', TextField, { 'size' => 16, 'unique' => true } )
 		matchField( XmlSku, 'standardPrice', MoneyField )
