@@ -41,9 +41,11 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		            { 'enums' => QueueHash.new( '1', '2', '3', '4' ) } )
 		matchField( XmlSku, 'integer1', IntegerField )
 		matchField( XmlSku, 'link1', LinkField, { 'linkedType' => User } )
-		
-		matchField( XmlSku, 'sku', TextField, { 'size' => 16, 'unique' => true } )
-		matchField( XmlSku, 'standardPrice', MoneyField )
+		matchField( XmlSku, 'money1', MoneyField )
+		matchField( XmlSku, 'month1', MonthField )
+		matchField( XmlSku, 'text1', TextField, { 'size' => 16, 'unique' => true } )
+		matchField( XmlSku, 'text2', TextField, { 'large' => true } )
+
 		matchField( XmlSku, 'description', TextField, { 'notNull' => false } )
 		matchField( XmlSku, 'salePrice', MoneyField, { 'notNull' => false } )
 		matchField( XmlSku, 'size', TextField, { 'notNull' => false } )

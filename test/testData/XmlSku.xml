@@ -26,9 +26,11 @@
 	</field>
 	<field name="integer1" class="IntegerField" />
 	<field name="link1" class="LinkField" linkedType="User" />
-	
-	<field name="sku" class="TextField" size="16" unique="y"/>
-	<field name="standardPrice" class="MoneyField"/>
+	<field name="money1" class="MoneyField"/>
+	<field name="month1" class="MonthField"/>
+	<field name="text1" class="TextField" size="16" unique="y"/>
+	<field name="text2" class="TextField" large="y"/>
+
 	<field name="description" class="TextField" notNull="n"/>
 	<field name="salePrice" class="MoneyField" notNull="n"/>
 	<field name="size" class="TextField" notNull="n"/>

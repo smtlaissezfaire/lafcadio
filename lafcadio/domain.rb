@@ -89,5 +89,6 @@ class ClassDefinitionXmlParser
 		fieldAttr << FieldAttribute.new( 'enums', FieldAttribute::HASH )
 		fieldAttr << FieldAttribute.new( 'range', FieldAttribute::ENUM,
 		                                 DateField )
+		fieldAttr << FieldAttribute.new( 'large', FieldAttribute::BOOLEAN )
 	end
 end
