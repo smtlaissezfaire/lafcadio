@@ -6,27 +6,6 @@ class SKU < DomainObject
     "skus"
   end
 
-  def SKU.classFields(fieldSet = "default")
-		require 'lafcadio/objectField/TextField'
-		require 'lafcadio/objectField/LinkField'
-		require 'lafcadio/objectField/MoneyField'
-		require 'lafcadio/objectField/DateField'
-    skuField = TextField.new self, "sku", "SKU"
-    skuField.size = 16
-    skuField.unique = true
-    standardPriceField = MoneyField.new self, "standardPrice"
-    descField = TextField.new self, "description"
-    descField.notNull = false
-		salePrice = MoneyField.new self, "salePrice"
-		salePrice.notNull = false
-		onSaleUntil = DateField.new self, "onSaleUntil"
-		onSaleUntil.notNull = false
-		sizeField = TextField.new self, 'size'
-		sizeField.notNull = false
-    [ skuField, standardPriceField, descField, sizeField, salePrice,
-			onSaleUntil ]
-  end
-
   def SKU.englishName
 		"SKU"
 	end

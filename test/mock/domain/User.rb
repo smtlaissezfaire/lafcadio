@@ -5,21 +5,6 @@ require 'lafcadio/objectField/TextField'
 require 'lafcadio/objectField/BooleanField'
 
 class User < DomainObject
-  def User.classFields
-    fields = []
-    emailField = EmailField.new User
-    emailField.unique = true
-    emailField.writeOnce = true
-		emailField.notUniqueMsg = <<-MSG
-A profile already exists for the email address that you have entered.
-Please choose another email address.
-		MSG
-		fields << emailField
-		fields <<(TextField.new(self, 'firstNames'))
-		fields << BooleanField.new( self, 'administrator' )
-    fields
-  end
-
   def User.fieldHash
     fieldHash = { "salutation" => "Mr", "firstNames" => "Francis",
 		  "lastName" => "Hwang", "phone" => "", "address1" => "",

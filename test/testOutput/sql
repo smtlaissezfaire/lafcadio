@@ -10,3 +10,11 @@ Wed Oct 22 08:39:15 EDT 2003: delete from clients where objId=1
 Wed Oct 22 08:41:21 EDT 2003: select * from clients
 Wed Oct 22 08:41:40 EDT 2003: select * from clients
 Wed Oct 22 08:44:20 EDT 2003: select * from clients
+Sun Oct 26 10:36:27 EST 2003: select * from clients
+Sun Oct 26 10:37:00 EST 2003: select * from clients
+Sun Oct 26 10:40:38 EST 2003: select * from clients
+Sun Oct 26 10:43:33 EST 2003: select * from clients
+Sun Oct 26 10:44:31 EST 2003: select * from clients
+Sun Oct 26 10:46:48 EST 2003: select * from clients
+Sun Oct 26 10:48:47 EST 2003: select * from clients
+Sun Oct 26 10:53:30 EST 2003: select * from clients

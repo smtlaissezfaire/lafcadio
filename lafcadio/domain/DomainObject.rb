@@ -42,6 +42,7 @@ class DomainObject
 	# method to return an array of ObjectField instances. You don't have to define
 	# an ObjectField instance for "objId".
 	def DomainObject.getClassFields
+		require 'lafcadio/domain'
 		dirName = LafcadioConfig.new['classDefinitionDir']
 		xmlFileName = ClassUtil.bareClassName( self ) + '.xml'
 		xmlPath = File.join( dirName, xmlFileName )
