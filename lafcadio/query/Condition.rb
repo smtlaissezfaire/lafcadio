@@ -1,3 +1,6 @@
+class MissingError < RuntimeError
+end
+
 class Query
 	# The abstract base class for all the other subconditions. Subclasses need to 
 	# define two different methods:
@@ -37,7 +40,13 @@ class Query
 				field = anObjectType.getField @fieldName
 				anObjectType = anObjectType.superclass
 			end
-			field
+			if field
+				field
+			else
+				errStr = "Couldn't find field \"#{ @fieldName }\" in " +
+				         "#{ @objectType } domain class"
+				raise( MissingError, errStr, caller )
+			end
 		end
 	end
 end
