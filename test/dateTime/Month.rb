@@ -3,20 +3,20 @@ require 'lafcadio/test'
 
 class TestMonth < LafcadioTestCase
 	def setup
-		@jan2000 = Month.new 1, 2000
-		@dec2000 = Month.new 12, 2000
-		@jan2001 = Month.new 1, 2001
+		@jan2000 = Month.new 2000, 1
+		@dec2000 = Month.new 2000, 12
+		@jan2001 = Month.new 2001, 1
 	end
 
 	def testChecksMonth
 		caught = false
 		begin
-			Month.new 2000, 1
+			Month.new 1, 2000
 		rescue
 			caught = true
 		end
 		assert caught
-		Month.new 1, 2000
+		Month.new 2000, 1
 	end
 
 	def testCompare
@@ -28,7 +28,7 @@ class TestMonth < LafcadioTestCase
 	end
 
 	def testHashable
-		newJan2000 = Month.new(1, 2000)
+		newJan2000 = Month.new( 2000, 1 )
 		assert_equal @jan2000, newJan2000
 		assert_equal @jan2000.hash, newJan2000.hash
 		assert( @jan2000.eql?( newJan2000 ) )
@@ -45,10 +45,10 @@ class TestMonth < LafcadioTestCase
 	end
 	
 	def testArithmetic
-		assert_equal( Month.new( 2, 2000 ), @jan2000 + 1 )
-		assert_equal( Month.new( 1, 2001 ), @jan2000 + 12 )
-		assert_equal( Month.new( 10, 1999 ), @jan2000 - 3 )
-		assert_equal( Month.new( 10, 1999 ), @jan2000 + -3 )
+		assert_equal( Month.new( 2000, 2 ), @jan2000 + 1 )
+		assert_equal( Month.new( 2001, 1 ), @jan2000 + 12 )
+		assert_equal( Month.new( 1999, 10 ), @jan2000 - 3 )
+		assert_equal( Month.new( 1999, 10 ), @jan2000 + -3 )
 	end
 	
 	def testPrevNext
@@ -60,6 +60,6 @@ class TestMonth < LafcadioTestCase
 	def testStartDateAndEndDate
 		assert_equal( Date.new( 2000, 12, 1 ), @dec2000.start_date )
 		assert_equal( Date.new( 2000, 12, 31 ), @dec2000.end_date )
-		assert_equal( Date.new( 1999, 2, 28 ), Month.new( 2, 1999 ).end_date )
+		assert_equal( Date.new( 1999, 2, 28 ), Month.new( 1999, 2 ).end_date )
 	end
 end

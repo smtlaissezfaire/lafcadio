@@ -16,7 +16,7 @@ module Lafcadio
 
 		# A new month can be set to a specific +month+ and +year+, or you can call 
 		# Month.new with no arguments to receive the current month.
-		def initialize( month = nil, year = nil )
+		def initialize( year = nil, month = nil )
 			require 'date'
 			if month.nil? || year.nil?
 				date = Date.today
@@ -37,7 +37,7 @@ module Lafcadio
 				resultMonth -= 12
 				resultYear += 1
 			end
-			Month.new( resultMonth, resultYear )
+			Month.new( resultYear, resultMonth )
 		end
 		
 		# Returns a new Month that is +amountToSubtract+ months earlier.
