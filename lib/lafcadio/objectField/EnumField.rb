@@ -15,15 +15,24 @@ module Lafcadio
 	# enums as the +enums+ argument.
 	#
 	class EnumField < TextField
-		def EnumField.instantiationParameters( fieldElt ) #:nodoc:
+		def self.instantiateWithParameters( domainClass, parameters ) #:nodoc:
+			self.new( domainClass, parameters['name'], parameters['enums'],
+								parameters['englishName'] )
+		end
+
+		def self.enum_queue_hash( fieldElt )
+			enumValues = []
+			fieldElt.elements.each( 'enums/enum' ) { |enumElt|
+				enumValues << enumElt.attributes['key']
+				enumValues << enumElt.text.to_s
+			}
+			QueueHash.new( *enumValues )
+		end
+
+		def self.instantiationParameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			if fieldElt.elements['enums'][1].attributes['key']
-				enumValues = []
-				fieldElt.elements.each( 'enums/enum' ) { |enumElt|
-					enumValues << enumElt.attributes['key']
-					enumValues << enumElt.text.to_s
-				}
-				parameters['enums'] = QueueHash.new( *enumValues )
+				parameters['enums'] = enum_queue_hash( fieldElt )
 			else
 				parameters['enums'] = []
 				fieldElt.elements.each( 'enums/enum' ) { |enumElt|
@@ -33,11 +42,6 @@ module Lafcadio
 			parameters
 		end
 		
-		def EnumField.instantiateWithParameters( domainClass, parameters ) #:nodoc:
-			self.new( domainClass, parameters['name'], parameters['enums'],
-								parameters['englishName'] )
-		end
-
 		attr_reader :enums
 
 		# [objectType]  The domain class that this field belongs to.

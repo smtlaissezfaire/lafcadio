@@ -6,7 +6,7 @@ module Lafcadio
 	# valid email address.
 	class EmailField < TextField
 		# Is +address+ a valid email address?
-		def EmailField.validAddress(address)
+		def self.validAddress(address)
 			address =~ /^[^ @]+@[^ \.]+\.[^ ,]+$/
 		end
 

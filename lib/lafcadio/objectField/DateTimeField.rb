@@ -4,10 +4,6 @@ require 'lafcadio/objectField/ObjectField'
 module Lafcadio
 	# DateTimeField represents a DateTime.
 	class DateTimeField < ObjectField
-		def valueFromSQL(dbi_value, lookupLink = true) # :nodoc:
-			dbi_value ? dbi_value.to_time : nil
-		end
-
 		def valueForSQL(value) # :nodoc:
 			if value
 				year = value.year
@@ -20,6 +16,10 @@ module Lafcadio
 			else
 				"null"
 			end
+		end
+
+		def valueFromSQL(dbi_value, lookupLink = true) # :nodoc:
+			dbi_value ? dbi_value.to_time : nil
 		end
 	end
 end

@@ -5,19 +5,19 @@ module Lafcadio
 	class DecimalField < ObjectField
 		attr_reader :precision
 
-		def DecimalField.valueType #:nodoc:
-			Numeric
+		def self.instantiateWithParameters( domainClass, parameters ) #:nodoc:
+			self.new( domainClass, parameters['name'], parameters['precision'],
+								parameters['englishName'] )
 		end
 
-		def DecimalField.instantiationParameters( fieldElt ) #:nodoc:
+		def self.instantiationParameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			parameters['precision'] = fieldElt.attributes['precision'].to_i
 			parameters
 		end
 		
-		def self.instantiateWithParameters( domainClass, parameters ) #:nodoc:
-			self.new( domainClass, parameters['name'], parameters['precision'],
-								parameters['englishName'] )
+		def self.valueType #:nodoc:
+			Numeric
 		end
 
 		# [objectType]  The domain class that this field belongs to.
@@ -29,13 +29,13 @@ module Lafcadio
 			@precision = precision
 		end
 
-		def valueFromSQL(string, lookupLink = true) #:nodoc:
-			string != nil ? string.to_f : nil
-		end
-
 		def processBeforeVerify(value) #:nodoc:
 			value = super value
 			value != nil && value != '' ? value.to_f : nil
+		end
+
+		def valueFromSQL(string, lookupLink = true) #:nodoc:
+			string != nil ? string.to_f : nil
 		end
 	end
 end
