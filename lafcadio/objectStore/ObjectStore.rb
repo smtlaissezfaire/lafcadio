@@ -5,6 +5,7 @@ require 'lafcadio/objectStore/Committer'
 require 'lafcadio/objectStore/DbBridge'
 require 'lafcadio/util/Context'
 require 'lafcadio/util/ContextualService'
+require 'lafcadio/util/DomainUtil'
 
 class ObjectStore < ContextualService
 	def ObjectStore.setDbName (dbName)
@@ -60,7 +61,7 @@ class ObjectStore < ContextualService
 		methodName = methodId.id2name
 		begin
 			methodName =~ /^get(.*)$/
-			objectType = ClassUtil.getObjectTypeFromString $1
+			objectType = DomainUtil.getObjectTypeFromString $1
 			get objectType, args[0]
 		rescue CouldntMatchObjectTypeError
 			subsystems = [ @collector, @dbBridge, @retriever ]

@@ -11,7 +11,9 @@ class Collector
   end
 
 	def getFiltered (objectTypeName, searchTerm, fieldName = nil)
-		objectType = ClassUtil.getObjectTypeFromString objectTypeName
+		require 'lafcadio/util/DomainUtil'
+
+		objectType = DomainUtil.getObjectTypeFromString objectTypeName
 		unless fieldName
 			fieldName = ClassUtil.bareClassName(searchTerm.objectType)
 			fieldName = StrUtil.decapitalize fieldName

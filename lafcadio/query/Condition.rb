@@ -1,5 +1,3 @@
-require 'lafcadio/domain/DomainObject'
-
 class Query
 	class Condition
 		def Condition.searchTermType
@@ -9,6 +7,8 @@ class Query
 		attr_reader :objectType
 
 		def initialize (fieldName, searchTerm, objectType)
+			require 'lafcadio/domain/DomainObject'
+
 			@fieldName = fieldName
 			@searchTerm = searchTerm
 			unless @searchTerm.type <= self.type.searchTermType

@@ -1,4 +1,3 @@
-require 'lafcadio/util/Context'
 require 'lafcadio/util/EnglishUtil'
 require 'lafcadio/objectField/FieldViewer'
 require 'lafcadio/objectField/FieldValueError'
@@ -19,6 +18,8 @@ class ObjectField
   end
 
   def initialize (objectType, name, englishName = nil)
+		require 'lafcadio/objectStore/ObjectStore'
+
     @objectType = objectType
     @name = name
 		@dbFieldName = @name
@@ -31,7 +32,7 @@ class ObjectField
     @hideLabel = false
     @unique = false
     @default = nil
-    @objectStore = Context.instance.getObjectStore
+    @objectStore = ObjectStore.getObjectStore
   end
 
   def nullErrorMsg

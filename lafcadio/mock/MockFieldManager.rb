@@ -10,7 +10,7 @@ class MockFieldManager < FieldManager
     objTypeString = initHash["objectType"]
     if objTypeString != nil
       objTypeString = objTypeString.read if objTypeString.type == Tempfile
-      @objectType = ClassUtil.getObjectTypeFromString objTypeString
+      @objectType = DomainUtil.getObjectTypeFromString objTypeString
       @objectType.classFields.each { |field|
         @imageFields << field.name if field.type == ImageField
       }
@@ -26,7 +26,7 @@ class MockFieldManager < FieldManager
 			@valueHash.set(key, value)
     }
 		if (objectTypeString = get('objectType'))
-			@objectType = ClassUtil.getObjectTypeFromString objectTypeString
+			@objectType = DomainUtil.getObjectTypeFromString objectTypeString
 		end
   end
 end

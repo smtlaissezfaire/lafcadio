@@ -50,7 +50,7 @@ class FieldManager
   def getObjectType (key = "objectType")
 		objTypeString = get key
 		if (objTypeString && objTypeString != '')
-			ClassUtil.getObjectTypeFromString get(key)
+			DomainUtil.getObjectTypeFromString get(key)
 		end
   end
 
