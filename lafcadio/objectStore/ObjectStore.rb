@@ -79,12 +79,11 @@ class ObjectStore < ContextualService
 	end
 
 	def method_missing(methodId, *args)
-		require 'lafcadio/util/DomainUtil'
 		require 'lafcadio/objectStore/CouldntMatchObjectTypeError'
 		methodName = methodId.id2name
 		begin
 			methodName =~ /^get(.*)$/
-			objectType = DomainUtil.getObjectTypeFromString $1
+			objectType = DomainObject.getObjectTypeFromString $1
 			if args[0].class <= Integer
 				get objectType, args[0]
 			elsif args[0].class <= DomainObject

@@ -25,7 +25,7 @@ class Collector
 
 	def dispatch_get_method( objectTypeName, searchTerm, fieldName )
 		if block_given? && searchTerm.nil?
-			domain_class = DomainUtil.getObjectTypeFromString( objectTypeName )
+			domain_class = DomainObject.getObjectTypeFromString( objectTypeName )
 			inferrer = Query::Inferrer.new( domain_class ) { |obj| yield( obj ) }
 			@objectStore.getSubset( inferrer.execute )
 		elsif !block_given? && !searchTerm.nil?
@@ -39,8 +39,7 @@ class Collector
 
 	def getFiltered(objectTypeName, searchTerm, fieldName = nil)
 		require 'lafcadio/query/Link'
-		require 'lafcadio/util/DomainUtil'
-		objectType = DomainUtil.getObjectTypeFromString objectTypeName
+		objectType = DomainObject.getObjectTypeFromString objectTypeName
 		unless fieldName
 			fieldName = searchTerm.objectType.bareName
 			fieldName = StrUtil.decapitalize fieldName
@@ -54,7 +53,7 @@ class Collector
 	end
 
 	def getMapped(searchTerm, resultTypeName)
-		resultType = DomainUtil.getObjectTypeFromString resultTypeName
+		resultType = DomainObject.getObjectTypeFromString resultTypeName
 		coll = []
 		firstTypeName = searchTerm.class.bareName
 		secondTypeName = resultType.bareName

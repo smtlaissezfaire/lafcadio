@@ -4,7 +4,7 @@ class LinkField < ObjectField
 	def LinkField.instantiationParameters( fieldElt )
 		parameters = super( fieldElt )
 		linkedTypeStr = fieldElt.attributes['linkedType']
-		linkedType = DomainUtil.getObjectTypeFromString( linkedTypeStr )
+		linkedType = DomainObject.getObjectTypeFromString( linkedTypeStr )
 		parameters['linkedType'] = linkedType
 		parameters
 	end
