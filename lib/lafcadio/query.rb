@@ -249,11 +249,13 @@ module Lafcadio
 			end
 
 			def toSql
-				useFieldForSqlValue = ( @fieldName != @objectType.sqlPrimaryKeyName &&
-				                        !( getField.class <= LinkField ) )
-				search_val = ( useFieldForSqlValue ?
-				               getField.valueForSQL(@searchTerm).to_s :
-				               @searchTerm.to_s )
+				not_pk = @fieldName != @objectType.sqlPrimaryKeyName
+				use_field_for_sql_value = ( not_pk &&
+				                            ( !( getField.class <= LinkField ) ||
+																		  @searchTerm.respond_to?( :objectType ) ) )
+				search_val = ( use_field_for_sql_value ?
+				               getField.valueForSQL( @searchTerm ).to_s :
+											 @searchTerm.to_s )
 				"#{ dbFieldName } #{ @@comparators[@compareType] } " + search_val
 			end
 
