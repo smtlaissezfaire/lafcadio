@@ -28,7 +28,7 @@ module Lafcadio
 			update_dependent_domain_objects if @dbObject.delete
 			@dbBridge.commit @dbObject
 			unless @dbObject.pkId
-				@dbObject.pkId = @dbBridge.lastPkIdInserted
+				@dbObject.pkId = @dbBridge.last_pk_id_inserted
 			end
 			@dbObject.post_commit_trigger
 		end
@@ -76,7 +76,7 @@ module Lafcadio
 
 	class DbBridge #:nodoc:
 		@@dbh = nil
-		@@lastPkIdInserted = nil
+		@@last_pk_id_inserted = nil
 		
 		def self._load(aString)
 			aString =~ /dbh:/
@@ -107,14 +107,14 @@ module Lafcadio
 			if sqlMaker.sqlStatements[0].first =~ /insert/
 				sql = 'select last_insert_id()'
 				result = execute_select( sql )
-				@@lastPkIdInserted = result[0]['last_insert_id()'].to_i
+				@@last_pk_id_inserted = result[0]['last_insert_id()'].to_i
 			end
 		end
 		
 		def execute_commit( sql, binds ); @db_conn.do( sql, *binds ); end
 		
 		def execute_select(sql)
-			maybeLog sql
+			maybe_log sql
 			begin
 				@db_conn.select_all( sql )
 			rescue DBI::DatabaseError => e
@@ -140,9 +140,9 @@ module Lafcadio
 			}
 		end
 
-		def lastPkIdInserted; @@lastPkIdInserted; end
+		def last_pk_id_inserted; @@last_pk_id_inserted; end
 		
-		def maybeLog(sql)
+		def maybe_log(sql)
 			config = LafcadioConfig.new
 			if config['logSql'] == 'y'
 				sqllog = Log4r::Logger['sql'] || Log4r::Logger.new( 'sql' )
@@ -238,7 +238,7 @@ module Lafcadio
 			@dbObject = nil
 		end
 
-		def getDbObject
+		def get_db_object
 			object_store = ObjectStore.get_object_store
 			if @dbObject.nil? || needs_refresh?
 				@dbObject = object_store.get(@object_type, @pkId)
@@ -249,11 +249,11 @@ module Lafcadio
 		end
 
 		def hash
-			getDbObject.hash
+			get_db_object.hash
 		end
 
 		def method_missing(methodId, *args)
-			getDbObject.send(methodId.id2name, *args)
+			get_db_object.send(methodId.id2name, *args)
 		end
 
 		def needs_refresh?
@@ -263,7 +263,7 @@ module Lafcadio
 		end
 		
 		def to_s
-			getDbObject.to_s
+			get_db_object.to_s
 		end
 	end
 

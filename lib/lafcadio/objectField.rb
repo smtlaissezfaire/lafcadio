@@ -226,11 +226,11 @@ module Lafcadio
 			@enums = nil
 		end
 
-		def falseEnum # :nodoc:
-			getEnums[false]
+		def false_enum # :nodoc:
+			get_enums[false]
 		end
 
-		def getEnums( value = nil ) # :nodoc:
+		def get_enums( value = nil ) # :nodoc:
 			if @enums
 				@enums
 			elsif @enumType == ENUMS_ONE_ZERO
@@ -246,25 +246,25 @@ module Lafcadio
 			end
 		end
 
-		def textEnumType # :nodoc:
+		def text_enum_type # :nodoc:
 			@enums ? @enums[true].class == String : @enumType == ENUMS_CAPITAL_YES_NO
 		end
 
-		def trueEnum( value = nil ) # :nodoc:
-			getEnums( value )[true]
+		def true_enum( value = nil ) # :nodoc:
+			get_enums( value )[true]
 		end
 
 		def value_for_sql(value) # :nodoc:
 			if value
-				vfs = trueEnum
+				vfs = true_enum
 			else
-				vfs = falseEnum
+				vfs = false_enum
 			end
-			textEnumType ? "'#{vfs}'" : vfs
+			text_enum_type ? "'#{vfs}'" : vfs
 		end
 
 		def value_from_sql(value, lookupLink = true) # :nodoc:
-			value == trueEnum( value )
+			value == true_enum( value )
 		end
 	end
 
@@ -342,7 +342,7 @@ module Lafcadio
 	# valid email address.
 	class EmailField < TextField
 		# Is +address+ a valid email address?
-		def self.validAddress(address)
+		def self.valid_address(address)
 			address =~ /^[^ @]+@[^ \.]+\.[^ ,]+$/
 		end
 
@@ -356,7 +356,7 @@ module Lafcadio
 
 		def verify_non_nil(value, pkId) #:nodoc:
 			super(value, pkId)
-			if !EmailField.validAddress(value)
+			if !EmailField.valid_address(value)
 				raise( FieldValueError,
 				       "#{ object_type.name }##{ name } needs a valid email address.",
 				       caller )

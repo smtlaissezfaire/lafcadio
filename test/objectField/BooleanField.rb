@@ -33,7 +33,7 @@ class TestBooleanField < LafcadioTestCase
 	def test_raise_error_if_no_enums_available
 		@bf.enumType = 999
 		begin
-			@bf.getEnums
+			@bf.get_enums
 			fail "should raise MissingError"
 		rescue MissingError
 			# ok

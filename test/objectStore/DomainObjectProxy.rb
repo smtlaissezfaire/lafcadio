@@ -31,9 +31,9 @@ class TestDomainObjectProxy < LafcadioTestCase
 	end
 
 	def testGetDbObject
-		assert_equal @client, @clientProxy.getDbObject
+		assert_equal @client, @clientProxy.get_db_object
 		begin
-			@clientProxy2.getDbObject
+			@clientProxy2.get_db_object
 			fail "should throw DomainObjectNotFoundError"
 		rescue DomainObjectNotFoundError
 			# ok
@@ -48,7 +48,7 @@ class TestDomainObjectProxy < LafcadioTestCase
 
 	def testFieldSettable
 		@clientProxy.name = 'new client name'
-		client = @clientProxy.getDbObject
+		client = @clientProxy.get_db_object
 		assert_equal( 'new client name', client.name )
 	end
 	

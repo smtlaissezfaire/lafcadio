@@ -15,17 +15,17 @@ class TestMockDBBridge < LafcadioTestCase
   end
 
   def testLastPkIdInserted
-		assert_equal nil, @mockDbBridge.lastPkIdInserted
+		assert_equal nil, @mockDbBridge.last_pk_id_inserted
     client = Client.new( { "name" => "clientName1" } )
     @mockDbBridge.commit client
-    assert_equal 1, @mockDbBridge.lastPkIdInserted
+    assert_equal 1, @mockDbBridge.last_pk_id_inserted
     assert_nil( client.pkId )
 		client2 = Client.new({ 'pkId' => 2 })
 		@mockDbBridge.commit client2
 		assert_equal 2, client2.pkId
 		client3 = Client.new({ })
 		@mockDbBridge.commit client3
-		assert_equal 3, @mockDbBridge.lastPkIdInserted
+		assert_equal 3, @mockDbBridge.last_pk_id_inserted
     assert_nil( client3.pkId )
   end
 

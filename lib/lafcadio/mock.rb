@@ -2,7 +2,7 @@ require 'lafcadio/objectStore'
 
 module Lafcadio
 	class MockDbBridge #:nodoc:
-		attr_reader :lastPkIdInserted, :retrievalsByType, :query_count
+		attr_reader :last_pk_id_inserted, :retrievalsByType, :query_count
 
 		def initialize
 			@objects = {}
@@ -48,8 +48,8 @@ module Lafcadio
 				get_objects_by_domain_class( dbObject.object_type ).keys.each { |pkId|
 					maxpkId = pkId if pkId > maxpkId
 				}
-				@lastPkIdInserted = maxpkId + 1
-				object_pkId = @lastPkIdInserted
+				@last_pk_id_inserted = maxpkId + 1
+				object_pkId = @last_pk_id_inserted
 			end
 			object_pkId
 		end

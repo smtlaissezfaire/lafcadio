@@ -15,13 +15,13 @@ class TestEmailField < LafcadioTestCase
 	end
 
 	def testValidAddress
-		assert !EmailField.validAddress('a@a')
-		assert !EmailField.validAddress('a.a@a')
-		assert !EmailField.validAddress('a.a.a')
-		assert !EmailField.validAddress('a')
-		assert EmailField.validAddress('a@a.a')
-		assert EmailField.validAddress('a,a@a.a')
-		assert !EmailField.validAddress('a@a.a, my_friend_too@a.a')
-		assert !EmailField.validAddress('cant have spaces @ this. that')
+		assert !EmailField.valid_address('a@a')
+		assert !EmailField.valid_address('a.a@a')
+		assert !EmailField.valid_address('a.a.a')
+		assert !EmailField.valid_address('a')
+		assert EmailField.valid_address('a@a.a')
+		assert EmailField.valid_address('a,a@a.a')
+		assert !EmailField.valid_address('a@a.a, my_friend_too@a.a')
+		assert !EmailField.valid_address('cant have spaces @ this. that')
   end
 end

@@ -110,11 +110,11 @@ class TestDBBridge < RUNIT::TestCase
   def testLastPkIdInserted
     client = Client.new( { "name" => "clientName1" } )
     @dbb.commit client
-    assert_equal 12, @dbb.lastPkIdInserted
+    assert_equal 12, @dbb.last_pk_id_inserted
     DbConnection.flush
     DbConnection.set_dbh( @mockDbh )
 		dbb2 = DbBridge.new
-    assert_equal 12, dbb2.lastPkIdInserted
+    assert_equal 12, dbb2.last_pk_id_inserted
   end
 
 	def testGetAll
