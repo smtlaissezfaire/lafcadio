@@ -71,7 +71,7 @@ class TestDBBridge < RUNIT::TestCase
 	end
 
   def setup
-		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
+		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
     @mockDbh = MockDbh.new
 		DbConnection.set_dbh( @mockDbh )
 		@dbb = DbBridge.new
@@ -150,13 +150,13 @@ class TestDBBridge < RUNIT::TestCase
 		if FileTest.exist?( logFilePath )
 			fail if Time.now - File.ctime( logFilePath ) < 5
 		end
-		LafcadioConfig.setFilename( '../test/testData/config_with_sql_logging.dat' )
+		LafcadioConfig.set_filename( '../test/testData/config_with_sql_logging.dat' )
 		@dbb.executeSelect( 'select * from clients' )
 		fail if Time.now - File.ctime( logFilePath ) > 5
 	end
 	
 	def testLogsSqlToDifferentFileName
-		LafcadioConfig.setFilename( '../test/testData/config_with_log_path.dat' )
+		LafcadioConfig.set_filename( '../test/testData/config_with_log_path.dat' )
 		logFilePath = '../test/testOutput/another.sql'
 		@dbb.executeSelect( 'select * from users' )
 		fail if Time.now - File.ctime( logFilePath ) > 5

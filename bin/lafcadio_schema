@@ -8,7 +8,7 @@ include Lafcadio
 opts = GetoptLong.new( [ '--config', '-c', GetoptLong::REQUIRED_ARGUMENT ] )
 if ( ( optArray = opts.get ) && ARGV.size >= 1 )
 	configFile = optArray[1]
-	LafcadioConfig.setFilename( configFile )
+	LafcadioConfig.set_filename( configFile )
 	ARGV.each { |fileName|
 		require "#{ fileName }"
 		fileName =~ /(\w*)\.rb/

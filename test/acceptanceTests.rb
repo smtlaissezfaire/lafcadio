@@ -16,13 +16,13 @@ class AcceptanceTestCase < RUNIT::TestCase
 	
 	def teardown
 		domain_classes.each { |domain_class| domain_class.drop_table( @dbh ) }
-		Context.instance.setObjectStore( nil )
+		Context.instance.set_object_store( nil )
 	end
 
 	def domain_classes; [ TestBadRow, TestRow, TestChildRow, TestDiffPkRow ]; end
 	
 	def get_dbh
-		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
+		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
 		config = LafcadioConfig.new
 		dbName = config['dbname']
 		dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"

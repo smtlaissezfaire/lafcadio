@@ -5,7 +5,7 @@ class TestDbConnection < RUNIT::TestCase
 	include Lafcadio
 
   def setup
-		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
+		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
     @mockDbh = MockDbh.new
     DbConnection.set_dbh( @mockDbh )
   end

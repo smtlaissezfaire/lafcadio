@@ -12,7 +12,7 @@ class TestObjectStore < LafcadioTestCase
 		context.flush
 		@mockDbBridge = MockDbBridge.new
 		@testObjectStore = ObjectStore.new context, @mockDbBridge
-		context.setObjectStore @testObjectStore
+		context.set_object_store @testObjectStore
 	end
 	
 	def setTestClient

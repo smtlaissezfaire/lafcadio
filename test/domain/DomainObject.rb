@@ -263,7 +263,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 	
 	def testGetObjectTypeFromStringWithoutDomainFile
-		LafcadioConfig.setFilename '../test/testData/config_no_domain_file.dat'
+		LafcadioConfig.set_filename '../test/testData/config_no_domain_file.dat'
 		assert_equal( 'Invoice',
 		              DomainObject.getObjectTypeFromString( 'Invoice' ).name )
 	end

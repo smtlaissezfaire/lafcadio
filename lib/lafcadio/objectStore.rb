@@ -161,7 +161,7 @@ module Lafcadio
 		@@dbh = nil
 
 		def self.flush
-			Context.instance.setDbConnection( nil )
+			Context.instance.set_db_connection( nil )
 			@@dbh = nil
 		end
 

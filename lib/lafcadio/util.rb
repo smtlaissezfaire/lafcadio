@@ -86,7 +86,7 @@ module Lafcadio
 			if methodName =~ /^get_(.*)$/
 				getResource $1, *args
 			elsif methodName =~ /^set(.*)$/
-				setResource $1, args[0]
+				setResource $1.underscore_to_camel_case, args[0]
 			else
 				super
 			end
@@ -244,7 +244,7 @@ module Lafcadio
 
 	# LafcadioConfig is a Hash that takes its data from the config file. You'll 
 	# have to set the location of that file before using it: Use 
-	# LafcadioConfig.setFilename.
+	# LafcadioConfig.set_filename.
 	#
 	# LafcadioConfig expects its data to be colon-delimited, one key-value pair 
 	# to a line. For example:
@@ -255,7 +255,7 @@ module Lafcadio
 	class LafcadioConfig < Hash
 		@@value_hash = nil
 	
-		def self.setFilename(filename); @@filename = filename; end
+		def self.set_filename(filename); @@filename = filename; end
 		
 		def self.setValues( value_hash ); @@value_hash = value_hash; end
 
