@@ -1,6 +1,18 @@
 require 'lafcadio/html/Input'
 require 'lafcadio/html/Select'
 
+# A class that generates HTML for use in getting a date value from a user. The 
+# field names are given the suffixes ".dom", ".month", and ".year" for the day 
+# of the month, month, and year, respectively. These field suffixes correspond 
+# with the assumed suffixes in FieldManager#getDate.
+#
+# By default, DateWidget assumes you want the user to enter a date. If you only 
+# want the user to enter a month, set DateWidget#showDomSelect to 
+# <tt>false</tt>.
+# 
+# By default, DateWidget assumes you want the year field to be a freeform text 
+# field. But if you would rather use a select widget, set 
+# DateWidget#textEntryYear to <tt>false</tt>.
 class DateWidget
 	def DateWidget.months
     months = [ "January", "February", "March", "April", "May", "June", "July",
@@ -9,6 +21,9 @@ class DateWidget
 
 	attr_accessor :showDomSelect, :textEntryYear
 
+	# [name] Name of the field.
+	# [date] Sets the pre-selected date; leave this is nil if you don't want any 
+	#        date pre-selected.
 	def initialize(name = 'date', date = nil)
 		@name = name
 		@date = date
@@ -49,6 +64,7 @@ class DateWidget
 				'size' => '4' })
 	end
 
+	# Returns an HTML string for use in a form.
 	def toHTML
 		widget = HTML.new
 		widget << monthSelect

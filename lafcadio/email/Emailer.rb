@@ -6,6 +6,7 @@ class Emailer < ContextualService
 	@@smtpClass = Net::SMTP
 	@@messagesSent = []
 
+	# Resets record of messages sent.
 	def Emailer.reset
 		@@messagesSent = []
 	end
@@ -14,10 +15,13 @@ class Emailer < ContextualService
 		@@smtpClass = smtpClass
 	end
 
+	# Returns a boolean value describing whether <tt>address</tt> is a plausible 
+	# email address format.
 	def Emailer.validAddress(address)
 		(address =~ /\w@\w*\./) != nil
 	end
 
+	# Sends an email message.
 	def sendEmail(email)
 		email.verifySendable
 		msg = []
@@ -35,6 +39,7 @@ class Emailer < ContextualService
 		end
 	end
 
+	# Returns an array of what messages have been sent.
 	def messagesSent
 		@@messagesSent
 	end

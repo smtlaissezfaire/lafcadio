@@ -5,6 +5,12 @@ class Email
 	attr_accessor :subject, :toAddress, :fromAddress, :toName, :fromName,
 			:contentType, :body, :charSet
 
+	# Unless they are explicitly set using accessors, the following defaults 
+	# apply:
+	# [toName] nil
+	# [fromName] nil
+	# [contentType] nil
+	# [charSet] 'iso-8859-1'
 	def initialize(subject, toAddress, fromAddress, body = nil)
 		@subject = subject
 		@toAddress = toAddress
@@ -13,6 +19,7 @@ class Email
 		@body = body
 	end
 
+	# Returns an array of strings describing the headers for this email message.
 	def headers
 		headers = []
 		headers << "Subject: #{@subject}"
@@ -40,6 +47,9 @@ class Email
 		headers
 	end
 
+	# Emailer calls this before sending a message; subclasses can override this if 
+	# they want to ensure that certain parts of the message are valid before 
+	# sending.
 	def verifySendable
 		nil
 	end
