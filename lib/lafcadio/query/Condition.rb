@@ -1,3 +1,4 @@
+require 'lafcadio/domain/DomainObject'
 require 'lafcadio/util'
 
 module Lafcadio
@@ -10,8 +11,6 @@ module Lafcadio
 			attr_reader :objectType
 
 			def initialize(fieldName, searchTerm, objectType)
-				require 'lafcadio/domain/DomainObject'
-
 				@fieldName = fieldName
 				@searchTerm = searchTerm
 				unless @searchTerm.class <= self.class.searchTermType
@@ -23,10 +22,6 @@ module Lafcadio
 						raise "Incorrect object type #{ @objectType.to_s }"
 					end
 				end
-			end
-			
-			def primaryKeyField?
-				[ @objectType.sqlPrimaryKeyName, 'pkId' ].include?( @fieldName )
 			end
 			
 			def dbFieldName
@@ -59,6 +54,10 @@ module Lafcadio
 			def not
 				require 'lafcadio/query/Not'
 				Query::Not.new( self )
+			end
+
+			def primaryKeyField?
+				[ @objectType.sqlPrimaryKeyName, 'pkId' ].include?( @fieldName )
 			end
 		end
 	end

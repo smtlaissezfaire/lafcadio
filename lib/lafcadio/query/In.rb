@@ -3,17 +3,17 @@ require 'lafcadio/query/Condition'
 module Lafcadio
 	class Query
 		class In < Condition #:nodoc:
-			def In.searchTermType
+			def self.searchTermType
 				Array
-			end
-
-			def toSql
-				"#{ dbFieldName } in (#{ @searchTerm.join(', ') })"
 			end
 
 			def objectMeets(anObj)
 				value = anObj.send @fieldName
 				@searchTerm.index(value) != nil
+			end
+
+			def toSql
+				"#{ dbFieldName } in (#{ @searchTerm.join(', ') })"
 			end
 		end
 	end

@@ -3,16 +3,6 @@ require 'lafcadio/query/Condition'
 module Lafcadio
 	class Query
 		class Equals < Condition #:nodoc:
-			def toSql
-				sql = "#{ dbFieldName } "
-				unless @searchTerm.nil?
-					sql += "= " + r_val_string
-				else
-					sql += "is null"
-				end
-				sql
-			end
-
 			def r_val_string
 				if primaryKeyField?
 					@searchTerm.to_s
@@ -39,6 +29,16 @@ module Lafcadio
 					compare_value = @searchTerm
 				end
 				compare_value == object_value
+			end
+
+			def toSql
+				sql = "#{ dbFieldName } "
+				unless @searchTerm.nil?
+					sql += "= " + r_val_string
+				else
+					sql += "is null"
+				end
+				sql
 			end
 		end
 	end

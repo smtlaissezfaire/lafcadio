@@ -12,6 +12,28 @@ module Lafcadio
 				super fieldName, searchTerm, objectType
 				@matchType = matchType
 			end
+			
+			def get_regexp
+				if @matchType == PRE_AND_POST
+					Regexp.new(@searchTerm)
+				elsif @matchType == PRE_ONLY
+					Regexp.new(@searchTerm.to_s + "$")
+				elsif @matchType == POST_ONLY
+					Regexp.new("^" + @searchTerm)
+				end
+			end
+
+			def objectMeets(anObj)
+				value = anObj.send @fieldName
+				if value.class <= DomainObject || value.class == DomainObjectProxy
+					value = value.pkId.to_s
+				end
+				if value.class <= Array
+					(value.index(@searchTerm) != nil)
+				else
+					get_regexp.match(value) != nil
+				end
+			end
 
 			def toSql
 				withWildcards = @searchTerm
@@ -23,25 +45,6 @@ module Lafcadio
 					withWildcards += "%"
 				end
 				"#{ dbFieldName } like '#{ withWildcards }'"
-			end
-
-			def objectMeets(anObj)
-				value = anObj.send @fieldName
-				if value.class <= DomainObject || value.class == DomainObjectProxy
-					value = value.pkId.to_s
-				end
-				if value.class <= Array
-					(value.index(@searchTerm) != nil)
-				else
-					if @matchType == PRE_AND_POST
-						regexp = Regexp.new(@searchTerm)
-					elsif @matchType == PRE_ONLY
-						regexp = Regexp.new(@searchTerm.to_s + "$")
-					elsif @matchType == POST_ONLY
-						regexp = Regexp.new("^" + @searchTerm)
-					end
-					regexp.match(value) != nil
-				end
 			end
 		end
 	end
