@@ -64,4 +64,24 @@ class TestGMockObjectStore < LafcadioTestCase
 		user_prime.commit
 		assert_equal( new_email, @mockObjectStore.getUser( 1 ).email )
 	end
+	
+	def test_order_by
+		client1 = Client.new( 'pkId' => 1, 'name' => 'zzz' )
+		client1.commit
+		client2 = Client.new( 'pkId' => 2, 'name' => 'aaa' )
+		client2.commit
+		query = Query.new Client
+		query.order_by = 'name'
+		clients = @mockObjectStore.get_subset( query )
+		assert_equal( 2, clients.size )
+		assert_equal( 'aaa', clients.first.name )
+		assert_equal( 'zzz', clients.last.name )
+		query2 = Query.new Client
+		query2.order_by = 'name'
+		query2.order_by_order = Query::DESC
+		clients2 = @mockObjectStore.get_subset( query2 )
+		assert_equal( 2, clients2.size )
+		assert_equal( 'zzz', clients2.first.name )
+		assert_equal( 'aaa', clients2.last.name )
+	end
 end
