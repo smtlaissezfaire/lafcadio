@@ -250,6 +250,8 @@ class TestObjectStore < LafcadioTestCase
 		rescue ArgumentError
 			# okay
 		end
+		coll4 = @testObjectStore.getClients
+		assert_equal( 3, coll4.size )
 	end
 	
 	def test_method_missing

@@ -19,6 +19,18 @@ module Lafcadio
 				end
 			end
 			
+			def dispatch_get_plural
+				searchTerm = @orig_args[0]
+				fieldName = @orig_args[1]
+				if @maybe_proc.nil? && searchTerm.nil?
+					@symbol = :getAll
+					@args = [ @domain_class ]
+				else
+					dispatch_get_plural_by_query_block_or_search_term( searchTerm,
+					                                                   fieldName )
+				end
+			end
+			
 			def dispatch_get_plural_by_query_block
 				inferrer = Query::Inferrer.new( @domain_class ) { |obj|
 					@maybe_proc.call( obj )
@@ -27,9 +39,8 @@ module Lafcadio
 				@args = [ inferrer.execute ]
 			end
 
-			def dispatch_get_plural_by_query_block_or_search_term
-				searchTerm = @orig_args[0]
-				fieldName = @orig_args[1]
+			def dispatch_get_plural_by_query_block_or_search_term( searchTerm,
+					                                                   fieldName )
 				if !@maybe_proc.nil? && searchTerm.nil?
 					dispatch_get_plural_by_query_block
 				elsif @maybe_proc.nil? && !searchTerm.nil?
@@ -50,7 +61,7 @@ module Lafcadio
 					begin
 						@domain_class = DomainObject.
 						                getObjectTypeFromString( objectTypeName )
-						dispatch_get_plural_by_query_block_or_search_term
+						dispatch_get_plural
 					rescue CouldntMatchObjectTypeError
 						raise_no_method_error
 					end
