@@ -77,6 +77,31 @@ class TestMockDBBridge < LafcadioTestCase
 		assert_equal 3, @mockDbBridge.last_pk_id_inserted
     assert_nil( client3.pk_id )
   end
+	
+	def test_limit
+		( 1..5 ).each { |i|
+			client = Client.new( 'pk_id' => i, 'name' => "client #{ i }" )
+			@mockDbBridge.commit client
+		}
+		query1 = Query.new( Client )
+		query1.limit = 0..2
+		coll1 = @mockDbBridge.get_collection_by_query query1
+		assert_equal( 3, coll1.size )
+		( 1..3 ).each { |i| assert_equal( i, coll1[i-1].pk_id ) }
+		query2 = Query.new( Client )
+		query2.limit = 3..4
+		coll2 = @mockDbBridge.get_collection_by_query query2
+		assert_equal( 2, coll2.size )
+		[ 4, 5 ].each { |i| assert_equal( i, coll2[i-4].pk_id ) }
+		query3 = Query.new( Client )
+		query3.limit = 3..4
+		query3.order_by = 'pk_id'
+		query3.order_by_order = Query::DESC
+		coll3 = @mockDbBridge.get_collection_by_query query3
+		assert_equal( 2, coll3.size )
+		assert_equal( 2, coll3[0].pk_id )
+		assert_equal( 1, coll3[1].pk_id )
+	end
 
 	def test_order_by
 		( 1..10 ).each { |day|

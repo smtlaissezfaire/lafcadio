@@ -47,7 +47,7 @@ module Lafcadio
 				objects = objects.sort_by { |dobj| dobj.pk_id }
 			end
 			if (range = query.limit)
-				objects = objects[0..(range.last - range.first)]
+				objects = objects[range]
 			end
 			objects
 		end
