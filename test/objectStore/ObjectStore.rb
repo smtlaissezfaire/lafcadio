@@ -77,6 +77,9 @@ class TestObjectStore < LafcadioTestCase
 		clientPrime = Client.new ({ 'objId' => 100, 'name' => 'client 100.1' })
 		@testObjectStore.commit clientPrime
 		assert_equal 'client 100.1', @testObjectStore.get(Client, 100).name
+		clientPrime.name = 'client 100.2'
+		@testObjectStore.commit clientPrime
+		assert_equal 'client 100.2', @testObjectStore.get(Client, 100).name		
 	end
 
 	def testDeleteClearsCachedValue
