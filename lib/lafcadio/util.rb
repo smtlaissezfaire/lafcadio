@@ -350,27 +350,6 @@ class String
 		newString
 	end
 
-	# Increments a filename. If the filename ends with a number, it increments 
-	# that number; otherwise it appends a "_1" after the filename but before the 
-	# file extension.
-	#
-	#   "john.jpg".increment_filename   -> "john_1.jpg"
-	#   "john_1.jpg".increment_filename -> "john_2.jpg"
-	#   "john_2.jpg".increment_filename -> "john_3.jpg"
-  def increment_filename
-		filename = self.clone
-    extension = filename.split(/\./).last
-    filename.sub!(/\..*$/, '')
-    if filename =~ /_(\d*)$/
-      newSuffix = $1.to_i + 1
-      filename = $` + "_#{newSuffix}"
-    else
-      filename += "_1"
-    end
-    filename += ".#{extension}"
-    filename
-  end
-
 	# Turns a numeric string into U.S. format if it's not already formatted that
 	# way.
 	#

@@ -2,12 +2,6 @@ require 'lafcadio/util'
 require 'test/unit'
 
 class TestString < Test::Unit::TestCase
-  def testIncrementsFilename
-    assert_equal "john_1.jpg", ("john.jpg".increment_filename)
-    assert_equal "john_2.jpg", ("john_1.jpg".increment_filename)
-    assert_equal "john_3.jpg", ("john_2.jpg".increment_filename)
-  end
-
 	def testDecapitalize
 		assert_equal 'internalClient', ('InternalClient'.decapitalize)
 		assert_equal 'order', ('Order'.decapitalize)
