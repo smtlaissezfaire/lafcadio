@@ -17,7 +17,7 @@ class User < Lafcadio::DomainObject
     myHash = fieldHash
     myHash["pkId"] = 1
     user = User.new myHash
-		Context.instance.getObjectStore.addObject user
+		Context.instance.getObjectStore.commit user
 		user
   end
 end

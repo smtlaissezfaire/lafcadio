@@ -11,7 +11,7 @@ class TestObjectField < LafcadioTestCase
 				"address2" => "", "city" => "", "state" => "",
 				"zip" => "", "email" => "test@test.com",
 				"password" => "mypassword!", "pkId" => 1 })
-		@mockObjectStore.addObject @user
+		@mockObjectStore.commit @user
 	end
 
   def testUniqueness

@@ -10,10 +10,6 @@ module Lafcadio
 			@query_count = Hash.new( 0 )
 		end
 
-		def addObject(dbObject)
-			commit dbObject
-		end
-
 		def commit(dbObject)
 			objectsByObjectType = get_objects_by_domain_class( dbObject.objectType )
 			if dbObject.delete
@@ -83,10 +79,6 @@ module Lafcadio
 
 		def initialize(context) # :nodoc:
 			super(context, MockDbBridge.new)
-		end
-
-		def addObject(dbObject) # :nodoc:
-			commit dbObject
 		end
 	end
 end

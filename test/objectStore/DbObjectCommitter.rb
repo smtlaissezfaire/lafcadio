@@ -36,8 +36,8 @@ class TestDbObjectCommitter < LafcadioTestCase
 		invoice = Invoice.new({ 'pkId' => 1,
 				'client' => DomainObjectProxy.new(client), 'date' => Date.new(2000, 1, 17),
 				'rate' => 45, 'hours' => 20 })
-    @mockDBBridge.addObject client
-    @mockDBBridge.addObject invoice
+    @mockDBBridge.commit client
+    @mockDBBridge.commit invoice
     client.delete = true
     committer = Committer.new(client, @mockDBBridge)
     committer.execute

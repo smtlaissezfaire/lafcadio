@@ -10,9 +10,9 @@ class TestLinkField < LafcadioTestCase
   def setup
 		super
     @olf = LinkField.new(nil, Client)
-		@mockObjectStore.addObject Client.new(
+		@mockObjectStore.commit Client.new(
 				{ "pkId" => 1, "name" => "clientName1" } )
-		@mockObjectStore.addObject Client.new(
+		@mockObjectStore.commit Client.new(
 				{ "pkId" => 2, "name" => "clientName2" } )
     @fieldWithListener = LinkField.new(nil, Client, "client", "Client")
     rateField = MoneyField.new nil, "rate"
@@ -51,7 +51,7 @@ class TestLinkField < LafcadioTestCase
 
   def testValueFromSQL
 		client = Client.getTestClient
-		@mockObjectStore.addObject client
+		@mockObjectStore.commit client
 		clientFromLinkField = @olf.valueFromSQL("1")
 		assert_equal DomainObjectProxy, clientFromLinkField.class
 		assert_equal client.name, clientFromLinkField.name

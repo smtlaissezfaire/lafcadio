@@ -103,7 +103,7 @@ class TestDomainObject < LafcadioTestCase
 		end
 		client = Client.getTestClient
     client.pkId = 99
-    @mockObjectStore.addObject client
+    @mockObjectStore.commit client
 		assert_equal client.name, proxyPrime.name
 	end
 

@@ -9,12 +9,12 @@ class TestGMockObjectStore < LafcadioTestCase
 	end
 
 	def testAddsPkId
-		@mockObjectStore.addObject User.getTestUser
+		@mockObjectStore.commit User.getTestUser
 		assert_equal 1, @mockObjectStore.get(User, 1).pkId
-		@mockObjectStore.addObject Client.new( { 'pkId' => 10,
+		@mockObjectStore.commit Client.new( { 'pkId' => 10,
 				'name' => 'client 10' } )
 		assert_equal 'client 10', @mockObjectStore.get(Client, 10).name
-		@mockObjectStore.addObject Client.new( { 'pkId' => 20,
+		@mockObjectStore.commit Client.new( { 'pkId' => 20,
 				'name' => 'client 20' } )
 		assert_equal 'client 20', @mockObjectStore.get(Client, 20).name
 	end

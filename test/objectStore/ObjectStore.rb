@@ -17,7 +17,7 @@ class TestObjectStore < LafcadioTestCase
 	
 	def setTestClient
 		@client = Client.getTestClient
-		@mockDbBridge.addObject @client
+		@mockDbBridge.commit @client
 	end
 
 	def testCaching
@@ -38,7 +38,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testConvertsFixnums
-		@mockDbBridge.addObject Client.getTestClient
+		@mockDbBridge.commit Client.getTestClient
 		@testObjectStore.get Client, 1
 		@testObjectStore.get Client, "1"
 		begin
@@ -51,11 +51,11 @@ class TestObjectStore < LafcadioTestCase
 
 	def testDeepLinking
 		client1 = Client.getTestClient
-		@mockDbBridge.addObject client1
+		@mockDbBridge.commit client1
 		client1Proxy = DomainObjectProxy.new(Client, 1)
 		client2 = Client.new({ 'pkId' => 2, 'name' => 'client 2',
 				'referringClient' => client1Proxy })
-		@mockDbBridge.addObject client2
+		@mockDbBridge.commit client2
 		client2Prime = @testObjectStore.getClient 2
 		assert_equal Client, client2Prime.referringClient.objectType
 	end
@@ -328,11 +328,11 @@ class TestObjectStore < LafcadioTestCase
 		client1 = Client.new({ 'pkId' => 1, 'name' => 'client 1',
 														'standard_rate' => 50,
 														'referringClient' => client2Proxy })
-		@mockDbBridge.addObject client1
+		@mockDbBridge.commit client1
 		client2 = Client.new({ 'pkId' => 2, 'name' => 'client 2',
 														'standard_rate' => 100,
 														'referringClient' => client1Proxy })
-		@mockDbBridge.addObject client2
+		@mockDbBridge.commit client2
 		client1Prime = @testObjectStore.getClient 1
 		assert_equal 2, client1Prime.referringClient.pkId
 		assert_equal 100, client1Prime.referringClient.standard_rate
