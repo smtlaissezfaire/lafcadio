@@ -2,6 +2,8 @@ module Lafcadio
 	module DomainComparable
 		include Comparable
 
+		# A DomainObject or DomainObjectProxy is compared by +objectType+ and by
+		# +pkId+. 
 		def <=>(anOther)
 			if anOther.respond_to?( 'objectType' )
 				if self.objectType == anOther.objectType

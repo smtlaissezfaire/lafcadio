@@ -1,10 +1,10 @@
 module Lafcadio
 	# Represents a specific month in time. With the exception of Month.monthNames
-	# (which returns an array), every usage of the month value assumes that 1 
-	# equals January and 12 equals December.
+	# (which returns a zero-based array), every usage of the month value assumes
+	# that 1 equals January and 12 equals December.
 	class Month
 		# Returns an array of the full names of months (in English). Note that
-		# "January" is the 0th element, and December is the 11th element.
+		# "January" is the 0th element, and "December" is the 11th element.
 		def Month.monthNames
 			[ "January", "February", "March", "April", "May", "June", "July",
 			  "August", "September", "October", "November", "December" ]
@@ -14,7 +14,7 @@ module Lafcadio
 
 		attr_reader :month, :year
 
-		# A new month can be set to a specific month and year, or you can call 
+		# A new month can be set to a specific +month+ and +year+, or you can call 
 		# Month.new with no arguments to receive the current month.
 		def initialize( month = nil, year = nil )
 			require 'date'
@@ -28,6 +28,7 @@ module Lafcadio
 			@year = year
 		end
 
+		# Compare this Month to another Month.
 		def <=>(anOther)
 			if @year == anOther.year
 				@month <=> anOther.month
@@ -40,11 +41,14 @@ module Lafcadio
 		def to_s
 			Month.monthNames[@month-1][0..2] + " " + @year.to_s
 		end
-
+		
+		# Calculate a hash value for this Month.
 		def hash
 			"#{@year}#{@month}".to_i
 		end
 
+		# Is this Month equal to +anOther+? +anOther+ must be another Month of the
+		# same value.
 		def eql?(anOther)
 			self == anOther
 		end

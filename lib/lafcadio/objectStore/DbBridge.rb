@@ -5,8 +5,7 @@ require_gem 'log4r'
 require 'lafcadio/util/LafcadioConfig'
 
 module Lafcadio
-	# The DbBridge manages the MySQL connection for the ObjectStore.
-	class DbBridge
+	class DbBridge #:nodoc:
 		@@dbh = nil
 		@@lastPkIdInserted = nil
 		@@dbName = nil
@@ -60,7 +59,6 @@ module Lafcadio
 			ObjectSpace.define_finalizer( self, proc { |id| DbBridge.disconnect } )
 		end
 		
-		# Hook for logging: Useful for testing.
 		def maybeLog(sql)
 			config = LafcadioConfig.new
 			if config['logSql'] == 'y'
@@ -73,9 +71,6 @@ module Lafcadio
 			end
 		end
 		
-		# Sends an insert, update, or delete statement to the database. This is 
-		# only called by Committer#execute, which handles a lot of Ruby-level 
-		# details such as triggers.
 		def commit(dbObject)
 			require 'lafcadio/objectStore/DomainObjectSqlMaker'
 			sqlMaker = DomainObjectSqlMaker.new(dbObject)
@@ -91,7 +86,6 @@ module Lafcadio
 			@dbh.do( sql, *binds )
 		end
 		
-		# When passed a query, executes that query and returns a Collection.
 		def getCollectionByQuery(query)
 			require 'lafcadio/objectStore/SqlValueConverter'
 			objectType = query.objectType

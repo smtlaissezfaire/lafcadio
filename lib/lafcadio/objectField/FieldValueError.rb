@@ -1,4 +1,4 @@
 module Lafcadio
-	class FieldValueError < RuntimeError
+	class FieldValueError < RuntimeError #:nodoc:
 	end
 end

@@ -2,11 +2,12 @@ require 'lafcadio/objectField/ObjectField'
 require 'date'
 
 module Lafcadio
+	# DateField represents a Date.
 	class DateField < ObjectField
 		RANGE_NEAR_FUTURE = 0
 		RANGE_PAST = 1
 
-		def DateField.valueType
+		def DateField.valueType # :nodoc:
 			Date
 		end
 
@@ -17,11 +18,11 @@ module Lafcadio
 			@range = RANGE_NEAR_FUTURE
 		end
 
-		def valueForSQL(value)
+		def valueForSQL(value) # :nodoc:
 			value ? "'#{value.to_s}'" : 'null'
 		end
 
-		def valueFromSQL(dbiDate, lookupLink = true)
+		def valueFromSQL(dbiDate, lookupLink = true) # :nodoc:
 			begin
 				dbiDate ? dbiDate.to_date : nil
 			rescue ArgumentError

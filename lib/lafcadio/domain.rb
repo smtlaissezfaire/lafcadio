@@ -5,7 +5,7 @@ require 'lafcadio/util'
 require 'rexml/document'
 
 module Lafcadio
-	class ClassDefinitionXmlParser
+	class ClassDefinitionXmlParser # :nodoc: all
 		class InvalidDataError < ArgumentError; end
 
 		class FieldAttribute

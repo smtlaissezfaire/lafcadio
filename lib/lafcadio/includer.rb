@@ -1,4 +1,4 @@
-class Includer
+class Includer # :nodoc:
 	def Includer.include( subdir )
 		dir = nil
 		$:.each { |includeDir|

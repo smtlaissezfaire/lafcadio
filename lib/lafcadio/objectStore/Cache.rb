@@ -2,8 +2,7 @@ require 'lafcadio/util/ContextualService'
 
 module Lafcadio
 	class ObjectStore < ContextualService
-		# Caches domain objects for the ObjectStore.
-		class Cache
+		class Cache #:nodoc:
 			def initialize( dbBridge )
 				@dbBridge = dbBridge
 				@objects = {}

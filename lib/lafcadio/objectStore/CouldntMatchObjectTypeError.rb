@@ -1,4 +1,4 @@
 module Lafcadio
-	class CouldntMatchObjectTypeError < RuntimeError
+	class CouldntMatchObjectTypeError < RuntimeError #:nodoc:
 	end
 end

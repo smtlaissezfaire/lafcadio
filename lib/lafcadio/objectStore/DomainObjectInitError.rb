@@ -1,5 +1,5 @@
 module Lafcadio
-	class DomainObjectInitError < RuntimeError
+	class DomainObjectInitError < RuntimeError #:nodoc:
 		attr_reader :messages
 
 		def initialize(messages)

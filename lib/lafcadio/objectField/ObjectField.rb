@@ -2,6 +2,7 @@ require 'lafcadio/util/English'
 require 'lafcadio/objectField/FieldValueError'
 
 module Lafcadio
+	# ObjectField is the abstract base class of any field for domain objects.
 	class ObjectField
 		include Comparable
 
@@ -9,11 +10,11 @@ module Lafcadio
 		attr_accessor :notNull, :hideLabel, :writeOnce, :unique, :hideDisplay,
 				:default, :dbFieldName, :notUniqueMsg
 
-		def ObjectField.valueType
+		def ObjectField.valueType #:nodoc:
 			Object
 		end
 
-		def ObjectField.instantiationParameters( fieldElt )
+		def ObjectField.instantiationParameters( fieldElt ) #:nodoc:
 			parameters = {}
 			parameters['name'] = fieldElt.attributes['name']
 			parameters['englishName'] = fieldElt.attributes['englishName']
@@ -21,12 +22,12 @@ module Lafcadio
 			parameters
 		end
 		
-		def ObjectField.instantiateFromXml( domainClass, fieldElt )
+		def ObjectField.instantiateFromXml( domainClass, fieldElt ) #:nodoc:
 			parameters = instantiationParameters( fieldElt )
 			instantiateWithParameters( domainClass, parameters )
 		end
 
-		def ObjectField.instantiateWithParameters( domainClass, parameters )
+		def self.instantiateWithParameters( domainClass, parameters ) #:nodoc:
 			instance = self.new( domainClass, parameters['name'],
 			                     parameters['englishName'] )
 			if ( dbFieldName = parameters['dbFieldName'] )
@@ -35,9 +36,9 @@ module Lafcadio
 			instance
 		end
 
-		# [objectType] The domain class that this object field belongs to.
-		# [name] The name of this field.
-		# [englishName] The descriptive English name of this field.
+		# [objectType]  The domain class that this object field belongs to.
+		# [name]        The name of this field.
+		# [englishName] The descriptive English name of this field. (Deprecated)
 		def initialize(objectType, name, englishName = nil )
 			@objectType = objectType
 			@name = name
@@ -48,17 +49,17 @@ module Lafcadio
 			@englishNameOrNil = englishName
 		end
 		
-		def bind_write?; false; end
+		def bind_write?; false; end #:nodoc:
 		
-		def englishName
+		def englishName #:nodoc:
 			@englishNameOrNil || English.camelCaseToEnglish(name).capitalize
 		end
 
-		def nullErrorMsg
+		def nullErrorMsg #:nodoc:
 			English.sentence "Please enter %a %nam.", englishName.downcase
 		end
 
-		def verify(value, pkId)
+		def verify(value, pkId) #:nodoc:
 			if value.nil? && notNull
 				raise FieldValueError, nullErrorMsg, caller
 			end
@@ -72,7 +73,7 @@ module Lafcadio
 			end
 		end
 
-		def verifyUniqueness(value, pkId)
+		def verifyUniqueness(value, pkId) #:nodoc:
 			inferrer = Query::Inferrer.new( @objectType ) { |domain_obj|
 				Query.And( domain_obj.send( self.name ).equals( value ),
 									 domain_obj.pkId.equals( pkId ).not )
@@ -102,17 +103,17 @@ module Lafcadio
 			value || 'null'
 		end
 
-		def firstTime(fieldManager)
+		def firstTime(fieldManager) #:nodoc:
 			pkId = fieldManager.getpkId
 			pkId == nil
 		end
 
-		def prevValue(pkId)
+		def prevValue(pkId) #:nodoc:
 			prevObject = ObjectStore.getObjectStore.get(@objectType, pkId)
 			prevObject.send(name)
 		end
 
-		def processBeforeVerify(value)
+		def processBeforeVerify(value) #:nodoc:
 			value = @default if value == nil
 			value
 		end
@@ -130,7 +131,7 @@ module Lafcadio
 			end
 		end
 
-		def dbWillAutomaticallyWrite
+		def dbWillAutomaticallyWrite #:nodoc:
 			false
 		end
 	end

@@ -1,7 +1,7 @@
 require 'lafcadio/objectField/LinkField'
 
 module Lafcadio
-	class SubsetLinkField < LinkField
+	class SubsetLinkField < LinkField #:nodoc:
 		def SubsetLinkField.instantiationParameters( fieldElt )
 			parameters = super( fieldElt )
 			parameters['subsetField'] = fieldElt.attributes['subsetField']

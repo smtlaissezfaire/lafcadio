@@ -1,4 +1,4 @@
 module Lafcadio
-	class DomainObjectNotFoundError < RuntimeError
+	class DomainObjectNotFoundError < RuntimeError #:nodoc:
 	end
 end

@@ -1,9 +1,7 @@
 require 'lafcadio/objectStore/DomainObjectInitError'
 
 module Lafcadio
-	# Generates the necessary SQL for committing one domain object to the 
-	# database.
-	class DomainObjectSqlMaker
+	class DomainObjectSqlMaker #:nodoc:
 		attr_reader :bindValues
 
 		def initialize(obj); @obj = obj; end

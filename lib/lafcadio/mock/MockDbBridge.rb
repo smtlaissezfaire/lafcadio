@@ -1,5 +1,5 @@
 module Lafcadio
-	class MockDbBridge
+	class MockDbBridge #:nodoc:
 		attr_reader :lastPkIdInserted, :retrievalsByType, :query_count
 
 		def initialize

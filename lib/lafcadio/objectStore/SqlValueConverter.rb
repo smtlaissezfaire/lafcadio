@@ -1,6 +1,5 @@
 module Lafcadio
-	# Turns a hash of SQL key-value pairs into Ruby-native key-value pairs.
-	class SqlValueConverter
+	class SqlValueConverter #:nodoc:
 		attr_reader :objectType, :rowHash
 
 		def initialize(objectType, rowHash)

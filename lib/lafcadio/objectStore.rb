@@ -4,7 +4,7 @@ require 'lafcadio/util/English'
 
 module Lafcadio
 	class ObjectStore
-		class MethodDispatch
+		class MethodDispatch #:nodoc:
 			attr_reader :symbol, :args
 		
 			def initialize( orig_method, maybe_proc, *orig_args )

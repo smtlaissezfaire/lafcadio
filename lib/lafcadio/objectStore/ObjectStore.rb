@@ -3,28 +3,73 @@ require 'lafcadio'
 module Lafcadio
 	# The ObjectStore represents the database in a Lafcadio application.
 	#
-	# There are a few important dynamic method names used by ObjectStore:
+	# = Configuring the ObjectStore
+	# The ObjectStore depends on a few values being set correctly in the
+	# LafcadioConfig file:
+	# [dbuser]     The database username.
+	# [dbpassword] The database password.
+	# [dbname]     The database name.
+	# [dbhost]     The database host.
 	#
+	# = Instantiating ObjectStore
+	# The ObjectStore is a ContextualService, meaning you can't get an instance by
+	# calling ObjectStore.new. Instead, you should call
+	# ObjectStore.getObjectStore. (Using a ContextualService makes it easier to
+	# make out the ObjectStore for unit tests: See ContextualService for more.)
+	#
+	# = Dynamic method calls
+	# ObjectStore uses reflection to provide a lot of convenience methods for
+	# querying domain objects in a number of ways.
 	# [ObjectStore#get< domain class > (pkId)]
 	#   Retrieves one domain object by pkId. For example,
-	#     ObjectStore#getUser (100)
+	#     ObjectStore#getUser( 100 )
 	#   will return User 100.
 	# [ObjectStore#get< domain class >s (searchTerm, fieldName = nil)]
-	#   Looks for instances of that domain class matching that search term. For
-	#   example,
-	#     ObjectStore#getProducts (aProductCategory)
-	#   queries MySQL for all products that belong to that product category. If 
-	#   <tt>fieldName</tt> isn't given, it's inferred from the 
-	#   <tt>searchTerm</tt>. This works well for a search term that is a domain 
-	#   object, but for something more prosaic you'll probably need to set 
-	#   <tt>fieldName</tt> explicitly:
-	#     ObjectStore#getUsers ("Jones", "lastName")
+	#   Returns a collection of all instances of that domain class matching that
+	#   search term. For example,
+	#     ObjectStore#getProducts( aProductCategory )
+	#   queries MySQL for all products that belong to that product category. You
+	#   can omit +fieldName+ if +searchTerm+ is a non-nil domain object, and the
+	#   field connecting the first domain class to the second is named after the
+	#   domain class. (For example, the above line assumes that Product has a
+	#   field named "productCategory".) Otherwise, it's best to include
+	#   +fieldName+:
+	#     ObjectStore#getUsers( "Jones", "lastName" )
+	#
+	# = Querying
+	# ObjectStore can also be used to generate complex, ad-hoc queries which
+	# emulate much of the functionality you'd get from writing the SQL yourself.
+	# Furthermore, these queries can be run against in-memory data stores, which
+	# is particularly useful for tests.
+	#   date = Date.new( 2003, 1, 1 )
+	#   ObjectStore#getInvoices { |invoice|
+	#     Query.And( invoice.date.gte( date ), invoice.rate.equals( 10 ),
+	#                invoice.hours.equals( 10 ) )
+	#   }
+	# is the same as
+	#   select * from invoices
+	#   where (date >= '2003-01-01' and rate = 10 and hours = 10)
+	# See Query::Inferrer for more.
+	#
+	# = SQL Logging
+	# Lafcadio uses log4r to log all of its SQL statements. The simplest way to
+	# turn on logging is to set the following values in the LafcadioConfig file:
+	# [logSql]     Should be set to "y" to turn on logging.
+	# [logdir]     The directory where log files should be written. Required if
+	#              +logSql+ is "y"
+	# [sqlLogFile] The name of the file (not including its directory) where SQL
+	#              should be logged. Default is "sql".
+	#
+	# = Triggers
+	# Domain classes can be set to fire triggers either before or after commits.
+	# Since these triggers are executed in Ruby, they're easy to test. See
+	# DomainObject#preCommitTrigger and DomainObject#postCommitTrigger for more.
 	class ObjectStore < ContextualService
-		def ObjectStore.setDbName(dbName)
+		def ObjectStore.setDbName(dbName) #:nodoc:
 			DbBridge.setDbName dbName
 		end
 		
-		def initialize(context, dbBridge = nil)
+		def initialize(context, dbBridge = nil) #:nodoc:
 			super context
 			@dbBridge = dbBridge == nil ? DbBridge.new : dbBridge
 			@cache = ObjectStore::Cache.new( @dbBridge )
@@ -58,9 +103,11 @@ module Lafcadio
 			@cache.getByQuery( query )
 		end
 
+		# Returns the DbBridge; this is useful in case you need to use raw SQL for a
+		# specific query.
 		def getDbBridge; @dbBridge; end
 
-		def getFiltered(objectTypeName, searchTerm, fieldName = nil)
+		def getFiltered(objectTypeName, searchTerm, fieldName = nil) #:nodoc:
 			require 'lafcadio/query/Link'
 			objectType = DomainObject.getObjectTypeFromString objectTypeName
 			unless fieldName
@@ -75,12 +122,12 @@ module Lafcadio
 			getSubset( condition )
 		end
 
-		def getMapMatch(objectType, mapped)
+		def getMapMatch(objectType, mapped) #:nodoc:
 			fieldName = mapped.objectType.bareName.decapitalize
 			Query::Equals.new(fieldName, mapped, objectType)
 		end
 
-		def getMapObject(objectType, map1, map2)
+		def getMapObject(objectType, map1, map2) #:nodoc:
 			require 'lafcadio/query/CompoundCondition'
 			unless map1 && map2
 				raise ArgumentError,
@@ -92,7 +139,7 @@ module Lafcadio
 			getSubset(condition)[0]
 		end
 
-		def getMapped(searchTerm, resultTypeName)
+		def getMapped(searchTerm, resultTypeName) #:nodoc:
 			resultType = DomainObject.getObjectTypeFromString resultTypeName
 			coll = []
 			firstTypeName = searchTerm.class.bareName
@@ -104,22 +151,25 @@ module Lafcadio
 			coll
 		end
 		
+		# Retrieves the maximum value across all instances of one domain class.
+		#   ObjectStore#getMax( Client )
+		# returns the highest +pkId+ in the +clients+ table.
+		#   ObjectStore#getMax( Invoice, "rate" )
+		# will return the highest rate for all invoices.
 		def getMax( domain_class, field_name = 'pkId' )
 			query = Query::Max.new( domain_class, field_name )
 			@dbBridge.group_query( query ).only
 		end
 
+		# Retrieves a collection of domain objects by +pkId+.
+		#   ObjectStore#getObjects( Clients, [ 1, 2, 3 ] )
 		def getObjects(objectType, pkIds)
 			require 'lafcadio/query/In'
 			condition = Query::In.new('pkId', pkIds, objectType)
 			getSubset condition
 		end
 
-		# Returns a collection of domain objects that correspond to the Condition 
-		# or Query. This queries the database for only the relevant objects, and
-		# as such can offer significant time savings over retrieving all the 
-		# objects and then filtering them in Ruby.
-		def getSubset(conditionOrQuery)
+		def getSubset(conditionOrQuery) #:nodoc:
 			if conditionOrQuery.class <= Query::Condition
 				condition = conditionOrQuery
 				query = Query.new condition.objectType, condition
@@ -129,11 +179,11 @@ module Lafcadio
 			@cache.getByQuery( query )
 		end
 		
-		def last_commit_time( domain_class, pkId )
+		def last_commit_time( domain_class, pkId ) #:nodoc:
 			@cache.last_commit_time( domain_class, pkId )
 		end
 
-		def method_missing(methodId, *args)
+		def method_missing(methodId, *args) #:nodoc:
 			proc = block_given? ? ( proc { |obj| yield( obj ) } ) : nil
 			dispatch = MethodDispatch.new( methodId, proc, *args )
 			self.send( dispatch.symbol, *dispatch.args )
@@ -144,7 +194,7 @@ module Lafcadio
 			@cache.save dbObject
 		end
 		
-		def updateCacheAfterCommit( committer )
+		def updateCacheAfterCommit( committer ) #:nodoc:
 			if committer.commitType == Committer::UPDATE ||
 				committer.commitType == Committer::INSERT
 				set( committer.dbObject )

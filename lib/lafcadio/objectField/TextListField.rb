@@ -6,7 +6,7 @@ module Lafcadio
 	# For example, a SQL field with the value "john,bill,dave", then the Ruby 
 	# field will have the value <tt>[ "john", "bill", "dave" ]</tt>.
 	class TextListField < ObjectField
-		def valueFromSQL(sqlString, lookupLink = true)
+		def valueFromSQL(sqlString, lookupLink = true) #:nodoc:
 			if sqlString
 				sqlString.split ','
 			else
@@ -14,7 +14,7 @@ module Lafcadio
 			end
 		end
 
-		def valueForSQL(objectValue)
+		def valueForSQL(objectValue) #:nodoc:
 			"'" + objectValue.join(',') + "'"
 		end
 	end

@@ -1,32 +1,32 @@
 require 'lafcadio/objectField/ObjectField'
 
 module Lafcadio
-	# BooleanField represents a boolean value. By default, it assumes that the 
-	# table field represents true and false with the integers 1 and 0. For a 
-	# field that deviates from this default, you can set the enumeration one of 
-	# two ways.
-	# 1. Set BooleanField#enumType one of the enums preset values. Currently 
-	#    there are only
-	#    * BooleanField::ENUMS_ONE_ZERO (the default, uses integers 1 and 0)
-	#    * BooleanField::ENUMS_CAPITAL_YES_NO (uses characters 'Y' and 'N')
-	# 1. Set BooleanField#enums to a hash with keys <tt>true</tt> and 
-	#    <tt>false</tt>. For example:
-	#      myBooleanField.enums = { true => 'yin', false => 'yang' }
-	# <tt>enums</tt> takes precedence over <tt>enumType</tt>.
+	# BooleanField represents a boolean value. By default, it assumes that the
+	# table field represents True and False with the integers 1 and 0. There are
+	# two different ways to change this default.
 	#
-	# In Lafcadio 0.3.1 and later, boolean fields can be set into XML class 
-	# definitions using this format:
-	#   <field name="field_name" class="BooleanField"/>
-	# Enums can be set using one of two forms:
+	# First, BooleanField includes a few enumerated defaults. Currently there are
+	# only
+	#   * BooleanField::ENUMS_ONE_ZERO (the default, uses integers 1 and 0)
+	#   * BooleanField::ENUMS_CAPITAL_YES_NO (uses characters 'Y' and 'N')
+	# In the XML class definition, this field would look like
 	#   <field name="field_name" class="BooleanField"
 	#          enumType="ENUMS_CAPITAL_YES_NO"/>
-	# or:
+	# If you're defining a field in Ruby, simply set BooleanField#enumType to one
+	# of the values.
+	#
+	# For more fine-grained specification you can pass specific values in. Use
+	# this format for the XML class definition:
 	#   <field name="field_name" class="BooleanField">
 	#     <enums>
 	#       <enum key="true">yin</enum>
 	#       <enum key="false">tang</enum>
 	#     </enums>
 	#   </field>
+	# If you're defining the field in Ruby, set BooleanField#enums to a hash.
+	#   myBooleanField.enums = { true => 'yin', false => 'yang' }
+	#
+	# +enums+ takes precedence over +enumType+.
 	class BooleanField < ObjectField
 		ENUMS_ONE_ZERO = 0
 		ENUMS_CAPITAL_YES_NO = 1
@@ -39,7 +39,7 @@ module Lafcadio
 			@enums = nil
 		end
 
-		def getEnums( value = nil )
+		def getEnums( value = nil ) # :nodoc:
 			if @enums
 				@enums
 			elsif @enumType == ENUMS_ONE_ZERO
@@ -55,19 +55,19 @@ module Lafcadio
 			end
 		end
 
-		def trueEnum( value = nil )
+		def trueEnum( value = nil ) # :nodoc:
 			getEnums( value )[true]
 		end
 
-		def falseEnum
+		def falseEnum # :nodoc:
 			getEnums[false]
 		end
 
-		def textEnumType
+		def textEnumType # :nodoc:
 			@enumType == ENUMS_CAPITAL_YES_NO
 		end
 
-		def valueForSQL(value)
+		def valueForSQL(value) # :nodoc:
 			if value
 				vfs = trueEnum
 			else
@@ -76,7 +76,7 @@ module Lafcadio
 			textEnumType ? "'#{vfs}'" : vfs
 		end
 
-		def valueFromSQL(value, lookupLink = true)
+		def valueFromSQL(value, lookupLink = true) # :nodoc:
 			value == trueEnum( value )
 		end
 	end

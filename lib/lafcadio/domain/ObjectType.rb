@@ -8,9 +8,11 @@ module Lafcadio
 	class ObjectType
 		@@instances = {}
 		
-		def self.flush; @@instances = {}; end
+		def self.flush #:nodoc:
+			@@instances = {}
+		end
 		
-		def self.getObjectType( aClass )
+		def self.getObjectType( aClass ) #:nodoc:
 			instance = @@instances[aClass]
 			if instance.nil?
 				@@instances[aClass] = new( aClass )
@@ -21,7 +23,7 @@ module Lafcadio
 
 		private_class_method :new
 
-		def initialize(objectType)
+		def initialize(objectType) #:nodoc:
 			@objectType = objectType
 			( @classFields, @xmlParser ) = [ nil, nil ]
 			dirName = LafcadioConfig.new['classDefinitionDir']
@@ -36,6 +38,8 @@ module Lafcadio
 			end
 		end
 
+		# Returns an Array of ObjectField instances for this domain class, parsing
+		# them from XML if necessary.
 		def getClassFields
 			unless @classFields
 				if @xmlParser
@@ -49,6 +53,8 @@ module Lafcadio
 			@classFields
 		end
 
+		# Returns the name of the primary key in the database, retrieving it from
+		# the class definition XML if necessary.
 		def sqlPrimaryKeyName
 			if !@xmlParser.nil? && ( spkn = @xmlParser.sqlPrimaryKeyName )
 				spkn

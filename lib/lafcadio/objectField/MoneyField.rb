@@ -1,7 +1,7 @@
 require 'lafcadio/objectField/DecimalField'
 
 module Lafcadio
-	class MoneyField < DecimalField
+	class MoneyField < DecimalField #:nodoc:
 		def MoneyField.instantiateWithParameters( domainClass, parameters )
 			self.new( domainClass, parameters['name'], parameters['englishName'] )
 		end

@@ -6,9 +6,7 @@ module Lafcadio
 	# override MapObject.mappedTypes, returning a two-element array containing 
 	# the domain classes that the map object maps between.
 	class MapObject < DomainObject
-		# Given one domain class, returns the other domain class that this map 
-		# object maps to.
-		def MapObject.otherMappedType(firstType)
+		def MapObject.otherMappedType(firstType) #:nodoc:
 			types = mappedTypes
 			if types.index(firstType) == 0
 				types[1]
@@ -17,7 +15,7 @@ module Lafcadio
 			end
 		end
 
-		def MapObject.subsidiaryMap
+		def MapObject.subsidiaryMap #:nodoc:
 			nil
 		end
 	end

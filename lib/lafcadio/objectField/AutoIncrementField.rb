@@ -1,7 +1,7 @@
 require 'lafcadio/objectField/IntegerField'
 
 module Lafcadio
-	class AutoIncrementField < IntegerField
+	class AutoIncrementField < IntegerField # :nodoc:
 		attr_reader :objectType
 
 		def initialize(objectType, name, englishName = nil)

@@ -6,18 +6,78 @@ module Lafcadio
 	# All classes that correspond to a table in the database need to be children 
 	# of DomainObject.
 	#
+	# = Defining fields
+	# There are two ways to define the fields of a DomainObject subclass.
+	# 1. Defining fields in an XML file. To do this,
+	#    1. Set one directory to contain all your XML files, by setting
+	#       +classDefinitionDir+ in your LafcadioConfig file.
+	#    2. Write one XML file per domain class. For example, a User.xml file
+	#       might look like:
+	#         <lafcadio_class_definition name="User">
+	#           <field name="lastName" class="TextField"/>
+	#           <field name="email" class="TextField"/>
+	#           <field name="password" class="TextField"/>
+	#           <field name="birthday" class="DateField"/>
+	#         </lafcadio_class_definition>
+	# 2. Overriding DomainObject.getClassFields. The method should return an Array
+	#    of instances of ObjectField or its children. The order is unimportant.
+	#    For example:
+	#      class User < DomainObject 
+	#        def User.getClassFields 
+	#          fields = [] 
+	#          fields << TextField.new(self, 'firstName') 
+	#          fields << TextField.new(self, 'lastName') 
+	#          fields << TextField.new(self, 'email') 
+	#          fields << TextField.new(self, 'password') 
+	#          fields << DateField.new(self, 'birthday') 
+	#          fields 
+	#        end 
+	#      end
+	#
+	# = Setting and retrieving fields
+	# Once your fields are defined, you can create an instance by passing in a
+	# hash of field names and values.
+	#   john = User.new( 'firstName' => 'John', 'lastName' => 'Doe',
+	#                    'email' => 'john.doe@email.com',
+	#                    'password' => 'my_password',
+	#                    'birthday' => tenYearsAgo )
+	#
+	# You can read and write these fields like normal instance attributes.
+	#   john.email => 'john.doe@email.com'
+	#   john.email = 'john.doe@mail.email.com'
+	#
+	# If your domain class has fields that refer to other domain classes, or even
+	# to another row in the same table, you can use a LinkField to express the
+	# relation.
+	#   <lafcadio_class_definition name="Message">
+	#     <field name="subject" class="TextField" />
+	#     <field name="body" class="TextField" />
+	#     <field name="author" class="LinkField" linkedType="User" />
+	#     <field name="recipient" class="LinkField" linkedType="User" />
+	#     <field name="dateSent" class="DateField" />
+	#   </lafcadio_class_definition>
+ 	#
+ 	#   msg = Message.new( 'subject' => 'hi there',
+ 	#                      'body' => 'You wanna go to the movies on Saturday?',
+ 	#                      'author' => john, 'recipient' => jane,
+ 	#                      'dateSent' => Date.today )
+	#
+	# = pkId and committing
+	# Lafcadio requires that each table has a numeric primary key. It assumes that
+	# this key is named +pkId+ in the database, though that can be overridden.
+	#
+	# When you create a domain object by calling new, you should not assign a
+	# +pkId+ to the new instance. The pkId will automatically be set when you
+	# commit the object by calling DomainObject#commit.
+	#
+	# However, you may want to manually set +pkId+ when setting up a test case, so
+	# you can ensure that a domain object has a given primary key.
+	#
+	# = Naming assumptions, and how to override them
 	# By default, Lafcadio assumes that every domain object is indexed by the
-	# field "pkId" in the database schema. If you're dealing with a table that 
+	# field +pkId+ in the database schema. If you're dealing with a table that 
 	# uses a different field name, override DomainObject.sqlPrimaryKeyName.
-	#
-	# Other fields are defined by overriding DomainObject.classFields. Once those 
-	# fields are defined, every instance of that domain class has standard
-	# accessors for each field.
-	#
-	# When new domain objects are instantiated, they don't have any pkId value.
-	# Lafcadio distinguishes between objects that already exist in the database 
-	# and objects that have yet to be inserted by testing for a non-nil pkId. 
-	# When a new object is committed, its pkId is automatically set.
+	# However, you will always use +pkId+ in your Ruby code.
 	#
 	# Lafcadio assumes that a domain class corresponds to a table whose name is 
 	# the plural of the class name, and whose first letter is lowercase. A User 
@@ -25,10 +85,20 @@ module Lafcadio
 	# class is assumed to be stored in a "productCategories" table. Override
 	# DomainObject.tableName to override this behavior.
 	#
+	# = Inheritance
 	# Domain classes can inherit from other domain classes; they have all the 
 	# fields of any concrete superclasses plus any new fields defined for 
-	# themselves. Lafcadio assumes that each concrete class has a corresponding 
-	# table, and each table has an pkId field that is used to match rows between 
+	# themselves. You can use normal inheritance to define this:
+	#   class User < DomainObject
+	#     ...
+	#   end
+	#
+	#   class Administrator < User
+	#     ...
+	#   end
+	#
+	# Lafcadio assumes that each concrete class has a corresponding table, and
+	# that each table has a +pkId+ field that is used to match rows between
 	# different levels.
 	class DomainObject
 		@@subclassHash = {}
@@ -40,7 +110,7 @@ module Lafcadio
 
 		include DomainComparable
 		
-		def DomainObject.classFields
+		def DomainObject.classFields #:nodoc:
 			classFields = @@classFields[self]
 			unless classFields
 				@@classFields[self] = self.getClassFields
@@ -49,15 +119,12 @@ module Lafcadio
 			classFields
 		end
 
-		# Returns an array of subclasses that cannot be instantiated.
-		def DomainObject.abstractSubclasses
+		def DomainObject.abstractSubclasses #:nodoc:
 			require 'lafcadio/domain'
 			[ MapObject ]
 		end
 
-		# Returns an array consisting of this class, and any concrete classes it 
-		# might inherit from.
-		def DomainObject.selfAndConcreteSuperclasses
+		def DomainObject.selfAndConcreteSuperclasses # :nodoc:
 			classes = [ ]
 			anObjectType = self
 			until(anObjectType == DomainObject ||
@@ -68,13 +135,12 @@ module Lafcadio
 			classes
 		end
 
-		def DomainObject.method_missing(methodId)
+		def DomainObject.method_missing(methodId) #:nodoc:
 			require 'lafcadio/domain'
 			ObjectType.getObjectType( self ).send( methodId.id2name )
 		end
 
-		# Returns the ObjectField instance corresponding to fieldName.
-		def DomainObject.getClassField(fieldName)
+		def DomainObject.getClassField(fieldName) #:nodoc:
 			field = nil
 			self.classFields.each { |aField|
 				field = aField if aField.name == fieldName
@@ -82,7 +148,7 @@ module Lafcadio
 			field
 		end
 		
-		def DomainObject.getField( fieldName )
+		def DomainObject.getField( fieldName ) #:nodoc:
 			aDomainClass = self
 			field = nil
 			while aDomainClass < DomainObject && !field
@@ -98,11 +164,7 @@ module Lafcadio
 			end
 		end
 
-		# Returns a hash of every other domain class that has a LinkField that
-		# points to this domain class; the hash keys are the classes and the hash 
-		# values are the LinkFields from those classes that point to this domain 
-		# class.
-		def DomainObject.dependentClasses
+		def DomainObject.dependentClasses #:nodoc:
 			dependentClasses = {}
 			DomainObject.subclasses.each { |aClass|
 				if aClass != DomainObjectProxy &&
@@ -117,7 +179,7 @@ module Lafcadio
 			dependentClasses
 		end
 
-		def DomainObject.objectType
+		def DomainObject.objectType #:nodoc:
 			self
 		end
 
@@ -131,32 +193,23 @@ module Lafcadio
 			allFields
 		end
 		
-		# By hooking into DomainObject.inherited (which is called by Ruby every 
-		# time a subclass is defined), DomainObject maintains a hash of every 
-		# defined subclass.
-		def DomainObject.inherited(subclass)
+		def DomainObject.inherited(subclass) #:nodoc:
 			@@subclassHash[subclass] = true
 		end
 		
-		# Returns an array of subclasses of DomainObject.
-		def DomainObject.subclasses
+		def DomainObject.subclasses #:nodoc:
 			@@subclassHash.keys
 		end
 
-		# Returns true for all classes that are concrete domain object
-		# classes, as opposed to DomainObject and others that are abstract
-		# super classes. 
-		def DomainObject.isConcrete?
+		def DomainObject.isConcrete? #:nodoc:
 		  (self != DomainObject && abstractSubclasses.index(self).nil?)
 		end
 		
-		# Is this Domain object based on another, ie: are there two tables and 
-		# not just one on the database layer ? 
-		def DomainObject.isBasedOn?
+		def DomainObject.isBasedOn? #:nodoc:
 		  self.superclass.isConcrete?
 		end
 
-		def self.getDomainDirs
+		def self.getDomainDirs #:nodoc:
 			config = LafcadioConfig.new
 			classPath = config['classpath']
 			domainDirStr = config['domainDirs']
@@ -167,8 +220,7 @@ module Lafcadio
 			end
 		end
 		
-		# Looks for the domain class whose name equals <tt>typeString</tt>.
-		def self.getObjectTypeFromString(typeString)
+		def self.getObjectTypeFromString(typeString) #:nodoc:
 			require 'lafcadio/objectStore/CouldntMatchObjectTypeError'
 			objectType = nil
 			typeString =~ /([^\:]*)$/
@@ -202,16 +254,16 @@ module Lafcadio
 		# fields of this domain class. For example, instantiating a User class 
 		# might look like:
 		#
-		#   User.new ({ 'firstNames' => 'John', 'lastName' => 'Doe',
-		#               'email' => 'john.doe@email.com', 'password' => 'l33t' })
+		#   User.new( 'firstNames' => 'John', 'lastName' => 'Doe',
+		#             'email' => 'john.doe@email.com', 'password' => 'l33t' )
 		#
 		# In normal usage any code you write that creates a domain object will not
-		# define the 'pkId' field. The system assumes that a domain object with an
-		# undefined pkId has yet to be inserted into the database, and when you
-		# commit the domain object an pkId will automatically be assigned.
+		# define the +pkId+ field. The system assumes that a domain object with an
+		# undefined +pkId+ has yet to be inserted into the database, and when you
+		# commit the domain object a +pkId+ will automatically be assigned.
 		#
 		# If you're creating mock objects for unit tests, you can explicitly set 
-		# the pkId to represent objects that already exist in the database.
+		# the +pkId+ to represent objects that already exist in the database.
 		def initialize(fieldHash)
 			@fieldHash = fieldHash
 			@pkId = fieldHash['pkId']
@@ -221,7 +273,7 @@ module Lafcadio
 			@fields_set = []
 		end
 		
-		def method_missing( methId, *args )
+		def method_missing( methId, *args ) #:nodoc:
 			if ( field = get_setter_field( methId ) )
 				set_field( field, args.first )
 			elsif ( field = get_getter_field( methId ) )
@@ -231,7 +283,7 @@ module Lafcadio
 			end
 		end
 
-		def get_getter_field( methId )
+		def get_getter_field( methId ) #:nodoc:
 			begin
 				self.class.getField( methId.id2name )
 			rescue MissingError
@@ -239,7 +291,7 @@ module Lafcadio
 			end
 		end
 
-		def get_setter_field( methId )
+		def get_setter_field( methId ) #:nodoc:
 			if methId.id2name =~ /(.*)=$/
 				begin
 					self.class.getField( $1 )
@@ -251,14 +303,14 @@ module Lafcadio
 			end
 		end
 		
-		def get_field( field )
+		def get_field( field ) #:nodoc:
 			unless @fields_set.include?( field )
 				set_field( field, @fieldHash[field.name] )
 			end
 			@fields[field.name]
 		end
 		
-		def set_field( field, value )
+		def set_field( field, value ) #:nodoc:
 			if field.class <= LinkField
 				if value.class != DomainObjectProxy && value
 					value = DomainObjectProxy.new(value)
@@ -268,6 +320,9 @@ module Lafcadio
 			@fields_set << field
 		end
 
+		# Returns the subclass of DomainObject that this instance represents.
+		# Because of the way that proxying works, clients should call this method
+		# instead of Object.class.
 		def objectType
 			self.class.objectType
 		end
@@ -293,12 +348,13 @@ module Lafcadio
 			@delete = value
 		end
 
-		# In general, to_s is considered an invalid operation for domain objects, 
-		# but this behavior can be overridden by subclasses.
+		# By default, to_s is considered an invalid operation for domain objects,
+		# and will raise an error. This behavior can be overridden by subclasses.
 		def to_s
 			raise "Don't make me into a string unless the type asks"
 		end
 		
+		# Returns a clone, with all of the fields copied.
 		def clone
 			copy = super
 			copy.fields = @fields.clone

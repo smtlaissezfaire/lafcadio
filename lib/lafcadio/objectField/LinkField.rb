@@ -2,8 +2,9 @@ require 'lafcadio/util'
 require 'lafcadio/objectField/ObjectField'
 
 module Lafcadio
+	# A LinkField is used to link from one domain class to another.
 	class LinkField < ObjectField
-		def LinkField.instantiationParameters( fieldElt )
+		def LinkField.instantiationParameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			linkedTypeStr = fieldElt.attributes['linkedType']
 			linkedType = DomainObject.getObjectTypeFromString( linkedTypeStr )
@@ -12,7 +13,7 @@ module Lafcadio
 			parameters
 		end
 
-		def LinkField.instantiateWithParameters( domainClass, parameters )
+		def LinkField.instantiateWithParameters( domainClass, parameters ) #:nodoc:
 			self.new( domainClass, parameters['linkedType'], parameters['name'],
 								parameters['englishName'], parameters['deleteCascade'] )
 		end
@@ -21,10 +22,12 @@ module Lafcadio
 		attr_accessor :listener, :objectStore, :newDuringEdit, :sortField,
 		              :deleteCascade
 
-		# [objectType] The domain class that this field belongs to.
-		# [linkedType] The domain class that this field points to.
-		# [name] The name of this field.
-		# [englishName] The English name of this field.
+		# [objectType]    The domain class that this field belongs to.
+		# [linkedType]    The domain class that this field points to.
+		# [name]          The name of this field.
+		# [englishName]   The English name of this field. (Deprecated)
+		# [deleteCascade] If this is true, deleting the domain object that is linked
+		#                 to will cause this domain object to be deleted as well.
 		def initialize( objectType, linkedType, name = nil, englishName = nil,
 		                deleteCascade = false )
 			unless name
@@ -38,7 +41,7 @@ module Lafcadio
 			@newDuringEdit = true
 		end
 
-		def valueForSQL(value)
+		def valueForSQL(value) #:nodoc:
 			require 'lafcadio/objectStore/DomainObjectInitError'
 			if !value
 				"null"
@@ -50,12 +53,12 @@ module Lafcadio
 			end
 		end
 
-		def valueFromSQL(string)
+		def valueFromSQL(string) #:nodoc:
 			require 'lafcadio/objectStore/DomainObjectProxy'
 			string != nil ? DomainObjectProxy.new(@linkedType, string.to_i) : nil
 		end
 
-		def verify(value, pkId)
+		def verify(value, pkId) #:nodoc:
 			super
 			if @linkedType != @objectType && pkId
 				subsetLinkField = nil

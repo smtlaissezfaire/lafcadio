@@ -1,34 +1,39 @@
 require 'lafcadio/objectField/ObjectField'
 
 module Lafcadio
+	# DecimalField represents a decimal value.
 	class DecimalField < ObjectField
 		attr_reader :precision
 
-		def DecimalField.valueType
+		def DecimalField.valueType #:nodoc:
 			Numeric
 		end
 
-		def DecimalField.instantiationParameters( fieldElt )
+		def DecimalField.instantiationParameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			parameters['precision'] = fieldElt.attributes['precision'].to_i
 			parameters
 		end
 		
-		def DecimalField.instantiateWithParameters( domainClass, parameters )
+		def self.instantiateWithParameters( domainClass, parameters ) #:nodoc:
 			self.new( domainClass, parameters['name'], parameters['precision'],
 								parameters['englishName'] )
 		end
 
+		# [objectType]  The domain class that this field belongs to.
+		# [name]        The name of this field.
+		# [precision]   The expected field precision. (Deprecated)
+		# [englishName] The English name of this field. (Deprecated)
 		def initialize(objectType, name, precision, englishName = nil)
 			super(objectType, name, englishName)
 			@precision = precision
 		end
 
-		def valueFromSQL(string, lookupLink = true)
+		def valueFromSQL(string, lookupLink = true) #:nodoc:
 			string != nil ? string.to_f : nil
 		end
 
-		def processBeforeVerify(value)
+		def processBeforeVerify(value) #:nodoc:
 			value = super value
 			value != nil && value != '' ? value.to_f : nil
 		end

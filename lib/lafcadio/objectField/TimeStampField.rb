@@ -1,7 +1,7 @@
 require 'lafcadio/objectField/DateTimeField'
 
 module Lafcadio
-	class TimeStampField < DateTimeField
+	class TimeStampField < DateTimeField #:nodoc:
 		def initialize(objectType, name = 'timeStamp', englishName = nil)
 			super( objectType, name, englishName )
 			@hideDisplay = true
