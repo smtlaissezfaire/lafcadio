@@ -10,13 +10,13 @@ module Lafcadio
 			@query_count = Hash.new( 0 )
 		end
 
-		def commit(dbObject)
-			objectsByObjectType = get_objects_by_domain_class( dbObject.object_type )
-			if dbObject.delete
-				objectsByObjectType.delete dbObject.pk_id
+		def commit(db_object)
+			objectsByObjectType = get_objects_by_domain_class( db_object.object_type )
+			if db_object.delete
+				objectsByObjectType.delete db_object.pk_id
 			else
-				object_pk_id = get_pk_id_before_committing( dbObject )
-				objectsByObjectType[object_pk_id] = dbObject
+				object_pk_id = get_pk_id_before_committing( db_object )
+				objectsByObjectType[object_pk_id] = db_object
 			end
 		end
 		
@@ -41,11 +41,11 @@ module Lafcadio
 			objects
 		end
 		
-		def get_pk_id_before_committing( dbObject )
-			object_pk_id = dbObject.pk_id
+		def get_pk_id_before_committing( db_object )
+			object_pk_id = db_object.pk_id
 			unless object_pk_id
 				maxpk_id = 0
-				get_objects_by_domain_class( dbObject.object_type ).keys.each { |pk_id|
+				get_objects_by_domain_class( db_object.object_type ).keys.each { |pk_id|
 					maxpk_id = pk_id if pk_id > maxpk_id
 				}
 				@last_pk_id_inserted = maxpk_id + 1

@@ -12,8 +12,8 @@ class TestDomainObject < LafcadioTestCase
 		LafcadioConfig.set_values( nil )
 	end
 
-	def matchField( domainClass, fieldName, fieldClass, attributes = nil )
-		field = domainClass.get_class_field( fieldName )
+	def matchField( domain_class, fieldName, fieldClass, attributes = nil )
+		field = domain_class.get_class_field( fieldName )
 		assert_not_nil( field )
 		assert_equal( fieldClass, field.class )
 		if attributes

@@ -7,8 +7,8 @@ module Lafcadio
 			TimeStampField => 'timestamp', DateTimeField => 'datetime'
 		}
 	
-		def initialize( domainClass )
-			@domainClass = domainClass
+		def initialize( domain_class )
+			@domain_class = domain_class
 		end
 		
 		def definition_terms( field )
@@ -22,14 +22,14 @@ module Lafcadio
 
 		def to_sql
 			createDefinitions = []
-			createDefinitions << "#{ @domainClass.sql_primary_key_name } " +
+			createDefinitions << "#{ @domain_class.sql_primary_key_name } " +
 													 "int not null auto_increment"
-			createDefinitions << "primary key (#{ @domainClass.sql_primary_key_name })"
-			@domainClass.class_fields.each { |field|
+			createDefinitions << "primary key (#{ @domain_class.sql_primary_key_name })"
+			@domain_class.class_fields.each { |field|
 				createDefinitions << definition_terms( field )
 			}
 			<<-SQL
-	create table #{ @domainClass.table_name } (
+	create table #{ @domain_class.table_name } (
 		#{ createDefinitions.join(",\n  ") }
 	);
 			SQL

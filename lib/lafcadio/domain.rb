@@ -4,8 +4,8 @@ require 'rexml/document'
 
 module Lafcadio
 	class ClassDefinitionXmlParser # :nodoc: all
-		def initialize( domainClass, xml )
-			@domainClass = domainClass
+		def initialize( domain_class, xml )
+			@domain_class = domain_class
 			@xmlDocRoot = REXML::Document.new( xml ).root
 			@namesProcessed = {}
 		end
@@ -16,7 +16,7 @@ module Lafcadio
 			begin
 				fieldClass = Class.get_class( 'Lafcadio::' + className )
 				register_name( name )
-				field = fieldClass.instantiate_from_xml( @domainClass, fieldElt )
+				field = fieldClass.instantiate_from_xml( @domain_class, fieldElt )
 				set_field_attributes( field, fieldElt )
 			rescue MissingError
 				msg = "Couldn't find field class '#{ className }' for field " +

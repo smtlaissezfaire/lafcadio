@@ -97,11 +97,11 @@ module Lafcadio
 		DESC 	= 2
 
 		attr_reader :object_type, :condition
-		attr_accessor :orderBy, :orderByOrder, :limit
+		attr_accessor :order_by, :order_byOrder, :limit
 
 		def initialize(object_type, pk_idOrCondition = nil)
 			@object_type = object_type
-			( @condition, @orderBy, @limit ) = [ nil, nil, nil ]
+			( @condition, @order_by, @limit ) = [ nil, nil, nil ]
 			if pk_idOrCondition
 				if pk_idOrCondition.class <= Condition
 					@condition = pk_idOrCondition
@@ -110,7 +110,7 @@ module Lafcadio
 					                                pk_idOrCondition, object_type )
 				end
 			end
-			@orderByOrder = ASC
+			@order_byOrder = ASC
 		end
 		
 		def eql?( other ); other.class <= Query && other.to_sql == to_sql; end
@@ -124,9 +124,9 @@ module Lafcadio
 		end
 
 		def order_clause
-			if @orderBy
-				clause = "order by #{ @orderBy } "
-				clause += @orderByOrder == ASC ? 'asc' : 'desc'
+			if @order_by
+				clause = "order by #{ @order_by } "
+				clause += @order_byOrder == ASC ? 'asc' : 'desc'
 				clause
 			end
 		end
@@ -305,10 +305,10 @@ module Lafcadio
 		end
 
 		class DomainObjectImpostor #:nodoc:
-			attr_reader :domainClass
+			attr_reader :domain_class
 		
-			def initialize( domainClass )
-				@domainClass = domainClass
+			def initialize( domain_class )
+				@domain_class = domain_class
 			end
 			
 			def method_missing( methId, *args )
@@ -317,7 +317,7 @@ module Lafcadio
 					ObjectFieldImpostor.new( self, fieldName )
 				else
 					begin
-						classField = @domainClass.get_field( fieldName )
+						classField = @domain_class.get_field( fieldName )
 						ObjectFieldImpostor.new( self, classField )
 					rescue MissingError
 						super( methId, *args )
@@ -382,14 +382,14 @@ module Lafcadio
 		end
 
 		class Inferrer #:nodoc:
-			def initialize( domainClass, &action )
-				@domainClass = domainClass; @action = action
+			def initialize( domain_class, &action )
+				@domain_class = domain_class; @action = action
 			end
 			
 			def execute
-				impostor = DomainObjectImpostor.new( @domainClass )
+				impostor = DomainObjectImpostor.new( @domain_class )
 				condition = @action.call( impostor )
-				query = Query.new( @domainClass, condition )
+				query = Query.new( @domain_class, condition )
 			end
 		end
 		
@@ -541,12 +541,12 @@ module Lafcadio
 			def register_compare_condition( compareStr, searchTerm)
 				compareVal = ObjectFieldImpostor.comparators[compareStr]
 				Compare.new( @db_field_name, searchTerm,
-										 @domainObjectImpostor.domainClass, compareVal )
+										 @domainObjectImpostor.domain_class, compareVal )
 			end
 			
 			def equals( searchTerm )
 				Equals.new( @db_field_name, field_or_field_name( searchTerm ),
-				            @domainObjectImpostor.domainClass )
+				            @domainObjectImpostor.domain_class )
 			end
 			
 			def field_or_field_name( search_term )
@@ -569,12 +569,12 @@ module Lafcadio
 					matchType = Query::Like::PRE_AND_POST
 				end
 				Query::Like.new( @db_field_name, searchTerm,
-												 @domainObjectImpostor.domainClass, matchType )
+												 @domainObjectImpostor.domain_class, matchType )
 			end
 			
 			def in( *searchTerms )
 				Query::In.new( @db_field_name, searchTerms,
-											 @domainObjectImpostor.domainClass )
+											 @domainObjectImpostor.domain_class )
 			end
 		end
 	end

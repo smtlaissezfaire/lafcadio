@@ -10,13 +10,13 @@ module Lafcadio
 		attr_reader :name, :object_type
 		attr_accessor :not_null, :unique, :db_field_name
 
-		def self.instantiate_from_xml( domainClass, fieldElt ) #:nodoc:
+		def self.instantiate_from_xml( domain_class, fieldElt ) #:nodoc:
 			parameters = instantiation_parameters( fieldElt )
-			instantiate_with_parameters( domainClass, parameters )
+			instantiate_with_parameters( domain_class, parameters )
 		end
 
-		def self.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
-			instance = self.new( domainClass, parameters['name'],
+		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
+			instance = self.new( domain_class, parameters['name'],
 			                     parameters['english_name'] )
 			if ( db_field_name = parameters['db_field_name'] )
 				instance.db_field_name = db_field_name
@@ -320,8 +320,8 @@ module Lafcadio
 	
 	# DecimalField represents a decimal value.
 	class DecimalField < ObjectField
-		def self.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
-			self.new( domainClass, parameters['name'], parameters['english_name'] )
+		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
+			self.new( domain_class, parameters['name'], parameters['english_name'] )
 		end
 
 		def self.value_type #:nodoc:
@@ -378,8 +378,8 @@ module Lafcadio
 	# enums as the +enums+ argument.
 	#
 	class EnumField < TextField
-		def self.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
-			self.new( domainClass, parameters['name'], parameters['enums'],
+		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
+			self.new( domain_class, parameters['name'], parameters['enums'],
 								parameters['english_name'] )
 		end
 
@@ -442,8 +442,8 @@ module Lafcadio
 
 	# A LinkField is used to link from one domain class to another.
 	class LinkField < ObjectField
-		def self.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
-			self.new( domainClass, parameters['linked_type'], parameters['name'],
+		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
+			self.new( domain_class, parameters['linked_type'], parameters['name'],
 								parameters['english_name'], parameters['delete_cascade'] )
 		end
 
@@ -556,8 +556,8 @@ module Lafcadio
 	end
 
 	class SubsetLinkField < LinkField #:nodoc:
-		def self.instantiate_with_parameters( domainClass, parameters )
-			self.new( domainClass, parameters['linked_type'],
+		def self.instantiate_with_parameters( domain_class, parameters )
+			self.new( domain_class, parameters['linked_type'],
 			          parameters['subset_field'], parameters['name'],
 								parameters['english_name'] )
 		end

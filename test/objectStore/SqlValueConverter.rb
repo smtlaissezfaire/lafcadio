@@ -8,18 +8,18 @@ require 'dbi'
 
 class TestSqlValueConverter < LafcadioTestCase
   def testExecute
-    rowHash = { "id" => "1", "name" => "clientName1",
+    row_hash = { "id" => "1", "name" => "clientName1",
 		"standard_rate" => "70" }
-    converter = SqlValueConverter.new(Client, rowHash)
+    converter = SqlValueConverter.new(Client, row_hash)
     assert_equal("clientName1", converter["name"])
     assert_equal(70, converter["standard_rate"])
   end
 
   def testTurnsLinkIdsIntoProxies
-    rowHash = { "client" => "1", "date" => DBI::Date.new( 2001, 1, 1 ),
+    row_hash = { "client" => "1", "date" => DBI::Date.new( 2001, 1, 1 ),
                 "rate" => "70", "hours" => "40",
                 "paid" => DBI::Date.new( 0, 0, 0 ) }
-    converter = SqlValueConverter.new(Invoice, rowHash)
+    converter = SqlValueConverter.new(Invoice, row_hash)
 		assert_nil converter['clientId']
 		assert_equal DomainObjectProxy, converter['client'].class
 		proxy = converter['client']
@@ -28,16 +28,16 @@ class TestSqlValueConverter < LafcadioTestCase
   end
 
   def testConvertsPkId
-    rowHash = { "pk_id" => "1", "name" => "clientName1",
+    row_hash = { "pk_id" => "1", "name" => "clientName1",
 		"standard_rate" => "70" }
-    converter = SqlValueConverter.new(Client, rowHash)
+    converter = SqlValueConverter.new(Client, row_hash)
     assert_equal(Fixnum, converter["pk_id"].class)
   end
 
 	def testInheritanceConstruction
-		rowHash = { 'pk_id' => '1', 'name' => 'clientName1',
+		row_hash = { 'pk_id' => '1', 'name' => 'clientName1',
 				'billingType' => 'trade' }
-		objectHash = SqlValueConverter.new(InternalClient, rowHash)
+		objectHash = SqlValueConverter.new(InternalClient, row_hash)
 		assert_equal 'clientName1', objectHash['name']
 		assert_equal 'trade', objectHash['billingType']
 	end

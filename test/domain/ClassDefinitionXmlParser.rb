@@ -4,12 +4,12 @@ require '../test/mock/domain'
 require '../test/mock/domain/XmlSku'
 
 class TestClassDefinitionXmlParser < LafcadioTestCase
-	def get_class_fields( domainClass, xml )
-		ClassDefinitionXmlParser.new( domainClass, xml ).get_class_fields
+	def get_class_fields( domain_class, xml )
+		ClassDefinitionXmlParser.new( domain_class, xml ).get_class_fields
 	end
 
-	def matchField( domainClass, fieldName, fieldClass, attributes = nil )
-		field = domainClass.get_class_field( fieldName )
+	def matchField( domain_class, fieldName, fieldClass, attributes = nil )
+		field = domain_class.get_class_field( fieldName )
 		assert_not_nil( field )
 		assert_equal( fieldClass, field.class )
 		if attributes

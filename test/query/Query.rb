@@ -45,8 +45,8 @@ class TestQuery < LafcadioTestCase
 
 	def testOrderBy
 		query = Query.new Client
-		query.orderBy = 'name'
-		query.orderByOrder = Query::DESC
+		query.order_by = 'name'
+		query.order_byOrder = Query::DESC
 		assert_equal 'select * from clients order by name desc', query.to_sql
 	end
 

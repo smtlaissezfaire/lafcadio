@@ -11,32 +11,32 @@ module Lafcadio
 		UPDATE 	= 2
 		DELETE  = 3
 
-		attr_reader :commit_type, :dbObject
+		attr_reader :commit_type, :db_object
 
-		def initialize(dbObject, dbBridge)
-			@dbObject = dbObject
+		def initialize(db_object, dbBridge)
+			@db_object = db_object
 			@dbBridge = dbBridge
 			@objectStore = Context.instance.get_object_store
 			@commit_type = nil
 		end
 		
 		def execute
-			@dbObject.verify if LafcadioConfig.new()['checkFields'] == 'onCommit'
+			@db_object.verify if LafcadioConfig.new()['checkFields'] == 'onCommit'
 			set_commit_type
-			@dbObject.last_commit = get_last_commit
-			@dbObject.pre_commit_trigger
-			update_dependent_domain_objects if @dbObject.delete
-			@dbBridge.commit @dbObject
-			unless @dbObject.pk_id
-				@dbObject.pk_id = @dbBridge.last_pk_id_inserted
+			@db_object.last_commit = get_last_commit
+			@db_object.pre_commit_trigger
+			update_dependent_domain_objects if @db_object.delete
+			@dbBridge.commit @db_object
+			unless @db_object.pk_id
+				@db_object.pk_id = @dbBridge.last_pk_id_inserted
 			end
-			@dbObject.post_commit_trigger
+			@db_object.post_commit_trigger
 		end
 
 		def get_last_commit
-			if @dbObject.delete
+			if @db_object.delete
 				DomainObject::COMMIT_DELETE
-			elsif @dbObject.pk_id
+			elsif @db_object.pk_id
 				DomainObject::COMMIT_EDIT
 			else
 				DomainObject::COMMIT_ADD
@@ -44,9 +44,9 @@ module Lafcadio
 		end
 		
 		def set_commit_type
-			if @dbObject.delete
+			if @db_object.delete
 				@commit_type = DELETE
-			elsif @dbObject.pk_id
+			elsif @db_object.pk_id
 				@commit_type = UPDATE
 			else
 				@commit_type = INSERT
@@ -54,10 +54,10 @@ module Lafcadio
 		end
 
 		def update_dependent_domain_objects
-			dependent_classes = @dbObject.object_type.dependent_classes
+			dependent_classes = @db_object.object_type.dependent_classes
 			dependent_classes.keys.each { |aClass|
 				field = dependent_classes[aClass]
-				collection = @objectStore.get_filtered( aClass.name, @dbObject,
+				collection = @objectStore.get_filtered( aClass.name, @db_object,
 																							 field.name )
 				collection.each { |dependentObject|
 					if field.delete_cascade
@@ -101,8 +101,8 @@ module Lafcadio
 			"dbh:#{dbDump}"
 		end
 		
-		def commit(dbObject)
-			sqlMaker = DomainObjectSqlMaker.new(dbObject)
+		def commit(db_object)
+			sqlMaker = DomainObjectSqlMaker.new(db_object)
 			sqlMaker.sql_statements.each { |sql, binds| execute_commit( sql, binds ) }
 			if sqlMaker.sql_statements[0].first =~ /insert/
 				sql = 'select last_insert_id()'
@@ -228,24 +228,24 @@ module Lafcadio
 				@object_type = object_typeOrDbObject
 				@pk_id = pk_id
 			elsif object_typeOrDbObject.class < DomainObject
-				@dbObject = object_typeOrDbObject
+				@db_object = object_typeOrDbObject
 				@d_obj_retrieve_time = Time.now
-				@object_type = @dbObject.class
-				@pk_id = @dbObject.pk_id
+				@object_type = @db_object.class
+				@pk_id = @db_object.pk_id
 			else
 				raise ArgumentError
 			end
-			@dbObject = nil
+			@db_object = nil
 		end
 
 		def get_db_object
 			object_store = ObjectStore.get_object_store
-			if @dbObject.nil? || needs_refresh?
-				@dbObject = object_store.get(@object_type, @pk_id)
+			if @db_object.nil? || needs_refresh?
+				@db_object = object_store.get(@object_type, @pk_id)
 								@d_obj_retrieve_time = Time.now
 
 			end
-			@dbObject
+			@db_object
 		end
 
 		def hash
@@ -268,7 +268,7 @@ module Lafcadio
 	end
 
 	class DomainObjectSqlMaker #:nodoc:
-		attr_reader :bindValues
+		attr_reader :bind_values
 
 		def initialize(obj); @obj = obj; end
 
@@ -286,7 +286,7 @@ module Lafcadio
 					nameValues <<(field.value_for_sql(value))
 				end
 				if field.bind_write?
-					@bindValues << value
+					@bind_values << value
 				end
 			}
 			QueueHash.new( *nameValues )
@@ -316,7 +316,7 @@ module Lafcadio
 		end
 
 		def statement_bind_value_pair( object_type )
-			@bindValues = []
+			@bind_values = []
 			if @obj.pk_id == nil
 				statement = insert_sql(object_type)
 			else
@@ -326,7 +326,7 @@ module Lafcadio
 					statement = update_sql(object_type)
 				end
 			end
-			[statement, @bindValues]
+			[statement, @bind_values]
 		end
 
 		def update_sql(object_type)
@@ -419,14 +419,14 @@ module Lafcadio
 
 		# Commits a domain object to the database. You can also simply call
 		#   myDomainObject.commit
-		def commit(dbObject)
-			@cache.commit( dbObject )
-			dbObject
+		def commit(db_object)
+			@cache.commit( db_object )
+			db_object
 		end
 		
 		# Flushes one domain object from its cache.
-		def flush(dbObject)
-			@cache.flush dbObject
+		def flush(db_object)
+			@cache.flush db_object
 		end
 
 		# Returns the domain object corresponding to the domain class and pk_id.
@@ -527,16 +527,16 @@ module Lafcadio
 				@commit_times = {}
 			end
 
-			def commit( dbObject )
-				committer = Committer.new dbObject, @dbBridge
+			def commit( db_object )
+				committer = Committer.new db_object, @dbBridge
 				committer.execute
 				update_after_commit( committer )
 			end
 
 			# Flushes a domain object.
-			def flush(dbObject)
-				hash_by_object_type(dbObject.object_type).delete dbObject.pk_id
-				flush_collection_cache( dbObject.object_type )
+			def flush(db_object)
+				hash_by_object_type(db_object.object_type).delete db_object.pk_id
+				flush_collection_cache( db_object.object_type )
 			end
 			
 			def flush_collection_cache( object_type )
@@ -595,19 +595,19 @@ module Lafcadio
 			end
 
 			# Saves a domain object.
-			def save(dbObject)
-				hash_by_object_type(dbObject.object_type)[dbObject.pk_id] = dbObject
-				flush_collection_cache( dbObject.object_type )
+			def save(db_object)
+				hash_by_object_type(db_object.object_type)[db_object.pk_id] = db_object
+				flush_collection_cache( db_object.object_type )
 			end
 			
 			def update_after_commit( committer ) #:nodoc:
 				if committer.commit_type == Committer::UPDATE ||
 					committer.commit_type == Committer::INSERT
-					save( committer.dbObject )
+					save( committer.db_object )
 				elsif committer.commit_type == Committer::DELETE
-					flush( committer.dbObject )
+					flush( committer.db_object )
 				end
-				set_commit_time( committer.dbObject )
+				set_commit_time( committer.db_object )
 			end
 		end
 
@@ -704,16 +704,16 @@ module Lafcadio
 	end
 
 	class SqlValueConverter #:nodoc:
-		attr_reader :object_type, :rowHash
+		attr_reader :object_type, :row_hash
 
-		def initialize(object_type, rowHash)
+		def initialize(object_type, row_hash)
 			@object_type = object_type
-			@rowHash = rowHash
+			@row_hash = row_hash
 		end
 
 		def []( key )
 			if key == 'pk_id'
-				if ( field_val = @rowHash[@object_type.sql_primary_key_name] ).nil?
+				if ( field_val = @row_hash[@object_type.sql_primary_key_name] ).nil?
 					raise FieldMatchError, error_msg, caller
 				else
 					field_val.to_i
@@ -721,7 +721,7 @@ module Lafcadio
 			else
 				begin
 					field = @object_type.get_field( key )
-					field.value_from_sql( @rowHash[ field.db_field_name ] )
+					field.value_from_sql( @row_hash[ field.db_field_name ] )
 				rescue MissingError
 					nil
 				end
