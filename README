@@ -3,6 +3,7 @@ Lafcadio is an object-relational mapping layer for Ruby and MySQL.
 http://rubyforge.org/projects/lafcadio/
 
 REQUIREMENTS:
+* log4r ( http://log4r.sourceforge.net/ )
 * Ruby DBI ( http://ruby-dbi.sourceforge.net/ )
 * REXML ( http://www.germane-software.com/software/rexml/ ). If you're using Ruby 1.8 or later you already have REXML.
 

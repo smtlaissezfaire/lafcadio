@@ -2,31 +2,25 @@
 	<head>
 		<title>Lafcadio</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-		<link rel="stylesheet" type="text/css" href="style.css">
+		<link rel="stylesheet" type="text/css" href="/style.css">
 	</head>
 	<body>
 <h1><a href="/">Lafcadio</a></h1>
 <h2>Tutorial</h2>
 
 <h3>1. Download and install</h3>
-<p>Lafcadio requires <a href="http://www.tmtm.org/ja/ruby/mysql/README_en.html">Ruby/MySQL</a>. (Please note that Ruby/MySQL and MySQL/Ruby are not the same thing.)
-<div class="beta_note"><img src="img/beta-logo.png">
-<br>Lafcadio 0.3.1 and later also requires <a href="http://www.germane-software.com/software/rexml/">REXML</a>, which you'll need to have installed if you're using a Ruby version that's earlier than 1.8.0.
-
-<p>Lafcadio 0.3.3 and later requires <a href="http://ruby-dbi.sourceforge.net/">Ruby DBI</a> instead of Ruby/MySQL.</p>
-</div>
-<ol>
-
-<li><a href="https://sourceforge.net/project/showfiles.php?group_id=83312">Download Lafcadio</a>.
-
-<li>Type <tt>tar zxvf lafcadio-0-3-3.tar.gz</tt> to decompress the file.
-
-<li>Type <tt>./bin/install.rb</tt> to install Lafcadio. (You need to be logged in as root.) This will copy the Ruby files into the right subdirectory in <tt>/usr/local/lib/ruby/site_ruby/</tt>. There are no binary files.
-<div class="beta_note"><img src="img/beta-logo.png">
-<br>Starting with Lafcadio 0.3.0, you'll type <tt>./install.rb</tt> instead. In addition to copying Ruby files into the subdirectory, there are some scripts (<tt>lafcadio_schema</tt> was the first, added with 0.3.0) to be installed in <tt>/usr/local/bin/</tt>.
-</div>
-
-</ol>
+<p>Lafcadio requires the following libraries:
+<ul>
+	<li><a href="http://log4r.sourceforge.net/">log4r</a></li>
+	<li><a href="http://ruby-dbi.sourceforge.net/">Ruby DBI</a></li>
+	<li>
+		<a href="http://www.germane-software.com/software/rexml/">REXML</a>, which you already have if you're using Ruby 1.8 or later.
+	</li>
+</ul>
+<p>
+	The easiest way to install this is by using <a href="http://rubygems.rubyforge.org">Rubygems</a>. Simply type:
+	<blockquote><tt>gem --remote-install lafcadio</tt></blockquote>
+</p>
 
 <h3>2. Create a configuration file</h3>
 <p>In Lafcadio, the MySQL database is abstracted behind an object called an object store. To make that database connection in the first place, Lafcadio relies on a configuration file to tell it the password, username, etc. For the purposes of this tutorial, let's say your application uses a MySQL database named <tt>lafcadio_test</tt>, logging into a local MySQL server with a username <tt>user</tt> and password <tt>password</tt>.
@@ -76,7 +70,7 @@ create table users (
 <p>Although we're creating a new table in this example, Lafcadio can also be integrated with pre-existing tables with only a little more work.
 </p>
 <div class="beta_note">
-<img src="img/beta-logo.png">
+<img src="/img/beta-logo.png">
 <br>It is possible in Lafcadio 0.3.0 and later to reverse the order of steps taken in this section: Instead of creating the table and defining the domain class later, you can define the domain class first and then use that to generate a SQL statement. First, follow steps 2 through 4. Then type <tt>lafcadio_schema -c &lt;config_file&gt; &lt;domain_file&gt;</tt> to get a SQL statement that you can use to create the table in MySQL.
 </div>
 
@@ -88,7 +82,30 @@ create table users (
 <br>domainDirs:/home/francis/lafcadio_test_project/domain/
 </tt></blockquote>
 
-<li>Write a domain object definition in <tt>domain/</tt>. Call it <tt>User.rb</tt>.
+<li>Write a domain object definition to define the fields.. There are two different ways to do this: By writing an XML configuration file, or by creating the fields yourself in Ruby. The differences between the two are mostly stylistic.
+<h4>Writing an XML configuration file</h4>
+<p>You'll need to create an empty domain class in <tt>domain/</tt>, called <tt>User.rb</tt>.
+<blockquote><tt>
+require 'lafcadio/domain/DomainObject'
+<br>require 'lafcadio/objectField/TextField'
+<br>require 'lafcadio/objectField/DateField'
+<br>
+<br>class User < DomainObject; end
+</tt></blockquote>
+<p>Save all your XML files in one directory (call it the <tt>classDefinitionDir</tt> in your config file), and then save them as the same name as the class. For example, our <tt>User.xml</tt> file would look like:</p>
+<blockquote><tt>
+&lt;lafcadio_class_definition name="User"&gt;<br>
+&nbsp;&nbsp;&lt;field name="firstName" class="TextField"/&gt;<br>
+&nbsp;&nbsp;&lt;field name="lastName" class="TextField"/&gt;<br>
+&nbsp;&nbsp;&lt;field name="email" class="TextField"/&gt;<br>
+&nbsp;&nbsp;&lt;field name="password" class="TextField"/&gt;<br>
+&nbsp;&nbsp;&lt;field name="birthday" class="DateField"/&gt;<br>
+&lt;/lafcadio_class_definition&gt;
+</tt></blockquote>
+<p>You write one <tt>field</tt> element for every field in the table, with the exception of <tt>objId</tt>. Lafcadio uses this array of fields to figure out what to request from the database.
+<p>For style reasons, Lafcadio expects the table name to be the plural (<tt>users</tt>) and expects the domain class type to be singular (<tt>User</tt>). You can override this assumption if you like.
+<h4>Creating the fields directly in Ruby</h4>
+<p>Defined <tt>User.getClassFields</tt> to return an array of field instances.</p>
 <blockquote><tt>
 require 'lafcadio/domain/DomainObject'
 <br>require 'lafcadio/objectField/TextField'
@@ -106,21 +123,6 @@ require 'lafcadio/domain/DomainObject'
 <br>&nbsp;&nbsp;end
 <br>end
 </tt></blockquote>
-<p>You define one instance of a field for every field in the table, with the exception of <tt>objId</tt>. Lafcadio uses this array of fields to figure out what to request from the database.
-<p>For style reasons, Lafcadio expects the table name to be the plural (<tt>users</tt>) and expects the domain class type to be singular (<tt>User</tt>). You can override this assumption if you like.
-<div class="beta_note">
-<img src="img/beta-logo.png">
-<br>Starting with Lafcadio 0.3.1, you can save a few keystrokes by writing an XML file with field descriptions instead of overriding <tt>DomainObject#getClassFields</tt>. You'll need to save all your XML files in one directory (call it the <tt>classDefinitionDir</tt> in your config file), and then save them as the same name as the class. For example, our <tt>User.xml</tt> file would look like:
-<blockquote><tt>
-&lt;lafcadio_class_definition name="User"&gt;<br>
-&nbsp;&nbsp;&lt;field name="firstName" class="TextField"/&gt;<br>
-&nbsp;&nbsp;&lt;field name="lastName" class="TextField"/&gt;<br>
-&nbsp;&nbsp;&lt;field name="email" class="TextField"/&gt;<br>
-&nbsp;&nbsp;&lt;field name="password" class="TextField"/&gt;<br>
-&nbsp;&nbsp;&lt;field name="birthday" class="DateField"/&gt;<br>
-&lt;/lafcadio_class_definition&gt;
-</tt></blockquote>
-</div>
 </ol>
 
 <h3>4. Manipulate some user objects</h3>
@@ -219,21 +221,8 @@ require 'lafcadio/domain/DomainObject'
 <br>require 'lafcadio/objectField/LinkField'
 <br>require 'domain/User'
 <br>
-<br>class Message < DomainObject
-<br>&nbsp;&nbsp;def Message.classFields
-<br>&nbsp;&nbsp;&nbsp;&nbsp;fields = []
-<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << TextField.new( self, 'subject' )
-<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << TextField.new( self, 'body' )
-<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << LinkField.new( self, User, 'author' )
-<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << LinkField.new( self, User, 'recipient' )
-<br>&nbsp;&nbsp;&nbsp;&nbsp;fields << DateField.new( self, 'dateSent' )
-<br>&nbsp;&nbsp;&nbsp;&nbsp;fields
-<br>&nbsp;&nbsp;end
-<br>end
+<br>class Message < DomainObject; end
 </tt></blockquote>
-<p>As before, you leave out the "objId" field.
-<div class="beta_note"><img src="img/beta-logo.png">
-<br>If you're using 0.3.1 or later you can have a file <tt>Message.xml</tt> with the field definitions like this:
 <blockquote><tt>
 &lt;lafcadio_class_definition name="Message"&gt;<br>
 &nbsp;&nbsp;&lt;field name="subject" class="TextField" /&gt;<br>
@@ -243,7 +232,8 @@ require 'lafcadio/domain/DomainObject'
 &nbsp;&nbsp;&lt;field name="dateSent" class="DateField" /&gt;<br>
 &lt;/lafcadio_class_definition&gt;
 </tt></blockquote>
-</div>
+
+<p>As before, you leave out the "objId" field.</p>
 
 <li>Attach Users to Messages.
 <p>Now you can treat instances of Users as values of the fields "author" and "recipient". For example, this code will save all the appropriate values to MySQL:
@@ -273,6 +263,6 @@ require 'lafcadio/domain/DomainObject'
 <p>With this code Lafcadio will save all the appropriate id numbers in the right fields in MySQL.
 </ol>
 <hr>
-<a href="http://rubyforge.org"><img src="img/rubyforge_logo.png" width="272" height="59"></a>
+<a href="http://rubyforge.org"><img src="/img/rubyforge_logo.png" width="272" height="59"></a>
 	</body>
 </html>

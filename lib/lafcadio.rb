@@ -16,7 +16,7 @@
 # http://rubyforge.lafcadio.org/tutorial.html.
 
 module Lafcadio
-	Version = "0.3.6"
+	Version = "0.4.0"
 
 	require 'lafcadio/dateTime'
 	require 'lafcadio/domain'
