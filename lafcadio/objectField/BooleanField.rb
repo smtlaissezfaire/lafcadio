@@ -9,15 +9,17 @@ class BooleanField < ObjectField
 		BooleanFieldViewer
 	end
 
-	attr_accessor :enumType
+	attr_accessor :enumType, :enums
 
   def initialize (objectType, name, englishName = nil)
 		super (objectType, name, englishName)
 		@enumType = ENUMS_ONE_ZERO
 	end
 
-	def enums
-		if @enumType == ENUMS_ONE_ZERO
+	def getEnums
+		if @enums
+			@enums
+		elsif @enumType == ENUMS_ONE_ZERO
 			{ true => '1', false => '0' }
 		elsif @enumType == ENUMS_CAPITAL_YES_NO
 			{ true => 'Y', false => 'N' }
@@ -25,11 +27,11 @@ class BooleanField < ObjectField
 	end
 
 	def trueEnum
-		enums[true]
+		getEnums[true]
 	end
 
 	def falseEnum
-		enums[false]
+		getEnums[false]
 	end
 
 	def textEnumType
