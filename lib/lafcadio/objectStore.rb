@@ -1,3 +1,4 @@
+require 'dbi'
 require 'lafcadio/includer'
 Includer.include( 'objectStore' )
 require 'lafcadio/util/English'

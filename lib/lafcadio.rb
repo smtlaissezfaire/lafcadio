@@ -28,5 +28,4 @@ module Lafcadio
 	require 'lafcadio/schema'
 	require 'lafcadio/test'
 	require 'lafcadio/util'
-	require 'lafcadio/xml'
 end
