@@ -10,6 +10,9 @@ class TestDomainObject < LafcadioTestCase
 	def teardown
 		super
 		LafcadioConfig.set_values( nil )
+		if FileTest.exist?( '../test/testData/Attribute.xml.tmp' )
+			`mv ../test/testData/Attribute.xml.tmp ../test/testData/Attribute.xml`
+		end
 	end
 
 	def matchField( domain_class, fieldName, fieldClass, attributes = nil )
@@ -44,23 +47,29 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def test_checks_fields_at_all_states
-		LafcadioConfig.set_values( 'checkFields' => 'onAllStates',
-		                          'classDefinitionDir' => '../test/testData' )
+		LafcadioConfig.set_values(
+			'checkFields' => 'onAllStates',
+			'classDefinitionDir' => '../test/testData',
+			'domainDirs' => '../test/mock/domain/'
+		)
 		client = Client.new( 'name' => 'client name' )
 		assert_exception( FieldValueError ) { client.name = nil }
 		assert_exception( FieldValueError ) { Client.new( 'name' => nil ) }
 	end
 
 	def test_checks_fields_on_commit
-		LafcadioConfig.set_values( 'checkFields' => 'onCommit',
-		                          'classDefinitionDir' => '../test/testData' )
+		LafcadioConfig.set_values(
+			'checkFields' => 'onCommit', 'classDefinitionDir' => '../test/testData',
+			'domainDirs' => '../test/mock/domain/'
+		)
 		client = Client.new( {} )
 		assert_exception( FieldValueError ) { client.commit }
 	end
 
 	def test_checks_fields_on_instantiation
 		LafcadioConfig.set_values( 'checkFields' => 'onInstantiate',
-		                          'classDefinitionDir' => '../test/testData' )
+		                           'classDefinitionDir' => '../test/testData',
+															 'domainDirs' => '../test/mock/domain/' )
 		first_client = Client.new( 'name' => 'first client' )
 		first_client.commit
 		assert_exception( FieldValueError ) { Client.new( {} ) }
@@ -268,6 +277,11 @@ class TestDomainObject < LafcadioTestCase
 		              DomainObject.get_object_type_from_string( 'Invoice' ).name )
 	end
 	
+	def testHandlesClassWithoutXml
+		assert_equal( 'pk_id', NoXml.sql_primary_key_name )
+		assert_equal( 'noXmls', NoXml.table_name )
+	end
+	
 	def test_hash_and_eql
 		client = Client.new( 'pk_id' => 1, 'name' => 'client name' )
 		client_prime = Client.new( 'pk_id' => 1, 'name' => 'client name' )
@@ -278,6 +292,17 @@ class TestDomainObject < LafcadioTestCase
 		assert( !client.eql?( client2 ) )
 	end
 	
+	def test_informative_error_if_missing_class_data
+		`mv ../test/testData/Attribute.xml ../test/testData/Attribute.xml.tmp`
+		begin
+			Attribute.get_class_fields
+			fail "Definitely needs to raise an Exception"
+		rescue MissingError
+			assert_equal( "Couldn't find either an XML class description file or " +
+			              "get_class_fields method for Attribute", $!.to_s )
+		end
+	end
+
 	def testInheritance
 		ic = InternalClient.new({ 'name' => 'clientName1',
 				'billingType' => 'trade' })
@@ -304,6 +329,11 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal Fixnum, Client.getTestClient.pk_id.class
 	end
 
+	def testTableName
+		assert_equal( "users", User.table_name )
+		assert_equal( "lineItems", Domain::LineItem.table_name )
+	end
+	
 	def test_to_s
 		assert_match( /Client/, newTestClientWithoutPkId.to_s )
 	end

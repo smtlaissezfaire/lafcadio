@@ -243,6 +243,7 @@ module Lafcadio
 	class DomainObject
 		@@subclassHash = {}
 		@@class_fields = {}
+		@@sql_primary_key_names = {}
 
 		COMMIT_ADD = 1
 		COMMIT_EDIT = 2
@@ -314,6 +315,19 @@ module Lafcadio
 		
 		def DomainObject.get_class_field_by_db_name( fieldName ) #:nodoc:
 			self.class_fields.find { |field| field.db_field_name == fieldName }
+		end
+
+		# Returns an Array of ObjectField instances for this domain class, parsing
+		# them from XML if necessary.
+		def self.get_class_fields
+			xmlParser = try_load_xml_parser
+			if xmlParser
+				xmlParser.get_class_fields
+			else
+				error_msg = "Couldn't find either an XML class description file " +
+										"or get_class_fields method for " + self.name
+				raise MissingError, error_msg, caller
+			end
 		end
 
 		def self.get_domain_dirs #:nodoc:
@@ -411,10 +425,61 @@ module Lafcadio
 			classes
 		end
 
+		# Returns the name of the primary key in the database, retrieving it from
+		# the class definition XML if necessary.
+		def self.sql_primary_key_name( set_sql_primary_key_name = nil )
+			if set_sql_primary_key_name
+				@@sql_primary_key_names[self] = set_sql_primary_key_name
+			elsif @@sql_primary_key_names[self].nil?
+				xmlParser = try_load_xml_parser
+				if !xmlParser.nil? && ( spkn = xmlParser.sql_primary_key_name )
+					@@sql_primary_key_names[self] = spkn
+				else
+					@@sql_primary_key_names[self] = 'pk_id'
+				end
+			end
+			@@sql_primary_key_names[self]
+		end
+
 		def self.subclasses #:nodoc:
 			@@subclassHash.keys
 		end
 
+		# Returns the table name, which is assumed to be the domain class name 
+		# pluralized, and with the first letter lowercase. A User class is
+		# assumed to be stored in a "users" table, while a ProductCategory class is
+		# assumed to be stored in a "productCategories" table.
+		def self.table_name( set_table_name = nil )
+			if set_table_name
+				@table_name = set_table_name
+			elsif @table_name
+				@table_name
+			else
+				xmlParser = try_load_xml_parser
+				if (!xmlParser.nil? && table_name = xmlParser.table_name)
+					table_name
+				else
+					table_name = self.bare_name
+					table_name[0] = table_name[0..0].downcase
+					English.plural table_name
+				end
+			end
+		end
+
+		def self.try_load_xml_parser
+			require 'lafcadio/domain'
+			dirName = LafcadioConfig.new['classDefinitionDir']
+			xmlFileName = self.bare_name + '.xml'
+			xmlPath = File.join( dirName, xmlFileName )
+			xml = ''
+			begin
+				File.open( xmlPath ) { |file| xml = file.readlines.join }
+				ClassDefinitionXmlParser.new( self, xml )
+			rescue Errno::ENOENT
+				# no xml file, so no @xmlParser
+			end
+		end
+		
 		attr_accessor :error_messages, :pk_id, :last_commit, :fields, :fields_set
 		attr_reader :delete
 		protected :fields, :fields_set
@@ -558,101 +623,6 @@ module Lafcadio
 
 		def self.subsidiary_map #:nodoc:
 			nil
-		end
-	end
-
-	# A utility class that handles a few details for the DomainObject class. All 
-	# the methods here are usually called as methods of DomainObject, and then 
-	# delegated to this class.
-	class ObjectType
-		@@instances = {}
-		
-		def self.flush #:nodoc:
-			@@instances = {}
-		end
-
-		def self.get_object_type( aClass ) #:nodoc:
-			instance = @@instances[aClass]
-			if instance.nil?
-				@@instances[aClass] = new( aClass )
-				instance = @@instances[aClass]
-			end
-			instance
-		end
-
-		private_class_method :new
-
-		def initialize(object_type) #:nodoc:
-			@object_type = object_type
-			( @class_fields, @xmlParser, @table_name ) = [ nil, nil, nil ]
-		end
-
-		# Returns an Array of ObjectField instances for this domain class, parsing
-		# them from XML if necessary.
-		def get_class_fields
-			unless @class_fields
-				try_load_xml_parser
-				if @xmlParser
-					@class_fields = @xmlParser.get_class_fields
-				else
-					error_msg = "Couldn't find either an XML class description file " +
-											"or get_class_fields method for " + @object_type.name
-					raise MissingError, error_msg, caller
-				end
-			end
-			@class_fields
-		end
-
-		# Returns the name of the primary key in the database, retrieving it from
-		# the class definition XML if necessary.
-		def sql_primary_key_name( set_sql_primary_key_name = nil )
-			if set_sql_primary_key_name
-				@sql_primary_key_name = set_sql_primary_key_name
-			elsif @sql_primary_key_name
-				@sql_primary_key_name
-			else
-				try_load_xml_parser
-				if !@xmlParser.nil? && ( spkn = @xmlParser.sql_primary_key_name )
-					spkn
-				else
-					'pk_id'
-				end
-			end
-		end
-
-		# Returns the table name, which is assumed to be the domain class name 
-		# pluralized, and with the first letter lowercase. A User class is
-		# assumed to be stored in a "users" table, while a ProductCategory class is
-		# assumed to be stored in a "productCategories" table.
-		def table_name( set_table_name = nil )
-			if set_table_name
-				@table_name = set_table_name
-			elsif @table_name
-				@table_name
-			else
-				try_load_xml_parser
-				if (!@xmlParser.nil? && table_name = @xmlParser.table_name)
-					table_name
-				else
-					table_name = @object_type.bare_name
-					table_name[0] = table_name[0..0].downcase
-					English.plural table_name
-				end
-			end
-		end
-		
-		def try_load_xml_parser
-			require 'lafcadio/domain'
-			dirName = LafcadioConfig.new['classDefinitionDir']
-			xmlFileName = @object_type.bare_name + '.xml'
-			xmlPath = File.join( dirName, xmlFileName )
-			xml = ''
-			begin
-				File.open( xmlPath ) { |file| xml = file.readlines.join }
-				@xmlParser = ClassDefinitionXmlParser.new( @object_type, xml )
-			rescue Errno::ENOENT
-				# no xml file, so no @xmlParser
-			end
 		end
 	end
 end
