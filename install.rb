@@ -3,7 +3,7 @@
 #                                                                              #
 #  Name: install.rb                                                            #
 #  Author: Sean E Russell <ser@germane-software.com>                           #
-#  Version: $Id: install.rb,v 1.1 2003/10/08 03:26:07 francis Exp $
+#  Version: $Id: install.rb,v 1.2 2003/10/08 03:55:00 francis Exp $
 #  Date: *2002-174                                                             #
 #  Description:                                                                #
 #    This is a generic installation script for pure ruby sources.  Features    #
@@ -19,6 +19,7 @@
 
 # CHANGE THIS
 SRC = 'lafcadio'
+BIN = 'bin'
 # CHANGE NOTHING BELOW THIS LINE
 
 Dir.chdir ".." if Dir.pwd =~ /bin.?$/
@@ -85,6 +86,21 @@ def install destdir
 	rescue
 		puts $!
 	end
+	puts "Installing binaries in #{ Config::CONFIG['bindir'] }"
+	begin
+		Dir.entries( BIN ).each { |entry|
+			src = File.join( BIN, entry )
+			next unless FileTest.executable?( src ) && !FileTest.directory?( src )
+			dst = File.join( Config::CONFIG['bindir'], entry )
+			if defined? NOOP
+				puts ">> #{ dst }"
+			else
+				File.install( src, dst, 0755, true )
+			end
+		}
+	rescue
+		puts $!
+	end
 end
 
 def uninstall destdir
@@ -108,6 +124,20 @@ def uninstall destdir
 			else
 				puts d
 				Dir.delete d
+			end
+		}
+	rescue
+	end
+	puts "Uninstalling binaries in #{ Config::CONFIG['bindir'] }"
+	begin
+		Dir.entries( BIN ).each { |entry|
+			orig = File.join( BIN, entry )
+			next unless FileTest.executable?( orig ) && !FileTest.directory?( orig )
+			to_uninstall = File.join( Config::CONFIG['bindir'], entry )
+			if defined? NOOP
+				puts "-- #{to_uninstall}" if File.file? to_uninstall
+			else
+				File.rm_f to_uninstall,true if File.file? to_uninstall
 			end
 		}
 	rescue
