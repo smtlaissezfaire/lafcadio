@@ -41,4 +41,12 @@ class TestSqlValueConverter < LafcadioTestCase
 		assert_equal 'clientName1', objectHash['name']
 		assert_equal 'trade', objectHash['billingType']
 	end
+	
+	def test_raises_if_bad_primary_key_match
+		row_hash = { 'objId' => '1', 'name' => 'client name',
+		             'standard_rate' => '70' }
+		object_hash = SqlValueConverter.new( Client, row_hash )
+		error_msg = 'The field "pkId" can\'t be found in the table "clients".'
+		assert_exception( FieldMatchError, error_msg ) { object_hash['pkId'] }
+	end
 end

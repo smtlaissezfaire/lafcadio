@@ -19,7 +19,7 @@ class AcceptanceTestCase < RUNIT::TestCase
 		Context.instance.setObjectStore( nil )
 	end
 
-	def domain_classes; [ TestRow, TestChildRow ]; end
+	def domain_classes; [ TestBadRow, TestRow, TestChildRow ]; end
 	
 	def get_dbh
 		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
@@ -29,6 +29,29 @@ class AcceptanceTestCase < RUNIT::TestCase
 		DBI.connect( dbAndHost, config['dbuser'], config['dbpassword'] )
 	end
 end
+
+class TestBadRow < DomainObject
+	def self.create_table( dbh )
+		dbh.do( 'drop table if exists testbadrows' )
+		createSql = <<-CREATE
+create table testbadrows (
+	objId int not null auto_increment,
+	primary key (objId),
+	text_field text
+)
+		CREATE
+		dbh.do( createSql )
+	end
+	
+	def self.drop_table( dbh ); dbh.do( 'drop table testbadrows' ); end
+
+	def self.getClassFields
+		fields = []
+		fields << TextField.new( self, 'text_field' )
+		fields
+	end
+end
+
 
 class TestRow < DomainObject
 	def self.create_table( dbh )
@@ -257,5 +280,14 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		}
 		assert_equal( 1, matches.size )
 		assert_equal( 'c', matches.only.text_field )
+	end
+	
+	def test_raise_if_bad_primary_key_map
+		br1 = TestBadRow.new( 'text_field' => 'a' )
+		br1.commit
+		error_msg = 'The field "pkId" can\'t be found in the table "testbadrows".'
+		assert_exception( FieldMatchError, error_msg ) {
+			@object_store.getAll( TestBadRow )
+		}
 	end
 end

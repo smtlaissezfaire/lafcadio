@@ -3,6 +3,8 @@ Includer.include( 'objectStore' )
 require 'lafcadio/util/English'
 
 module Lafcadio
+	class FieldMatchError < StandardError; end
+
 	class ObjectStore
 		class MethodDispatch #:nodoc:
 			attr_reader :symbol, :args
