@@ -72,6 +72,25 @@ class TestMockDBBridge < LafcadioTestCase
     assert_nil( client3.pk_id )
   end
 
+	def test_order_by
+		( 1..10 ).each { |day|
+			@mockDbBridge.commit Invoice.new( 'date' => Date.new( 2005, 1, day ) )
+		}
+		query = Query.new( Invoice )
+		query.order_by = 'date'
+		query.order_by_order = Query::DESC
+		query.limit = 0..4
+		invoices = @mockDbBridge.get_collection_by_query query
+		assert_equal( 5, invoices.size )
+		( 6..10 ).each { |day|
+			date = Date.new( 2005, 1, day )
+			assert(
+				invoices.any? { |inv| inv.date == date },
+				"Couldn't find Invoice for #{ date }"
+			)
+		}
+	end
+
 	def testRetrievalsByType
 		assert_equal 0, @mockDbBridge.retrievals_by_type[Client]
 		get_all Client
