@@ -13,6 +13,17 @@ class TestObjectCollector < LafcadioTestCase
 		@collector = Collector.new @mockObjectStore
 	end
 
+	def test_getMapped
+		ili = TestInventoryLineItem.storedTestInventoryLineItem
+		option = TestOption.storedTestOption
+		iliOption = TestInventoryLineItemOption.storedTestInventoryLineItemOption
+		collection = @collector.getMapped( ili, 'Option' )
+		assert_equal( 1, collection.size )
+		option_prime = collection.first
+		assert_equal( Option, option_prime.objectType )
+		assert_equal( option, option_prime )
+	end
+
 	def testGetObjects
 		@mockObjectStore.addObject Client.new( { "objId" => 1, "name" => "clientName1" } )
 		@mockObjectStore.addObject Client.new( { "objId" => 2, "name" => "clientName2" } )
