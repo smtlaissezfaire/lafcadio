@@ -158,7 +158,7 @@ module Lafcadio
 				field_class = Lafcadio.const_get( maybe_field_class_name )
 				createField( field_class, args[0], args[1] || {} )
 			rescue NameError
-				ObjectType.getObjectType( self ).send( method_name )
+				ObjectType.getObjectType( self ).send( method_name, *args )
 			end
 		end
 

@@ -25,4 +25,7 @@ class XmlSku2 < Lafcadio::DomainObject
 	text       'text2', { 'large' => true }
 	textList   'textList1', { 'dbFieldName' => 'text_list1' }
 	timeStamp  'timestamp1'
+	
+	tableName         'that_table'
+	sqlPrimaryKeyName 'xml_sku2_id'
 end

@@ -4,6 +4,7 @@ require '../test/mock/domain/InternalClient'
 require '../test/mock/domain/Invoice'
 require '../test/mock/domain/Client'
 require '../test/mock/domain/User'
+require '../test/mock/domain/XmlSku2'
 
 class TestDomainObject < LafcadioTestCase
 	def matchField( domainClass, fieldName, fieldClass, attributes = nil )
@@ -244,7 +245,6 @@ class TestDomainObject < LafcadioTestCase
 	end
 	
 	def test_class_fields_from_one_line_class_methods
-		require '../test/mock/domain/XmlSku2'
 		matchField( XmlSku2, 'boolean1', BooleanField,
 		            { 'enumType' => BooleanField::ENUMS_CAPITAL_YES_NO } )
 		matchField( XmlSku2, 'boolean2', BooleanField,
@@ -274,5 +274,10 @@ class TestDomainObject < LafcadioTestCase
 		matchField( XmlSku2, 'textList1', TextListField,
 		            { 'dbFieldName' => 'text_list1' } )
 		matchField( XmlSku2, 'timestamp1', TimeStampField )
+	end
+	
+	def test_override_class_defaults_from_one_liners
+		assert_equal( 'that_table', XmlSku2.tableName )
+		assert_equal( 'xml_sku2_id', XmlSku2.sqlPrimaryKeyName )
 	end
 end

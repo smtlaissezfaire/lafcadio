@@ -25,23 +25,14 @@ module Lafcadio
 
 		def initialize(objectType) #:nodoc:
 			@objectType = objectType
-			( @classFields, @xmlParser ) = [ nil, nil ]
-			dirName = LafcadioConfig.new['classDefinitionDir']
-			xmlFileName = @objectType.bareName + '.xml'
-			xmlPath = File.join( dirName, xmlFileName )
-			xml = ''
-			begin
-				File.open( xmlPath ) { |file| xml = file.readlines.join }
-				@xmlParser = ClassDefinitionXmlParser.new( @objectType, xml )
-			rescue Errno::ENOENT
-				# no xml file, so no @xmlParser
-			end
+			( @classFields, @xmlParser, @tableName ) = [ nil, nil, nil ]
 		end
 
 		# Returns an Array of ObjectField instances for this domain class, parsing
 		# them from XML if necessary.
 		def getClassFields
 			unless @classFields
+				try_load_xml_parser
 				if @xmlParser
 					@classFields = @xmlParser.getClassFields
 				else
@@ -55,11 +46,18 @@ module Lafcadio
 
 		# Returns the name of the primary key in the database, retrieving it from
 		# the class definition XML if necessary.
-		def sqlPrimaryKeyName
-			if !@xmlParser.nil? && ( spkn = @xmlParser.sqlPrimaryKeyName )
-				spkn
+		def sqlPrimaryKeyName( set_sql_primary_key_name = nil )
+			if set_sql_primary_key_name
+				@sqlPrimaryKeyName = set_sql_primary_key_name
+			elsif @sqlPrimaryKeyName
+				@sqlPrimaryKeyName
 			else
-				'pkId'
+				try_load_xml_parser
+				if !@xmlParser.nil? && ( spkn = @xmlParser.sqlPrimaryKeyName )
+					spkn
+				else
+					'pkId'
+				end
 			end
 		end
 
@@ -67,13 +65,33 @@ module Lafcadio
 		# pluralized, and with the first letter lowercase. A User class is
 		# assumed to be stored in a "users" table, while a ProductCategory class is
 		# assumed to be stored in a "productCategories" table.
-		def tableName
-			if (!@xmlParser.nil? && tableName = @xmlParser.tableName)
-				tableName
+		def tableName( set_table_name = nil )
+			if set_table_name
+				@tableName = set_table_name
+			elsif @tableName
+				@tableName
 			else
-				tableName = @objectType.bareName
-				tableName[0] = tableName[0..0].downcase
-				English.plural tableName
+				try_load_xml_parser
+				if (!@xmlParser.nil? && tableName = @xmlParser.tableName)
+					tableName
+				else
+					tableName = @objectType.bareName
+					tableName[0] = tableName[0..0].downcase
+					English.plural tableName
+				end
+			end
+		end
+		
+		def try_load_xml_parser
+			dirName = LafcadioConfig.new['classDefinitionDir']
+			xmlFileName = @objectType.bareName + '.xml'
+			xmlPath = File.join( dirName, xmlFileName )
+			xml = ''
+			begin
+				File.open( xmlPath ) { |file| xml = file.readlines.join }
+				@xmlParser = ClassDefinitionXmlParser.new( @objectType, xml )
+			rescue Errno::ENOENT
+				# no xml file, so no @xmlParser
 			end
 		end
 	end
