@@ -180,7 +180,7 @@ class TestDomainObject < LafcadioTestCase
 		                                  'xmlSku' => nil )
 		converter = SqlValueConverter.new( Invoice, row_hash )
 		inv = Invoice.new( converter )
-		assert_equal( 1, row_hash.key_lookups['pk_id'] )
+		assert_equal( 0, row_hash.key_lookups['pk_id'] )
 		assert_equal( 0, row_hash.key_lookups['hours'] )
 		assert_equal( 0, row_hash.key_lookups['xmlSku'] )
 		assert_equal( 36.5, inv.hours )

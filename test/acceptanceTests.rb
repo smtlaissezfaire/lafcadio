@@ -92,7 +92,7 @@ create table testrows (
 	def self.drop_table( dbh ); dbh.do( 'drop table testrows' ); end
 
 	def TestRow.get_class_fields
-		fields = []
+		fields = super
 		fields << TextField.new( self, 'text_field' )
 		fields << DateTimeField.new( self, 'date_time' )
 		fields << BooleanField.new( self, 'bool_field' )

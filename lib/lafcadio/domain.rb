@@ -483,7 +483,7 @@ module Lafcadio
 			end
 		end
 		
-		attr_accessor :error_messages, :pk_id, :last_commit, :fields, :fields_set
+		attr_accessor :error_messages, :last_commit, :fields, :fields_set
 		attr_reader :delete
 		protected :fields, :fields_set
 
@@ -503,8 +503,6 @@ module Lafcadio
 		# the +pk_id+ to represent objects that already exist in the database.
 		def initialize(fieldHash)
 			@fieldHash = fieldHash
-			@pk_id = fieldHash['pk_id']
-			@pk_id = @pk_id.to_i unless @pk_id.nil?
 			@error_messages = []
 			@fields = {}
 			@fields_set = []
@@ -596,7 +594,8 @@ module Lafcadio
 					value = DomainObjectProxy.new(value)
 				end
 			end
-			if LafcadioConfig.new()['checkFields'] == 'onAllStates'
+			if ( LafcadioConfig.new()['checkFields'] == 'onAllStates' &&
+			     !field.instance_of?( PrimaryKeyField ) )
 				field.verify( value, pk_id )
 			end
 			@fields[field.name] = value
