@@ -57,4 +57,6 @@ class TestQueueHash < LafcadioTestCase
 		anotherQh = QueueHash.new( 'a', 's', 'd', 'f', 'g', 'h' )
 		assert( @qh != anotherQh )
 	end
+	
+	def test_nil; assert_nil( @qh['qwerty'] ); end
 end

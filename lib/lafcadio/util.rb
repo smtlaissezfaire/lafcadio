@@ -302,7 +302,9 @@ module Lafcadio
 			end
 		end
 
-		def [](key); ( @pairs.find { |pair| pair[0] == key } )[1]; end
+		def [](key)
+			( pair = @pairs.find { |pair| pair[0] == key } ) ? pair.last : nil
+		end
 
 		def []=(key, value); @pairs << [key, value]; end
 

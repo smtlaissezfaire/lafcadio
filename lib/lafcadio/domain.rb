@@ -562,7 +562,7 @@ module Lafcadio
 		def self.flush #:nodoc:
 			@@instances = {}
 		end
-		
+
 		def self.getObjectType( aClass ) #:nodoc:
 			instance = @@instances[aClass]
 			if instance.nil?

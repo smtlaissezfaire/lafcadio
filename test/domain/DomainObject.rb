@@ -44,7 +44,8 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def test_checks_fields_on_instantiation
-		LafcadioConfig.setValues( 'checkFields' => 'onInstantiate' )
+		LafcadioConfig.setValues( 'checkFields' => 'onInstantiate',
+		                          'classDefinitionDir' => '../test/testData' )
 		first_client = Client.new( 'name' => 'first client' )
 		first_client.commit
 		assert_exception( FieldValueError ) { Client.new( {} ) }
@@ -55,6 +56,13 @@ class TestDomainObject < LafcadioTestCase
 		assert_exception( FieldValueError ) {
 			Client.new( 'name' => 'client name', 'referringClient' => first_client,
 			            'standard_rate' => "Free!" )
+		}
+		assert_exception( FieldValueError ) {
+			User.new( 'email' => 'a@a', 'firstNames' => 'Bill',
+			          'administrator' => false )
+		}
+		assert_exception( FieldValueError ) {
+			XmlSku.new( 'enum1' => 'c', 'email1' => 'bill@bill.bill' )
 		}
 	end
 	

@@ -78,7 +78,7 @@ module Lafcadio
 		end
 
 		def nullErrorMsg #:nodoc:
-			English.sentence "Please enter %a %nam.", englishName.downcase
+			"#{ self.objectType.name }##{ name } can not be nil."
 		end
 
 		def prevValue(pkId) #:nodoc:
@@ -104,8 +104,10 @@ module Lafcadio
 			if value
 				valueType = self.class.valueType
 				unless value.class <= valueType
-					raise FieldValueError, 
-							"#{name} needs an object of type #{valueType.name}", caller
+					raise( FieldValueError, 
+					       "#{ objectType.name }##{ name } needs a " + valueType.name +
+								     " value.",
+					       caller )
 				end
 				verifyUniqueness(value, pkId) if unique
 			end
@@ -353,7 +355,9 @@ module Lafcadio
 		def verify(value, pkId) #:nodoc:
 			super(value, pkId)
 			if !EmailField.validAddress(value)
-				raise FieldValueError, "Please enter a valid email address.", caller
+				raise( FieldValueError,
+				       "#{ objectType.name }##{ name } needs a valid email address.",
+				       caller )
 			end
 		end
 	end
@@ -417,6 +421,17 @@ module Lafcadio
 		
 		def valueForSQL(value) #:nodoc:
 			value != '' ?(super(value)) : 'null'
+		end
+		
+		def verify( value, pkId ) #:nodoc:
+			super
+			if @enums[value].nil?
+				key_str = '[ ' +
+				          ( @enums.keys.map { |key| "\"#{ key }\"" } ).join(', ') + ' ]'
+				err_str = "#{ @objectType.name }##{ name } needs a value that is " +
+				          "one of #{ key_str }"
+				raise( FieldValueError, err_str, caller )
+			end
 		end
 	end
 	
