@@ -214,8 +214,7 @@ module Lafcadio
 				field = nil
 				while (anObjectType < DomainObject || anObjectType < DomainObject) &&
 							!field
-					field = anObjectType.get_class_field( @fieldName ) ||
-					        anObjectType.get_class_field_by_db_name( @fieldName )
+					field = anObjectType.get_class_field( @fieldName )
 					anObjectType = anObjectType.superclass
 				end
 				if field
@@ -233,9 +232,7 @@ module Lafcadio
 				Query::Not.new( self )
 			end
 
-			def primary_key_field?
-				[ @object_type.sql_primary_key_name, 'pk_id' ].include?( @fieldName )
-			end
+			def primary_key_field?; 'pk_id' == @fieldName; end
 			
 			def to_condition; self; end
 		end
@@ -530,10 +527,10 @@ module Lafcadio
 			def initialize( domainObjectImpostor, class_field_or_name )
 				@domainObjectImpostor = domainObjectImpostor
 				if class_field_or_name == 'pk_id'
-					@db_field_name = 'pk_id'
+					@field_name = 'pk_id'
 				else
 					@class_field = class_field_or_name
-					@db_field_name = class_field_or_name.db_field_name
+					@field_name = class_field_or_name.name
 				end
 			end
 			
@@ -548,12 +545,12 @@ module Lafcadio
 			
 			def register_compare_condition( compareStr, searchTerm)
 				compareVal = ObjectFieldImpostor.comparators[compareStr]
-				Compare.new( @db_field_name, searchTerm,
+				Compare.new( @field_name, searchTerm,
 				             @domainObjectImpostor.domain_class, compareVal )
 			end
 			
 			def equals( searchTerm )
-				Equals.new( @db_field_name, field_or_field_name( searchTerm ),
+				Equals.new( @field_name, field_or_field_name( searchTerm ),
 					          @domainObjectImpostor.domain_class )
 			end
 			
@@ -567,7 +564,7 @@ module Lafcadio
 			
 			def include?( search_term )
 				if @class_field.instance_of?( TextListField )
-					Include.new( @db_field_name, search_term,
+					Include.new( @field_name, search_term,
 					             @domainObjectImpostor.domain_class )
 				else
 					raise ArgumentError
@@ -585,18 +582,18 @@ module Lafcadio
 					searchTerm = regexp.source
 					matchType = Query::Like::PRE_AND_POST
 				end
-				Query::Like.new( @db_field_name, searchTerm,
+				Query::Like.new( @field_name, searchTerm,
 												 @domainObjectImpostor.domain_class, matchType )
 			end
 			
 			def in( *searchTerms )
-				Query::In.new( @db_field_name, searchTerms,
+				Query::In.new( @field_name, searchTerms,
 											 @domainObjectImpostor.domain_class )
 			end
 			
 			def to_condition
 				if @class_field.instance_of?( BooleanField )
-					Query::Equals.new( @db_field_name, true,
+					Query::Equals.new( @field_name, true,
 					                   @domainObjectImpostor.domain_class )
 				else
 					raise
