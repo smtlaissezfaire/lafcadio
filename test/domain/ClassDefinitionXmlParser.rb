@@ -46,6 +46,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		matchField( XmlSku, 'text1', TextField, { 'size' => 16, 'unique' => true } )
 		matchField( XmlSku, 'text2', TextField, { 'large' => true } )
 		matchField( XmlSku, 'textList1', TextListField )
+		matchField( Invoice, 'timestamp1', TimeStampField )
 	end
 	
 	def testFieldNamesNeedToBeUnique

@@ -30,6 +30,8 @@ class CreateTableStatement
 			'date'
 		elsif field.class <= BooleanField
 			'bool'
+		elsif field.class <= TimeStampField
+			'timestamp'
 		elsif field.class <= DateTimeField
 			'datetime'
 		end
