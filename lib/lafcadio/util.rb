@@ -100,6 +100,8 @@ module Lafcadio
 	#
 	# For example: ObjectStore.getObjectStore
 	class ContextualService
+		def self.flush; Context.instance.set_resource( self, nil ); end
+	
 		def self.method_missing( methodId, *args )
 			methodName = methodId.id2name
 			if methodName =~ /^get_(.*)/ || methodName =~ /^set_(.*)/

@@ -23,6 +23,12 @@ class TestContextualService < Test::Unit::TestCase
 		assert_raise( NoMethodError ) { context.getServiceA }
 	end
 	
+	def test_flush
+		service_a = ServiceA.get_service_a
+		ServiceA.flush
+		assert( service_a != ServiceA.get_service_a )
+	end
+	
 	class Outer; class Inner < Lafcadio::ContextualService; end; end
 	
 	def test_handles_inner_class_child
