@@ -201,6 +201,16 @@ class TestDomainObject < LafcadioTestCase
     client.name = "newClientName"
     assert_equal("newClientName", client.name)
   end
+
+	def test_dispatch_to_object_store
+		invoice = Invoice.storedTestInvoice
+		client = Client.storedTestClient
+		assert_equal( invoice, client.get_invoices.only )
+		assert_equal( 0, client.get_clients( 'referringClient' ).size )
+		client2 = Client.new( 'pk_id' => 2, 'referringClient' => client )
+		client2.commit
+		assert_equal( client2, client.get_clients( 'referringClient' ).only )
+	end
 	
 	def testDontSetDeleteWithoutPkId
 		foo = Client.new( { "name" => "clientName1" } )
