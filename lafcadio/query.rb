@@ -12,6 +12,17 @@ class Query
 			condition = @action.call( impostor )
 			query = Query.new( @domainClass, condition )
 		end
+		
+		module Methods
+			def query_and( *conditions )
+				CompoundCondition.new( *conditions )
+			end
+			
+			def query_or( *conditions )
+				conditions << CompoundCondition::OR
+				CompoundCondition.new( *conditions)
+			end
+		end
 	end
 	
 	class DomainObjectImpostor
@@ -22,30 +33,35 @@ class Query
 		end
 		
 		def method_missing( methId, *args )
-			fieldName = ( methId.id2name =~ /(.*)=$/ ? $1 : methId.id2name )
-			begin
-				classField = @domainClass.getField( fieldName )
-				ObjectFieldImpostor.new( self, classField )
-			rescue MissingError
-				super( methId, *args )
+			fieldName = methId.id2name
+			if fieldName == 'objId'
+				ObjectFieldImpostor.new( self, fieldName )
+			else
+				begin
+					classField = @domainClass.getField( fieldName )
+					ObjectFieldImpostor.new( self, classField )
+				rescue MissingError
+					super( methId, *args )
+				end
 			end
-		end
-		
-		def in( fieldName, searchTerms )
-			Query::In.new( fieldName, searchTerms, @domainClass )
 		end
 	end
 	
 	class ObjectFieldImpostor
 		def ObjectFieldImpostor.comparators
 			{ 
-				'<' => Compare::LESS_THAN, '<=' => Compare::LESS_THAN_OR_EQUAL,
-				'>=' => Compare::GREATER_THAN_OR_EQUAL, '>' => Compare::GREATER_THAN
+				'lt' => Compare::LESS_THAN, 'lte' => Compare::LESS_THAN_OR_EQUAL,
+				'gte' => Compare::GREATER_THAN_OR_EQUAL, 'gt' => Compare::GREATER_THAN
 			}
 		end
 	
-		def initialize( domainObjectImpostor, classField )
-			@domainObjectImpostor = domainObjectImpostor; @classField = classField
+		def initialize( domainObjectImpostor, class_field_or_name )
+			@domainObjectImpostor = domainObjectImpostor
+			if class_field_or_name == 'objId'
+				@db_field_name = 'objId'
+			else
+				@db_field_name = class_field_or_name.dbFieldName
+			end
 		end
 		
 		def method_missing( methId, *args )
@@ -59,16 +75,16 @@ class Query
 		
 		def registerCompareCondition( compareStr, searchTerm)
 			compareVal = ObjectFieldImpostor.comparators[compareStr]
-			Compare.new( @classField.dbFieldName, searchTerm,
+			Compare.new( @db_field_name, searchTerm,
 			             @domainObjectImpostor.domainClass, compareVal )
 		end
 		
-		def ==( searchTerm )
-			Equals.new( @classField.dbFieldName, searchTerm,
+		def equals( searchTerm )
+			Equals.new( @db_field_name, searchTerm,
 			            @domainObjectImpostor.domainClass )
 		end
 		
-		def =~( regexp )
+		def like( regexp )
 			if regexp.source =~ /^\^(.*)/
 				searchTerm = $1
 				matchType = Query::Like::POST_ONLY
@@ -79,8 +95,13 @@ class Query
 				searchTerm = regexp.source
 				matchType = Query::Like::PRE_AND_POST
 			end
-			Query::Like.new( @classField.dbFieldName, searchTerm,
+			Query::Like.new( @db_field_name, searchTerm,
 			                 @domainObjectImpostor.domainClass, matchType )
+		end
+		
+		def in( *searchTerms )
+			Query::In.new( @db_field_name, searchTerms,
+			               @domainObjectImpostor.domainClass )
 		end
 	end
 end
