@@ -96,8 +96,10 @@ class DomainObject
 		end
 	end
 
-	# Returns an array of every other domain class that has a LinkField that
-	# points to this domain class.
+	# Returns a hash of every other domain class that has a LinkField that
+	# points to this domain class; the hash keys are the classes and the hash 
+	# values are the LinkFields from those classes that point to this domain 
+	# class.
   def DomainObject.dependentClasses
     dependentClasses = {}
 		DomainObject.subclasses.each { |aClass|
