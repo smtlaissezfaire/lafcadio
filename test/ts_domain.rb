@@ -62,7 +62,14 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 			# desired behavior
 		end
 	end
-	
+
+	def testSetPkNameAndTableNameInXml
+		assert_equal( 'some_other_id', XmlSku.sql_primary_key_name )
+		assert_equal( 'pk_id', Attribute.sql_primary_key_name )
+		assert_equal( 'some_other_table', XmlSku.table_name )
+		assert_equal( 'attributes', Attribute.table_name )
+	end
+
 	def testUsefulErrorMessages
 		begin
 			get_class_fields( XmlSku, <<-XML
@@ -75,13 +82,6 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		rescue StandardError
 			assert_equal( "Couldn't find field class '' for field 'date1'", $!.to_s )
 		end
-	end
-
-	def testSetPkNameAndTableNameInXml
-		assert_equal( 'some_other_id', XmlSku.sql_primary_key_name )
-		assert_equal( 'pk_id', Attribute.sql_primary_key_name )
-		assert_equal( 'some_other_table', XmlSku.table_name )
-		assert_equal( 'attributes', Attribute.table_name )
 	end
 end
 
@@ -323,20 +323,6 @@ class TestDomainObject < LafcadioTestCase
 		assert invoice != client
 	end
 
-	def testGetField
-		name = Client.get_class_field 'name'
-		assert_not_nil name
-		assert_equal( 'name', InternalClient.get_field( 'name' ).name )
-		assert_equal( 'billingType', InternalClient.get_field( 'billingType' ).name )
-		begin
-			InternalClient.get_field( 'something' )
-			fail "DomainObject.get_field needs to raise an error if it can't find " +
-           "anything"
-    rescue MissingError
-    	# ok
-    end
-	end
-	
 	def test_get_domain_class_from_string
 		assert_equal(
 			Class, DomainObject.get_domain_class_from_string( 'Invoice' ).class
@@ -360,6 +346,20 @@ class TestDomainObject < LafcadioTestCase
 		LafcadioConfig.set_filename '../test/testData/config_no_domain_file.dat'
 		assert_equal( 'Invoice',
 		              DomainObject.get_domain_class_from_string( 'Invoice' ).name )
+	end
+
+	def testGetField
+		name = Client.get_class_field 'name'
+		assert_not_nil name
+		assert_equal( 'name', InternalClient.get_field( 'name' ).name )
+		assert_equal( 'billingType', InternalClient.get_field( 'billingType' ).name )
+		begin
+			InternalClient.get_field( 'something' )
+			fail "DomainObject.get_field needs to raise an error if it can't find " +
+           "anything"
+    rescue MissingError
+    	# ok
+    end
 	end
 	
 	def testHandlesClassWithoutXml

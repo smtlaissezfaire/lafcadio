@@ -10,6 +10,22 @@ class TestBooleanField < LafcadioTestCase
     @bf = BooleanField.new(nil, "administrator")
   end
 
+	def test_raise_error_if_no_enums_available
+		@bf.enum_type = 999
+		begin
+			@bf.get_enums
+			fail "should raise MissingError"
+		rescue MissingError
+			# ok
+		end
+	end
+
+	def test_text_enums
+		@bf.enums = { true => '1', false => '0' }
+		assert_equal( "'1'", @bf.value_for_sql( true ) )
+		assert_equal( "'0'", @bf.value_for_sql( false ) )
+	end
+
   def testValueForSQL
     assert_equal(0, @bf.value_for_sql(false))
   end
@@ -32,40 +48,12 @@ class TestBooleanField < LafcadioTestCase
 		assert_equal true, bf3.value_from_sql('')
 		assert_equal false, bf3.value_from_sql('N')
 	end
-	
-	def test_raise_error_if_no_enums_available
-		@bf.enum_type = 999
-		begin
-			@bf.get_enums
-			fail "should raise MissingError"
-		rescue MissingError
-			# ok
-		end
-	end
-	
-	def test_text_enums
-		@bf.enums = { true => '1', false => '0' }
-		assert_equal( "'1'", @bf.value_for_sql( true ) )
-		assert_equal( "'0'", @bf.value_for_sql( false ) )
-	end
 end
 
 class TestDateField < LafcadioTestCase
   def setup
   	super
     @odf = DateField.new Invoice
-  end
-
-  def testValueForSQL
-    assert_equal("'2001-04-05'", @odf.value_for_sql(Date.new(2001, 4, 5)))
-		assert_equal 'null', @odf.value_for_sql(nil)
-  end
-
-  def testNotNull
-    odf1 = DateField.new nil
-    assert(odf1.not_null)
-    odf1.not_null = false
-    assert(!odf1.not_null)
   end
 
   def testCatchesBadFormat
@@ -76,6 +64,18 @@ class TestDateField < LafcadioTestCase
 			# ok
     end
     @odf.verify(Date.new(2001, 4, 5), nil)
+  end
+
+  def testNotNull
+    odf1 = DateField.new nil
+    assert(odf1.not_null)
+    odf1.not_null = false
+    assert(!odf1.not_null)
+  end
+
+  def testValueForSQL
+    assert_equal("'2001-04-05'", @odf.value_for_sql(Date.new(2001, 4, 5)))
+		assert_equal 'null', @odf.value_for_sql(nil)
   end
 
   def testValueFromSQL
@@ -118,15 +118,6 @@ class TestDecimalField < LafcadioTestCase
   	super
     @odf = DecimalField.new( Invoice, "hours" )
   end
-  
-  def testGetvalue_from_sql
-    obj = @odf.value_from_sql "1.1"
-    assert_equal(1.1, obj)    
-  end
-
-	def testValueForSQL
-		assert_equal 'null', @odf.value_for_sql(nil)
-	end
 
   def testNeedsNumeric
     caught = false
@@ -138,9 +129,29 @@ class TestDecimalField < LafcadioTestCase
     assert(caught)
     @odf.verify(36.5, nil)
   end
+  
+  def testGetvalue_from_sql
+    obj = @odf.value_from_sql "1.1"
+    assert_equal(1.1, obj)    
+  end
+
+	def testValueForSQL
+		assert_equal 'null', @odf.value_for_sql(nil)
+	end
 end
 
 class TestEmailField < LafcadioTestCase
+	def testValidAddress
+		assert !EmailField.valid_address('a@a')
+		assert !EmailField.valid_address('a.a@a')
+		assert !EmailField.valid_address('a.a.a')
+		assert !EmailField.valid_address('a')
+		assert EmailField.valid_address('a@a.a')
+		assert EmailField.valid_address('a,a@a.a')
+		assert !EmailField.valid_address('a@a.a, my_friend_too@a.a')
+		assert !EmailField.valid_address('cant have spaces @ this. that')
+  end
+
   def testVerify
     field = EmailField.new User
 		begin
@@ -152,17 +163,6 @@ class TestEmailField < LafcadioTestCase
 		field.not_null = false
 		field.verify( nil, 1 )
 	end
-
-	def testValidAddress
-		assert !EmailField.valid_address('a@a')
-		assert !EmailField.valid_address('a.a@a')
-		assert !EmailField.valid_address('a.a.a')
-		assert !EmailField.valid_address('a')
-		assert EmailField.valid_address('a@a.a')
-		assert EmailField.valid_address('a,a@a.a')
-		assert !EmailField.valid_address('a@a.a, my_friend_too@a.a')
-		assert !EmailField.valid_address('cant have spaces @ this. that')
-  end
 end
 
 class TestEnumField < LafcadioTestCase
@@ -213,6 +213,10 @@ class TestLinkField < LafcadioTestCase
     @fieldWithListener = LinkField.new(nil, Client, "client", "Client")
   end
 
+  def testNameForSQL
+    assert_equal("client", @olf.name_for_sql)
+  end
+
   def testNames
     assert_equal("client", @olf.name)
 		caLinkField = LinkField.new nil, InternalClient
@@ -220,6 +224,23 @@ class TestLinkField < LafcadioTestCase
 		liLinkField = LinkField.new nil, Domain::LineItem
 		assert_equal "lineItem", liLinkField.name
   end
+
+	def testRespectsOtherSubsetLinks
+		invoice = Invoice.storedTestInvoice
+		client = Client.storedTestClient
+		client.priorityInvoice = invoice
+		@mockObjectStore.commit client
+		client2 = client.clone
+		client2.pk_id = 2
+		@mockObjectStore.commit client2
+		linkField = Invoice.get_class_field 'client'
+		begin
+			linkField.verify(client2, 1)
+			fail 'should throw FieldValueError'
+		rescue FieldValueError
+			# ok
+		end
+	end
 
   def testValueForSQL
     client = Client.new( { "name" => "my name", "pk_id" => 10 } )
@@ -239,10 +260,6 @@ class TestLinkField < LafcadioTestCase
 		assert_equal 45, @olf.value_for_sql(clientProxy)
 	end
 
-  def testNameForSQL
-    assert_equal("client", @olf.name_for_sql)
-  end
-
   def testValueFromSQL
 		client = Client.getTestClient
 		@mockObjectStore.commit client
@@ -251,29 +268,17 @@ class TestLinkField < LafcadioTestCase
 		assert_equal client.name, clientFromLinkField.name
 		assert_nil @olf.value_from_sql(nil)
   end
-
-	def testRespectsOtherSubsetLinks
-		invoice = Invoice.storedTestInvoice
-		client = Client.storedTestClient
-		client.priorityInvoice = invoice
-		@mockObjectStore.commit client
-		client2 = client.clone
-		client2.pk_id = 2
-		@mockObjectStore.commit client2
-		linkField = Invoice.get_class_field 'client'
-		begin
-			linkField.verify(client2, 1)
-			fail 'should throw FieldValueError'
-		rescue FieldValueError
-			# ok
-		end
-	end
 end
 
 class TestMonthField < LafcadioTestCase
 	def setup
 		super
 		@field = MonthField.new nil, "expirationDate"
+	end
+
+	def testValueForSQL
+		assert_equal( "'2005-12-01'",
+		              @field.value_for_sql( Month.new( 2005, 12 ) ) )
 	end
 
 	def testVerifyMonths
@@ -285,11 +290,6 @@ class TestMonthField < LafcadioTestCase
 			caught = true
 		end
 		assert caught
-	end
-
-	def testValueForSQL
-		assert_equal( "'2005-12-01'",
-		              @field.value_for_sql( Month.new( 2005, 12 ) ) )
 	end
 end
 
@@ -305,18 +305,18 @@ class TestObjectField < LafcadioTestCase
 		@mockObjectStore.commit @user
 	end
 
-	def testNameForSQL
-		field = ObjectField.new User, "id"
-		field.db_field_name = "pk_id"
-		assert_equal "pk_id", field.name_for_sql
-	end
-
 	def testComparable
 		field1 = ObjectField.new User, "firstNames"
 		field2 = ObjectField.new User, "firstNames"
 		assert_equal field1, field2
 		field3 = ObjectField.new User, "lastName"
 		assert field1 != field3
+	end
+
+	def testNameForSQL
+		field = ObjectField.new User, "id"
+		field.db_field_name = "pk_id"
+		assert_equal "pk_id", field.name_for_sql
 	end
 
 	def testValueForSQL
@@ -390,6 +390,12 @@ class TestTextListField < LafcadioTestCase
 		@tlf = TextListField.new nil, 'whatever'
 	end
 
+	def testValueForSQL
+		assert_equal "'a,b,c'",(@tlf.value_for_sql([ 'a', 'b', 'c' ]))
+		assert_equal "''",(@tlf.value_for_sql([ ]))
+		assert_equal( "'abc'", @tlf.value_for_sql( 'abc' ) )
+	end
+
 	def testValueFromSQL
 		array = @tlf.value_from_sql('a,b,c')
 		assert_not_nil array.index('a')
@@ -398,11 +404,5 @@ class TestTextListField < LafcadioTestCase
 		assert_equal 3, array.size
 		array = @tlf.value_from_sql(nil)
 		assert_equal 0, array.size
-	end
-
-	def testValueForSQL
-		assert_equal "'a,b,c'",(@tlf.value_for_sql([ 'a', 'b', 'c' ]))
-		assert_equal "''",(@tlf.value_for_sql([ ]))
-		assert_equal( "'abc'", @tlf.value_for_sql( 'abc' ) )
 	end
 end

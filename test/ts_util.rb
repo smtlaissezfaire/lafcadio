@@ -9,10 +9,12 @@ class TestContext < Test::Unit::TestCase
 		Context.instance.flush
 	end
 
-	def testSingleton
-		assert_equal Context.instance.object_id, Context.instance.object_id
+	def testCreatesStandardInstances
+		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
+		objectStore = ObjectStore.get_object_store
+		assert_equal ObjectStore, objectStore.class
 	end
-	
+
 	def testSetterAndGetter
 		context1 = Context.instance
 		context2 = Context.instance
@@ -20,11 +22,9 @@ class TestContext < Test::Unit::TestCase
 		mockObjectStore = context1.get_resource( ObjectStore )
 		assert_equal mockObjectStore, context2.get_resource( ObjectStore )
 	end
-	
-	def testCreatesStandardInstances
-		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
-		objectStore = ObjectStore.get_object_store
-		assert_equal ObjectStore, objectStore.class
+
+	def testSingleton
+		assert_equal Context.instance.object_id, Context.instance.object_id
 	end
 end
 
@@ -56,8 +56,6 @@ class TestContextualService < Test::Unit::TestCase
 		assert( service_a != ServiceA.get_service_a )
 	end
 	
-	class Outer; class Inner < Lafcadio::ContextualService; end; end
-	
 	def test_handles_inner_class_child
 		inner = Outer::Inner.get_inner
 		assert_equal( Outer::Inner, inner.class )
@@ -79,6 +77,8 @@ class TestContextualService < Test::Unit::TestCase
 		mock_service_a_prime = ServiceA.get_service_a
 		assert_equal( mock_service_a.id, mock_service_a_prime.id )
 	end
+
+	class Outer; class Inner < Lafcadio::ContextualService; end; end
 end
 
 class TestEnglish < LafcadioTestCase
@@ -90,18 +90,6 @@ class TestEnglish < LafcadioTestCase
 		assert_equal 'catalog order',
 				English.camel_case_to_english('catalogOrder')
 		assert_equal 'product', English.camel_case_to_english('product')
-  end
-
-  def testSentence
-    sentence = English.sentence("There %is currently %num %nam",
-				"product category", 0)
-    assert_equal("There are currently 0 product categories", sentence)
-		sentence2 = English.sentence("Add %a %nam", "sku")
-		assert_equal("Add a sku", sentence2)
-		sentence3 = English.sentence("Add %a %nam", "invoice")
-		assert_equal("Add an invoice", sentence3)
-		sentence4 = English.sentence("Add %a %nam", 'user')
-		assert_equal 'Add a user', sentence4
   end
 
   def testPlural
@@ -122,16 +110,28 @@ class TestEnglish < LafcadioTestCase
 				English.proper_noun("virgin islands, u.s.")
 	end
 
-	def testStartsWithVowelSound
-		assert English.starts_with_vowel_sound('order')
-		assert !English.starts_with_vowel_sound('catalogOrder')
-		assert !English.starts_with_vowel_sound('user')
-	end
+  def testSentence
+    sentence = English.sentence("There %is currently %num %nam",
+				"product category", 0)
+    assert_equal("There are currently 0 product categories", sentence)
+		sentence2 = English.sentence("Add %a %nam", "sku")
+		assert_equal("Add a sku", sentence2)
+		sentence3 = English.sentence("Add %a %nam", "invoice")
+		assert_equal("Add an invoice", sentence3)
+		sentence4 = English.sentence("Add %a %nam", 'user')
+		assert_equal 'Add a user', sentence4
+  end
 
 	def testSingular
 		assert_equal 'tree', English.singular('trees')
 		assert_equal 'fairy', English.singular('fairies')
 		assert_equal 'address', English.singular('addresses')
+	end
+
+	def testStartsWithVowelSound
+		assert English.starts_with_vowel_sound('order')
+		assert !English.starts_with_vowel_sound('catalogOrder')
+		assert !English.starts_with_vowel_sound('user')
 	end
 end
 
@@ -147,14 +147,6 @@ class TestConfig < Test::Unit::TestCase
 		LafcadioConfig.set_values( nil )
 	end
 
-	def testURL
-		assert_equal "http://test.url", @config['url']
-	end
-
-	def testSiteName
-		assert_equal 'Site Name', @config['siteName']
-	end
-	
 	def test_define_in_code
 		LafcadioConfig.set_filename( nil )
 		LafcadioConfig.set_values(
@@ -166,6 +158,14 @@ class TestConfig < Test::Unit::TestCase
 		assert_equal( 'localhost', config['dbhost'] )
 		assert( config['domainDirs'].include?( 'lafcadio/domain/' ) )
 	end
+
+	def testSiteName
+		assert_equal 'Site Name', @config['siteName']
+	end
+
+	def testURL
+		assert_equal "http://test.url", @config['url']
+	end
 end
 
 class TestQueueHash < LafcadioTestCase
@@ -173,11 +173,42 @@ class TestQueueHash < LafcadioTestCase
     @qh = QueueHash.new("q", "w", "e", "r", "t", "y")
   end
 
+  def testAssign
+    qh = QueueHash.new
+    qh["a"] = 1
+    qh["b"] = 2
+    qh["c"] = 3
+    assert_equal(1, qh["a"])
+    assert_equal(1, qh.values[0])
+  end
+
+	def testEquality
+		qhPrime = QueueHash.new("q", "w", "e", "r", "t", "y")
+		assert_equal( @qh, qhPrime )
+		anotherQh = QueueHash.new( 'a', 's', 'd', 'f', 'g', 'h' )
+		assert( @qh != anotherQh )
+	end
+
+	def testIterate
+		str = ""
+		@qh.each { |name, value| str += name + value }
+		assert_equal 'qwerty', str
+	end
+
   def testKeyValue
     assert_equal("w", @qh["q"])
     assert_equal("r", @qh["e"])
     assert_equal("y", @qh["t"])
   end
+
+	def testNewFromArray
+		qh = QueueHash.new_from_array([ 'a', 'b', 'c' ])
+		assert_equal 'a', qh['a']
+		assert_equal 'b', qh['b']
+		assert_equal 'c', qh['c']
+	end
+
+	def test_nil; assert_nil( @qh['qwerty'] ); end
 
   def testOrder
     assert_equal("q", @qh.keys[0])
@@ -195,44 +226,11 @@ class TestQueueHash < LafcadioTestCase
     assert_equal("r", values[1])
     assert_equal("y", values[2])
   end
-
-  def testAssign
-    qh = QueueHash.new
-    qh["a"] = 1
-    qh["b"] = 2
-    qh["c"] = 3
-    assert_equal(1, qh["a"])
-    assert_equal(1, qh.values[0])
-  end
-
-	def testNewFromArray
-		qh = QueueHash.new_from_array([ 'a', 'b', 'c' ])
-		assert_equal 'a', qh['a']
-		assert_equal 'b', qh['b']
-		assert_equal 'c', qh['c']
-	end
-
-	def testIterate
-		str = ""
-		@qh.each { |name, value| str += name + value }
-		assert_equal 'qwerty', str
-	end
-	
-	def testEquality
-		qhPrime = QueueHash.new("q", "w", "e", "r", "t", "y")
-		assert_equal( @qh, qhPrime )
-		anotherQh = QueueHash.new( 'a', 's', 'd', 'f', 'g', 'h' )
-		assert( @qh != anotherQh )
-	end
-	
-	def test_nil; assert_nil( @qh['qwerty'] ); end
 end
 
 class TestString < Test::Unit::TestCase
-	def testDecapitalize
-		assert_equal 'internalClient', ('InternalClient'.decapitalize)
-		assert_equal 'order', ('Order'.decapitalize)
-		assert_equal 'sku', ('SKU'.decapitalize)
+	def test_camel_case_to_underscore
+		assert_equal( 'object_store', 'ObjectStore'.camel_case_to_underscore )
 	end
 
 	def testCountOccurrences
@@ -244,6 +242,12 @@ class TestString < Test::Unit::TestCase
 			ab/x)
 	end
 
+	def testDecapitalize
+		assert_equal 'internalClient', ('InternalClient'.decapitalize)
+		assert_equal 'order', ('Order'.decapitalize)
+		assert_equal 'sku', ('SKU'.decapitalize)
+	end
+
 	def testNumericStringToUsFormat
 		assert_equal '5.00',('5,00'.numeric_string_to_us_format)
 		assert_equal '5,000',('5,000'.numeric_string_to_us_format)
@@ -251,9 +255,5 @@ class TestString < Test::Unit::TestCase
 
 	def test_underscore_to_camel_case
 		assert_equal( 'ObjectStore', 'object_store'.underscore_to_camel_case )
-	end
-	
-	def test_camel_case_to_underscore
-		assert_equal( 'object_store', 'ObjectStore'.camel_case_to_underscore )
 	end
 end
