@@ -12,6 +12,19 @@ require 'lafcadio/objectField/BooleanFieldViewer'
 #    <tt>false</tt>. For example:
 #      myBooleanField.enums = { true => 'yin', false => 'yang' }
 # <tt>enums</tt> takes precedence over <tt>enumType</tt>.
+#
+# In Lafcadio 0.3.1 and later, boolean fields can be set into XML class definitions using this format:
+#   <field name="field_name" class="BooleanField"/>
+# Enums can be set using one of two forms:
+#   <field name="field_name" class="BooleanField"
+#          enumType"ENUMS_CAPITAL_YES_NO"/>
+# or:
+#   <field name="field_name" class="BooleanField">
+#     <enums>
+#       <enum key="true">yin</enum>
+#       <enum key="false">tang</enum>
+#     </enums>
+#   </field>
 class BooleanField < ObjectField
 	ENUMS_ONE_ZERO = 0
 	ENUMS_CAPITAL_YES_NO = 1

@@ -1,6 +1,6 @@
-# Represents a specific month in time. With the exception of Month.monthNames,
-# every usage of the month value assumes that 1 equals January and 12 equals
-# December.
+# Represents a specific month in time. With the exception of Month.monthNames
+# (which returns an array), every usage of the month value assumes that 1 equals 
+# January and 12 equals December.
 class Month
 	# Returns an array of the full names of months (in English). Note that
 	# "January" is the 0th element, and December is the 11th element.
@@ -13,6 +13,8 @@ class Month
 
 	attr_reader :month, :year
 
+	# A new month can be set to a specific month and year, or you can call 
+	# Month.new with no arguments to receive the current month.
 	def initialize( month = nil, year = nil )
 		require 'date'
 		if month.nil? || year.nil?
@@ -46,6 +48,7 @@ class Month
 		self == anOther
 	end
 	
+	# Returns a new Month that is +amountToAdd+ months later.
 	def +( amountToAdd )
 		( fullYears, remainingMonths ) = amountToAdd.divmod( 12 )
 		resultYear = @year + fullYears
@@ -57,22 +60,27 @@ class Month
 		Month.new( resultMonth, resultYear )
 	end
 	
+	# Returns a new Month that is +amountToSubtract+ months earlier.
 	def -(amountToSubtract)
 		self + (-amountToSubtract)
 	end
 	
+	# Returns the previous Month.
 	def prev
 		self - 1
 	end
 	
+	# Returns the next Month.
 	def next
 		self + 1
 	end
 	
+	# Returns the first Date of the month.
 	def startDate
 		Date.new( @year, @month, 1 )
 	end
 	
+	# Returns the last Date of the month.
 	def endDate
 		self.next.startDate - 1
 	end
