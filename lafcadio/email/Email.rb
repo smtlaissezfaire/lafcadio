@@ -30,7 +30,8 @@ class Email
 		end
 		headers << fromHeader
 		if contentType == HTML_CONTENT_TYPE
-			headers << "Content-Type: text/html; charset=\"#{@charset}\""
+			headers << "Content-Type: text/html; charset=\"#{@charSet}\""
+			headers << "MIME-Version: 1.0"
 		end
 		headers
 	end
