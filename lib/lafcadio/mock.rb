@@ -69,7 +69,7 @@ module Lafcadio
 					query.field_name == 'rate' )
 					query.collect( @objects[query.object_type].values )
 				else
-					raise "Can't handle query with sql '#{ query.toSql }'"
+					raise "Can't handle query with sql '#{ query.to_sql }'"
 				end
 			end
 		end

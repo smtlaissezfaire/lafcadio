@@ -7,7 +7,7 @@ require '../test/mock/domain/Client'
 class TestQueryInferrer < LafcadioTestCase
 	def assert_infer_match( desiredSql, domainClass, &action )
 		inferrer = Query::Inferrer.new( domainClass ) { |obj| action.call( obj ) }
-		assert_equal( desiredSql, inferrer.execute.toSql )
+		assert_equal( desiredSql, inferrer.execute.to_sql )
 	end
 
 	def testCompare

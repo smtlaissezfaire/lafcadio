@@ -16,7 +16,7 @@ if ( ( optArray = opts.get ) && ARGV.size >= 1 )
 		domainClass = Class.getClass( className )
 		if domainClass
 			statement = CreateTableStatement.new( domainClass )
-			puts statement.toSql
+			puts statement.to_sql
 		else
 			puts "No domain class in #{ fileName }"
 		end

@@ -12,7 +12,7 @@ class TestCompoundCondition < LafcadioTestCase
 		notExpiredYet = Query::Equals.new('hours', 10, Invoice)
 		condition = Query::CompoundCondition.new(pastExpDate, notExpiredYet)
 		assert_equal( "(invoices.date >= '2003-01-01' and invoices.hours = 10)",
-		              condition.toSql )
+		              condition.to_sql )
 		assert_equal Invoice, condition.object_type
 	end
 
@@ -27,7 +27,7 @@ class TestCompoundCondition < LafcadioTestCase
 				pastExpDate, notExpiredYet, notComplementary)
 		assert_equal( "(invoices.date >= '2003-01-01' and invoices.rate = 10 and " +
 		              "invoices.hours = 10)",
-		              condition.toSql )
+		              condition.to_sql )
 		invoice = Invoice.new({ 'pkId' => 1, 'date' => Date.new(2003, 1, 1),
 				'rate' => 10, 'hours' => 10 })
 		assert condition.objectMeets(invoice)
@@ -45,7 +45,7 @@ class TestCompoundCondition < LafcadioTestCase
 				Query::CompoundCondition::OR)
 		assert_equal( "(users.email = 'test@test.com' or " +
 		              "users.firstNames = 'John')",
-		              compound.toSql )
+		              compound.to_sql )
 		assert compound.objectMeets(user)
 	end
 end

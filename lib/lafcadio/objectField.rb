@@ -442,12 +442,12 @@ module Lafcadio
 
 	# A LinkField is used to link from one domain class to another.
 	class LinkField < ObjectField
-		def LinkField.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
+		def self.instantiate_with_parameters( domainClass, parameters ) #:nodoc:
 			self.new( domainClass, parameters['linkedType'], parameters['name'],
 								parameters['english_name'], parameters['deleteCascade'] )
 		end
 
-		def LinkField.instantiation_parameters( fieldElt ) #:nodoc:
+		def self.instantiation_parameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			linkedTypeStr = fieldElt.attributes['linkedType']
 			linkedType = DomainObject.get_object_type_from_string( linkedTypeStr )
@@ -537,7 +537,7 @@ module Lafcadio
 	# value. It can be set to auto-generate a password at random.
 	class PasswordField < TextField
 		# Returns a random 8-letter alphanumeric password.
-		def PasswordField.randomPassword
+		def self.random_password
 			chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".
 					split(//)
 			value = ""

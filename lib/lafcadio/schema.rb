@@ -20,7 +20,7 @@ module Lafcadio
 			definitionTerms.join( ' ' )
 		end
 
-		def toSql
+		def to_sql
 			createDefinitions = []
 			createDefinitions << "#{ @domainClass.sql_primary_key_name } " +
 													 "int not null auto_increment"

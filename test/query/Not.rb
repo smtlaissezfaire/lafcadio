@@ -12,7 +12,7 @@ class TestNot < LafcadioTestCase
 	def test_object_type; assert_equal( User, @not.object_type ); end
 
 	def testToSql
-		assert_equal "!(users.email = 'test@test.com')", @not.toSql
+		assert_equal "!(users.email = 'test@test.com')", @not.to_sql
 	end
 
 	def testObjectsMeets

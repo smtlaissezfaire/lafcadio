@@ -113,17 +113,17 @@ module Lafcadio
 			@orderByOrder = ASC
 		end
 		
-		def eql?( other ); other.class <= Query && other.toSql == toSql; end
+		def eql?( other ); other.class <= Query && other.to_sql == to_sql; end
 
 		def fields; '*'; end
 
-		def hash; toSql.hash; end
+		def hash; to_sql.hash; end
 		
-		def limitClause
+		def limit_clause
 			"limit #{ @limit.begin }, #{ @limit.end - @limit.begin + 1 }" if @limit
 		end
 
-		def orderClause
+		def order_clause
 			if @orderBy
 				clause = "order by #{ @orderBy } "
 				clause += @orderByOrder == ASC ? 'asc' : 'desc'
@@ -131,7 +131,7 @@ module Lafcadio
 			end
 		end
 
-		def sqlPrimaryKeyField(object_type)
+		def sql_primary_key_field(object_type)
 			"#{ object_type.table_name }.#{ object_type.sql_primary_key_name }"
 		end
 
@@ -143,11 +143,11 @@ module Lafcadio
 			table_names.join( ', ' )
 		end
 
-		def toSql
+		def to_sql
 			clauses = [ "select #{ fields }", "from #{ tables }" ]
 			clauses << whereClause if whereClause
-			clauses << orderClause if orderClause
-			clauses << limitClause if limitClause
+			clauses << order_clause if order_clause
+			clauses << limit_clause if limit_clause
 			clauses.join ' '
 		end
 
@@ -156,11 +156,11 @@ module Lafcadio
 			where_clauses = []
 			concrete_classes.each_with_index { |domain_class, i|
 				if i < concrete_classes.size - 1
-					join_clause = sqlPrimaryKeyField( domain_class ) + ' = ' +
-					              sqlPrimaryKeyField( concrete_classes[i+1] )
+					join_clause = sql_primary_key_field( domain_class ) + ' = ' +
+					              sql_primary_key_field( concrete_classes[i+1] )
 					where_clauses << join_clause
 				else
-					where_clauses << @condition.toSql if @condition
+					where_clauses << @condition.to_sql if @condition
 				end
 			}
 			where_clauses.size > 0 ? 'where ' + where_clauses.join( ' and ' ) : nil
@@ -248,7 +248,7 @@ module Lafcadio
 				@compareType = compareType
 			end
 
-			def toSql
+			def to_sql
 				not_pk = @fieldName != @object_type.sql_primary_key_name
 				use_field_for_sql_value = ( not_pk &&
 				                            ( !( get_field.class <= LinkField ) ||
@@ -297,9 +297,9 @@ module Lafcadio
 				end
 			end
 
-			def toSql
+			def to_sql
 				booleanString = @compoundType == AND ? 'and' : 'or'
-				subSqlStrings = @conditions.collect { |cond| cond.toSql }
+				subSqlStrings = @conditions.collect { |cond| cond.to_sql }
 				"(#{ subSqlStrings.join(" #{ booleanString } ") })"
 			end
 		end
@@ -355,7 +355,7 @@ module Lafcadio
 				compare_value == object_value
 			end
 
-			def toSql
+			def to_sql
 				sql = "#{ dbFieldName } "
 				unless @searchTerm.nil?
 					sql += "= " + r_val_string
@@ -376,7 +376,7 @@ module Lafcadio
 				@searchTerm.index(value) != nil
 			end
 
-			def toSql
+			def to_sql
 				"#{ dbFieldName } in (#{ @searchTerm.join(', ') })"
 			end
 		end
@@ -426,7 +426,7 @@ module Lafcadio
 				end
 			end
 
-			def toSql
+			def to_sql
 				withWildcards = @searchTerm
 				if @matchType == PRE_AND_POST
 					withWildcards = "%" + withWildcards + "%"
@@ -459,7 +459,7 @@ module Lafcadio
 				value ? value.pkId == @searchTerm.pkId : false
 			end
 
-			def toSql
+			def to_sql
 				"#{ dbFieldName } = #{ @searchTerm.pkId }"
 			end
 		end
@@ -503,8 +503,8 @@ module Lafcadio
 			
 			def object_type; @unCondition.object_type; end
 
-			def toSql
-				"!(#{ @unCondition.toSql })"
+			def to_sql
+				"!(#{ @unCondition.to_sql })"
 			end
 		end
 

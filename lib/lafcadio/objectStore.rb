@@ -124,13 +124,13 @@ module Lafcadio
 		
 		def get_collection_by_query(query)
 			object_type = query.object_type
-			execute_select( query.toSql ).collect { |row_hash|
+			execute_select( query.to_sql ).collect { |row_hash|
 				object_type.new( SqlValueConverter.new( object_type, row_hash ) )
 			}
 		end
 		
 		def group_query( query )
-			execute_select( query.toSql )[0].collect { |val|
+			execute_select( query.to_sql )[0].collect { |val|
 				if query.field_name != query.object_type.sql_primary_key_name
 					a_field = query.object_type.get_field( query.field_name )
 					a_field.value_from_sql( val )
@@ -407,7 +407,7 @@ module Lafcadio
 	# Since these triggers are executed in Ruby, they're easy to test. See
 	# DomainObject#pre_commit_trigger and DomainObject#post_commit_trigger for more.
 	class ObjectStore < ContextualService
-		def ObjectStore.set_db_name(dbName) #:nodoc:
+		def self.set_db_name(dbName) #:nodoc:
 			DbConnection.set_db_name dbName
 		end
 		

@@ -14,9 +14,9 @@ class TestLike < LafcadioTestCase
 	end
 
 	def testToSql
-		assert_equal( "invoices.client like '%606%'", @like1.toSql )
-		assert_equal( "invoices.client like '%606'", @like2.toSql )
-		assert_equal( "invoices.client like '606%'", @like3.toSql )
+		assert_equal( "invoices.client like '%606%'", @like1.to_sql )
+		assert_equal( "invoices.client like '%606'", @like2.to_sql )
+		assert_equal( "invoices.client like '606%'", @like3.to_sql )
 	end
 	
 	def testObjectMeets
@@ -31,11 +31,11 @@ class TestLike < LafcadioTestCase
 	
 	def testFieldBelongingToSuperclass
 		condition = Query::Like.new('name', 'client name', InternalClient)
-		assert_equal( "clients.name like '%client name%'", condition.toSql )
+		assert_equal( "clients.name like '%client name%'", condition.to_sql )
 	end
 
 	def testDbFieldName
 		condition = Query::Like.new( 'text1', 'foobar', XmlSku )
-		assert_equal( "some_other_table.text_one like '%foobar%'", condition.toSql )
+		assert_equal( "some_other_table.text_one like '%foobar%'", condition.to_sql )
 	end
 end

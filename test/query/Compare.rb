@@ -17,38 +17,38 @@ class TestCompare < LafcadioTestCase
 			dc = Query::Compare.new('date', Date.new(2003, 1, 1), Invoice,
 					compareType)
 			assert_equal( "invoices.date #{ comparisonSymbol } '2003-01-01'",
-			              dc.toSql )
+			              dc.to_sql )
 		}
 	end
 	
 	def testDbFieldName
 		compare = Query::Compare.new( 'text1', 'foobar', XmlSku,
 		                              Query::Compare::LESS_THAN )
-		assert_equal( "some_other_table.text_one < 'foobar'", compare.toSql )
+		assert_equal( "some_other_table.text_one < 'foobar'", compare.to_sql )
 	end
 
 	def testFieldBelongingToSuperclass
 		condition = Query::Compare.new('standard_rate', 10, InternalClient,
 				Query::Compare::LESS_THAN)
-		assert_equal( 'clients.standard_rate < 10', condition.toSql )
+		assert_equal( 'clients.standard_rate < 10', condition.to_sql )
 	end
 
 	def test_handles_dobj_that_doesnt_exist
 		condition = Query::Compare.new( 'client',
 		                                DomainObjectProxy.new( Client, 10 ),
 																		Invoice, Query::Compare::LESS_THAN )
-		assert_equal( 'invoices.client < 10', condition.toSql )
+		assert_equal( 'invoices.client < 10', condition.to_sql )
 		assert_equal( 0, @mockObjectStore.get_subset( condition ).size )
 		condition2 = Query::Compare.new( 'client', 10, Invoice,
 		                                 Query::Compare::LESS_THAN )
-		assert_equal( 'invoices.client < 10', condition2.toSql )
+		assert_equal( 'invoices.client < 10', condition2.to_sql )
 		assert_equal( 0, @mockObjectStore.get_subset( condition2 ).size )		
 	end
 	
 	def testLessThan
 		condition = Query::Compare.new(
 				User.sql_primary_key_name, 10, User, Query::Compare::LESS_THAN)
-		assert_equal( 'users.pkId < 10', condition.toSql )
+		assert_equal( 'users.pkId < 10', condition.to_sql )
 	end
 
 	def testMockComparatorAndNilValue
@@ -98,6 +98,6 @@ class TestCompare < LafcadioTestCase
 	def testNumericalSearchingOfaLinkField
 		condition = Query::Compare.new('client', 10, Invoice,
 				Query::Compare::LESS_THAN)
-		assert_equal( 'invoices.client < 10', condition.toSql )
+		assert_equal( 'invoices.client < 10', condition.to_sql )
 	end
 end
