@@ -9,6 +9,8 @@ class TestNot < LafcadioTestCase
 		@not = Query::Not.new(
 				Query::Equals.new('email', 'test@test.com', User))
 	end
+	
+	def test_objectType; assert_equal( User, @not.objectType ); end
 
 	def testToSql
 		assert_equal "!(email = 'test@test.com')", @not.toSql

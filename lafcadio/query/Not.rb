@@ -14,5 +14,7 @@ class Query
 		def objectMeets(obj)
 			!@unCondition.objectMeets(obj)
 		end
+		
+		def objectType; @unCondition.objectType; end
 	end
 end
