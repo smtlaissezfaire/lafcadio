@@ -382,6 +382,12 @@ module Lafcadio
 			end
 		end
 		
+		def self.get_link_field( linked_domain_class ) # :nodoc:
+			class_fields.find { |field|
+				field.is_a? LinkField and field.linked_type == linked_domain_class
+			}
+		end
+		
 		def self.inherited(subclass) #:nodoc:
 			@@subclassHash[subclass] = true
 		end

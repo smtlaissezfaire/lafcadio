@@ -744,10 +744,12 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal( invoice1, coll.only )
 		xml_sku = XmlSku.new( 'pk_id' => 1 )
 		xml_sku.commit
-		xml_sku2 = XmlSku2.new( 'xml_sku' => xml_sku )
+		user = User.getTestUserWithPkId
+		xml_sku2 = XmlSku2.new( 'xml_sku' => xml_sku, 'link1' => user )
 		xml_sku2.commit
 		coll2 = @testObjectStore.get_xml_sku2s( xml_sku )
 		assert_equal( xml_sku2, coll2.only )
+		assert_equal( xml_sku2, @testObjectStore.get_xml_sku2s( user ).only )
 	end
 
 	def testDynamicMethodNamesAsFacadeForCollector

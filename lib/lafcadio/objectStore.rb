@@ -450,7 +450,9 @@ module Lafcadio
 			domain_class = DomainObject.get_domain_class_from_string(
 				domain_class_name
 			)
-			fieldName = get_field_name( searchTerm ) unless fieldName
+			unless fieldName
+				fieldName = domain_class.get_link_field( searchTerm.domain_class ).name
+			end
 			get_subset( Query::Equals.new( fieldName, searchTerm, domain_class ) )
 		end
 
