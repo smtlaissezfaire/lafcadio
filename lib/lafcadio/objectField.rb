@@ -476,19 +476,6 @@ module Lafcadio
 		end
 	end
 
-	# A PasswordField is simply a TextField that is expected to contain a password
-	# value. It can be set to auto-generate a password at random.
-	class PasswordField < TextField
-		# Returns a random 8-letter alphanumeric password.
-		def self.random_password
-			chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".
-					split(//)
-			value = ""
-			0.upto(8) { |i| value += chars[rand(chars.size)] }
-			value
-		end
-	end
-	
 	class PrimaryKeyField < IntegerField
 		def initialize( domain_class )
 			super( domain_class, 'pk_id' )
