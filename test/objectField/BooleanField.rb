@@ -30,4 +30,14 @@ class TestBooleanField < LafcadioTestCase
 		assert_equal true, bf3.valueFromSQL('')
 		assert_equal false, bf3.valueFromSQL('N')
 	end
+	
+	def test_raise_error_if_no_enums_available
+		@bf.enumType = 999
+		begin
+			@bf.getEnums
+			fail "should raise MissingError"
+		rescue MissingError
+			# ok
+		end
+	end
 end

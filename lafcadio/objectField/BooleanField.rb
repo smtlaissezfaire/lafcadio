@@ -46,6 +46,8 @@ class BooleanField < ObjectField
 			end
 		elsif @enumType == ENUMS_CAPITAL_YES_NO
 			{ true => 'Y', false => 'N' }
+		else
+			raise MissingError
 		end
 	end
 
