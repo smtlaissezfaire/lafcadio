@@ -22,7 +22,7 @@ class TestInventoryLineItemOption < LafcadioTestCase
 		ilio = TestInventoryLineItemOption.getTestInventoryLineItemOption
 		ilio.inventoryLineItem = TestInventoryLineItem.storedTestInventoryLineItem
 		ilio.option = TestOption.storedTestOption
-		Context.instance.getObjectStore.commit ilio
+		Context.instance.get_object_store.commit ilio
 		ilio
 	end
 end

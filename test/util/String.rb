@@ -38,4 +38,8 @@ class TestString < RUNIT::TestCase
 		result = qbr.lineWrap(10)
 		assert_equal "the quick\nbrown fox\njumped\nover the\nlazy dog.", result
 	end
+
+	def test_underscore_to_camel_case
+		assert_equal( 'ObjectStore', 'object_store'.underscore_to_camel_case )
+	end
 end

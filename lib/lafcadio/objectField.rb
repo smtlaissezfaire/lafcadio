@@ -82,7 +82,7 @@ module Lafcadio
 		end
 
 		def prevValue(pkId) #:nodoc:
-			prevObject = ObjectStore.getObjectStore.get(@objectType, pkId)
+			prevObject = ObjectStore.get_object_store.get(@objectType, pkId)
 			prevObject.send(name)
 		end
 
@@ -120,7 +120,7 @@ module Lafcadio
 				Query.And( domain_obj.send( self.name ).equals( value ),
 									 domain_obj.pkId.equals( pkId ).not )
 			}
-			collisions = ObjectStore.getObjectStore.getSubset( inferrer.execute )
+			collisions = ObjectStore.get_object_store.getSubset( inferrer.execute )
 			if collisions.size > 0
 				notUniqueMsg = "That #{englishName.downcase} already exists."
 				raise FieldValueError, notUniqueMsg, caller
@@ -167,7 +167,7 @@ module Lafcadio
 				super value
 			else
 				highestValue = 0
-				ObjectStore.getObjectStore.getAll(objectType).each { |obj|
+				ObjectStore.get_object_store.getAll(objectType).each { |obj|
 					aValue = obj.send(name).to_i
 					highestValue = aValue if aValue > highestValue
 				}
@@ -505,7 +505,7 @@ module Lafcadio
 
 		def verify_subset_link_field( subsetLinkField, pkId )
 			begin
-				prevObj = ObjectStore.getObjectStore.get(objectType, pkId)
+				prevObj = ObjectStore.get_object_store.get(objectType, pkId)
 				prevObjLinkedTo = prevObj.send(name)
 				possiblyMyObj = prevObjLinkedTo.send(subsetLinkField.name)
 				if possiblyMyObj && possiblyMyObj.pkId == pkId

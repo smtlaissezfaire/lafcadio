@@ -62,6 +62,7 @@ module Lafcadio
 		end
 		
 		def createInstance( resourceName, service_class ) #:nodoc:
+			resourceName = resourceName.underscore_to_camel_case
 			service_class = eval resourceName unless service_class
 			service_class.new self
 		end
@@ -72,17 +73,17 @@ module Lafcadio
 		end
 
 		def getResource( resourceName, service_class = nil ) #:nodoc:
-			resource = @resources[resourceName]
+			resource = @resources[resourceName.underscore_to_camel_case]
 			unless resource
 				resource = createInstance( resourceName, service_class )
-				setResource resourceName, resource
+				setResource resourceName.underscore_to_camel_case, resource
 			end
 			resource
 		end
 
 		def method_missing(methId, *args) #:nodoc:
 			methodName = methId.id2name
-			if methodName =~ /^get(.*)$/
+			if methodName =~ /^get_(.*)$/
 				getResource $1, *args
 			elsif methodName =~ /^set(.*)$/
 				setResource $1, args[0]
@@ -477,5 +478,10 @@ class String
 		end
 		result << string unless string == ''
 		result
+	end
+
+	# Returns the camel-case equivalent of an underscore-style string.
+	def underscore_to_camel_case
+		capitalize.gsub( /_([a-zA-Z0-9]+)/ ) { |s| s[1,s.size - 1].capitalize }
 	end
 end

@@ -450,7 +450,7 @@ module Lafcadio
 		
 		# Commits this domain object to the database.
 		def commit
-			ObjectStore.getObjectStore.commit self
+			ObjectStore.get_object_store.commit self
 		end
 
 		# Set the delete value to true if you want this domain object to be deleted

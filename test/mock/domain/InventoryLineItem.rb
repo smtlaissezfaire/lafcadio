@@ -14,7 +14,7 @@ class TestInventoryLineItem < RUNIT::TestCase
 	def TestInventoryLineItem.storedTestInventoryLineItem
 		ili = TestInventoryLineItem.getTestInventoryLineItem
 		ili.sku = TestSKU.storedTestSKU
-		Lafcadio::Context.instance.getObjectStore.commit ili
+		Lafcadio::Context.instance.get_object_store.commit ili
 		ili
 	end
 end

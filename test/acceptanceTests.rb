@@ -11,7 +11,7 @@ class AcceptanceTestCase < RUNIT::TestCase
 		super
 		@dbh = get_dbh
 		domain_classes.each { |domain_class| domain_class.create_table( @dbh ) }
-		@object_store = ObjectStore.getObjectStore
+		@object_store = ObjectStore.get_object_store
 	end
 	
 	def teardown

@@ -19,7 +19,7 @@ class TestOption < LafcadioTestCase
 	def TestOption.storedTestOption
 		opt = getTestOption
 		opt.attribute = TestAttribute.storedTestAttribute
-		Context.instance.getObjectStore.commit opt
+		Context.instance.get_object_store.commit opt
 		opt
 	end
 end

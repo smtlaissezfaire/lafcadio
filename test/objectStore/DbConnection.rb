@@ -12,7 +12,7 @@ class TestDbConnection < RUNIT::TestCase
 
   def testConnectionPooling
   	DbConnection.set_connection_class( MockDbi )
-    100.times { DbConnection.getDbConnection }
+    100.times { DbConnection.get_db_connection }
     DbConnection.flush
     DbConnection.set_connection_class( DBI )
   end
@@ -28,7 +28,7 @@ class TestDbConnection < RUNIT::TestCase
 	end
 	
 	def testDisconnect
-		DbConnection.getDbConnection.disconnect
+		DbConnection.get_db_connection.disconnect
 		assert !@mockDbh.connected?
 	end
 

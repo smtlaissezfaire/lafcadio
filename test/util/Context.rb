@@ -18,12 +18,12 @@ class TestContext < RUNIT::TestCase
 		context2 = Context.instance
 		mockObjectStore = MockObjectStore.new context1
 		context1.setObjectStore mockObjectStore
-		assert_equal mockObjectStore, context2.getObjectStore
+		assert_equal mockObjectStore, context2.get_object_store
 	end
 	
 	def testCreatesStandardInstances
 		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
-		objectStore = Context.instance.getObjectStore
+		objectStore = Context.instance.get_object_store
 		assert_equal ObjectStore, objectStore.class
 	end
 end

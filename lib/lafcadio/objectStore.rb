@@ -16,7 +16,7 @@ module Lafcadio
 		def initialize(dbObject, dbBridge)
 			@dbObject = dbObject
 			@dbBridge = dbBridge
-			@objectStore = Context.instance.getObjectStore
+			@objectStore = Context.instance.get_object_store
 			@commitType = nil
 		end
 		
@@ -90,9 +90,9 @@ module Lafcadio
 		end
 		
 		def initialize
-			@db_conn = DbConnection.getDbConnection
+			@db_conn = DbConnection.get_db_connection
 			ObjectSpace.define_finalizer( self, proc { |id|
-				DbConnection.getDbConnection.disconnect
+				DbConnection.get_db_connection.disconnect
 			} )
 		end
 
@@ -239,7 +239,7 @@ module Lafcadio
 		end
 
 		def getDbObject
-			object_store = ObjectStore.getObjectStore
+			object_store = ObjectStore.get_object_store
 			if @dbObject.nil? || needs_refresh?
 				@dbObject = object_store.get(@objectType, @pkId)
 								@d_obj_retrieve_time = Time.now
@@ -257,7 +257,7 @@ module Lafcadio
 		end
 
 		def needs_refresh?
-			object_store = ObjectStore.getObjectStore
+			object_store = ObjectStore.get_object_store
 			last_commit_time = object_store.last_commit_time( @objectType, @pkId )
 			!last_commit_time.nil? && last_commit_time > @d_obj_retrieve_time
 		end
@@ -356,7 +356,7 @@ module Lafcadio
 	# = Instantiating ObjectStore
 	# The ObjectStore is a ContextualService, meaning you can't get an instance by
 	# calling ObjectStore.new. Instead, you should call
-	# ObjectStore.getObjectStore. (Using a ContextualService makes it easier to
+	# ObjectStore.get_object_store. (Using a ContextualService makes it easier to
 	# make out the ObjectStore for unit tests: See ContextualService for more.)
 	#
 	# = Dynamic method calls
