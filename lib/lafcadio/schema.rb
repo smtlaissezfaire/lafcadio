@@ -17,7 +17,7 @@ module Lafcadio
 			definitionTerms << typeClause( field )
 			definitionTerms << 'not null' if field.notNull
 			definitionTerms << 'unique' if field.unique
-			definitionTerms
+			definitionTerms.join( ' ' )
 		end
 
 		def toSql
@@ -47,6 +47,10 @@ module Lafcadio
 				'varchar(255)'
 			elsif ( field.class <= LinkField || field.class <= IntegerField )
 				'int'
+			elsif ( field.class <= DecimalField )
+				'float(10, 2)'
+			elsif ( field.class <= BlobField )
+				'blob'
 			end
 		end
 	end
