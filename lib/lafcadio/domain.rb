@@ -396,9 +396,18 @@ module Lafcadio
 		
 		def self.method_missing( methodId, *args ) #:nodoc:
 			method_name = methodId.id2name
-			maybe_field_class_name = method_name.underscore_to_camel_case + 'Field'
-			field_class = Lafcadio.const_get( maybe_field_class_name )
-			create_field( field_class, args[0], args[1] || {} )
+			if method_name == 'get'
+				if block_given?
+					query = Query.infer( self ) { |dobj| yield( dobj ) }
+					ObjectStore.get_object_store.get_subset( query )
+				else
+					ObjectStore.get_object_store.get( self, *args )
+				end
+			else
+				maybe_field_class_name = method_name.underscore_to_camel_case + 'Field'
+				field_class = Lafcadio.const_get( maybe_field_class_name )
+				create_field( field_class, args[0], args[1] || {} )
+			end
 		end
 
 		def self.domain_class #:nodoc:

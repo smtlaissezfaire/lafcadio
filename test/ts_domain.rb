@@ -281,6 +281,11 @@ class TestDomainObject < LafcadioTestCase
 		client2 = Client.new( 'pk_id' => 2, 'referringClient' => client )
 		client2.commit
 		assert_equal( client2, client.get_clients( 'referringClient' ).only )
+		assert_equal( client, Client.get( 1 ) )
+		assert_equal(
+			client2,
+			Client.get { |cli| cli.referringClient.equals( client ) }.only
+		)
 	end
 	
 	def testDontSetDeleteWithoutPkId
