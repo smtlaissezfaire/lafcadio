@@ -269,8 +269,8 @@ class TestDomainObject < LafcadioTestCase
 		matchField( XmlSku2, 'subsetLink1', SubsetLinkField,
 		            { 'subsetField' => 'xmlSku' } )
 		matchField( XmlSku2, 'text1', TextField,
-		            { 'size' => 16, 'unique' => true } )
-		matchField( XmlSku2, 'text2', TextField, { 'large' => true } )
+		            { 'unique' => true } )
+		matchField( XmlSku2, 'text2', TextField )
 		matchField( XmlSku2, 'textList1', TextListField,
 		            { 'dbFieldName' => 'text_list1' } )
 		matchField( XmlSku2, 'timestamp1', TimeStampField )
