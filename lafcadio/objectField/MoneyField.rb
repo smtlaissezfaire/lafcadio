@@ -1,5 +1,4 @@
 require 'lafcadio/objectField/DecimalField'
-require 'lafcadio/util/StrUtil'
 
 class MoneyField < DecimalField
 	def MoneyField.instantiateWithParameters( domainClass, parameters )

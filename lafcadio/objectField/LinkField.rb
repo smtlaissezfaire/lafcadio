@@ -1,3 +1,4 @@
+require 'lafcadio/util'
 require 'lafcadio/objectField/ObjectField'
 
 class LinkField < ObjectField
@@ -22,11 +23,10 @@ class LinkField < ObjectField
 	# [name] The name of this field.
 	# [englishName] The English name of this field.
   def initialize(objectType, linkedType, name = nil, englishName = nil)
-  	require 'lafcadio/util/StrUtil'
 		unless name
 			linkedType.name =~ /::/
 			name = $' || linkedType.name
-			name = StrUtil.decapitalize name
+			name = name.decapitalize
 		end
     super(objectType, name, englishName)
     @linkedType = linkedType

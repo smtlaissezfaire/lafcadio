@@ -1,5 +1,5 @@
 require 'lafcadio/query'
-require 'lafcadio/util/StrUtil'
+require 'lafcadio/util'
 
 # The Collector searches for certain collections of domain objects in the 
 # database. These are in-SQL queries that are executed, so the time savings can 
@@ -42,7 +42,7 @@ class Collector
 		objectType = DomainObject.getObjectTypeFromString objectTypeName
 		unless fieldName
 			fieldName = searchTerm.objectType.bareName
-			fieldName = StrUtil.decapitalize fieldName
+			fieldName = fieldName.decapitalize
 		end
 		if searchTerm.class <= DomainObject
 			condition = Query::Link.new(fieldName, searchTerm, objectType)
@@ -59,7 +59,7 @@ class Collector
 		secondTypeName = resultType.bareName
 		mapTypeName = firstTypeName + secondTypeName
 		getFiltered(mapTypeName, searchTerm).each { |mapObj|
-			coll << mapObj.send(StrUtil.decapitalize(resultType.name))
+			coll << mapObj.send( resultType.name.decapitalize )
 		}
 		coll
 	end
@@ -88,8 +88,7 @@ class Collector
 	end
 
 	def getMapMatch(objectType, mapped)
-		fieldName = mapped.objectType.bareName
-		fieldName = StrUtil.decapitalize fieldName
+		fieldName = mapped.objectType.bareName.decapitalize
 		Query::Equals.new(fieldName, mapped, objectType)
 	end
 

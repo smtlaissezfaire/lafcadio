@@ -1,5 +1,4 @@
 require 'lafcadio/objectField/ObjectField'
-require 'lafcadio/util/StrUtil'
 
 class DecimalField < ObjectField
   attr_reader :precision
