@@ -10,6 +10,13 @@ module Lafcadio
 				@commit_times = {}
 			end
 
+			def commit( dbObject )
+				require 'lafcadio/objectStore/Committer'
+				committer = Committer.new dbObject, @dbBridge
+				committer.execute
+				update_after_commit( committer )
+			end
+
 			# Flushes a domain object.
 			def flush(dbObject)
 				hashByObjectType(dbObject.objectType).delete dbObject.pkId
@@ -75,6 +82,16 @@ module Lafcadio
 			def save(dbObject)
 				hashByObjectType(dbObject.objectType)[dbObject.pkId] = dbObject
 				flush_collection_cache( dbObject.objectType )
+			end
+			
+			def update_after_commit( committer ) #:nodoc:
+				if committer.commitType == Committer::UPDATE ||
+					committer.commitType == Committer::INSERT
+					save( committer.dbObject )
+				elsif committer.commitType == Committer::DELETE
+					flush( committer.dbObject )
+				end
+				set_commit_time( committer.dbObject )
 			end
 		end
 	end

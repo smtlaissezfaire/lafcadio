@@ -79,12 +79,7 @@ module Lafcadio
 
 		# Commits a domain object to the database. You can also simply call
 		#   myDomainObject.commit
-		def commit(dbObject)
-			require 'lafcadio/objectStore/Committer'
-			committer = Committer.new dbObject, @dbBridge
-			committer.execute
-			updateCacheAfterCommit( committer )
-		end
+		def commit(dbObject); @cache.commit( dbObject ); end
 		
 		# Flushes one domain object from its cache.
 		def flush(dbObject)
@@ -100,37 +95,32 @@ module Lafcadio
 		end
 
 		# Returns all domain objects for the given domain class.
-		def getAll(objectType)
-			query = Query.new( objectType )
-			@cache.getByQuery( query )
-		end
+		def getAll(objectType); @cache.getByQuery( Query.new( objectType ) ); end
 
 		# Returns the DbBridge; this is useful in case you need to use raw SQL for a
 		# specific query.
 		def getDbBridge; @dbBridge; end
+		
+		def get_field_name( domain_object )
+			domain_object.objectType.bareName.decapitalize
+		end
 
 		def getFiltered(objectTypeName, searchTerm, fieldName = nil) #:nodoc:
-			require 'lafcadio/query/Link'
 			objectType = DomainObject.getObjectTypeFromString objectTypeName
-			unless fieldName
-				fieldName = searchTerm.objectType.bareName
-				fieldName = fieldName.decapitalize
-			end
+			fieldName = get_field_name( searchTerm ) unless fieldName
 			if searchTerm.class <= DomainObject
-				condition = Query::Link.new(fieldName, searchTerm, objectType)
+				cond_class = Query::Link
 			else
-				condition = Query::Equals.new(fieldName, searchTerm, objectType)
+				cond_class = Query::Equals
 			end
-			getSubset( condition )
+			getSubset( cond_class.new( fieldName, searchTerm, objectType ) )
 		end
 
 		def getMapMatch(objectType, mapped) #:nodoc:
-			fieldName = mapped.objectType.bareName.decapitalize
-			Query::Equals.new(fieldName, mapped, objectType)
+			Query::Equals.new( get_field_name( mapped ), mapped, objectType )
 		end
 
 		def getMapObject(objectType, map1, map2) #:nodoc:
-			require 'lafcadio/query/CompoundCondition'
 			unless map1 && map2
 				raise ArgumentError,
 						"ObjectStore#getMapObject needs two non-nil keys", caller
@@ -143,14 +133,12 @@ module Lafcadio
 
 		def getMapped(searchTerm, resultTypeName) #:nodoc:
 			resultType = DomainObject.getObjectTypeFromString resultTypeName
-			coll = []
 			firstTypeName = searchTerm.class.bareName
 			secondTypeName = resultType.bareName
 			mapTypeName = firstTypeName + secondTypeName
-			getFiltered(mapTypeName, searchTerm).each { |mapObj|
-				coll << mapObj.send( resultType.name.decapitalize )
+			getFiltered( mapTypeName, searchTerm ).collect { |mapObj|
+				mapObj.send( resultType.name.decapitalize )
 			}
-			coll
 		end
 		
 		# Retrieves the maximum value across all instances of one domain class.
@@ -159,16 +147,13 @@ module Lafcadio
 		#   ObjectStore#getMax( Invoice, "rate" )
 		# will return the highest rate for all invoices.
 		def getMax( domain_class, field_name = 'pkId' )
-			query = Query::Max.new( domain_class, field_name )
-			@dbBridge.group_query( query ).only
+			@dbBridge.group_query( Query::Max.new( domain_class, field_name ) ).only
 		end
 
 		# Retrieves a collection of domain objects by +pkId+.
 		#   ObjectStore#getObjects( Clients, [ 1, 2, 3 ] )
 		def getObjects(objectType, pkIds)
-			require 'lafcadio/query/In'
-			condition = Query::In.new('pkId', pkIds, objectType)
-			getSubset condition
+			getSubset Query::In.new('pkId', pkIds, objectType)
 		end
 
 		def getSubset(conditionOrQuery) #:nodoc:
@@ -189,21 +174,6 @@ module Lafcadio
 			proc = block_given? ? ( proc { |obj| yield( obj ) } ) : nil
 			dispatch = MethodDispatch.new( methodId, proc, *args )
 			self.send( dispatch.symbol, *dispatch.args )
-		end
-		
-		# Caches one domain object.
-		def set(dbObject)
-			@cache.save dbObject
-		end
-		
-		def updateCacheAfterCommit( committer ) #:nodoc:
-			if committer.commitType == Committer::UPDATE ||
-				committer.commitType == Committer::INSERT
-				set( committer.dbObject )
-			elsif committer.commitType == Committer::DELETE
-				@cache.flush( committer.dbObject )
-			end
-			@cache.set_commit_time( committer.dbObject )
 		end
 	end
 end
