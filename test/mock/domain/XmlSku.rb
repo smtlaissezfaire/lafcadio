@@ -1,4 +1,4 @@
 require 'lafcadio/domain'
 
-class XmlSku < DomainObject
+class XmlSku < Lafcadio::DomainObject
 end

@@ -1,14 +1,16 @@
 require 'lafcadio/objectStore/ObjectStore'
 require 'lafcadio/mock/MockDbBridge'
 
-class MockObjectStore < ObjectStore
-	public_class_method :new
+module Lafcadio
+	class MockObjectStore < ObjectStore
+		public_class_method :new
 
-	def initialize(context)
-		super(context, MockDbBridge.new)
-	end
+		def initialize(context)
+			super(context, MockDbBridge.new)
+		end
 
-	def addObject(dbObject)
-		commit dbObject
+		def addObject(dbObject)
+			commit dbObject
+		end
 	end
 end

@@ -1,32 +1,33 @@
 require 'lafcadio/query/Condition'
 
-class Query
-	# Tests whether a field is equal to a given value.
-	class Equals < Condition
-		def toSql
-			sql = "#{ @fieldName } "
-			unless @searchTerm.nil?
-				sql += "= "
-				if @fieldName == @objectType.sqlPrimaryKeyName
-					sql += @searchTerm.to_s
+module Lafcadio
+	class Query
+		# Tests whether a field is equal to a given value.
+		class Equals < Condition
+			def toSql
+				sql = "#{ @fieldName } "
+				unless @searchTerm.nil?
+					sql += "= "
+					if @fieldName == @objectType.sqlPrimaryKeyName
+						sql += @searchTerm.to_s
+					else
+						field = getField
+						sql += field.valueForSQL(@searchTerm).to_s
+					end
 				else
-					field = getField
-					sql += field.valueForSQL(@searchTerm).to_s
+					sql += "is null"
 				end
-			else
-				sql += "is null"
+				sql
 			end
-			sql
-		end
 
-		def objectMeets(anObj)
-			if @fieldName == @objectType.sqlPrimaryKeyName
-				value = anObj.objId
-			else
-				value = anObj.send @fieldName
+			def objectMeets(anObj)
+				if @fieldName == @objectType.sqlPrimaryKeyName
+					value = anObj.objId
+				else
+					value = anObj.send @fieldName
+				end
+				@searchTerm == value
 			end
-			@searchTerm == value
 		end
 	end
 end
-

@@ -11,7 +11,8 @@ class Class < Module
 		if theClass
 			theClass
 		else
-			raise( MissingError, "Couldn't find class \"#{ className }\"", caller )
+			raise( Lafcadio::MissingError, "Couldn't find class \"#{ className }\"",
+			       caller )
 		end
 	end
 	
@@ -23,7 +24,9 @@ class Class < Module
 	end
 end
 
-class MissingError < RuntimeError
+module Lafcadio
+	class MissingError < RuntimeError
+	end
 end
 
 class Numeric

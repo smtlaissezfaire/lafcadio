@@ -3,6 +3,8 @@ require 'lafcadio/util/Context'
 require 'lafcadio/util/ContextualService'
 
 class TestContextualService < RUNIT::TestCase
+	include Lafcadio
+
 	class ServiceA < ContextualService
 	end
 	

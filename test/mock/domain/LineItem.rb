@@ -1,7 +1,7 @@
 require 'lafcadio/domain/DomainObject'
 
 module Domain
-	class LineItem < DomainObject
+	class LineItem < Lafcadio::DomainObject
 		def subtotal
 			@quantity * @price
 		end

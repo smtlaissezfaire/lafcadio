@@ -4,6 +4,8 @@ require 'lafcadio/mock/MockObjectStore'
 require 'lafcadio/util/LafcadioConfig'
 
 class TestContext < RUNIT::TestCase
+	include Lafcadio
+
 	def setup
 		Context.instance.flush
 	end

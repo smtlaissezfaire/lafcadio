@@ -4,7 +4,9 @@ require 'date'
 require 'test/mock/domain/Client'
 require 'test/domain/ClassDefinitionXmlParser'
 
-class Invoice < DomainObject
+class Invoice < Lafcadio::DomainObject
+	include Lafcadio
+
   def Invoice.getTestInvoice
     hash = { "client" => Client.getTestClient, "rate" => 70,
              "date" => Date.new(2001, 4, 5), "hours" => 36.5, 

@@ -5,6 +5,8 @@ require 'test/mock/domain/LineItem'
 require 'lafcadio/query/Query'
 
 class TestDBBridge < RUNIT::TestCase
+	include Lafcadio
+
   class MockDbh
   	@@connected = false
   

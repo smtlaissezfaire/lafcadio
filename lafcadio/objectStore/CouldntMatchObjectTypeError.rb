@@ -1,2 +1,4 @@
-class CouldntMatchObjectTypeError < RuntimeError
+module Lafcadio
+	class CouldntMatchObjectTypeError < RuntimeError
+	end
 end

@@ -1,2 +1,4 @@
-class FieldValueError < RuntimeError
+module Lafcadio
+	class FieldValueError < RuntimeError
+	end
 end

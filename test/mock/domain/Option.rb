@@ -2,7 +2,7 @@ require 'lafcadio/domain/DomainObject'
 require 'test/mock/domain'
 require 'lafcadio/objectField/LinkField'
 
-class Option < DomainObject
+class Option < Lafcadio::DomainObject
 	def addEditHomepage
 		"admin/ae.rhtml?objectType=Attribute&objId=#{attribute.objId}"
 	end

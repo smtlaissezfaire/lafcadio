@@ -3,6 +3,7 @@
 require 'lafcadio/schema/CreateTableStatement'
 require 'lafcadio/util'
 require 'getoptlong'
+include Lafcadio
 
 opts = GetoptLong.new( [ '--config', '-c', GetoptLong::REQUIRED_ARGUMENT ] )
 if ( ( optArray = opts.get ) && ARGV.size >= 1 )

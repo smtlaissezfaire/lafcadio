@@ -1,19 +1,21 @@
-module DomainComparable
-	include Comparable
+module Lafcadio
+	module DomainComparable
+		include Comparable
 
-	def <=>(anOther)
-		if anOther.respond_to?( 'objectType' )
-			if self.objectType == anOther.objectType
-				self.objId <=> anOther.objId
+		def <=>(anOther)
+			if anOther.respond_to?( 'objectType' )
+				if self.objectType == anOther.objectType
+					self.objId <=> anOther.objId
+				else
+					self.objectType.name <=> anOther.objectType.name
+				end
 			else
-				self.objectType.name <=> anOther.objectType.name
+				nil
 			end
-		else
-			nil
 		end
-	end
-	
-	def eql?(otherObj)
-		self == otherObj
+		
+		def eql?(otherObj)
+			self == otherObj
+		end
 	end
 end

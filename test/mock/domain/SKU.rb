@@ -1,7 +1,7 @@
 require 'lafcadio/domain/DomainObject'
 require 'lafcadio/util/QueueHash'
 
-class SKU < DomainObject
+class SKU < Lafcadio::DomainObject
   def SKU.tableName
     "skus"
   end
@@ -54,7 +54,7 @@ class TestSKU < RUNIT::TestCase
 
 	def TestSKU.storedTestSKU
 		sku = TestSKU.getTestSKU
-		Context.instance.getObjectStore.addObject sku
+		Lafcadio::Context.instance.getObjectStore.addObject sku
 		sku
 	end
 end

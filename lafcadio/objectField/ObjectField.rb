@@ -1,126 +1,129 @@
 require 'lafcadio/util/English'
 require 'lafcadio/objectField/FieldValueError'
 
-class ObjectField
-	include Comparable
+module Lafcadio
+	class ObjectField
+		include Comparable
 
-  attr_reader :name, :defaultFieldName, :objectType
-  attr_accessor :notNull, :hideLabel, :writeOnce, :unique, :hideDisplay,
-      :default, :dbFieldName, :notUniqueMsg
+		attr_reader :name, :defaultFieldName, :objectType
+		attr_accessor :notNull, :hideLabel, :writeOnce, :unique, :hideDisplay,
+				:default, :dbFieldName, :notUniqueMsg
 
-  def ObjectField.valueType
-    Object
-  end
-
-  def ObjectField.instantiationParameters( fieldElt )
-		parameters = {}
-		parameters['name'] = fieldElt.attributes['name']
-		parameters['englishName'] = fieldElt.attributes['englishName']
-		parameters
-  end
-  
-  def ObjectField.instantiateFromXml( domainClass, fieldElt )
-		parameters = instantiationParameters( fieldElt )
-		instantiateWithParameters( domainClass, parameters )
-  end
-
-	def ObjectField.instantiateWithParameters( domainClass, parameters )
-		self.new( domainClass, parameters['name'], parameters['englishName'] )
-	end
-
-	# [objectType] The domain class that this object field belongs to.
-	# [name] The name of this field.
-	# [englishName] The descriptive English name of this field.
-  def initialize(objectType, name, englishName = nil)
-    @objectType = objectType
-    @name = name
-    @dbFieldName = name
-    @notNull = true
-    @unique = false
-    @default = nil
-    @englishNameOrNil = englishName
-  end
-  
-  def englishName
-		@englishNameOrNil || English.camelCaseToEnglish(name).capitalize
-  end
-
-  def nullErrorMsg
-		English.sentence "Please enter %a %nam.", englishName.downcase
-  end
-
-  def verify(value, objId)
-		if value.nil? && notNull
-      raise FieldValueError, nullErrorMsg, caller
-    end
-    if value
-      valueType = self.class.valueType
-			unless value.class <= valueType
-        raise FieldValueError, 
-						"#{name} needs an object of type #{valueType.name}", caller
-      end
-      verifyUniqueness(value, objId) if unique
-    end
-  end
-
-  def verifyUniqueness(value, objId)
-		inferrer = Query::Inferrer.new( @objectType ) { |domain_obj|
-			Query.And( domain_obj.send( self.name ).equals( value ),
-			           domain_obj.objId.equals( objId ).not )
-		}
-		collisions = ObjectStore.getObjectStore.getSubset( inferrer.execute )
-    if collisions.size > 0
-			if @notUniqueMsg
-				notUniqueMsg = @notUniqueMsg
-			else
-				notUniqueMsg = "That #{englishName.downcase} is already taken. " +
-						"Please choose another."
-			end
-      raise FieldValueError, notUniqueMsg, caller
-    end
-  end
-
-	# Returns the name that this field is referenced by in the MySQL table. By 
-	# default this is the same as the name; to override it, set 
-	# ObjectField#dbFieldName.
-  def nameForSQL
-    dbFieldName
-  end
-
-	# Returns a string value suitable for committing this field's value to MySQL.
-  def valueForSQL(value)
-    value || 'null'
-  end
-
-  def firstTime(fieldManager)
-    objId = fieldManager.getObjId
-    objId == nil
-  end
-
-  def prevValue(objId)
-    prevObject = ObjectStore.getObjectStore.get(@objectType, objId)
-    prevObject.send(name)
-  end
-
-  def processBeforeVerify(value)
-    value = @default if value == nil
-    value
-  end
-
-	# Given the SQL value string, returns a Ruby-native value.
-  def valueFromSQL(string)
-    string
-  end
-
-	def <=>(other)
-		if @objectType == other.objectType && name == other.name
-			0
-		else
-			id <=> other.id
+		def ObjectField.valueType
+			Object
 		end
-	end
 
-	def dbWillAutomaticallyWrite
-		false
+		def ObjectField.instantiationParameters( fieldElt )
+			parameters = {}
+			parameters['name'] = fieldElt.attributes['name']
+			parameters['englishName'] = fieldElt.attributes['englishName']
+			parameters
+		end
+		
+		def ObjectField.instantiateFromXml( domainClass, fieldElt )
+			parameters = instantiationParameters( fieldElt )
+			instantiateWithParameters( domainClass, parameters )
+		end
+
+		def ObjectField.instantiateWithParameters( domainClass, parameters )
+			self.new( domainClass, parameters['name'], parameters['englishName'] )
+		end
+
+		# [objectType] The domain class that this object field belongs to.
+		# [name] The name of this field.
+		# [englishName] The descriptive English name of this field.
+		def initialize(objectType, name, englishName = nil)
+			@objectType = objectType
+			@name = name
+			@dbFieldName = name
+			@notNull = true
+			@unique = false
+			@default = nil
+			@englishNameOrNil = englishName
+		end
+		
+		def englishName
+			@englishNameOrNil || English.camelCaseToEnglish(name).capitalize
+		end
+
+		def nullErrorMsg
+			English.sentence "Please enter %a %nam.", englishName.downcase
+		end
+
+		def verify(value, objId)
+			if value.nil? && notNull
+				raise FieldValueError, nullErrorMsg, caller
+			end
+			if value
+				valueType = self.class.valueType
+				unless value.class <= valueType
+					raise FieldValueError, 
+							"#{name} needs an object of type #{valueType.name}", caller
+				end
+				verifyUniqueness(value, objId) if unique
+			end
+		end
+
+		def verifyUniqueness(value, objId)
+			inferrer = Query::Inferrer.new( @objectType ) { |domain_obj|
+				Query.And( domain_obj.send( self.name ).equals( value ),
+									 domain_obj.objId.equals( objId ).not )
+			}
+			collisions = ObjectStore.getObjectStore.getSubset( inferrer.execute )
+			if collisions.size > 0
+				if @notUniqueMsg
+					notUniqueMsg = @notUniqueMsg
+				else
+					notUniqueMsg = "That #{englishName.downcase} is already taken. " +
+							"Please choose another."
+				end
+				raise FieldValueError, notUniqueMsg, caller
+			end
+		end
+
+		# Returns the name that this field is referenced by in the MySQL table. By 
+		# default this is the same as the name; to override it, set 
+		# ObjectField#dbFieldName.
+		def nameForSQL
+			dbFieldName
+		end
+
+		# Returns a string value suitable for committing this field's value to 
+		# MySQL.
+		def valueForSQL(value)
+			value || 'null'
+		end
+
+		def firstTime(fieldManager)
+			objId = fieldManager.getObjId
+			objId == nil
+		end
+
+		def prevValue(objId)
+			prevObject = ObjectStore.getObjectStore.get(@objectType, objId)
+			prevObject.send(name)
+		end
+
+		def processBeforeVerify(value)
+			value = @default if value == nil
+			value
+		end
+
+		# Given the SQL value string, returns a Ruby-native value.
+		def valueFromSQL(string)
+			string
+		end
+
+		def <=>(other)
+			if @objectType == other.objectType && name == other.name
+				0
+			else
+				id <=> other.id
+			end
+		end
+
+		def dbWillAutomaticallyWrite
+			false
+		end
 	end
 end

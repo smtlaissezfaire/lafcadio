@@ -4,7 +4,7 @@ require 'lafcadio/objectField/EmailField'
 require 'lafcadio/objectField/TextField'
 require 'lafcadio/objectField/BooleanField'
 
-class User < DomainObject
+class User < Lafcadio::DomainObject
   def User.fieldHash
     fieldHash = { "salutation" => "Mr", "firstNames" => "Francis",
 		  "lastName" => "Hwang", "phone" => "", "address1" => "",

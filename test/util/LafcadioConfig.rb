@@ -2,6 +2,8 @@ require 'lafcadio/util/LafcadioConfig'
 require 'runit/testcase'
 
 class TestConfig < RUNIT::TestCase
+	include Lafcadio
+
 	def setup
 		LafcadioConfig.setFilename 'lafcadio/testconfig.dat'
 		@config = LafcadioConfig.new

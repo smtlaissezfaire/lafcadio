@@ -2,7 +2,7 @@ require 'lafcadio/objectField/TextField'
 require 'lafcadio/domain/DomainObject'
 require 'test/mock/domain/Option'
 
-class Attribute < DomainObject
+class Attribute < Lafcadio::DomainObject
 	def Attribute.tableName
 		"attributes"
 	end
@@ -34,4 +34,4 @@ class TestAttribute < LafcadioTestCase
 	end
 end
 
-class NoXml < DomainObject; def NoXml.getClassFields; []; end; end
+class NoXml < Lafcadio::DomainObject; def NoXml.getClassFields; []; end; end

@@ -1,6 +1,6 @@
 require 'lafcadio/domain/DomainObject'
 
-class InventoryLineItem < DomainObject
+class InventoryLineItem < Lafcadio::DomainObject
 end
 
 require 'runit/testcase'
@@ -14,7 +14,7 @@ class TestInventoryLineItem < RUNIT::TestCase
 	def TestInventoryLineItem.storedTestInventoryLineItem
 		ili = TestInventoryLineItem.getTestInventoryLineItem
 		ili.sku = TestSKU.storedTestSKU
-		Context.instance.getObjectStore.addObject ili
+		Lafcadio::Context.instance.getObjectStore.addObject ili
 		ili
 	end
 end

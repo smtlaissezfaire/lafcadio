@@ -4,7 +4,9 @@ require 'lafcadio/domain/DomainObject'
 require 'lafcadio/objectField/TextField'
 require 'lafcadio/objectField/MoneyField'
 
-class Client < DomainObject
+class Client < Lafcadio::DomainObject
+	include Lafcadio
+	
   def Client.getTestClient
     Client.new( { "name" => "clientName1", 'objId' => 1 } )
   end

@@ -9,7 +9,7 @@ dir.each { |entry|
 					require "test/#{subDirName}/#{entry}"
 				end
 			}
-		rescue StandardError
+		rescue Errno::ENOTDIR
 			# not a directory, whatev
 		end
 	end
