@@ -72,7 +72,20 @@ class TestObjectStore < LafcadioTestCase
 	def testDynamicMethodNames
 		setTestClient
 		assert_equal @client, @testObjectStore.getClient(1)
-		@testObjectStore.flush( @client )
+		invoice1 = Invoice.new( 'client' => nil )
+		invoice1.commit
+		invoice2 = Invoice.new( 'client' => @client )
+		invoice2.commit
+		begin
+			@testObjectStore.getInvoices( nil )
+			raise "Should raise ArgumentError"
+		rescue ArgumentError
+			expected = "ObjectStore#getInvoices needs a field name as its second " +
+			           "argument if its first argument is nil"
+			assert_equal( expected, $!.to_s )
+		end
+		coll = @testObjectStore.getInvoices( nil, 'client' )
+		assert_equal( invoice1, coll.only )
 	end
 
 	def testDynamicMethodNamesAsFacadeForCollector

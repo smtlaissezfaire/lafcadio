@@ -20,12 +20,17 @@ module Lafcadio
 			end
 			
 			def dispatch_get_plural
-				searchTerm = @orig_args[0]
-				fieldName = @orig_args[1]
-				if @maybe_proc.nil? && searchTerm.nil?
+				if @orig_args.size == 0 && @maybe_proc.nil?
 					@symbol = :getAll
 					@args = [ @domain_class ]
 				else
+					searchTerm = @orig_args[0]
+					fieldName = @orig_args[1]
+					if searchTerm.nil? && @maybe_proc.nil? && fieldName.nil?
+						msg = "ObjectStore\##{ @orig_method } needs a field name as its " +
+						      "second argument if its first argument is nil"
+						raise( ArgumentError, msg, caller )
+					end
 					dispatch_get_plural_by_query_block_or_search_term( searchTerm,
 					                                                   fieldName )
 				end
@@ -43,7 +48,7 @@ module Lafcadio
 					                                                   fieldName )
 				if !@maybe_proc.nil? && searchTerm.nil?
 					dispatch_get_plural_by_query_block
-				elsif @maybe_proc.nil? && !searchTerm.nil?
+				elsif @maybe_proc.nil? && ( !( searchTerm.nil? && fieldName.nil? ) )
 					@symbol = :getFiltered
 					@args = [ @domain_class.name, searchTerm, fieldName ]
 				else
