@@ -9,8 +9,7 @@ class Query
 		
 		def execute
 			impostor = DomainObjectImpostor.new( @domainClass )
-			@action.call( impostor )
-			condition = impostor.getCondition
+			condition = @action.call( impostor )
 			query = Query.new( @domainClass, condition )
 		end
 	end
@@ -20,22 +19,14 @@ class Query
 	
 		def initialize( domainClass )
 			@domainClass = domainClass
-			@conditions = []
-		end
-		
-		def registerCondition( condition )
-			@conditions << condition
-		end
-		
-		def getCondition
-			@conditions[0]
 		end
 		
 		def method_missing( methId, *args )
-			classField = @domainClass.getField( methId.id2name )
-			if !classField.nil?
+			fieldName = ( methId.id2name =~ /(.*)=$/ ? $1 : methId.id2name )
+			begin
+				classField = @domainClass.getField( fieldName )
 				ObjectFieldImpostor.new( self, classField )
-			else
+			rescue MissingError
 				super( methId, *args )
 			end
 		end
@@ -55,19 +46,22 @@ class Query
 		
 		def method_missing( methId, *args )
 			methodName = methId.id2name
-			if ObjectFieldImpostor.comparators.keys.index( methodName ).nil?
-				super( methId, *args )
-			else
+			if !ObjectFieldImpostor.comparators.keys.index( methodName ).nil?
 				registerCompareCondition( methodName, *args )
+			else
+				super( methId, *args )
 			end
 		end
 		
 		def registerCompareCondition( compareStr, searchTerm)
 			compareVal = ObjectFieldImpostor.comparators[compareStr]
-			condition = Compare.new( @classField.dbFieldName, searchTerm,
-			                         @domainObjectImpostor.domainClass,
-			                         compareVal )
-			@domainObjectImpostor.registerCondition( condition )
+			Compare.new( @classField.dbFieldName, searchTerm,
+			             @domainObjectImpostor.domainClass, compareVal )
+		end
+		
+		def ==( searchTerm )
+			Equals.new( @classField.dbFieldName, searchTerm,
+			            @domainObjectImpostor.domainClass )
 		end
 	end
 end

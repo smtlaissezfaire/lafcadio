@@ -47,5 +47,13 @@ class Query
 				raise( MissingError, errStr, caller )
 			end
 		end
+		
+		def & (otherCondition)
+			CompoundCondition.new( self, otherCondition )
+		end
+		
+		def | (otherCondition)
+			CompoundCondition.new( self, otherCondition, CompoundCondition::OR )
+		end
 	end
 end

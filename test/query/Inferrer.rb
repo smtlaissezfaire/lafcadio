@@ -32,4 +32,35 @@ class TestQueryInferrer < LafcadioTestCase
 			intc.standard_rate < 10
 		}
 	end
+	
+	def testCompound
+		desiredSql = "select * from invoices " +
+		             "where (date >= '2003-01-01' and hours = 10)"
+		date = Date.new( 2003, 1, 1 )
+		assert_infer_match( desiredSql, Invoice ) { |inv|
+			(inv.date >= date) & (inv.hours == 10)
+		}
+	end
+	
+	def testCompoundThree
+		desiredSql = "select * from invoices " +
+		             "where ((date >= '2003-01-01' and rate = 10) and hours = 10)"
+		date = Date.new( 2003, 1, 1 )
+		assert_infer_match( desiredSql, Invoice ) { |inv|
+			(inv.date >= date) & (inv.rate == 10) & (inv.hours == 10)
+		}
+	end
+	
+	def testOr
+		desiredSql = "select * from users " +
+		             "where (email = 'test@test.com' or firstNames = 'John')"
+		assert_infer_match( desiredSql, User ) { |u|
+			(u.email == 'test@test.com') | (u.firstNames == 'John')
+		}
+	end
+	
+	def testEquals
+		desiredSql = "select * from invoices where hours = 10"
+		assert_infer_match( desiredSql, Invoice ) { |inv| inv.hours == 10 }
+	end
 end
