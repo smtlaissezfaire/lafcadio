@@ -42,3 +42,12 @@ Initial production release.
 0.3.0 -- October 15 2003
 * moved install.rb from /bin to /. /bin is now for scripts that Lafcadio users will use after installation, such as lafcadio_schema.
 * created lafcadio_schema script, which reads a DomainObject class definition and creates a create table statement.
+
+0.3.1 -- October 26 2003
+* DEPRECATION WARNING: There are now root-level includeable files that can save you from having to type too many includes. You can now include "lafcadio/objectField" to include all files in the objectField directory instead of "lafcadio/objectField/DateField", "lafcadio/objectField/TextField", etc. The individual files will disappear sometime around version 0.5.0.
+* Instead of overwriting DomainObject.getClassFields to define fields for a domain class, you now have the option of writing an XML file instead. This method is now the encouraged method, but the old method of overwriting DomainObject.getClassFields will work for the foreseeable future.
+* lafcadio_schema needs the config file as an argument flagged with -c.
+* Added +, -, prev, next, startDate, and endDate to Month. Also, calling Month.new with no arguments returns the current month.
+* SQL logging can be toggled by editing the config file. Insert the line "logSql:y" in the file to turn it on, and make sure to set your logdir value as well.
+* Added QueueHash#==.
+* Fixed a bug in MockSmtp.lastSubject.
