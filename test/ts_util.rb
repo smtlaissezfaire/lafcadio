@@ -1,4 +1,5 @@
 require 'test/unit'
+require 'lafcadio/test'
 require 'lafcadio/util'
 require 'lafcadio/mock'
 

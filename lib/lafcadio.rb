@@ -26,6 +26,5 @@ module Lafcadio
 	require 'lafcadio/objectStore'
 	require 'lafcadio/query'
 	require 'lafcadio/schema'
-	require 'lafcadio/test'
 	require 'lafcadio/util'
 end
