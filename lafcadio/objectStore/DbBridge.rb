@@ -31,6 +31,10 @@ class DbBridge
 		@@connectionClass = aClass
 	end
 	
+	def DbBridge.disconnect
+		@@dbh.disconnect if @@dbh
+	end
+	
 	def initialize(dbh = nil)
 		if dbh == nil
 			if @@dbh == nil
@@ -40,10 +44,11 @@ class DbBridge
 				@@dbh = @@connectionClass.connect( dbAndHost, config['dbuser'],
 				                                   config['dbpassword'] )
 			end
-			@dbh = @@dbh
 		else
-			@dbh = dbh
+			@@dbh = dbh
 		end
+		@dbh = @@dbh
+		ObjectSpace.define_finalizer( self, proc { |id| DbBridge.disconnect } )
 	end
 	
 	# Hook for logging: Useful for testing.

@@ -5,11 +5,14 @@ require 'test/mock/domain/LineItem'
 require 'lafcadio/query/Query'
 
 class TestDBBridge < RUNIT::TestCase
-  class MockDB
+  class MockDbh
+  	@@connected = false
+  
     attr_reader :lastSQL, :sqlStatements
-
+    
 		def initialize
 			@sqlStatements = []
+			@@connected = true
 		end
 		
 		def do( sql )
@@ -35,16 +38,25 @@ class TestDBBridge < RUNIT::TestCase
     def getAll(objectType)
       Collection.new objectType
     end
+    
+    def disconnect
+    	@@connected = false
+    end
+    
+    def connected?
+    	@@connected
+    end
   end
 
   def setup
 		LafcadioConfig.setFilename 'lafcadio/testconfig.dat'
-    @mockDB = MockDB.new
-    @dbb = DbBridge.new(@mockDB)
+    @mockDbh = MockDbh.new
+    @dbb = DbBridge.new(@mockDbh)
     @client = Client.new( {"objId" => 1, "name" => "clientName1"} )
   end
 
   def teardown
+		@dbb = nil
  		DbBridge.flushConnection
 		DbBridge.setDbName nil
 	end
@@ -52,12 +64,12 @@ class TestDBBridge < RUNIT::TestCase
   def test_commits_delete
     @client.delete = true
     @dbb.commit(@client)
-    assert_equal("delete from clients where objId=1", @mockDB.lastSQL)
+    assert_equal("delete from clients where objId=1", @mockDbh.lastSQL)
   end
 
   def testCommitsEdit
     @dbb.commit(@client)
-    sql = @mockDB.lastSQL
+    sql = @mockDbh.lastSQL
     assert(sql.index("update clients set name='clientName1'") != nil, sql)
   end
 
@@ -69,7 +81,7 @@ class TestDBBridge < RUNIT::TestCase
 			@@dbName = dbAndHost.split(':')[2]
       @@instances += 1
       raise "initialize me just once, please" if @@instances > 1
-      return new
+      return MockDbh.new
 		end
 
 		def MockDbi.flushInstanceCount
@@ -92,7 +104,7 @@ class TestDBBridge < RUNIT::TestCase
     client = Client.new( { "name" => "clientName1" } )
     @dbb.commit client
     assert_equal 12, @dbb.lastObjIdInserted
-		dbb2 = DbBridge.new @mockDB
+		dbb2 = DbBridge.new @mockDbh
     assert_equal 12, dbb2.lastObjIdInserted
   end
 
@@ -106,10 +118,10 @@ class TestDBBridge < RUNIT::TestCase
 		ic = InternalClient.new({ 'objId' => 1, 'name' => 'client name',
 				'billingType' => 'trade' })
 		@dbb.commit ic
-		assert_equal 2, @mockDB.sqlStatements.size
-		sql1 = @mockDB.sqlStatements[0]
+		assert_equal 2, @mockDbh.sqlStatements.size
+		sql1 = @mockDbh.sqlStatements[0]
 		assert_not_nil sql1 =~ /update internalClients set/, sql1
-		sql2 = @mockDB.sqlStatements[1]
+		sql2 = @mockDbh.sqlStatements[1]
 		assert_not_nil sql2 =~ /update clients set/, sql2
 	end
 
@@ -136,5 +148,10 @@ class TestDBBridge < RUNIT::TestCase
 		LafcadioConfig.setFilename( 'test/testData/config_with_sql_logging.dat' )
 		@dbb.executeSelect( 'select * from clients' )
 		fail if Time.now - File.ctime( logFilePath ) > 5
+	end
+	
+	def testDisconnect
+		DbBridge.disconnect
+		assert !@mockDbh.connected?
 	end
 end
