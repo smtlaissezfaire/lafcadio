@@ -5,7 +5,7 @@ class Query
 	class Equals < Condition
 		def toSql
 			sql = "#{ @fieldName } "
-			if @searchTerm
+			unless @searchTerm.nil?
 				sql += "= "
 				if @fieldName == @objectType.sqlPrimaryKeyName
 					sql += @searchTerm.to_s

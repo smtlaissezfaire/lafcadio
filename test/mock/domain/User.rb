@@ -2,6 +2,7 @@ require 'lafcadio/domain/DomainObject'
 require 'lafcadio/objectField/SubsetLinkField'
 require 'lafcadio/objectField/EmailField'
 require 'lafcadio/objectField/TextField'
+require 'lafcadio/objectField/BooleanField'
 
 class User < DomainObject
   def User.classFields
@@ -15,6 +16,7 @@ Please choose another email address.
 		MSG
 		fields << emailField
 		fields <<(TextField.new(self, 'firstNames'))
+		fields << BooleanField.new( self, 'administrator' )
     fields
   end
 

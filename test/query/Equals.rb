@@ -26,4 +26,9 @@ class TestEquals < LafcadioTestCase
 		clientCondition = Query::Equals.new('name', 'client 1', InternalClient)
 		assert_equal "name = 'client 1'", clientCondition.toSql
 	end
+	
+	def testBooleanField
+		equals = Query::Equals.new( 'administrator', false, User )
+		assert_equal( 'administrator = 0', equals.toSql )
+	end
 end
