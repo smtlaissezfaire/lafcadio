@@ -258,10 +258,14 @@ module Lafcadio
 
 		include DomainComparable
 		
+		def self.[]( pk_id ); get( pk_id ); end
+		
 		def self.abstract_subclasses #:nodoc:
 			require 'lafcadio/domain'
 			[ MapObject ]
 		end
+		
+		def self.all; ObjectStore.get_object_store.get_all( self ); end
 		
 		# Returns an array of all fields defined for this class and all concrete
 		# superclasses.
@@ -320,6 +324,8 @@ module Lafcadio
 			}
 			dependent_classes
 		end
+		
+		def self.first; all.first; end
 
 		def self.get_class_field(fieldName) #:nodoc:
 			field = nil
@@ -408,6 +414,8 @@ module Lafcadio
 		  (self != DomainObject && abstract_subclasses.index(self).nil?)
 		end
 		
+		def self.last; all.last; end
+		
 		def self.method_missing( methodId, *args ) #:nodoc:
 			method_name = methodId.id2name
 			if method_name == 'get'
@@ -427,6 +435,8 @@ module Lafcadio
 				end
 			end
 		end
+		
+		def self.only; all.only; end
 
 		def self.domain_class #:nodoc:
 			self

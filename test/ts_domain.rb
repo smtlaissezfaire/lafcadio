@@ -219,6 +219,15 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal( Client, something.class )
 	end
 	
+	def test_convenience_class_methods
+		5.times { Client.new({}).commit }
+		assert_equal( 5, Client.all.size )
+		assert_equal( 1, Client.first.pk_id )
+		assert_equal( 5, Client.last.pk_id )
+		assert_raise( IndexError ) { Client.only }
+		assert_equal( 3, Client[3].pk_id )
+	end
+	
 	def testCreateWithLinkedProxies
 		clientProxy = DomainObjectProxy.new Client, 99
 		invoice = Invoice.new(
