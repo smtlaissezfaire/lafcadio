@@ -44,7 +44,12 @@ module Lafcadio
 				if @@dbh == nil
 					config = LafcadioConfig.new
 					dbName = @@dbName || config['dbname']
-					dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"
+					dbAndHost = nil
+					if dbName && config['dbhost']
+						dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"
+					else
+						dbAndHost = "dbi:#{config['dbconn']}"
+					end
 					@@dbh = @@connectionClass.connect( dbAndHost, config['dbuser'],
 																						 config['dbpassword'] )
 				end
