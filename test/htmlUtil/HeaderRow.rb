@@ -26,12 +26,12 @@ class TestHeaderRow < LafcadioTestCase
 		row << "a"
 		caught = false
 		begin
-			row << HTML::Strong.new ('b')
+			row << (HTML::Strong.new ('b'))
 		rescue
 			caught = true
 		end
 		assert caught
-		row << HTML::TD.new({ 'colspan' => 2 }, 'c')
+		row << (HTML::TD.new({ 'colspan' => 2 }, 'c'))
 	end
 
 	def testInitWithArray

@@ -13,7 +13,7 @@ class TestTextField < LafcadioTestCase
     name = "John's Doe"
     assert_equal("'John''s Doe'", @of.valueForSQL(name))
     assert_equal("John's Doe", name)
-		assert_equal("null", @of.valueForSQL nil)
+		assert_equal("null", (@of.valueForSQL nil))
 		assert_equal "'don\\\\'t substitute this apostrophe'",
 				@of.valueForSQL("don\\'t substitute this apostrophe")
 		assert_equal "'couldn''t, wouldn''t, shouldn''t'",

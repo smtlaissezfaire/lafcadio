@@ -23,8 +23,8 @@ class ObjectStore < ContextualService
 				dbObject = @dbBridge.getCollectionByQuery(query)[0]
 				@cache.save dbObject if dbObject
 			end
-			@cache.get (objectType, objId) || raise (DomainObjectNotFoundError,
-					"Can't find #{objectType} #{objId}", caller)
+			(@cache.get (objectType, objId)) || (raise (DomainObjectNotFoundError,
+					"Can't find #{objectType} #{objId}", caller))
 		end
 
 		def getAll (objectType)

@@ -35,7 +35,7 @@ class TestTR < RUNIT::TestCase
 
 	def testContainsTD
 		tr = HTML::TR.new
-		tr << HTML::TD.new ( {}, "text")
+		tr << (HTML::TD.new ( {}, "text"))
 		html = tr.toHTML
 		assert_not_nil html.index("<td")
 		assert_not_nil html.index("text")

@@ -14,7 +14,7 @@ A profile already exists for the email address that you have entered.
 Please choose another email address.
 		MSG
 		fields << emailField
-		fields << TextField.new (self, 'firstNames')
+		fields << (TextField.new (self, 'firstNames'))
     fields
   end
 

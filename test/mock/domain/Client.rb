@@ -11,7 +11,7 @@ class Client < DomainObject
 				"Standard Rate")
     standardRateField.notNull = false
 		fields << standardRateField
-		fields << LinkField.new (self, Client, 'referringClient')
+		fields << (LinkField.new (self, Client, 'referringClient'))
 		priorityInvoice = SubsetLinkField.new self, Invoice, 'client',
 				'priorityInvoice'
 		priorityInvoice.notNull = false

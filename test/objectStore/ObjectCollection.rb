@@ -43,8 +43,8 @@ class TestObjectCollection < LafcadioTestCase
 
 	def testMultiValSort
 		newClientColl = Collection.new Client
-		newClientColl << Client.new ({ 'objId' => 10, 'name' => 'name' })
-		newClientColl << Client.new ({ 'objId' => 1, 'name' => 'name' })
+		newClientColl << (Client.new ({ 'objId' => 10, 'name' => 'name' }))
+		newClientColl << (Client.new ({ 'objId' => 1, 'name' => 'name' }))
 		assert_equal 10, newClientColl[0].objId
 		newClientColl.sort! ([ 'name', 'objId' ])
 		assert_equal 1, newClientColl[0].objId

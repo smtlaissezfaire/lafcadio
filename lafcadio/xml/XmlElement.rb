@@ -29,8 +29,8 @@ class XmlElement < Array
 	end
 
 	def toXml (level = 0)
-		str = spaces (level) + "<#{@name}" + attributeString + ">\n"
+		str = spaces(level).to_s + "<#{@name}" + attributeString + ">\n"
 		self.each { |child| str += child.toXml (level + 1) }
-		str += spaces (level) + "</#{@name}>\n"
+		str += spaces(level).to_s + "</#{@name}>\n"
 	end
 end

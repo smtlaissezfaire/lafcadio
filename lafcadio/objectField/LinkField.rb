@@ -23,7 +23,7 @@ class LinkField < ObjectField
 
   def valueForSQL (value)
 		require 'lafcadio/objectStore/DomainObjectInitError'
-		if value == nil
+		if !value
 			"null"
 		elsif value.objId
 			value.objId

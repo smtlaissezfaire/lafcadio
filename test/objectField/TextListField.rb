@@ -18,7 +18,7 @@ class TestTextListField < LafcadioTestCase
 	end
 
 	def testValueForSQL
-		assert_equal "'a,b,c'", @tlf.valueForSQL ([ 'a', 'b', 'c' ])
-		assert_equal "''", @tlf.valueForSQL ([ ])
+		assert_equal "'a,b,c'", (@tlf.valueForSQL ([ 'a', 'b', 'c' ]))
+		assert_equal "''", (@tlf.valueForSQL ([ ]))
 	end
 end

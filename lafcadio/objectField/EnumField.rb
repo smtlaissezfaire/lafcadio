@@ -19,7 +19,7 @@ class EnumField < TextField
 	end
 	
 	def valueForSQL (value)
-		value != '' ? super (value) : 'null'
+		value != '' ? (super (value)) : 'null'
 	end
 end
 

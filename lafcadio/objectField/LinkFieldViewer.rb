@@ -8,7 +8,7 @@ class LinkFieldViewer < FieldViewer
   end
 
   def javaScriptFunction
-    if @field.listener != nil
+    if @field.listener
       functionName = getBroadcastJavaScriptFunctionName
       ifElseTree = HTML::JSIfElseTree.new
       ObjectStore.getObjectStore.getAll(@field.linkedType).each { |object|
@@ -28,7 +28,7 @@ class LinkFieldViewer < FieldViewer
   end
 
   def getObjId
-    @value != nil ? @value.objId : nil
+    @value ? @value.objId : nil
   end
 
   def optionObjs
@@ -43,7 +43,7 @@ class LinkFieldViewer < FieldViewer
   def toHTMLWidget
     select = HTML::Select.new({ 'name' => @field.name })
 		select.selected = getObjId
-    if @field.listener != nil
+    if @field.listener
       select.onChange = "#{getBroadcastJavaScriptFunctionName}(this)"
     end
     select.addOption("", "") unless @field.notNull

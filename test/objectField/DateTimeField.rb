@@ -16,12 +16,12 @@ class TestDateTimeField < LafcadioTestCase
 		value2 = @dateTimeField.valueFromSQL '2002-08-24 13:08:22'
 		assert_equal value2, @aug24
 		oct6 = Time.local (2002, "oct", 6, 0, 0, 0)
-		assert_equal oct6, @dateTimeField.valueFromSQL '2002-10-06 00:00:00'
-		assert_equal nil, @dateTimeField.valueFromSQL '0000-00-00 00:00:00'
+		assert_equal oct6, (@dateTimeField.valueFromSQL '2002-10-06 00:00:00')
+		assert_equal nil, (@dateTimeField.valueFromSQL '0000-00-00 00:00:00')
 	end
 
 	def testValueForSQL
-		assert_equal "'2002-08-24 13:08:22'", @dateTimeField.valueForSQL (@aug24)
+		assert_equal "'2002-08-24 13:08:22'", (@dateTimeField.valueForSQL (@aug24))
 		assert_equal "null", @dateTimeField.valueForSQL(nil)
 	end
 	

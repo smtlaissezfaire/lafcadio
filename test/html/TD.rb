@@ -18,7 +18,7 @@ class TestTD < RUNIT::TestCase
 	end
 
 	def testNonStringContents
-		td = HTML::TD.new( {}, HTML::Strong.new "text")
+		td = HTML::TD.new( {}, (HTML::Strong.new "text"))
 		assert_equal "<td><strong>text</strong></td>", td.toHTML
 	end
 

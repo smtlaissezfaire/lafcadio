@@ -27,9 +27,9 @@ class Collection < Array
 
 	def sort! ( accessors = [ 'objId' ] )
 		if block_given?
-			super () { |x, y| yield x, y }
+			super &(proc { |x, y| yield (x, y) } )
 		else
-			super () { |x, y| elementCompare(x, y, accessors) }
+			super &(proc { |x, y| elementCompare(x, y, accessors) } )
 		end
 	end
 

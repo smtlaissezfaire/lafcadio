@@ -5,6 +5,7 @@ class DomainUtil
 		require 'lafcadio/util/Config'
     objectType = nil
 		typeString =~ /([^\:]*)$/
+		fileName = $1
 		config = Config.new
 		classPath = config['classpath']
 		domainDirStr = config['domainDirs']
@@ -14,8 +15,8 @@ class DomainUtil
 			domainDirs = [ classPath + 'domain/' ]
 		end
 		domainDirs.each { |domainDir|
-			if Dir.entries(domainDir).index("#{$1}.rb")
-				require "#{ domainDir }#{ $1 }"
+			if Dir.entries(domainDir).index("#{fileName}.rb")
+				require "#{ domainDir }#{ fileName }"
 				DomainObject.subclasses.each { |subclass|
 					objectType = subclass if subclass.to_s == typeString
 				}

@@ -32,9 +32,9 @@ class FieldViewer
 			row.valign = 'top'
 			labelCellArgs = { 'valign' => 'top', 'align' => 'right' }
 			labelCellArgs['class'] = 'tableCellBold' if leftContent != ""
-      row << HTML::TD.new ( labelCellArgs, leftContent)
-      row << HTML::TD.new ({ 'class' => 'tableCell', 'valign' => 'top' },
-					rightContent)
+      row << (HTML::TD.new ( labelCellArgs, leftContent))
+      row << (HTML::TD.new ({ 'class' => 'tableCell', 'valign' => 'top' },
+					rightContent))
       row
     end
   end

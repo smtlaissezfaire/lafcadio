@@ -8,8 +8,8 @@ class TestPlainText < RUNIT::TestCase
 	end
 
 	def testChangeNewlines
-		assert_equal "here's a \n<br>break tag", convert ("here's a \nbreak tag")
-		assert_equal "here's a \n<p>paragraph", convert ("here's a \n\nparagraph")
+		assert_equal "here's a \n<br>break tag", (convert ("here's a \nbreak tag"))
+		assert_equal "here's a \n<p>paragraph", (convert ("here's a \n\nparagraph"))
 	end
 
 	def testChangesBrackets
@@ -20,17 +20,17 @@ class TestPlainText < RUNIT::TestCase
 	def testFaintColorsForQuotedLines
 		assert_equal "<span class=\"quoted_text\">&gt; " +
 				"that's what you said</span>",
-				convert ("> that's what you said")
+				(convert ("> that's what you said"))
 		assert_equal "<span class=\"quoted_text\">&gt; that's what \n" +
 				"<br>&gt; you said</span>",
-				convert ("> that's what \n> you said")
+				(convert ("> that's what \n> you said"))
 		assert_equal "<span class=\"quoted_text\">&gt; " +
 				"that's what you said</span>\n<p>Here's what I say",
-				convert ("> that's what you said\n\nHere's what I say")
+				(convert ("> that's what you said\n\nHere's what I say"))
 	end
 
 	def testCreateHtmlLinks
 		assert_equal "<a href=\"http://google.com\">http://google.com</a>",
-				convert ("http://google.com")
+				(convert ("http://google.com"))
 	end
 end

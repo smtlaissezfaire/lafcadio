@@ -26,7 +26,7 @@ class Query
 			anObjectType = @objectType
 			field = nil
 			while (anObjectType < DomainObject || anObjectType < DomainObject) &&
-						field == nil
+						!field
 				field = anObjectType.getField @fieldName
 				anObjectType = anObjectType.superclass
 			end

@@ -20,7 +20,7 @@ class DateFormatter
 	end
 	
 	def getTime (date)
-		date.type == Date ? DateTimeUtil.dateToTime (date) : date
+		date.type == Date ? (DateTimeUtil.dateToTime (date)) : date
 	end
 
 	def to_s (date)

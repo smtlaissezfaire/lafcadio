@@ -22,7 +22,7 @@ class ObjectEntryTable < HTML::Table
 		require 'lafcadio/html/InputSubmit'
 		row = HTML::TR.new
 		row << ""
-		row << HTML::TD.new ( {}, HTML::InputSubmit.new )
+		row << (HTML::TD.new ( {}, HTML::InputSubmit.new ))
 		self << row
 	end
 end

@@ -17,7 +17,7 @@ class TestMonthField < LafcadioTestCase
 	end
 
 	def testVerifyMonths
-		@field.verify (Month.new (12, 2005), nil)
+		@field.verify ((Month.new (12, 2005)), nil)
 		caught = false
 		begin
 			@field.verify (Date.new (5, 12, 2005))

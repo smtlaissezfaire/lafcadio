@@ -35,10 +35,10 @@ class ObjectField
   end
 
   def verify (value, objId)
-    if value == nil && notNull
+    if !value && notNull
       raise FieldValueError, nullErrorMsg, caller
     end
-    if value != nil
+    if value
       valueType = self.type.valueType
 			unless value.type <= valueType
         raise FieldValueError, 

@@ -11,7 +11,7 @@ class TestPasswordField < LafcadioTestCase
   end
 
   def testValueFromCGINewUser
-    fm = FieldManager.new {}
+    fm = FieldManager.new ({})
     previous = []
     0.upto(20) { |i|
       nextRnd = @pf.valueFromCGI fm

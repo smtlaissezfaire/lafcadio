@@ -17,7 +17,7 @@ class TestEmailer < RUNIT::TestCase
 		emailer = Emailer.new Context.instance
 		Emailer.setSMTPClass MockSmtp
 		email = Email.new ('subject', 'john.doe@email.com', 'me@me.com', '')
-		MockSmtp.setError Net::ProtoFatalError.new('', nil), 'john.doe@email.com'
+		MockSmtp.setError Net::ProtoFatalError.new(''), 'john.doe@email.com'
 		emailer.sendEmail email
 		MockSmtp.setError TimeoutError.new, 'john.doe@email.com'
 		emailer.sendEmail email

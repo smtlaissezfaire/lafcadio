@@ -25,7 +25,7 @@ class PasswordField < TextField
 
   def valueFromCGI (fieldManager)
 		require 'lafcadio/objectField/FieldValueError'
-    if firstTime (fieldManager) && @autoGenerate
+    if (firstTime (fieldManager)) && @autoGenerate
 			value = PasswordField.randomPassword
 		else
       val1 = fieldManager.get("#{name}1")

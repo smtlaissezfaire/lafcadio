@@ -19,7 +19,7 @@ class DomainObjectSqlMaker
       value = @obj.send(field.name)
 			unless field.dbWillAutomaticallyWrite
 				nameValues << field.nameForSQL
-        nameValues << field.valueForSQL (value)
+        nameValues << (field.valueForSQL (value))
       end
     }
     QueueHash.new *nameValues

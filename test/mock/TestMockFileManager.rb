@@ -28,7 +28,7 @@ class TestMockFileManager < LafcadioTestCase
 		xmlStr = "<product></product>"
 		xmlFullPath = "cache/product5.xml"
 		@mfm.save (xmlFullPath, xmlStr)
-		assert_equal xmlStr, @mfm.read (xmlFullPath)
+		assert_equal xmlStr, (@mfm.read (xmlFullPath))
 	end
 
 	def testWrite
