@@ -162,7 +162,7 @@ module Lafcadio
 			@object_type = object_type
 		end
 
-		def HTMLWidgetValueStr(value)
+		def html_widget_value_str(value)
 			if value != nil
 				super value
 			else

@@ -257,12 +257,12 @@ module Lafcadio
 
 		# Returns an array of all fields defined for this class and all concrete
 		# superclasses.
-		def DomainObject.allFields
-			allFields = []
+		def self.all_fields
+			all_fields = []
 			self_and_concrete_superclasses.each { |aClass|
-				aClass.class_fields.each { |field| allFields << field }
+				aClass.class_fields.each { |field| all_fields << field }
 			}
-			allFields
+			all_fields
 		end
 
 		def self.class_fields #:nodoc:

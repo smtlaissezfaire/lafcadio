@@ -5,6 +5,6 @@ require 'lafcadio/objectField'
 class TestAutoIncrementField < LafcadioTestCase
   def testIncrementFromNothing
     oaif = AutoIncrementField.new(Invoice, "invoice_num", "Invoice No.")
-    assert_equal("1", oaif.HTMLWidgetValueStr(nil))
+    assert_equal("1", oaif.html_widget_value_str(nil))
   end
 end

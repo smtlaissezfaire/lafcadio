@@ -432,13 +432,13 @@ module Lafcadio
 		# Returns the domain object corresponding to the domain class and pkId.
 		def get(object_type, pkId)
 			query = Query.new object_type, pkId
-			@cache.getByQuery( query )[0] ||
+			@cache.get_by_query( query )[0] ||
 			    ( raise( DomainObjectNotFoundError,
 					         "Can't find #{object_type} #{pkId}", caller ) )
 		end
 
 		# Returns all domain objects for the given domain class.
-		def get_all(object_type); @cache.getByQuery( Query.new( object_type ) ); end
+		def get_all(object_type); @cache.get_by_query( Query.new( object_type ) ); end
 
 		# Returns the DbBridge; this is useful in case you need to use raw SQL for a
 		# specific query.
@@ -506,7 +506,7 @@ module Lafcadio
 			else
 				query = conditionOrQuery
 			end
-			@cache.getByQuery( query )
+			@cache.get_by_query( query )
 		end
 		
 		def last_commit_time( domain_class, pkId ) #:nodoc:
@@ -535,7 +535,7 @@ module Lafcadio
 
 			# Flushes a domain object.
 			def flush(dbObject)
-				hashByObjectType(dbObject.object_type).delete dbObject.pkId
+				hash_by_object_type(dbObject.object_type).delete dbObject.pkId
 				flush_collection_cache( dbObject.object_type )
 			end
 			
@@ -549,15 +549,15 @@ module Lafcadio
 
 			# Returns a cached domain object, or nil if none is found.
 			def get(object_type, pkId)
-				hashByObjectType(object_type)[pkId].clone
+				hash_by_object_type(object_type)[pkId].clone
 			end
 
 			# Returns an array of all domain objects of a given type.
 			def get_all(object_type)
-				hashByObjectType(object_type).values.collect { |d_obj| d_obj.clone }
+				hash_by_object_type(object_type).values.collect { |d_obj| d_obj.clone }
 			end
 
-			def getByQuery( query )
+			def get_by_query( query )
 				unless @collections_by_query[query]
 					newObjects = @dbBridge.get_collection_by_query(query)
 					newObjects.each { |dbObj| save dbObj }
@@ -573,7 +573,7 @@ module Lafcadio
 				collection
 			end
 
-			def hashByObjectType(object_type)
+			def hash_by_object_type(object_type)
 				unless @objects[object_type]
 					@objects[object_type] = {}
 				end
@@ -596,7 +596,7 @@ module Lafcadio
 
 			# Saves a domain object.
 			def save(dbObject)
-				hashByObjectType(dbObject.object_type)[dbObject.pkId] = dbObject
+				hash_by_object_type(dbObject.object_type)[dbObject.pkId] = dbObject
 				flush_collection_cache( dbObject.object_type )
 			end
 			

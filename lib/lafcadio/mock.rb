@@ -15,7 +15,7 @@ module Lafcadio
 			if dbObject.delete
 				objectsByObjectType.delete dbObject.pkId
 			else
-				object_pkId = get_pkId_before_committing( dbObject )
+				object_pkId = get_pk_id_before_committing( dbObject )
 				objectsByObjectType[object_pkId] = dbObject
 			end
 		end
@@ -41,7 +41,7 @@ module Lafcadio
 			objects
 		end
 		
-		def get_pkId_before_committing( dbObject )
+		def get_pk_id_before_committing( dbObject )
 			object_pkId = dbObject.pkId
 			unless object_pkId
 				maxpkId = 0
