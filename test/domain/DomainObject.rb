@@ -70,6 +70,14 @@ class TestDomainObject < LafcadioTestCase
 		}
 	end
 	
+	def test_checks_fields_at_all_states
+		LafcadioConfig.setValues( 'checkFields' => 'onAllStates',
+		                          'classDefinitionDir' => '../test/testData' )
+		client = Client.new( 'name' => 'client name' )
+		assert_exception( FieldValueError ) { client.name = nil }
+		assert_exception( FieldValueError ) { Client.new( 'name' => nil ) }
+	end
+	
 	def test_class_fields_from_one_line_class_methods
 		matchField( XmlSku2, 'boolean1', BooleanField,
 		            { 'enumType' => BooleanField::ENUMS_CAPITAL_YES_NO } )

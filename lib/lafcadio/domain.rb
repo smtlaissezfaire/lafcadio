@@ -436,7 +436,8 @@ module Lafcadio
 			@errorMessages = []
 			@fields = {}
 			@fields_set = []
-			verify if LafcadioConfig.new()['checkFields'] == 'onInstantiate'
+			check_fields = LafcadioConfig.new()['checkFields']
+			verify if %w( onInstantiate onAllStates ).include?( check_fields )
 		end
 		
 		# Returns a clone, with all of the fields copied.
@@ -522,6 +523,9 @@ module Lafcadio
 				if value.class != DomainObjectProxy && value
 					value = DomainObjectProxy.new(value)
 				end
+			end
+			if LafcadioConfig.new()['checkFields'] == 'onAllStates'
+				field.verify( value, pkId )
 			end
 			@fields[field.name] = value
 			@fields_set << field
