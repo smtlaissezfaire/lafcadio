@@ -136,7 +136,7 @@ module Lafcadio
 		end
 
 		def tables
-			concrete_classes = object_type.selfAndConcreteSuperclasses.reverse
+			concrete_classes = object_type.self_and_concrete_superclasses.reverse
 			table_names = concrete_classes.collect { |domain_class|
 				domain_class.table_name
 			}
@@ -152,7 +152,7 @@ module Lafcadio
 		end
 
 		def whereClause
-			concrete_classes = object_type.selfAndConcreteSuperclasses.reverse
+			concrete_classes = object_type.self_and_concrete_superclasses.reverse
 			where_clauses = []
 			concrete_classes.each_with_index { |domain_class, i|
 				if i < concrete_classes.size - 1

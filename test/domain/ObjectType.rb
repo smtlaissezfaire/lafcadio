@@ -13,13 +13,13 @@ class TestObjectType < LafcadioTestCase
 	end
 
 	def testTableName
-		assert_equal( "users", ObjectType.getObjectType(User).table_name )
+		assert_equal( "users", ObjectType.get_object_type(User).table_name )
 		assert_equal( "lineItems",
-		              ObjectType.getObjectType(Domain::LineItem).table_name )
+		              ObjectType.get_object_type(Domain::LineItem).table_name )
 	end
 	
 	def testHandlesClassWithoutXml
-		ot = ObjectType.getObjectType( NoXml )
+		ot = ObjectType.get_object_type( NoXml )
 		assert_equal( 'pkId', ot.sql_primary_key_name )
 		assert_equal( 'noXmls', ot.table_name )
 	end

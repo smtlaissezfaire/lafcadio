@@ -24,13 +24,13 @@ module Lafcadio
 			@dbObject.verify if LafcadioConfig.new()['checkFields'] == 'onCommit'
 			setCommitType
 			@dbObject.lastCommit = getLastCommit
-			@dbObject.preCommitTrigger
+			@dbObject.pre_commit_trigger
 			update_dependent_domain_objects if @dbObject.delete
 			@dbBridge.commit @dbObject
 			unless @dbObject.pkId
 				@dbObject.pkId = @dbBridge.lastPkIdInserted
 			end
-			@dbObject.postCommitTrigger
+			@dbObject.post_commit_trigger
 		end
 
 		def getLastCommit
@@ -309,7 +309,7 @@ module Lafcadio
 			if @obj.errorMessages.size > 0
 				raise DomainObjectInitError, @obj.errorMessages, caller
 			end
-			@obj.class.selfAndConcreteSuperclasses.each { |object_type|
+			@obj.class.self_and_concrete_superclasses.each { |object_type|
 				statements << statement_bind_value_pair( object_type )
  			}
 			statements.reverse
@@ -405,7 +405,7 @@ module Lafcadio
 	# = Triggers
 	# Domain classes can be set to fire triggers either before or after commits.
 	# Since these triggers are executed in Ruby, they're easy to test. See
-	# DomainObject#preCommitTrigger and DomainObject#postCommitTrigger for more.
+	# DomainObject#pre_commit_trigger and DomainObject#post_commit_trigger for more.
 	class ObjectStore < ContextualService
 		def ObjectStore.setDbName(dbName) #:nodoc:
 			DbConnection.set_db_name dbName

@@ -259,7 +259,7 @@ module Lafcadio
 		# superclasses.
 		def DomainObject.allFields
 			allFields = []
-			selfAndConcreteSuperclasses.each { |aClass|
+			self_and_concrete_superclasses.each { |aClass|
 				aClass.class_fields.each { |field| allFields << field }
 			}
 			allFields
@@ -341,7 +341,7 @@ module Lafcadio
 
 		def self.get_object_type_from_string(typeString) #:nodoc:
 			object_type = nil
-			requireDomainFile( typeString )
+			require_domain_file( typeString )
 			subclasses.each { |subclass|
 				object_type = subclass if subclass.to_s == typeString
 			}
@@ -373,7 +373,7 @@ module Lafcadio
 				field_class = Lafcadio.const_get( maybe_field_class_name )
 				create_field( field_class, args[0], args[1] || {} )
 			rescue NameError
-				ObjectType.getObjectType( self ).send( method_name, *args )
+				ObjectType.get_object_type( self ).send( method_name, *args )
 			end
 		end
 
@@ -381,7 +381,7 @@ module Lafcadio
 			self
 		end
 
-		def self.requireDomainFile( typeString )
+		def self.require_domain_file( typeString )
 			typeString =~ /([^\:]*)$/
 			fileName = $1
 			get_domain_dirs.each { |domainDir|
@@ -396,7 +396,7 @@ module Lafcadio
 			end
 		end
 
-		def self.selfAndConcreteSuperclasses # :nodoc:
+		def self.self_and_concrete_superclasses # :nodoc:
 			classes = [ ]
 			anObjectType = self
 			until(anObjectType == DomainObject ||
@@ -508,13 +508,13 @@ module Lafcadio
 
 		# This template method is called before every commit. Subclasses can 
 		# override it to ensure code is executed before a commit.
-		def preCommitTrigger
+		def pre_commit_trigger
 			nil
 		end
 
 		# This template method is called after every commit. Subclasses can 
 		# override it to ensure code is executed after a commit.
-		def postCommitTrigger
+		def post_commit_trigger
 			nil
 		end
 
@@ -543,7 +543,7 @@ module Lafcadio
 	# override MapObject.mappedTypes, returning a two-element array containing 
 	# the domain classes that the map object maps between.
 	class MapObject < DomainObject
-		def self.otherMappedType(firstType) #:nodoc:
+		def self.other_mapped_type(firstType) #:nodoc:
 			types = mappedTypes
 			if types.index(firstType) == 0
 				types[1]
@@ -552,7 +552,7 @@ module Lafcadio
 			end
 		end
 
-		def self.subsidiaryMap #:nodoc:
+		def self.subsidiary_map #:nodoc:
 			nil
 		end
 	end
@@ -567,7 +567,7 @@ module Lafcadio
 			@@instances = {}
 		end
 
-		def self.getObjectType( aClass ) #:nodoc:
+		def self.get_object_type( aClass ) #:nodoc:
 			instance = @@instances[aClass]
 			if instance.nil?
 				@@instances[aClass] = new( aClass )
