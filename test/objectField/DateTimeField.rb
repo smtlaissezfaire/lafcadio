@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'lafcadio/objectField/DateTimeField'
+require 'lafcadio/objectField'
 
 class TestDateTimeField < LafcadioTestCase
 	def setup

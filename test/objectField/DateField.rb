@@ -1,5 +1,5 @@
 require 'dbi'
-require 'lafcadio/objectField/DateField'
+require 'lafcadio/objectField'
 require 'lafcadio/test/LafcadioTestCase'
 require '../test/mock/domain/Invoice'
 require 'lafcadio/objectField/FieldValueError'

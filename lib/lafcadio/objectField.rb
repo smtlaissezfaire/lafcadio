@@ -1,5 +1,7 @@
 require 'lafcadio/includer'
 Includer.include( 'objectField' )
+require 'date'
+require 'lafcadio/util'
 
 module Lafcadio
 	class AutoIncrementField < IntegerField # :nodoc:
@@ -111,6 +113,79 @@ module Lafcadio
 
 		def valueFromSQL(value, lookupLink = true) # :nodoc:
 			value == trueEnum( value )
+		end
+	end
+
+	# DateField represents a Date.
+	class DateField < ObjectField
+		RANGE_NEAR_FUTURE = 0
+		RANGE_PAST = 1
+
+		def self.valueType # :nodoc:
+			Date
+		end
+
+		attr_accessor :range
+
+		def initialize(objectType, name = "date", englishName = nil)
+			super(objectType, name, englishName)
+			@range = RANGE_NEAR_FUTURE
+		end
+
+		def valueForSQL(value) # :nodoc:
+			value ? "'#{value.to_s}'" : 'null'
+		end
+
+		def valueFromSQL(dbiDate, lookupLink = true) # :nodoc:
+			begin
+				dbiDate ? dbiDate.to_date : nil
+			rescue ArgumentError
+				nil
+			end
+		end
+	end
+	
+	# DateTimeField represents a DateTime.
+	class DateTimeField < ObjectField
+		def valueForSQL(value) # :nodoc:
+			if value
+				year = value.year
+				month = value.mon.to_s.pad( 2, "0" )
+				day = value.day.to_s.pad( 2, "0" )
+				hour = value.hour.to_s.pad( 2, "0" )
+				minute = value.min.to_s.pad( 2, "0" )
+				second = value.sec.to_s.pad( 2, "0" )
+				"'#{year}-#{month}-#{day} #{hour}:#{minute}:#{second}'"
+			else
+				"null"
+			end
+		end
+
+		def valueFromSQL(dbi_value, lookupLink = true) # :nodoc:
+			dbi_value ? dbi_value.to_time : nil
+		end
+	end
+	
+	# Accepts a Month as a value. This field automatically saves in MySQL as a 
+	# date corresponding to the first day of the month.
+	class MonthField < DateField
+		def self.valueType #:nodoc:
+			Month
+		end
+
+		def valueForSQL(value) #:nodoc:
+			"'#{value.year}-#{value.month}-01'"
+		end
+	end
+
+	class TimeStampField < DateTimeField #:nodoc:
+		def initialize(objectType, name = 'timeStamp', englishName = nil)
+			super( objectType, name, englishName )
+			@notNull = false
+		end
+
+		def dbWillAutomaticallyWrite
+			true
 		end
 	end
 end
