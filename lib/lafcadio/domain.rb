@@ -19,9 +19,7 @@ module Lafcadio
 				fieldClass = Class.getClass( 'Lafcadio::' + className )
 				register_name( name )
 				field = fieldClass.instantiateFromXml( @domainClass, fieldElt )
-				possibleFieldAttributes.each { |fieldAttr|
-					fieldAttr.maybeSetFieldAttr( field, fieldElt )
-				}
+				set_field_attributes( field, fieldElt )
 			rescue MissingError
 				msg = "Couldn't find field class '#{ className }' for field " +
 				      "'#{ name }'"
@@ -57,6 +55,12 @@ module Lafcadio
 			@namesProcessed[name] = true
 		end
 		
+		def set_field_attributes( field, fieldElt )
+			possibleFieldAttributes.each { |fieldAttr|
+				fieldAttr.maybeSetFieldAttr( field, fieldElt )
+			}
+		end
+
 		def sqlPrimaryKeyName
 			@xmlDocRoot.attributes['sqlPrimaryKeyName']
 		end
