@@ -3,7 +3,7 @@ require '../test/mock/domain/Client'
 require '../test/mock/domain/User'
 require 'lafcadio/test/LafcadioTestCase'
 require '../test/mock/domain/Invoice'
-require 'lafcadio/objectStore/SqlValueConverter'
+require 'lafcadio/objectStore'
 require 'dbi'
 
 class TestSqlValueConverter < LafcadioTestCase

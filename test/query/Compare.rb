@@ -1,6 +1,6 @@
 require 'lafcadio/test/LafcadioTestCase'
 require 'date'
-require 'lafcadio/query/Compare'
+require 'lafcadio/query'
 require '../test/mock/domain/InternalClient'
 require '../test/mock/domain/Invoice'
 require '../test/mock/domain/User'
