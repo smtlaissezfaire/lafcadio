@@ -5,6 +5,73 @@ require 'lafcadio/query'
 require 'lafcadio/util'
 
 module Lafcadio
+	class Committer #:nodoc:
+		INSERT 	= 1
+		UPDATE 	= 2
+		DELETE  = 3
+
+		attr_reader :commitType, :dbObject
+
+		def initialize(dbObject, dbBridge)
+			@dbObject = dbObject
+			@dbBridge = dbBridge
+			@objectStore = Context.instance.getObjectStore
+			@commitType = nil
+		end
+		
+		def execute
+			setCommitType
+			@dbObject.lastCommit = getLastCommit
+			@dbObject.preCommitTrigger
+			update_dependent_domain_objects if @dbObject.delete
+			@dbBridge.commit @dbObject
+			unless @dbObject.pkId
+				@dbObject.pkId = @dbBridge.lastPkIdInserted
+			end
+			@dbObject.postCommitTrigger
+		end
+
+		def getLastCommit
+			if @dbObject.delete
+				DomainObject::COMMIT_DELETE
+			elsif @dbObject.pkId
+				DomainObject::COMMIT_EDIT
+			else
+				DomainObject::COMMIT_ADD
+			end
+		end
+		
+		def setCommitType
+			if @dbObject.delete
+				@commitType = DELETE
+			elsif @dbObject.pkId
+				@commitType = UPDATE
+			else
+				@commitType = INSERT
+			end
+		end
+
+		def update_dependent_domain_objects
+			dependentClasses = @dbObject.objectType.dependentClasses
+			dependentClasses.keys.each { |aClass|
+				field = dependentClasses[aClass]
+				collection = @objectStore.getFiltered( aClass.name, @dbObject,
+																							 field.name )
+				collection.each { |dependentObject|
+					if field.deleteCascade
+						dependentObject.delete = true
+					else
+						dependentObject.send( field.name + '=', nil )
+					end
+					@objectStore.commit(dependentObject)
+				}
+			}
+		end
+	end
+
+	class CouldntMatchObjectTypeError < RuntimeError #:nodoc:
+	end
+
 	class DbConnection < ContextualService
 		@@connectionClass = DBI
 		@@db_name = nil
@@ -231,7 +298,6 @@ module Lafcadio
 			end
 
 			def commit( dbObject )
-				require 'lafcadio/objectStore/Committer'
 				committer = Committer.new dbObject, @dbBridge
 				committer.execute
 				update_after_commit( committer )
