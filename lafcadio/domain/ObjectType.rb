@@ -1,3 +1,5 @@
+require 'lafcadio/util'
+
 # A utility class that handles a few details for the DomainObject class. All the 
 # methods here are usually called as methods of DomainObject, and then delegated 
 # to this class.
