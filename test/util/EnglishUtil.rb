@@ -6,6 +6,9 @@ class TestEnglishUtil < LafcadioTestCase
 				EnglishUtil.camelCaseToEnglish("productCategory")
 		assert_equal "product category",
 				EnglishUtil.camelCaseToEnglish("ProductCategory")
+		assert_equal 'catalog order',
+				EnglishUtil.camelCaseToEnglish('catalogOrder')
+		assert_equal 'product', EnglishUtil.camelCaseToEnglish('product')
   end
 
   def testSentence
