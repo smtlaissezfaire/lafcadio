@@ -14,10 +14,12 @@ class DomainObjectProxy
 		if objId
 			@objectType = objectTypeOrDbObject
 			@objId = objId
-		else
+		elsif objectTypeOrDbObject.class < DomainObject
 			dbObject = objectTypeOrDbObject
 			@objectType = dbObject.class
 			@objId = dbObject.objId
+		else
+			raise ArgumentError
 		end
 	end
 

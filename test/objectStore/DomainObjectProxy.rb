@@ -51,4 +51,13 @@ class TestDomainObjectProxy < LafcadioTestCase
 		client = @clientProxy.getDbObject
 		assert_equal( 'new client name', client.name )
 	end
+	
+	def testCantInitializeWithAnotherProxy
+		begin
+			metaProxy = DomainObjectProxy.new( @clientProxy )
+			fail "Should raise ArgumentError"
+		rescue ArgumentError
+			# ok
+		end
+	end
 end
