@@ -69,8 +69,12 @@ end
 require 'runit/testcase'
 
 class TestSKU < RUNIT::TestCase
+	def TestSKU.getTestSKU
+		SKU.new ({ 'objId' => 1, 'sku' => 'sku0001', 'standardPrice' => 99.95 })
+	end
+
 	def TestSKU.storedTestSKU
-		sku = SKU.new ({ 'sku' => 'sku0001', 'standardPrice' => 99.95 })
+		sku = TestSKU.getTestSKU
 		Context.instance.getObjectStore.addObject sku
 		sku
 	end

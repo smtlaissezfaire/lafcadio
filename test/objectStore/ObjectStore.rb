@@ -1,4 +1,7 @@
 require 'test/mock/domain/Client'
+require 'test/mock/domain/InventoryLineItem'
+require 'test/mock/domain/InventoryLineItemOption'
+require 'test/mock/domain/Option'
 require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/mock/MockDbBridge'
 
@@ -96,5 +99,16 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal @client, @testObjectStore.getSubset(condition)[0]
 		query = Query.new Client, condition
 		assert_equal @client, @testObjectStore.getSubset(query)[0]
+	end
+	
+	def testDynamicMethodNameDispatchesToCollectorMapObjectFunction
+		option = TestOption.getTestOption
+		@testObjectStore.commit option
+		ili = TestInventoryLineItem.getTestInventoryLineItem
+		@testObjectStore.commit ili
+		ilio = TestInventoryLineItemOption.getTestInventoryLineItemOption
+		@testObjectStore.commit ilio
+		assert_equal ilio, @testObjectStore.getInventoryLineItemOption(
+				ili, option)
 	end
 end

@@ -62,7 +62,11 @@ class ObjectStore < ContextualService
 		begin
 			methodName =~ /^get(.*)$/
 			objectType = DomainUtil.getObjectTypeFromString $1
-			get objectType, args[0]
+			if args[0].type <= Integer
+				get objectType, args[0]
+			elsif args[0].type <= DomainObject
+				@collector.getMapObject objectType, args[0], args[1]
+			end
 		rescue CouldntMatchObjectTypeError
 			subsystems = [ @collector, @dbBridge, @retriever ]
 			resolved = false

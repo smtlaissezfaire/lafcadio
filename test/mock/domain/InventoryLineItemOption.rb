@@ -17,11 +17,17 @@ end
 require 'lafcadio/test/LafcadioTestCase'
 
 class TestInventoryLineItemOption < LafcadioTestCase
+	def TestInventoryLineItemOption.getTestInventoryLineItemOption
+		fieldHash = { 'objId' => 1, 'inventoryLineItem' =>
+											TestInventoryLineItem.getTestInventoryLineItem,
+									'option' => TestOption.getTestOption }
+		InventoryLineItemOption.new fieldHash
+	end
+
 	def TestInventoryLineItemOption.storedTestInventoryLineItemOption
-		fieldHash = { 'inventoryLineItem' =>
-											TestInventoryLineItem.storedTestInventoryLineItem,
-									'option' => TestOption.storedTestOption }
-		ilio = InventoryLineItemOption.new fieldHash
+		ilio = TestInventoryLineItemOption.getTestInventoryLineItemOption
+		ilio.inventoryLineItem = TestInventoryLineItem.storedTestInventoryLineItem
+		ilio.option = TestOption.storedTestOption
 		Context.instance.getObjectStore.addObject ilio
 		ilio
 	end

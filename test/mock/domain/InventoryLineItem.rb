@@ -16,9 +16,13 @@ require 'runit/testcase'
 require 'test/mock/domain/SKU'
 
 class TestInventoryLineItem < RUNIT::TestCase
+	def TestInventoryLineItem.getTestInventoryLineItem
+		InventoryLineItem.new ({ 'objId' => 1, 'sku' => TestSKU.getTestSKU })
+	end
+
 	def TestInventoryLineItem.storedTestInventoryLineItem
-		ili = InventoryLineItem.new ({ 'objId' => 1,
-				'sku' => TestSKU.storedTestSKU })
+		ili = TestInventoryLineItem.getTestInventoryLineItem
+		ili.sku = TestSKU.storedTestSKU
 		Context.instance.getObjectStore.addObject ili
 		ili
 	end
