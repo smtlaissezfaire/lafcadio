@@ -31,7 +31,7 @@ class ClassDefinitionXmlParser
 		def valueFromElt( elt )
 			hash = {}
 			elt.elements.each( EnglishUtil.singular( @name ) ) { |subElt|
-				key = subElt.attributes['value'] == 'true'
+				key = subElt.attributes['key'] == 'true'
 				value = subElt.text.to_s
 				hash[key] = value
 			}
@@ -39,13 +39,16 @@ class ClassDefinitionXmlParser
 		end
 		
 		def maybeSetFieldAttr( field, fieldElt )
-			if valueClass != FieldAttribute::HASH
-				if ( attrStr = fieldElt.attributes[name] )
-					field.send( "#{ name }=", valueFromString( attrStr ) )
-				end
-			else
-				if ( attrElt = fieldElt.elements[name] )
-					field.send( "#{ name }=", valueFromElt( attrElt ) )
+			setterMethod = "#{ name }="
+			if field.respond_to?( setterMethod )
+				if valueClass != FieldAttribute::HASH
+					if ( attrStr = fieldElt.attributes[name] )
+						field.send( setterMethod, valueFromString( attrStr ) )
+					end
+				else
+					if ( attrElt = fieldElt.elements[name] )
+						field.send( setterMethod, valueFromElt( attrElt ) )
+					end
 				end
 			end
 		end
@@ -55,6 +58,31 @@ class ClassDefinitionXmlParser
 		@domainClass = domainClass; @xml = xml
 	end
 	
+	def instantiateField( fieldClass, fieldElt, name )
+		englishName = fieldElt.attributes['englishName']
+		if fieldClass == DecimalField
+			precision = fieldElt.attributes['precision'].to_i
+			fieldClass.new( @domainClass, name, precision, englishName )
+		elsif fieldClass == EnumField
+			if fieldElt.elements['enums'][1].attributes['key']
+				enumValues = []
+				fieldElt.elements.each( 'enums/enum' ) { |enumElt|
+					enumValues << enumElt.attributes['key']
+					enumValues << enumElt.text.to_s
+				}
+				enums = QueueHash.new( *enumValues )
+			else
+				enums = []
+				fieldElt.elements.each( 'enums/enum' ) { |enumElt|
+					enums << enumElt.text.to_s
+				}
+			end
+			fieldClass.new( @domainClass, name, enums, englishName )
+		else
+			fieldClass.new( @domainClass, name, englishName )
+		end
+	end
+
 	def execute
 		require 'rexml/document'
 		require 'lafcadio/util'
@@ -66,13 +94,7 @@ class ClassDefinitionXmlParser
 			fieldClass = ClassUtil.getClass( fieldElt.attributes['class'] )
 			name = fieldElt.attributes['name']
 			raise InvalidDataError if namesProcessed[name]
-			englishName = fieldElt.attributes['englishName']
-			if fieldClass != DecimalField
-				field = fieldClass.new( @domainClass, name, englishName )
-			else
-				precision = fieldElt.attributes['precision'].to_i
-				field = fieldClass.new( @domainClass, name, precision, englishName )
-			end
+			field = instantiateField( fieldClass, fieldElt, name )
 			possibleFieldAttributes.each { |fieldAttr|
 				fieldAttr.maybeSetFieldAttr( field, fieldElt )
 			}

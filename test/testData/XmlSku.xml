@@ -2,8 +2,8 @@
 	<field name="boolean1" class="BooleanField" enumType="ENUMS_CAPITAL_YES_NO"/>
 	<field name="boolean2" class="BooleanField" englishName="boolean 2">
 		<enums>
-			<enum value="true">yin</enum>
-			<enum value="false">yang</enum>
+			<enum key="true">yin</enum>
+			<enum key="false">yang</enum>
 		</enums>
 	</field>
 	<field name="date1" class="DateField" notNull="n"/>
@@ -11,6 +11,19 @@
 	<field name="dateTime1" class="DateTimeField" />
 	<field name="decimal1" class="DecimalField" precision="4"
 	       englishName="decimal 1" />
+	<field name="email1" class="EmailField" />
+	<field name="enum1" class="EnumField">
+		<enums>
+			<enum>a</enum>
+			<enum>b</enum>
+		</enums>
+	</field>
+	<field name="enum2" class="EnumField">
+		<enums>
+			<enum key="1">2</enum>
+			<enum key="3">4</enum>
+		</enums>
+	</field>
 	
 	<field name="sku" class="TextField" size="16" unique="y"/>
 	<field name="standardPrice" class="MoneyField"/>
