@@ -5,6 +5,14 @@ require 'lafcadio/dateTime'
 require 'lafcadio/util'
 
 module Lafcadio
+	# IntegerField represents an integer.
+	class IntegerField < ObjectField
+		def valueFromSQL(string) #:nodoc:
+			value = super
+			value ? value.to_i : nil
+		end
+	end
+
 	# A TextField is expected to contain a string value.
 	class TextField < ObjectField
 		def valueForSQL(value) #:nodoc:
@@ -287,6 +295,9 @@ module Lafcadio
 		end
 	end
 	
+	class FieldValueError < RuntimeError #:nodoc:
+	end
+
 	class MoneyField < DecimalField #:nodoc:
 	end
 
@@ -321,6 +332,28 @@ module Lafcadio
 	class StateField < EnumField
 		def initialize(objectType, name = "state", englishName = nil)
 			super objectType, name, UsStates.states, englishName
+		end
+	end
+
+	class SubsetLinkField < LinkField #:nodoc:
+		def self.instantiateWithParameters( domainClass, parameters )
+			self.new( domainClass, parameters['linkedType'],
+			          parameters['subsetField'], parameters['name'],
+								parameters['englishName'] )
+		end
+
+		def self.instantiationParameters( fieldElt )
+			parameters = super( fieldElt )
+			parameters['subsetField'] = fieldElt.attributes['subsetField']
+			parameters
+		end
+		
+		attr_accessor :subsetField
+
+		def initialize(objectType, linkedType, subsetField,
+				name = linkedType.name.downcase, englishName = nil)
+			super(objectType, linkedType, name, englishName)
+			@subsetField = subsetField
 		end
 	end
 

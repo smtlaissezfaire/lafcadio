@@ -1,5 +1,5 @@
 require 'lafcadio/util/English'
-require 'lafcadio/objectField/FieldValueError'
+require 'lafcadio/objectField'
 
 module Lafcadio
 	# ObjectField is the abstract base class of any field for domain objects.

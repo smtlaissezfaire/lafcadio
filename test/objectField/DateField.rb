@@ -2,7 +2,6 @@ require 'dbi'
 require 'lafcadio/objectField'
 require 'lafcadio/test/LafcadioTestCase'
 require '../test/mock/domain/Invoice'
-require 'lafcadio/objectField/FieldValueError'
 
 class TestDateField < LafcadioTestCase
   def setup

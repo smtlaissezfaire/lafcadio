@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'lafcadio/objectField/IntegerField'
+require 'lafcadio/objectField'
 
 class TestIntegerField < LafcadioTestCase
 	def testValueFromSQL

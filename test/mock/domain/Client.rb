@@ -1,5 +1,4 @@
 require '../test/mock/domain/Invoice'
-require 'lafcadio/objectField/SubsetLinkField'
 require 'lafcadio/domain'
 require 'lafcadio/objectField'
 
