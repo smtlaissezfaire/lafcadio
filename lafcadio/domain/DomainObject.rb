@@ -1,7 +1,6 @@
 require 'lafcadio/objectField/LinkField'
 require 'lafcadio/objectStore/DomainComparable'
 require 'lafcadio/objectStore/DomainObjectProxy'
-require 'lafcadio/domain'
 
 # All classes that correspond to a table in the database need to be children of DomainObject.
 #
@@ -57,6 +56,7 @@ class DomainObject
 
 	# Returns an array of subclasses that cannot be instantiated.
 	def DomainObject.abstractSubclasses
+		require 'lafcadio/domain'
 		[ MapObject ]
 	end
 
