@@ -7,6 +7,10 @@ require 'lafcadio/util/Context'
 require 'lafcadio/util/ContextualService'
 
 class ObjectStore < ContextualService
+	def ObjectStore.setDbName (dbName)
+		DbBridge.setDbName dbName
+	end
+  
   def initialize (context, dbBridge = nil)
   	super context
 		@dbBridge = dbBridge == nil ? DbBridge.new : dbBridge

@@ -7,6 +7,11 @@ require "mysql"
 class DbBridge
   @@db = nil
 	@@lastObjIdInserted = nil
+	@@dbName = nil
+
+	def DbBridge.setDbName (dbName)
+		@@dbName = dbName
+	end
 
   def DbBridge._load(aString)
     aString =~ /db:/
@@ -30,7 +35,8 @@ class DbBridge
         config = Config.new
 					@@db = mysqlClass.new config['dbhost'], config['dbuser'],
 						config['dbpassword']
-        @@db.select_db(config["dbname"])
+				dbName = @@dbName || config["dbname"]
+        @@db.select_db(dbName)
       end
       @db = @@db
     else

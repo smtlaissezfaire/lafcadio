@@ -61,6 +61,11 @@ class TestDBBridge < RUNIT::TestCase
     @client = Client.new( {"objId" => 1, "name" => "clientName1"} )
   end
 
+  def teardown
+ 		DbBridge.flushConnection
+		DbBridge.setDbName nil
+	end
+
   def test_commits_delete
     @client.delete = true
     @dbb.commit(@client)
@@ -75,6 +80,15 @@ class TestDBBridge < RUNIT::TestCase
 
   class MockMysql
     @@instances = 0
+    @@dbName = nil
+
+		def MockMysql.flushInstanceCount
+			@@instances = 0
+		end
+
+		def MockMysql.dbName
+			@@dbName
+		end
 
     def initialize (host, user, password)
       @@instances += 1
@@ -82,6 +96,7 @@ class TestDBBridge < RUNIT::TestCase
     end
 
     def select_db (dbName)
+    	@@dbName = dbName
     end
   end
 
@@ -117,5 +132,12 @@ class TestDBBridge < RUNIT::TestCase
 
 	def testGetMax
 		assert 1, @dbb.getMax(Client)
+	end
+	
+	def testDbName
+		MockMysql.flushInstanceCount
+		ObjectStore.setDbName 'some_other_db'
+		db = DbBridge.new nil, MockMysql
+		assert_equal 'some_other_db', MockMysql.dbName
 	end
 end
