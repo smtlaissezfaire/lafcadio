@@ -39,7 +39,7 @@ class MockSmtp
 		i = 0
 		until lastSubject || i > @@message.size
 			headerLine = @@message[i]
-			if headerLine =~ /^Subject:(.*)$/
+			if headerLine =~ /^Subject: (.*)$/
 				lastSubject = $1.chomp
 			end
 			i+= 1
