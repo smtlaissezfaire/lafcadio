@@ -10,8 +10,7 @@
 	<field name="date1" class="DateField" notNull="n"/>
 	<field name="date2" class="DateField" range="RANGE_PAST" />
 	<field name="dateTime1" class="DateTimeField" />
-	<field name="decimal1" class="DecimalField" precision="4"
-	       englishName="decimal 1" />
+	<field name="decimal1" class="DecimalField" englishName="decimal 1" />
 	<field name="email1" class="EmailField" />
 	<field name="enum1" class="EnumField">
 		<enums>

@@ -255,7 +255,7 @@ class TestDomainObject < LafcadioTestCase
 		            { 'range' => DateField::RANGE_PAST } )
 		matchField( XmlSku2, 'dateTime1', DateTimeField )
 		matchField( XmlSku2, 'decimal1', DecimalField,
-		            { 'precision' => 4, 'englishName' => 'decimal 1' } )
+		            { 'englishName' => 'decimal 1' } )
 		matchField( XmlSku2, 'email1', EmailField )
 		matchField( XmlSku2, 'enum1', EnumField,
 		            { 'enums' => QueueHash.new( 'a', 'a', 'b', 'b' ) } )

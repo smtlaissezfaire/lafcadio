@@ -32,7 +32,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		            { 'range' => DateField::RANGE_PAST } )
 		matchField( XmlSku, 'dateTime1', DateTimeField )
 		matchField( XmlSku, 'decimal1', DecimalField,
-		            { 'precision' => 4, 'englishName' => 'decimal 1' } )
+		            { 'englishName' => 'decimal 1' } )
 		matchField( XmlSku, 'email1', EmailField )
 		matchField( XmlSku, 'enum1', EnumField,
 		            { 'enums' => QueueHash.new( 'a', 'a', 'b', 'b' ) } )

@@ -22,7 +22,7 @@ module Lafcadio
 			elsif ( field.class <= TextField || field.class <= TextListField )
 				'varchar(255)'
 			elsif field.class <= DecimalField
-				"float(10, #{ field.precision })"
+				"float"
 			elsif ( field.class <= LinkField || field.class <= IntegerField )
 				'int'
 			elsif field.class <= DateField

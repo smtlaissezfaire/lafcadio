@@ -4,6 +4,11 @@ require 'lafcadio/objectField/ObjectField'
 module Lafcadio
 	# A LinkField is used to link from one domain class to another.
 	class LinkField < ObjectField
+		def LinkField.instantiateWithParameters( domainClass, parameters ) #:nodoc:
+			self.new( domainClass, parameters['linkedType'], parameters['name'],
+								parameters['englishName'], parameters['deleteCascade'] )
+		end
+
 		def LinkField.instantiationParameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			linkedTypeStr = fieldElt.attributes['linkedType']
@@ -11,11 +16,6 @@ module Lafcadio
 			parameters['linkedType'] = linkedType
 			parameters['deleteCascade'] = fieldElt.attributes['deleteCascade'] == 'y'
 			parameters
-		end
-
-		def LinkField.instantiateWithParameters( domainClass, parameters ) #:nodoc:
-			self.new( domainClass, parameters['linkedType'], parameters['name'],
-								parameters['englishName'], parameters['deleteCascade'] )
 		end
 
 		attr_reader :linkedType
