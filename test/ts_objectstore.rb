@@ -320,22 +320,30 @@ class TestDbObjectCommitter < LafcadioTestCase
 	def testAssignsPkIdOnNewCommit
 		client = Client.new({ 'name' => 'client name' })
 		assert_nil client.pk_id
-    committer = Committer.new(client, @mockDBBridge)
+    committer = Committer.new(
+			client, @mockDBBridge, ObjectStore::Cache.new( @mockDBBridge )
+		)
     committer.execute
 		assert_not_nil client.pk_id
 	end
 
 	def testCommitType
 		client = Client.new({ 'name' => 'client name' })
-    committer = Committer.new(client, @mockDBBridge)
+    committer = Committer.new(
+			client, @mockDBBridge, ObjectStore::Cache.new( @mockDBBridge )
+		)
     committer.execute
 		assert_equal Committer::INSERT, committer.commit_type
 		client2 = Client.new({ 'pk_id' => 25, 'name' => 'client 25' })
-		committer2 = Committer.new(client2, @mockDBBridge)
+		committer2 = Committer.new(
+			client2, @mockDBBridge, ObjectStore::Cache.new( @mockDBBridge )
+		)
 		committer2.execute
 		assert_equal Committer::UPDATE, committer2.commit_type
 		client2.delete = true
-		committer3 = Committer.new(client2, @mockDBBridge)
+		committer3 = Committer.new(
+			client2, @mockDBBridge, ObjectStore::Cache.new( @mockDBBridge )
+		)
 		committer3.execute
 		assert_equal Committer::DELETE, committer3.commit_type
 	end
@@ -347,7 +355,9 @@ class TestDbObjectCommitter < LafcadioTestCase
 		xml_sku = XmlSku.new( 'link1' => user )
 		xml_sku.commit
 		user.delete = true
-		committer = Committer.new( user, @mockDBBridge )
+		committer = Committer.new(
+			user, @mockDBBridge, ObjectStore::Cache.new( @mockDBBridge )
+		)
 		committer.execute
 		assert_equal( 0, @testObjectStore.get_xml_skus.size )
 	end
@@ -360,7 +370,9 @@ class TestDbObjectCommitter < LafcadioTestCase
     @mockDBBridge.commit client
     @mockDBBridge.commit invoice
     client.delete = true
-    committer = Committer.new(client, @mockDBBridge)
+    committer = Committer.new(
+			client, @mockDBBridge, ObjectStore::Cache.new( @mockDBBridge )
+		)
     committer.execute
 		assert_nil getFromDbBridge(Client, 1)
 		assert_not_nil getFromDbBridge(Invoice, 1)
@@ -647,6 +659,20 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 1, @mockDbBridge.retrievals_by_type[Invoice]
 		@testObjectStore.get_all Client
 		assert_equal 1, @mockDbBridge.retrievals_by_type[Client]
+	end
+	
+	def test_commit_notifies_proxies_to_update_before_triggers
+		client = Client.new( 'name' => 'Lovecraft' )
+		client.commit
+		invoice = Invoice.new( 'client' => client )
+		invoice.commit
+		client.priorityInvoice = invoice
+		client.commit
+		assert_equal( 'Lovecraft', client.priorityInvoice.client.name )
+		assert_raise( RuntimeError ) do
+			client.name = 'Cthulhu'
+			client.commit
+		end
 	end
 
 	def test_commit_returns_dobj

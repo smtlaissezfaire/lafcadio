@@ -12,9 +12,10 @@ module Lafcadio
 
 		attr_reader :commit_type, :db_object
 
-		def initialize(db_object, dbBridge)
+		def initialize(db_object, dbBridge, cache)
 			@db_object = db_object
 			@dbBridge = dbBridge
+			@cache = cache
 			@objectStore = ObjectStore.get_object_store
 			@commit_type = nil
 		end
@@ -29,6 +30,7 @@ module Lafcadio
 			unless @db_object.pk_id
 				@db_object.pk_id = @dbBridge.last_pk_id_inserted
 			end
+			@cache.update_after_commit self
 			@db_object.post_commit_trigger
 		end
 
@@ -543,9 +545,8 @@ module Lafcadio
 			end
 
 			def commit( db_object )
-				committer = Committer.new db_object, @dbBridge
+				committer = Committer.new db_object, @dbBridge, self
 				committer.execute
-				update_after_commit( committer )
 			end
 
 			# Flushes a domain object.

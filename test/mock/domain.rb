@@ -32,6 +32,15 @@ class Client < Lafcadio::DomainObject
 		ObjectStore.get_object_store.commit client
 		client
 	end
+	
+	def post_commit_trigger
+		if (
+			self.name == 'Cthulhu' and self.priorityInvoice and
+			self.priorityInvoice.client.name == 'Cthulhu'
+		)
+			raise
+		end
+	end
 
   def testPkId
     client = Client.new( { "name" => "clientName1", "pk_id" => 1 } )
