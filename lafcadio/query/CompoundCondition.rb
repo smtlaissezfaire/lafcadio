@@ -1,10 +1,22 @@
 require 'lafcadio/query/Condition'
 
 class Query
+	# Turns two or more conditions into one condition, joined by either AND or OR.
 	class CompoundCondition < Condition
 		AND = 1
 		OR  = 2
 	
+		# CompoundCondition takes a list of conditions as its arguments during
+		# initialization:
+		#   adultMaleCondition = Query::CompoundCondition.new(
+		#                            maleCondition, 
+		#                            adultCondition )
+		# If you want to change the compound type from its default AND to OR, use 
+		# that as the last argument:
+		#   adultOrMaleCondition = Query::CompoundCondition.new (
+		#                              maleCondition,
+		#                              adultCondition, 
+		#                              Query::CompoundCondition::OR )
 		def initialize(*conditions)
 			if( [ AND, OR ].index(conditions.last) )
 				@compoundType = conditions.last

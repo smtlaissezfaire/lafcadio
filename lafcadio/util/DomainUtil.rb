@@ -1,4 +1,5 @@
 class DomainUtil
+	# Looks for the domain class whose name equals <tt>typeString</tt>.
   def DomainUtil.getObjectTypeFromString(typeString)
 		require 'lafcadio/domain/DomainObject'
 		require 'lafcadio/objectStore/CouldntMatchObjectTypeError'

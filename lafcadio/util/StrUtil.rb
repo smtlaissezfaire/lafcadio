@@ -1,4 +1,6 @@
+# A collection of utilities for dealing with Strings.
 class StrUtil
+	# Returns the number of times that <tt>regexp</tt> occurs in <tt>str</tt>.
 	def StrUtil.countOccurrences(str, regexp)
 		count = 0
 		while str =~ regexp
@@ -8,6 +10,14 @@ class StrUtil
 		count
 	end
 
+	# Returns a string that represents <tt>floatValue</tt> to <tt>precision</tt> 
+	# decimal places, rounding <tt>floatValue</tt> down if necessary. If 
+	# <tt>padDecimals</tt> is set to <tt>false</tt> and <tt>floatValue</tt> rounds 
+	# to a whole number, there will be no decimals shown.
+	#
+	#   StrUtil.floatFormat(24.55, 3)      -> "24.550"
+	#   StrUtil.floatFormat(24.55, 0)      -> "24"
+	#   StrUtil.floatFormat(100, 2, false) -> "100"
   def StrUtil.floatFormat(floatValue, precision, padDecimals = true)
     str = floatValue.floor.to_s
     if precision > 0
@@ -24,10 +34,19 @@ class StrUtil
     str
   end
 
+	# Returns a float <tt>value</tt> formatted to two decimal places and preceded 
+	# by a "$".
 	def StrUtil.moneyFormat(value)
 		"$#{floatFormat value, 2}"
 	end
 
+	# Increments a filename. If the filename ends with a number, it increments 
+	# that number; otherwise it appends a "_1" after the filename but before the 
+	# file extension.
+	#
+	#   StrUtil.incrementFilename("john.jpg")   -> "john_1.jpg"
+	#   StrUtil.incrementFilename("john_1.jpg") -> "john_2.jpg"
+	#   StrUtil.incrementFilename("john_2.jpg") -> "john_3.jpg"
   def StrUtil.incrementFilename(filename)
     extension = filename.split(/\./).last
     filename.sub!(/\..*$/, '')
@@ -41,6 +60,11 @@ class StrUtil
     filename
   end
 
+	# Decapitalizes the first letter of <tt>string</tt>, or decapitalizes the 
+	# entire string if it's all capitals.
+	#
+	#   StrUtil.decapitalize('InternalClient') -> "internalClient"
+	#   StrUtil.decapitalize('SKU')            -> "sku"
 	def StrUtil.decapitalize(string)
 		firstLetter = string[0..0].downcase
 		string = firstLetter + string[1..string.length]
@@ -66,6 +90,12 @@ class StrUtil
 		numericString
 	end
 
+	# Divides <tt>string</tt> into substrings using <tt>regexp</tt> as a 
+	# delimiter, and returns an array containing both the substrings and the 
+	# portions that matched <tt>regexp</tt>.
+	#
+	#   StrUtil.splitKeepInBetweens('theZquickZZbrownZfox', /Z+/) ->
+	#     ['the', 'Z', 'quick', 'ZZ', 'brown', 'Z', 'fox' ]
 	def StrUtil.splitKeepInBetweens(string, regexp)
 		result = []
 		while string =~ regexp
@@ -77,6 +107,10 @@ class StrUtil
 		result
 	end
 	
+	# Breaks <tt>string</tt> into lines no longer than <tt>lineLength</tt>.
+	#
+	#   StrUtil.lineWrap('the quick brown fox jumped over the lazy dog.') ->
+	#     "the quick\nbrown fox\njumped\nover the\nlazy dog."
 	def StrUtil.lineWrap(string, lineLength)
 		words = string.split ' '
 		line = ''

@@ -1,6 +1,7 @@
 require 'lafcadio/query/Condition'
 
 class Query
+	# Tests whether a field value is in a given range of values.
 	class In < Condition
 		def In.searchTermType
 			Array

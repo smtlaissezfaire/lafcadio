@@ -1,6 +1,7 @@
 require 'lafcadio/query/Condition'
 
 class Query
+	# Tests whether a field is equal to a given value.
 	class Equals < Condition
 		def toSql
 			sql = "#{ @fieldName } "

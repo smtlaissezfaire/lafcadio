@@ -1,5 +1,11 @@
 require 'lafcadio/util/Context'
 
+# A ContextualService is a service that is managed by the Context. 
+# ContextualServices are not instantiated normally. Instead, the instance of 
+# such a service may be retrieved by calling the method
+#   < class name >.get< class name >
+#
+# For example: ObjectStore.getObjectStore
 class ContextualService
 	def ContextualService.method_missing(methodId)
 		methodName = methodId.id2name
@@ -10,6 +16,10 @@ class ContextualService
 		end
 	end
 
+	# The passKey needs to be the Context instance, or else this method fails. 
+	# Note that this isn't hard security of any kind; it's simply a gentle 
+	# reminder to users of a ContextualService that the class should not be 
+	# instantiated directly.
 	def initialize(passKey)
 		if passKey.class != Context
 			raise ArgumentError,

@@ -1,6 +1,7 @@
 require 'lafcadio/query/Condition'
 
 class Query
+	# Tests a link field against a given domain object.
 	class Link < Condition
 		def Link.searchTermType
 			DomainObject

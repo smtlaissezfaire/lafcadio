@@ -1,4 +1,6 @@
 class UsStates
+	# Returns a QueueHash of states, with two-letter postal codes as keys and 
+	# state names as values.
 	def UsStates.states
 		require 'lafcadio/util/QueueHash'
 		QueueHash.new( 'AL', 'Alabama', 'AK', 'Alaska', 'AZ', 'Arizona',

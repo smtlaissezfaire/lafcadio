@@ -1,4 +1,7 @@
+# An ordered hash: Keys are ordered according to when they were inserted.
 class QueueHash
+	# Creates a QueueHash with all the elements in <tt>array</tt> as keys, and 
+	# each value initially set to be the same as the corresponding key.
 	def QueueHash.newFromArray(array)
 		valueArray = []
 		array.each { |elt|
@@ -8,6 +11,11 @@ class QueueHash
 		new(*valueArray)
 	end
 
+	# Takes an even number of arguments, and sets each odd-numbered argument to 
+	# correspond to the argument immediately afterward. For example:
+	#   queueHash = QueueHash.new (1, 2, 3, 4)
+	#   queueHash[1] => 2
+	#   queueHash[3] => 4
   def initialize(*values)
     @pairs = []
     0.step(values.size-1, 2) { |i| @pairs << [ values[i], values[i+1] ] }

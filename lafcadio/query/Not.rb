@@ -1,6 +1,7 @@
 require 'lafcadio/query/Condition'
 
 class Query
+	# Returns the opposite of a given condition.
 	class Not < Condition
 		def initialize(unCondition)
 			@unCondition = unCondition

@@ -1,3 +1,4 @@
+# Manages the generation of SQL for one query.
 class Query
 	ASC		= 1
 	DESC 	= 2
@@ -5,6 +6,10 @@ class Query
 	attr_reader :objectType, :condition
 	attr_accessor :orderBy, :orderByOrder, :limit
 
+	# [objectType] The domain class being searched.
+	# [objIdOrCondition] If this is an Integer, it will search for only the object 
+	#                    with that objId. If this is a Condition, it will search 
+	#                    for a collection that matches that condition.
 	def initialize(objectType, objIdOrCondition = nil)
 		@objectType = objectType
 		if objIdOrCondition

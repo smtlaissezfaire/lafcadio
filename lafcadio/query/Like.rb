@@ -1,11 +1,20 @@
 require 'lafcadio/query/Condition'
 
 class Query
+	# Tests whether a string field is like a string value.
 	class Like < Condition
 		PRE_AND_POST	= 1
 		PRE_ONLY			= 2
 		POST_ONLY			= 3
 
+		# [fieldName] The name of the field.
+		# [searchTerm] The string that the field will be compared to.
+		# [objectType] The domain type we're searching for.
+		# [matchType] The type of match we'll accept.
+		#             * PRE_AND_POST: Can have extra characters before or after the             
+		#               string.
+		#             * PRE_ONLY: Can only have extra characters before the string.
+		#             * POST_ONLY: Can only have extra characters after the string.
 		def initialize(
 				fieldName, searchTerm, objectType, matchType = PRE_AND_POST)
 			super fieldName, searchTerm, objectType

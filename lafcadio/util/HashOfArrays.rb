@@ -1,3 +1,4 @@
+# A hash where each value is guaranteed to be an array or nil.
 class HashOfArrays
 	def initialize
 		@values = {}

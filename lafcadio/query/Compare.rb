@@ -1,6 +1,7 @@
 require 'lafcadio/query/Condition'
 
 class Query
+	# Compares numeric fields.
 	class Compare < Condition
 		LESS_THAN							= 1
 		LESS_THAN_OR_EQUAL		= 2
