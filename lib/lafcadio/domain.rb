@@ -436,6 +436,7 @@ module Lafcadio
 			@errorMessages = []
 			@fields = {}
 			@fields_set = []
+			verify if LafcadioConfig.new()['checkFields'] == 'onInstantiate'
 		end
 		
 		# Returns a clone, with all of the fields copied.
@@ -524,6 +525,12 @@ module Lafcadio
 			end
 			@fields[field.name] = value
 			@fields_set << field
+		end
+		
+		def verify
+			self.class.getClassFields.each { |field|
+				field.verify( self.send( field.name ), self.pkId )
+			}
 		end
 	end
 

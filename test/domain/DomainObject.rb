@@ -7,6 +7,11 @@ require '../test/mock/domain/User'
 require '../test/mock/domain/XmlSku2'
 
 class TestDomainObject < LafcadioTestCase
+	def teardown
+		super
+		LafcadioConfig.setValues( nil )
+	end
+
 	def matchField( domainClass, fieldName, fieldClass, attributes = nil )
 		field = domainClass.getClassField( fieldName )
 		assert_not_nil( field )
@@ -36,6 +41,13 @@ class TestDomainObject < LafcadioTestCase
 
 	def testCachesClassFields
 		2.times { MockDomainObject.classFields }
+	end
+
+	def test_checks_fields_on_instantiation
+		LafcadioConfig.setValues( 'checkFields' => 'onInstantiate' )
+		assert_exception( FieldValueError, "Client#name should not be null." ) {
+			Client.new( {} )
+		}
 	end
 	
 	def test_class_fields_from_one_line_class_methods
