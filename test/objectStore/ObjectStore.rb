@@ -325,6 +325,15 @@ class TestObjectStore < LafcadioTestCase
 		end
 	end
 	
+	def test_respond_to?
+		[ :get_client, :get_clients ].each { |meth_id|
+			assert( @testObjectStore.respond_to?( meth_id ) )
+		}
+		[ :get_foo_bar, :foo_bar ].each { |meth_id|
+			assert( !@testObjectStore.respond_to?( meth_id ) )
+		}
+	end
+	
 	def testSelfLinking
 		client1Proxy = DomainObjectProxy.new(Client, 1)
 		client2Proxy = DomainObjectProxy.new(Client, 2)

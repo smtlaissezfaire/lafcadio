@@ -519,6 +519,14 @@ module Lafcadio
 			self.send( dispatch.symbol, *dispatch.args )
 		end
 
+		def respond_to?( symbol, include_private = false )
+			begin
+				dispatch = MethodDispatch.new( symbol )
+			rescue NoMethodError
+				super
+			end
+		end
+		
 		class Cache #:nodoc:
 			def initialize( dbBridge )
 				@dbBridge = dbBridge
@@ -614,10 +622,12 @@ module Lafcadio
 		class MethodDispatch #:nodoc:
 			attr_reader :symbol, :args
 		
-			def initialize( orig_method, maybe_proc, *orig_args )
+			def initialize( orig_method, *other_args )
 				@orig_method = orig_method
-				@maybe_proc = maybe_proc
-				@orig_args = orig_args
+				@orig_args = other_args
+				if @orig_args.size > 0
+					@maybe_proc = @orig_args.shift
+				end
 				@methodName = orig_method.id2name
 				if @methodName =~ /^get(.*)$/
 					dispatch_get_method
