@@ -720,7 +720,7 @@ module Lafcadio
 			else
 				begin
 					field = @objectType.getField( key )
-					field.valueFromSQL( @rowHash[ key ] )
+					field.valueFromSQL( @rowHash[ field.dbFieldName ] )
 				rescue MissingError
 					nil
 				end

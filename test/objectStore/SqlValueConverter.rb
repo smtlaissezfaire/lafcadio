@@ -49,4 +49,10 @@ class TestSqlValueConverter < LafcadioTestCase
 		error_msg = 'The field "pkId" can\'t be found in the table "clients".'
 		assert_exception( FieldMatchError, error_msg ) { object_hash['pkId'] }
 	end
+	
+	def test_different_db_field_name
+		string = "Jane says I'm done with Sergio"
+		svc = SqlValueConverter.new( XmlSku, { 'text_one' => string } )
+		assert_equal( string, svc['text1'] )
+	end
 end

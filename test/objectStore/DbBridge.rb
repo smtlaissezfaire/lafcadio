@@ -35,8 +35,8 @@ class TestDBBridge < RUNIT::TestCase
 			elsif str == 'select max(date) from invoices'
 				[ [ DBI::Date.new( 2001, 4, 5 ) ] ]
 			elsif str == 'select * from some_other_table'
-				[ OneTimeAccessHash.new( 'some_other_id' => '16', 'text1' => 'foobar',
-				                         'link1' => '1' ) ]
+				[ OneTimeAccessHash.new( 'some_other_id' => '16',
+				                         'text_one' => 'foobar', 'link1' => '1' ) ]
 			elsif str == 'select max(some_other_id) from some_other_table'
 				[ [ '5' ] ]
 			else

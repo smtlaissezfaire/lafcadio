@@ -225,6 +225,9 @@ class AccTestEquals < AcceptanceTestCase
 		row.commit
 		cond = Query::Equals.new( 'text2', 'some text', TestRow )
 		assert_equal( 1, @object_store.getSubset( cond ).size )
+		@object_store.flush( row )
+		row_prime = @object_store.getTestRow( 1 )
+		assert_equal( 'some text', row_prime.text2 )
 	end
 end
 
