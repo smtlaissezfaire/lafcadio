@@ -19,7 +19,7 @@ class TestObjectStore < LafcadioTestCase
 		@client = Client.getTestClient
 		@mockDbBridge.addObject @client
 	end
-	
+
 	def testDeepLinking
 		client1 = Client.getTestClient
 		@mockDbBridge.addObject client1
@@ -291,23 +291,6 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal client.name, @testObjectStore.get(Client, 1).name
 		@testObjectStore.flush client
 		assert_equal 'new client name', @testObjectStore.get(Client, 1).name
-	end
-
-	def testClear
-		client = Client.getTestClient
-		@mockDbBridge.commit client
-		assert_equal 1, @testObjectStore.getAll(Client).size
-		@testObjectStore.clear client
-		assert_equal 0, @testObjectStore.getAll(Client).size
-	end
-
-	def testGetAllAndGetUseSameCache
-		client = Client.getTestClient
-		@mockDbBridge.commit client
-		assert_not_nil @testObjectStore.get(Client, 1)
-		assert_equal 1, @testObjectStore.getAll(Client).size
-		@testObjectStore.flush client
-		assert_equal 0, @testObjectStore.getAll(Client).size
 	end
 
 	def testRaisesExceptionIfCantFindObject

@@ -24,6 +24,12 @@ module Lafcadio
 			end
 			@orderByOrder = ASC
 		end
+		
+		def hash; toSql.hash; end
+		
+		def eql?( other )
+			other.class <= Query && other.toSql == toSql
+		end
 
 		def tables
 			tableNames = []

@@ -46,23 +46,6 @@ module Lafcadio
 
 		# Returns the domain object corresponding to the domain class and objId.
 		def get(objectType, objId)
-if false
-			require 'lafcadio/objectStore/DomainObjectNotFoundError'
-			raise "ObjectStore.getObject can't accept nil objId" if objId == nil
-			objId = objId.to_i
-			if objId.class != Fixnum
-				raise "ObjectStore.getObject needs a Fixnum as its objId, " +
-						"objId is #{objId}(#{objId.class})"
-			end
-			unless @cache.get(objectType, objId)
-				query = Query.new objectType, objId
-				dbObject = @dbBridge.getCollectionByQuery(query)[0]
-				@cache.save dbObject if dbObject
-			end
-			(@cache.get(objectType, objId)) ||(raise(DomainObjectNotFoundError,
-					"Can't find #{objectType} #{objId}", caller))
-end
-
 			query = Query.new objectType, objId
 			@cache.getByQuery( query )[0] ||
 			    ( raise( DomainObjectNotFoundError,
