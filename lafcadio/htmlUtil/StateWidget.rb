@@ -1,4 +1,4 @@
-require 'lafcadio/util/USStates'
+require 'lafcadio/util/UsStates'
 require 'lafcadio/html/Select'
 
 class StateWidget
@@ -10,7 +10,7 @@ class StateWidget
 	def toHTML
 		select = HTML::Select.new ({ 'name' => @name })
 		select.selected = @selectedState
-		USStates.states.each { |stateCode, stateName|
+		UsStates.states.each { |stateCode, stateName|
 			select.addOption stateCode, stateName
 		}
 		select.toHTML
