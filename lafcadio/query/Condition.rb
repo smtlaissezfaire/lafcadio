@@ -47,5 +47,10 @@ class Query
 				raise( MissingError, errStr, caller )
 			end
 		end
+		
+		def not
+			require 'lafcadio/query/Not'
+			Query::Not.new( self )
+		end
 	end
 end

@@ -9,18 +9,6 @@ class Query
 		CompoundCondition.new( *conditions)
 	end
 
-	class Inferrer
-		def initialize( domainClass, &action )
-			@domainClass = domainClass; @action = action
-		end
-		
-		def execute
-			impostor = DomainObjectImpostor.new( @domainClass )
-			condition = @action.call( impostor )
-			query = Query.new( @domainClass, condition )
-		end
-	end
-	
 	class DomainObjectImpostor
 		attr_reader :domainClass
 	
@@ -40,6 +28,18 @@ class Query
 					super( methId, *args )
 				end
 			end
+		end
+	end
+	
+	class Inferrer
+		def initialize( domainClass, &action )
+			@domainClass = domainClass; @action = action
+		end
+		
+		def execute
+			impostor = DomainObjectImpostor.new( @domainClass )
+			condition = @action.call( impostor )
+			query = Query.new( @domainClass, condition )
 		end
 	end
 	

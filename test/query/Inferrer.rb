@@ -55,7 +55,7 @@ class TestQueryInferrer < LafcadioTestCase
 								 inv.hours.equals( 10 ) )
 		}
 	end
-	
+
 	def testOr
 		desiredSql = "select * from users " +
 		             "where (email = 'test@test.com' or firstNames = 'John')"
@@ -101,8 +101,8 @@ class TestQueryInferrer < LafcadioTestCase
 	end
 
 	def testNot
-		desired_sql = "select * from invoices where hours != 10"
-		assert_infer_match( desiredSql, Invoice ) { |inv|
+		desired_sql = "select * from invoices where !(hours = 10)"
+		assert_infer_match( desired_sql, Invoice ) { |inv|
 			inv.hours.equals( 10 ).not
 		}
 	end
