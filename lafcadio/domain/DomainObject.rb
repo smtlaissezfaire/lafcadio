@@ -79,6 +79,22 @@ class DomainObject
 		}
 		field
 	end
+	
+	def DomainObject.getField( fieldName )
+		aDomainClass = self
+		field = nil
+		while aDomainClass < DomainObject && !field
+			field = aDomainClass.getClassField( fieldName )
+			aDomainClass = aDomainClass.superclass
+		end
+		if field
+			field
+		else
+			errStr = "Couldn't find field \"#{ field }\" in " +
+							 "#{ self } domain class"
+			raise( MissingError, errStr, caller )
+		end
+	end
 
 	# Returns an array of every other domain class that has a LinkField that
 	# points to this domain class.

@@ -31,24 +31,8 @@ class Query
 			@conditions[0]
 		end
 		
-		def getField( fieldName )
-			aDomainClass = @domainClass
-			field = nil
-			while aDomainClass < DomainObject && !field
-				field = aDomainClass.getClassField( fieldName )
-				aDomainClass = aDomainClass.superclass
-			end
-			if field
-				field
-			else
-				errStr = "Couldn't find field \"#{ @fieldName }\" in " +
-				         "#{ @objectType } domain class"
-				raise( MissingError, errStr, caller )
-			end
-		end
-		
 		def method_missing( methId, *args )
-			classField = getField( methId.id2name )
+			classField = @domainClass.getField( methId.id2name )
 			if !classField.nil?
 				ObjectFieldImpostor.new( self, classField )
 			else
