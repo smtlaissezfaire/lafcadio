@@ -5,8 +5,11 @@ require 'lafcadio/cgi/FieldManager'
 
 class TestFieldManager < LafcadioTestCase
   class MockCGI
-    def initialize(aHash)
+  	attr_reader :query_string
+  
+    def initialize(aHash, queryString = nil)
     	@hash = aHash
+    	@query_string = queryString
     end
 
 		def params
@@ -18,8 +21,8 @@ class TestFieldManager < LafcadioTestCase
 		end
   end
 
-	def fieldManager(aHash)
-		FieldManager.new (MockCGI.new (aHash))
+	def fieldManager(aHash, queryString = nil)
+		FieldManager.new( MockCGI.new( aHash, queryString ) )
 	end
 
   def test_returns_nil
@@ -48,6 +51,8 @@ class TestFieldManager < LafcadioTestCase
   end
 
   class UndumpableCGI < Hash
+  	attr_reader :query_string
+  
     def _dump(aDepth)
       raise "don't dump me"
     end
@@ -119,6 +124,11 @@ class TestFieldManager < LafcadioTestCase
 		dump = fm.dump
 		assert_not_nil dump =~ /a: b\n/, dump
 		assert_not_nil dump =~ /c: d, e\n/, dump
+	end
+	
+	def testStoresQueryString
+		fm = fieldManager({ 'a' => [ '1', '2' ], 'b' => [ '3' ] }, 'a=1&a=2&b=3' )
+		assert_equal( 'a=1&a=2&b=3', fm.queryString )
 	end
 end
 

@@ -3,6 +3,8 @@ require 'date'
 
 # Lafcadio uses FieldManager to wrap and abstract CGI arguments.
 class FieldManager
+	attr_reader :queryString
+
   def initialize(cgi = nil)
 		require 'lafcadio/util/HashOfArrays'
     cgi = CGI.new if cgi == nil
@@ -11,6 +13,7 @@ class FieldManager
 			valueArray = cgi.params[key]
 			@valueHash.set(key, valueArray)
     }
+    @queryString = cgi.query_string if cgi.respond_to?( 'query_string' )
   end
 
 	# Return the value for this key. If the FieldManager contains an array of
