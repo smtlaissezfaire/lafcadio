@@ -1,0 +1,19 @@
+H1 {font-size: xx-large; font-family: sans-serif}
+H2 {font-size: x-large; font-family: sans-serif; font-width: normal}
+H3 {font-size: large; font-family: sans-serif; font-width: normal}
+H4 {font-size: medium; font-family: sans-serif; font-width: normal}
+p {font-family: Verdana, sans-serif}
+HR {
+    height:2px;
+    width:100%;
+    background:#446791;
+   }
+li {font-family: Verdana, sans-serif}
+blockquote {
+	font-family: Verdana, sans-serif; background-color: #dddddd; padding: 0.5em;
+	margin: 1em 0em 0em 0em
+}
+.beta_note {
+	font-family: Verdana, sans-serif; border-style: solid; padding: 0.5em;
+	margin: 1em 0em 0em 0em; border-width: 2px; border-color: #dddddd
+}
