@@ -37,7 +37,9 @@ class TestDBBridge < RUNIT::TestCase
 			elsif str == 'select * from some_other_table'
 				[ OneTimeAccessHash.new( 'some_other_id' => '16', 'text1' => 'foobar',
 				                         'link1' => '1' ) ]
-      else
+			elsif str == 'select max(some_other_id) from some_other_table'
+				[ [ '5' ] ]
+			else
 				[]
       end
     end
@@ -138,6 +140,8 @@ class TestDBBridge < RUNIT::TestCase
 		invoice = Invoice.storedTestInvoice
 		query2 = Query::Max.new( Invoice, 'date' )
 		assert_equal( invoice.date, @dbb.group_query( query2 ).only )
+		query3 = Query::Max.new( XmlSku )
+		assert_equal( 5, @dbb.group_query( query3 ).only )
 	end
 	
 	def testLogsSql

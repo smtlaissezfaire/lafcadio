@@ -20,7 +20,6 @@ module Lafcadio
 
 	require 'lafcadio/dateTime'
 	require 'lafcadio/domain'
-	require 'lafcadio/includer'
 	require 'lafcadio/mock'
 	require 'lafcadio/objectField'
 	require 'lafcadio/objectStore'

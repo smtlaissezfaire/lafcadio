@@ -248,6 +248,9 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 1, @testObjectStore.getMax(Client)
 		Invoice.storedTestInvoice
 		assert_equal( 70, @testObjectStore.getMax( Invoice, 'rate' ) )
+		xml_sku = XmlSku.new( 'pkId' => 25 )
+		xml_sku.commit
+		assert_equal( 25, @testObjectStore.getMax( XmlSku ) )
 	end
 
 	def testGetWithaNonLinkingField	

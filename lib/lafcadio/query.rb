@@ -467,14 +467,21 @@ module Lafcadio
 		class Max < Query #:nodoc:
 			attr_reader :field_name
 		
-			def initialize( objectType, field_name = 'pkId' )
+			def initialize( objectType, field_name = nil )
 				super( objectType )
-				@field_name = field_name
+				if field_name
+					@field_name = field_name
+					@pk = false
+				else
+					@field_name = objectType.sqlPrimaryKeyName
+					@pk = true
+				end
 			end
 		
 			def collect( coll )
+				fn = @pk ? 'pkId': @field_name
 				max = coll.inject( nil ) { |max, d_obj|
-					a_value = d_obj.send( @field_name )
+					a_value = d_obj.send( fn )
 					( max.nil? || a_value > max ) ? a_value : max
 				}
 				[ max ]

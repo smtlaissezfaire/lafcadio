@@ -241,8 +241,7 @@ insert into testdiffpkrows( objId, text_field )
 values( 1, 'sample text' )
 		SQL
 		@dbh.do( sql )
-		testdiffpkrow1 = @object_store.getTestDiffPkRows( 1, 'objId' ).first
-		assert_equal( 'sample text', testdiffpkrow1.text_field )
+		assert_equal( 1, @object_store.getMax( TestDiffPkRow ) )
 	end
 
 	def test_large_result_set

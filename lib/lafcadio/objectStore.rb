@@ -130,7 +130,7 @@ module Lafcadio
 		
 		def group_query( query )
 			executeSelect( query.toSql )[0].collect { |val|
-				if query.field_name != 'pkId'
+				if query.field_name != query.objectType.sqlPrimaryKeyName
 					a_field = query.objectType.getField( query.field_name )
 					a_field.valueFromSQL( val )
 				else
@@ -488,7 +488,7 @@ module Lafcadio
 		# returns the highest +pkId+ in the +clients+ table.
 		#   ObjectStore#getMax( Invoice, "rate" )
 		# will return the highest rate for all invoices.
-		def getMax( domain_class, field_name = 'pkId' )
+		def getMax( domain_class, field_name = nil )
 			@dbBridge.group_query( Query::Max.new( domain_class, field_name ) ).only
 		end
 
