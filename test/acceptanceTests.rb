@@ -88,5 +88,10 @@ apostrophe's
 		@dbh.do( 'insert into testrows( text_field ) values( ? )', text )
 		testrow = @object_store.getTestRow( 1 )
 		testrow.commit
+		text2 = "Por favor, don't just forward the icon through email\n'cause then you won't be able to see 'em through the web interface."
+		@dbh.do( 'insert into testrows( text_field ) values( ? )', text2 )
+		testrow2 = @object_store.getTestRow( 2 )
+		assert_equal( text2, testrow2.text_field )
+		testrow2.commit
 	end
 end

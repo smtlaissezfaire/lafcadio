@@ -31,6 +31,13 @@ class TestTextField < LafcadioTestCase
 									@of.valueForSQL( "// ~  $ #{ backslash * 2 }\n" +
 									                 "some other line\napostrophe's" )
 							  )
+		assert_equal( "'Por favor, don''t just forward the icon through email\n" +
+		              "''cause then you won''t be able to see ''em through the " +
+									"web interface.'",
+									@of.valueForSQL( "Por favor, don't just forward the icon " +
+									                 "through email\n'cause then you won't be " +
+																	 "able to see 'em through the web " +
+																	 "interface." ) )
   end
 
 	def testValueFromCGIMakesBlankIntoNil
