@@ -340,7 +340,16 @@ module Lafcadio
 				if @searchTerm.class <= ObjectField
 					@searchTerm.db_table_and_field_name
 				else
-					field.value_for_sql(@searchTerm).to_s
+					begin
+						field.value_for_sql( @searchTerm ).to_s
+					rescue DomainObjectInitError
+						raise(
+							ArgumentError,
+							"Can't query using an uncommitted domain object as a search " +
+									"term.",
+							caller
+						)
+					end
 				end
 			end
 
@@ -447,31 +456,6 @@ module Lafcadio
 					withWildcards += "%"
 				end
 				"#{ db_field_name } like '#{ withWildcards }'"
-			end
-		end
-
-		class Link < Condition #:nodoc:
-			def initialize( fieldName, searchTerm, domain_class )
-				if searchTerm.pk_id.nil?
-					raise ArgumentError,
-					      "Can't query using an uncommitted domain object as a search term",
-								caller
-				else
-					super( fieldName, searchTerm, domain_class )
-				end
-			end
-		
-			def self.search_term_type
-				DomainObject
-			end
-
-			def object_meets(anObj)
-				value = anObj.send @fieldName
-				value ? value.pk_id == @searchTerm.pk_id : false
-			end
-
-			def to_sql
-				"#{ db_field_name } = #{ @searchTerm.pk_id }"
 			end
 		end
 

@@ -310,9 +310,7 @@ class TestObjectStore < LafcadioTestCase
 	
 	def test_raises_error_with_querying_with_uncommitted_dobj
 		uncommitted = Client.new( {} )
-		assert_raise( ArgumentError,
-		                  "Can't query using an uncommitted domain object as a search term"
-		                ) {
+		assert_raise( ArgumentError ) {
 			@testObjectStore.get_invoices( uncommitted )
 		}
 	end

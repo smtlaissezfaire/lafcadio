@@ -451,12 +451,7 @@ module Lafcadio
 				domain_class_name
 			)
 			fieldName = get_field_name( searchTerm ) unless fieldName
-			if searchTerm.class <= DomainObject
-				cond_class = Query::Link
-			else
-				cond_class = Query::Equals
-			end
-			get_subset( cond_class.new( fieldName, searchTerm, domain_class ) )
+			get_subset( Query::Equals.new( fieldName, searchTerm, domain_class ) )
 		end
 
 		def get_map_match( domain_class, mapped ) #:nodoc:
