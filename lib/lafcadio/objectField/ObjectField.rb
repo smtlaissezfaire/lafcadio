@@ -58,7 +58,7 @@ module Lafcadio
 			English.sentence "Please enter %a %nam.", englishName.downcase
 		end
 
-		def verify(value, objId)
+		def verify(value, pkId)
 			if value.nil? && notNull
 				raise FieldValueError, nullErrorMsg, caller
 			end
@@ -68,14 +68,14 @@ module Lafcadio
 					raise FieldValueError, 
 							"#{name} needs an object of type #{valueType.name}", caller
 				end
-				verifyUniqueness(value, objId) if unique
+				verifyUniqueness(value, pkId) if unique
 			end
 		end
 
-		def verifyUniqueness(value, objId)
+		def verifyUniqueness(value, pkId)
 			inferrer = Query::Inferrer.new( @objectType ) { |domain_obj|
 				Query.And( domain_obj.send( self.name ).equals( value ),
-									 domain_obj.objId.equals( objId ).not )
+									 domain_obj.pkId.equals( pkId ).not )
 			}
 			collisions = ObjectStore.getObjectStore.getSubset( inferrer.execute )
 			if collisions.size > 0
@@ -103,12 +103,12 @@ module Lafcadio
 		end
 
 		def firstTime(fieldManager)
-			objId = fieldManager.getObjId
-			objId == nil
+			pkId = fieldManager.getpkId
+			pkId == nil
 		end
 
-		def prevValue(objId)
-			prevObject = ObjectStore.getObjectStore.get(@objectType, objId)
+		def prevValue(pkId)
+			prevObject = ObjectStore.getObjectStore.get(@objectType, pkId)
 			prevObject.send(name)
 		end
 

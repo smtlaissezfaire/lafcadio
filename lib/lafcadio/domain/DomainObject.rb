@@ -7,17 +7,17 @@ module Lafcadio
 	# of DomainObject.
 	#
 	# By default, Lafcadio assumes that every domain object is indexed by the
-	# field "objId" in the database schema. If you're dealing with a table that 
+	# field "pkId" in the database schema. If you're dealing with a table that 
 	# uses a different field name, override DomainObject.sqlPrimaryKeyName.
 	#
 	# Other fields are defined by overriding DomainObject.classFields. Once those 
 	# fields are defined, every instance of that domain class has standard
 	# accessors for each field.
 	#
-	# When new domain objects are instantiated, they don't have any objId value.
+	# When new domain objects are instantiated, they don't have any pkId value.
 	# Lafcadio distinguishes between objects that already exist in the database 
-	# and objects that have yet to be inserted by testing for a non-nil objId. 
-	# When a new object is committed, its objId is automatically set.
+	# and objects that have yet to be inserted by testing for a non-nil pkId. 
+	# When a new object is committed, its pkId is automatically set.
 	#
 	# Lafcadio assumes that a domain class corresponds to a table whose name is 
 	# the plural of the class name, and whose first letter is lowercase. A User 
@@ -28,7 +28,7 @@ module Lafcadio
 	# Domain classes can inherit from other domain classes; they have all the 
 	# fields of any concrete superclasses plus any new fields defined for 
 	# themselves. Lafcadio assumes that each concrete class has a corresponding 
-	# table, and each table has an objId field that is used to match rows between 
+	# table, and each table has an pkId field that is used to match rows between 
 	# different levels.
 	class DomainObject
 		@@subclassHash = {}
@@ -194,7 +194,7 @@ module Lafcadio
 			end
 		end
 
-		attr_accessor :delete, :errorMessages, :objId, :lastCommit, :fields
+		attr_accessor :delete, :errorMessages, :pkId, :lastCommit, :fields
 		protected :fields
 
 		# fieldHash should contain key-value associations for the different
@@ -205,14 +205,14 @@ module Lafcadio
 		#               'email' => 'john.doe@email.com', 'password' => 'l33t' })
 		#
 		# In normal usage any code you write that creates a domain object will not
-		# define the 'objId' field. The system assumes that a domain object with an
-		# undefined objId has yet to be inserted into the database, and when you
-		# commit the domain object an objId will automatically be assigned.
+		# define the 'pkId' field. The system assumes that a domain object with an
+		# undefined pkId has yet to be inserted into the database, and when you
+		# commit the domain object an pkId will automatically be assigned.
 		#
 		# If you're creating mock objects for unit tests, you can explicitly set 
-		# the objId to represent objects that already exist in the database.
+		# the pkId to represent objects that already exist in the database.
 		def initialize(fieldHash)
-			@objId = fieldHash["objId"] != nil ? fieldHash["objId"].to_i : nil
+			@pkId = fieldHash["pkId"] != nil ? fieldHash["pkId"].to_i : nil
 			@errorMessages = []
 			@fields = {}
 			self.class.allFields.each { |field|
@@ -267,7 +267,7 @@ module Lafcadio
 		# Set the delete value to true if you want this domain object to be deleted
 		# from the database during its next commit.
 		def delete=(value)
-			if value && !objId
+			if value && !pkId
 				raise "No point deleting an object that's not already in the DB"
 			end
 			@delete = value

@@ -8,7 +8,7 @@ module Lafcadio
 	# The DbBridge manages the MySQL connection for the ObjectStore.
 	class DbBridge
 		@@dbh = nil
-		@@lastObjIdInserted = nil
+		@@lastPkIdInserted = nil
 		@@dbName = nil
 		@@connectionClass = DBI
 		
@@ -78,7 +78,7 @@ module Lafcadio
 			if sqlMaker.sqlStatements[0].first =~ /insert/
 				sql = 'select last_insert_id()'
 				result = executeSelect( sql )
-				@@lastObjIdInserted = result[0]['last_insert_id()'].to_i
+				@@lastPkIdInserted = result[0]['last_insert_id()'].to_i
 			end
 		end
 		
@@ -120,15 +120,15 @@ module Lafcadio
 			"dbh:#{dbDump}"
 		end
 		
-		def lastObjIdInserted
-			@@lastObjIdInserted
+		def lastPkIdInserted
+			@@lastPkIdInserted
 		end
 		
 		def getMax(objectType)
 			require 'lafcadio/query'
 			sql = Query::Max.new(objectType).toSql
 			result = executeSelect sql
-			result[0]['max(objId)'].to_i
+			result[0]['max(pkId)'].to_i
 		end
 	end
 end

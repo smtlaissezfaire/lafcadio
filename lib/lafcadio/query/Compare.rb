@@ -44,7 +44,7 @@ module Lafcadio
 
 			def objectMeets(anObj)
 				value = anObj.send @fieldName
-				value = value.objId if value.class <= DomainObject
+				value = value.pkId if value.class <= DomainObject
 				if value
 					@@mockComparators[@compareType].call(value, @searchTerm)
 				else

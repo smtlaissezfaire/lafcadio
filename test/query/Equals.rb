@@ -17,9 +17,9 @@ class TestEquals < LafcadioTestCase
 		assert_equal 'date is null', equals.toSql
 	end
 
-	def testObjId
-		equals = Query::Equals.new('objId', 123, Client)
-		assert_equal 'objId = 123', equals.toSql
+	def testPkId
+		equals = Query::Equals.new('pkId', 123, Client)
+		assert_equal 'pkId = 123', equals.toSql
 	end
 
 	def testSubclass

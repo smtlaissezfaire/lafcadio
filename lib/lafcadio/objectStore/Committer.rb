@@ -21,7 +21,7 @@ module Lafcadio
 		def setCommitType
 			if @dbObject.delete
 				@commitType = DELETE
-			elsif @dbObject.objId
+			elsif @dbObject.pkId
 				@commitType = UPDATE
 			else
 				@commitType = INSERT
@@ -48,8 +48,8 @@ module Lafcadio
 				}
 			end
 			@dbBridge.commit @dbObject
-			unless @dbObject.objId
-				@dbObject.objId = @dbBridge.lastObjIdInserted
+			unless @dbObject.pkId
+				@dbObject.pkId = @dbBridge.lastPkIdInserted
 			end
 			@dbObject.postCommitTrigger
 		end
@@ -57,7 +57,7 @@ module Lafcadio
 		def getLastCommit
 			if @dbObject.delete
 				DomainObject::COMMIT_DELETE
-			elsif @dbObject.objId
+			elsif @dbObject.pkId
 				DomainObject::COMMIT_EDIT
 			else
 				DomainObject::COMMIT_ADD

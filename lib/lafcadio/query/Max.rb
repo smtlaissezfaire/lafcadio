@@ -2,7 +2,7 @@ module Lafcadio
 	class Query
 		class Max < Query
 			def fields
-				"max(objId)"
+				"max(pkId)"
 			end
 		end
 	end

@@ -12,7 +12,7 @@ require 'lafcadio/test/LafcadioTestCase'
 
 class TestInventoryLineItemOption < LafcadioTestCase
 	def TestInventoryLineItemOption.getTestInventoryLineItemOption
-		fieldHash = { 'objId' => 1, 'inventoryLineItem' =>
+		fieldHash = { 'pkId' => 1, 'inventoryLineItem' =>
 											TestInventoryLineItem.getTestInventoryLineItem,
 									'option' => TestOption.getTestOption }
 		InventoryLineItemOption.new fieldHash

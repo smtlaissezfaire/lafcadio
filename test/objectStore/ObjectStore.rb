@@ -24,7 +24,7 @@ class TestObjectStore < LafcadioTestCase
 		client1 = Client.getTestClient
 		@mockDbBridge.addObject client1
 		client1Proxy = DomainObjectProxy.new(Client, 1)
-		client2 = Client.new({ 'objId' => 2, 'name' => 'client 2',
+		client2 = Client.new({ 'pkId' => 2, 'name' => 'client 2',
 				'referringClient' => client1Proxy })
 		@mockDbBridge.addObject client2
 		client2Prime = @testObjectStore.getClient 2
@@ -38,7 +38,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testDeleteClearsCachedValue
-		client = Client.new({ 'objId' => 100, 'name' => 'client 100' })
+		client = Client.new({ 'pkId' => 100, 'name' => 'client 100' })
 		@testObjectStore.commit client
 		assert_equal 1, @testObjectStore.getAll(Client).size
 		client.delete = true
@@ -125,24 +125,24 @@ class TestObjectStore < LafcadioTestCase
 	def testSelfLinking
 		client1Proxy = DomainObjectProxy.new(Client, 1)
 		client2Proxy = DomainObjectProxy.new(Client, 2)
-		client1 = Client.new({ 'objId' => 1, 'name' => 'client 1',
+		client1 = Client.new({ 'pkId' => 1, 'name' => 'client 1',
 														'standard_rate' => 50,
 														'referringClient' => client2Proxy })
 		@mockDbBridge.addObject client1
-		client2 = Client.new({ 'objId' => 2, 'name' => 'client 2',
+		client2 = Client.new({ 'pkId' => 2, 'name' => 'client 2',
 														'standard_rate' => 100,
 														'referringClient' => client1Proxy })
 		@mockDbBridge.addObject client2
 		client1Prime = @testObjectStore.getClient 1
-		assert_equal 2, client1Prime.referringClient.objId
+		assert_equal 2, client1Prime.referringClient.pkId
 		assert_equal 100, client1Prime.referringClient.standard_rate
 	end
 
 	def testUpdateFlushesCache
-		client = Client.new({ 'objId' => 100, 'name' => 'client 100' })
+		client = Client.new({ 'pkId' => 100, 'name' => 'client 100' })
 		@testObjectStore.commit client
 		assert_equal 'client 100', @testObjectStore.get(Client, 100).name
-		clientPrime = Client.new({ 'objId' => 100, 'name' => 'client 100.1' })
+		clientPrime = Client.new({ 'pkId' => 100, 'name' => 'client 100.1' })
 		@testObjectStore.commit clientPrime
 		assert_equal 'client 100.1', @testObjectStore.get(Client, 100).name
 		clientPrime.name = 'client 100.2'
@@ -162,15 +162,15 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testGetObjects
-		@testObjectStore.commit Client.new( { "objId" => 1, "name" => "clientName1" } )
-		@testObjectStore.commit Client.new( { "objId" => 2, "name" => "clientName2" } )
+		@testObjectStore.commit Client.new( { "pkId" => 1, "name" => "clientName1" } )
+		@testObjectStore.commit Client.new( { "pkId" => 2, "name" => "clientName2" } )
 		coll = @testObjectStore.getObjects(Client, [ 1, 2 ])
 		assert_equal 2, coll.size
 		foundOne = false
 		foundTwo = false
 		coll.each { |obj|
-			foundOne = true if obj.objId == 1
-			foundTwo = true if obj.objId == 2
+			foundOne = true if obj.pkId == 1
+			foundTwo = true if obj.pkId == 2
 		}
 		assert foundOne
 		assert foundTwo
@@ -195,9 +195,9 @@ class TestObjectStore < LafcadioTestCase
 	def testGetWithaNonLinkingField	
 		client = Client.getTestClient
 		@testObjectStore.commit client
-		client2 = Client.new({ 'objId' => 2, 'name' => 'client 2' })
+		client2 = Client.new({ 'pkId' => 2, 'name' => 'client 2' })
 		@testObjectStore.commit client2
-		assert_equal 2, @testObjectStore.getClients('client 2', 'name')[0].objId
+		assert_equal 2, @testObjectStore.getClients('client 2', 'name')[0].pkId
 	end
 
 	def testHandlesLinksThroughProxies
@@ -227,15 +227,15 @@ class TestObjectStore < LafcadioTestCase
 	end
 	
 	def test_query_inference
-		client1 = Client.new( 'objId' => 1, 'name' => 'client 1' )
+		client1 = Client.new( 'pkId' => 1, 'name' => 'client 1' )
 		client1.commit
-		client2 = Client.new( 'objId' => 2, 'name' => 'client 2' )
+		client2 = Client.new( 'pkId' => 2, 'name' => 'client 2' )
 		client2.commit
-		client3 = Client.new( 'objId' => 3, 'name' => 'client 3' )
+		client3 = Client.new( 'pkId' => 3, 'name' => 'client 3' )
 		client3.commit
 		coll1 = @testObjectStore.getClients { |client| client.name.equals( 'client 1' ) }
 		assert_equal( 1, coll1.size )
-		assert_equal( 1, coll1[0].objId )
+		assert_equal( 1, coll1[0].pkId )
 		coll2 = @testObjectStore.getClients { |client| client.name.like( /^clie/ ) }
 		assert_equal( 3, coll2.size )
 		coll3 = @testObjectStore.getClients { |client| client.name.like( /^clie/ ).not }

@@ -44,12 +44,12 @@ module Lafcadio
 			}
 			allNameValues = nameValueStrings.join ', '
 			"update #{ objectType.tableName} set #{allNameValues} " +
-					"where #{ objectType.sqlPrimaryKeyName}=#{@obj.objId}"
+					"where #{ objectType.sqlPrimaryKeyName}=#{@obj.pkId}"
 		end
 
 		def deleteSql(objectType)
 			"delete from #{ objectType.tableName} " +
-					"where #{ objectType.sqlPrimaryKeyName }=#{ @obj.objId }"
+					"where #{ objectType.sqlPrimaryKeyName }=#{ @obj.pkId }"
 		end
 
 		def sqlStatements
@@ -59,7 +59,7 @@ module Lafcadio
 			end
 			@obj.class.selfAndConcreteSuperclasses.each { |objectType|
 				@bindValues = []
-				if @obj.objId == nil
+				if @obj.pkId == nil
 					statement = insertSQL(objectType)
 				else
 					if @obj.delete

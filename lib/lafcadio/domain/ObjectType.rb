@@ -52,7 +52,7 @@ module Lafcadio
 			if !@xmlParser.nil? && ( spkn = @xmlParser.sqlPrimaryKeyName )
 				spkn
 			else
-				'objId'
+				'pkId'
 			end
 		end
 

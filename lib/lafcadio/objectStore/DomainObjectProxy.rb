@@ -3,29 +3,29 @@ require 'lafcadio/objectStore/DomainComparable'
 module Lafcadio
 	# The DomainObjectProxy is used when retrieving domain objects that are 
 	# linked to other domain objects with LinkFields. In terms of objectType and 
-	# objId, a DomainObjectProxy instance looks to the outside world like the 
+	# pkId, a DomainObjectProxy instance looks to the outside world like the 
 	# domain object it's supposed to represent. It only retrieves its domain 
 	# object from the database when member data is requested.
 	class DomainObjectProxy
 		include DomainComparable
 
-		attr_accessor :objectType, :objId
+		attr_accessor :objectType, :pkId
 
-		def initialize(objectTypeOrDbObject, objId = nil)
-			if objId
+		def initialize(objectTypeOrDbObject, pkId = nil)
+			if pkId
 				@objectType = objectTypeOrDbObject
-				@objId = objId
+				@pkId = pkId
 			elsif objectTypeOrDbObject.class < DomainObject
 				dbObject = objectTypeOrDbObject
 				@objectType = dbObject.class
-				@objId = dbObject.objId
+				@pkId = dbObject.pkId
 			else
 				raise ArgumentError
 			end
 		end
 
 		def getDbObject
-			Context.instance.getObjectStore.get(@objectType, @objId)
+			Context.instance.getObjectStore.get(@objectType, @pkId)
 		end
 
 		def method_missing(methodId, *args)

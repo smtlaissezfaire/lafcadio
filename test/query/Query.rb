@@ -11,13 +11,13 @@ class TestQuery < LafcadioTestCase
 		assert_equal "select * from lineItems", query.toSql
 	end
 
-	def testOneObjId
+	def testOnePkId
 		query = Query.new SKU, 199
-    assert_equal 'select * from skus where objId = 199', query.toSql
+    assert_equal 'select * from skus where pkId = 199', query.toSql
 	end
 
 	def testByCondition
-		client = Client.new({ 'objId' => 13 })
+		client = Client.new({ 'pkId' => 13 })
 		condition = Query::Equals.new('client', client, Invoice)
 		query = Query.new Invoice, condition
 		assert_equal 'select * from invoices where client = 13', query.toSql
@@ -32,12 +32,12 @@ class TestQuery < LafcadioTestCase
 	def testTableJoinsForInheritance
 		query = Query.new InternalClient, 1
 		assert_equal 'select * from clients, internalClients ' +
-				'where clients.objId = internalClients.objId and ' +
-				'objId = 1', query.toSql
+				'where clients.pkId = internalClients.pkId and ' +
+				'pkId = 1', query.toSql
 		condition = Query::Equals.new('billingType', 'whatever', InternalClient)
 		query2 = Query.new InternalClient, condition
 		assert_equal "select * from clients, internalClients " +
-				"where clients.objId = internalClients.objId and " +
+				"where clients.pkId = internalClients.pkId and " +
 				"billingType = 'whatever'", query2.toSql
 	end
 

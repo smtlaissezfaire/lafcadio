@@ -22,7 +22,7 @@ module Lafcadio
 
 			def objectMeets(anObj)
 				if @fieldName == @objectType.sqlPrimaryKeyName
-					value = anObj.objId
+					value = anObj.pkId
 				else
 					value = anObj.send @fieldName
 				end

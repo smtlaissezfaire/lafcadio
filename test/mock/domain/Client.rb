@@ -8,7 +8,7 @@ class Client < Lafcadio::DomainObject
 	include Lafcadio
 	
   def Client.getTestClient
-    Client.new( { "name" => "clientName1", 'objId' => 1 } )
+    Client.new( { "name" => "clientName1", 'pkId' => 1 } )
   end
 
 	def Client.storedTestClient
@@ -17,15 +17,15 @@ class Client < Lafcadio::DomainObject
 		client
 	end
 
-  def testObjId
-    client = Client.new( { "name" => "clientName1", "objId" => 1 } )
-    assert_equal(1, client.objId)
+  def testPkId
+    client = Client.new( { "name" => "clientName1", "pkId" => 1 } )
+    assert_equal(1, client.pkId)
   end
 
   def testEquality
     dbd = "clientName1"
-    client1 = Client.new( { "name" => dbd, "objId" => 1 } )
-    client2 = Client.new( { "name" => dbd, "objId" => 1 } )
+    client1 = Client.new( { "name" => dbd, "pkId" => 1 } )
+    client2 = Client.new( { "name" => dbd, "pkId" => 1 } )
     assert_equal(client1, client2)
   end
 end

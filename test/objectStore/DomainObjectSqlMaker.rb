@@ -16,15 +16,15 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
     values = { "name" => "ClientName1" }
     client1a = Client.new values
     insertSql = DomainObjectSqlMaker.new(client1a).sqlStatements[0]
-    values["objId"] = 1
+    values["pkId"] = 1
     client1b = Client.new values
     updateSql = DomainObjectSqlMaker.new(client1b).sqlStatements[0][0]
 		assert_match( /update/, updateSql )
-    assert_not_nil updateSql.index("objId")
+    assert_not_nil updateSql.index("pkId")
     client1b.delete = true
     deleteSql = DomainObjectSqlMaker.new(client1b).sqlStatements[0][0]
     assert_not_nil deleteSql.index("delete")
-    assert_not_nil deleteSql.index("objId")
+    assert_not_nil deleteSql.index("pkId")
 		binds = DomainObjectSqlMaker.new(client1b).sqlStatements[0][1]
 		assert_not_nil( binds )
 		assert_equal( 0, binds.size )
@@ -53,18 +53,18 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
   def testCommitSQLWithInvoice
     hash = { "client" => Client.getTestClient, "rate" => 70,
              "date" => Date.new(2001, 4, 5), "hours" => 36.5, 
-						 "invoice_num" => 1, "objId" => 1 }
+						 "invoice_num" => 1, "pkId" => 1 }
     invoice = Invoice.new hash
     updateSQL = DomainObjectSqlMaker.new(invoice).sqlStatements[0]
     assert_not_nil(updateSQL =~ /update invoices/, updateSQL)
-    assert_not_nil(updateSQL =~ /objId=1/, updateSQL)
+    assert_not_nil(updateSQL =~ /pkId=1/, updateSQL)
     invoice.delete = true
     deleteSQL = DomainObjectSqlMaker.new(invoice).sqlStatements[0]
-    assert_not_nil(deleteSQL =~ /delete from invoices where objId=1/)
+    assert_not_nil(deleteSQL =~ /delete from invoices where pkId=1/)
   end
 
 	def testSetsNulls
-		client = Client.new({ 'objId' => 1, 'name' => 'client name',
+		client = Client.new({ 'pkId' => 1, 'name' => 'client name',
 				'referringClient' => nil, 'priorityInvoice' => nil })
 		sqlMaker = DomainObjectSqlMaker.new client
 		sql = sqlMaker.sqlStatements[0]
@@ -73,7 +73,7 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
 	end
 
 	def testInheritanceCommit
-		ic = InternalClient.new({ 'objId' => 1, 'name' => 'client name',
+		ic = InternalClient.new({ 'pkId' => 1, 'name' => 'client name',
 				'billingType' => 'trade' })
 		sqlMaker = DomainObjectSqlMaker.new ic
 		statements = sqlMaker.sqlStatements

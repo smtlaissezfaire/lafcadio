@@ -5,7 +5,7 @@ module Lafcadio
 		def <=>(anOther)
 			if anOther.respond_to?( 'objectType' )
 				if self.objectType == anOther.objectType
-					self.objId <=> anOther.objId
+					self.pkId <=> anOther.pkId
 				else
 					self.objectType.name <=> anOther.objectType.name
 				end
@@ -18,6 +18,6 @@ module Lafcadio
 			self == otherObj
 		end
 
-		def hash; "#{ self.class.name } #{ objId }".hash; end
+		def hash; "#{ self.class.name } #{ pkId }".hash; end
 	end
 end

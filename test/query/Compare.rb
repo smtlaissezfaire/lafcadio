@@ -67,7 +67,7 @@ class TestCompare < LafcadioTestCase
 	def testLessThan
 		condition = Query::Compare.new(
 				User.sqlPrimaryKeyName, 10, User, Query::Compare::LESS_THAN)
-		assert_equal 'objId < 10', condition.toSql
+		assert_equal 'pkId < 10', condition.toSql
 	end
 
 	def testNumericalSearchingOfaLinkField

@@ -5,8 +5,8 @@ module Lafcadio
 	#
 	# There are a few important dynamic method names used by ObjectStore:
 	#
-	# [ObjectStore#get< domain class > (objId)]
-	#   Retrieves one domain object by objId. For example,
+	# [ObjectStore#get< domain class > (pkId)]
+	#   Retrieves one domain object by pkId. For example,
 	#     ObjectStore#getUser (100)
 	#   will return User 100.
 	# [ObjectStore#get< domain class >s (searchTerm, fieldName = nil)]
@@ -44,12 +44,12 @@ module Lafcadio
 			@cache.flush dbObject
 		end
 
-		# Returns the domain object corresponding to the domain class and objId.
-		def get(objectType, objId)
-			query = Query.new objectType, objId
+		# Returns the domain object corresponding to the domain class and pkId.
+		def get(objectType, pkId)
+			query = Query.new objectType, pkId
 			@cache.getByQuery( query )[0] ||
 			    ( raise( DomainObjectNotFoundError,
-					         "Can't find #{objectType} #{objId}", caller ) )
+					         "Can't find #{objectType} #{pkId}", caller ) )
 		end
 
 		# Returns all domain objects for the given domain class.
@@ -106,9 +106,9 @@ module Lafcadio
 		
 		def getMax( domain_class ); @dbBridge.getMax( domain_class ); end
 
-		def getObjects(objectType, objIds)
+		def getObjects(objectType, pkIds)
 			require 'lafcadio/query/In'
-			condition = Query::In.new('objId', objIds, objectType)
+			condition = Query::In.new('pkId', pkIds, objectType)
 			getSubset condition
 		end
 

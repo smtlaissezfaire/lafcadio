@@ -15,8 +15,8 @@ module Lafcadio
 			"Please enter an email address."
 		end
 
-		def verify(value, objId)
-			super(value, objId)
+		def verify(value, pkId)
+			super(value, pkId)
 			if !EmailField.validAddress(value)
 				raise FieldValueError, "Please enter a valid email address.", caller
 			end

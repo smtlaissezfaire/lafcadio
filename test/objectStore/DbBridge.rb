@@ -30,8 +30,8 @@ class TestDBBridge < RUNIT::TestCase
 			logSql( str )
       if str == "select last_insert_id()"
 				[ { 'last_insert_id()' => '12' } ]
-			elsif str == 'select max(objId) from clients'
-				[ { 'max(objId)' => '1' } ]
+			elsif str == 'select max(pkId) from clients'
+				[ { 'max(pkId)' => '1' } ]
       else
 				[]
       end
@@ -52,7 +52,7 @@ class TestDBBridge < RUNIT::TestCase
 		LafcadioConfig.setFilename 'lafcadio/test/testconfig.dat'
     @mockDbh = MockDbh.new
     @dbb = DbBridge.new(@mockDbh)
-    @client = Client.new( {"objId" => 1, "name" => "clientName1"} )
+    @client = Client.new( {"pkId" => 1, "name" => "clientName1"} )
   end
 
   def teardown
@@ -64,7 +64,7 @@ class TestDBBridge < RUNIT::TestCase
   def test_commits_delete
     @client.delete = true
     @dbb.commit(@client)
-    assert_equal("delete from clients where objId=1", @mockDbh.lastSQL)
+    assert_equal("delete from clients where pkId=1", @mockDbh.lastSQL)
   end
 
   def testCommitsEdit
@@ -100,12 +100,12 @@ class TestDBBridge < RUNIT::TestCase
     DbBridge.setConnectionClass( DBI )
   end
 
-  def testLastObjIdInserted
+  def testLastPkIdInserted
     client = Client.new( { "name" => "clientName1" } )
     @dbb.commit client
-    assert_equal 12, @dbb.lastObjIdInserted
+    assert_equal 12, @dbb.lastPkIdInserted
 		dbb2 = DbBridge.new @mockDbh
-    assert_equal 12, dbb2.lastObjIdInserted
+    assert_equal 12, dbb2.lastPkIdInserted
   end
 
 	def testGetAll
@@ -115,7 +115,7 @@ class TestDBBridge < RUNIT::TestCase
 	end
 
 	def testCommitsForInheritedObjects
-		ic = InternalClient.new({ 'objId' => 1, 'name' => 'client name',
+		ic = InternalClient.new({ 'pkId' => 1, 'name' => 'client name',
 				'billingType' => 'trade' })
 		@dbb.commit ic
 		assert_equal 2, @mockDbh.sqlStatements.size

@@ -11,7 +11,7 @@ module Lafcadio
 		def execute
 			require 'lafcadio/objectField/LinkField'
 			objectHash = {}
-			objectHash["objId"] = rowHash[@objectType.sqlPrimaryKeyName].to_i
+			objectHash["pkId"] = rowHash[@objectType.sqlPrimaryKeyName].to_i
 			objectType.selfAndConcreteSuperclasses.each { |anObjectType|
 				anObjectType.classFields.each { |field|
 					key = field.name

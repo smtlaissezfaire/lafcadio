@@ -28,7 +28,7 @@ class TestCompoundCondition < LafcadioTestCase
 				pastExpDate, notExpiredYet, notComplementary)
 		assert_equal "(date >= '2003-01-01' and rate = 10 and " +
 				"hours = 10)", condition.toSql
-		invoice = Invoice.new({ 'objId' => 1, 'date' => Date.new(2003, 1, 1),
+		invoice = Invoice.new({ 'pkId' => 1, 'date' => Date.new(2003, 1, 1),
 				'rate' => 10, 'hours' => 10 })
 		assert condition.objectMeets(invoice)
 		invoice.hours = 10.5

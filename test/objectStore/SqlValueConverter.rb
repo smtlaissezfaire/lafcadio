@@ -25,20 +25,20 @@ class TestSqlValueConverter < LafcadioTestCase
 		assert_nil objectHash['clientId']
 		assert_equal DomainObjectProxy, objectHash['client'].class
 		proxy = objectHash['client']
-		assert_equal 1, proxy.objId
+		assert_equal 1, proxy.pkId
 		assert_equal Client, proxy.objectType
   end
 
-  def testConvertsObjId
-    rowHash = { "objId" => "1", "name" => "clientName1",
+  def testConvertsPkId
+    rowHash = { "pkId" => "1", "name" => "clientName1",
 		"standard_rate" => "70" }
     converter = SqlValueConverter.new(Client, rowHash)
     objectHash = converter.execute
-    assert_equal(Fixnum, objectHash["objId"].class)
+    assert_equal(Fixnum, objectHash["pkId"].class)
   end
 
 	def testInheritanceConstruction
-		rowHash = { 'objId' => '1', 'name' => 'clientName1',
+		rowHash = { 'pkId' => '1', 'name' => 'clientName1',
 				'billingType' => 'trade' }
 		objectHash = SqlValueConverter.new(InternalClient, rowHash).execute
 		assert_equal 'clientName1', objectHash['name']

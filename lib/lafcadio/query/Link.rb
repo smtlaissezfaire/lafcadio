@@ -9,12 +9,12 @@ module Lafcadio
 			end
 
 			def toSql
-				"#{ dbFieldName } = #{ @searchTerm.objId }"
+				"#{ dbFieldName } = #{ @searchTerm.pkId }"
 			end
 
 			def objectMeets(anObj)
 				value = anObj.send @fieldName
-				value ? value.objId == @searchTerm.objId : false
+				value ? value.pkId == @searchTerm.pkId : false
 			end
 		end
 	end

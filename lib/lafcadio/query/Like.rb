@@ -39,7 +39,7 @@ module Lafcadio
 			def objectMeets(anObj)
 				value = anObj.send @fieldName
 				if value.class <= DomainObject || value.class == DomainObjectProxy
-					value = value.objId.to_s
+					value = value.pkId.to_s
 				end
 				if value.class <= Array
 					(value.index(@searchTerm) != nil)

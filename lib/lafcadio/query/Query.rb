@@ -8,18 +8,18 @@ module Lafcadio
 		attr_accessor :orderBy, :orderByOrder, :limit
 
 		# [objectType] The domain class being searched.
-		# [objIdOrCondition] If this is an Integer, it will search for only the 
-		#                    object with that objId. If this is a Condition, it 
+		# [pkIdOrCondition] If this is an Integer, it will search for only the 
+		#                    object with that pkId. If this is a Condition, it 
 		#                    will search for a collection that matches that 
 		#                    condition.
-		def initialize(objectType, objIdOrCondition = nil)
+		def initialize(objectType, pkIdOrCondition = nil)
 			@objectType = objectType
-			if objIdOrCondition
-				if objIdOrCondition.class <= Condition
-					@condition = objIdOrCondition
+			if pkIdOrCondition
+				if pkIdOrCondition.class <= Condition
+					@condition = pkIdOrCondition
 				else
 					@condition = Query::Equals.new(objectType.sqlPrimaryKeyName,
-							objIdOrCondition, objectType)
+							pkIdOrCondition, objectType)
 				end
 			end
 			@orderByOrder = ASC

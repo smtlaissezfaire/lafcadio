@@ -30,7 +30,7 @@ class TestQueryInferrer < LafcadioTestCase
 	
 	def testCompareFieldBelongingToSuperclass
 		desiredSql = "select * from clients, internalClients " +
-		             "where clients.objId = internalClients.objId and " +
+		             "where clients.pkId = internalClients.pkId and " +
                  "standard_rate < 10"
     assert_infer_match( desiredSql, InternalClient ) { |intc|
 			intc.standard_rate.lt( 10 )
@@ -71,9 +71,9 @@ class TestQueryInferrer < LafcadioTestCase
 	end
 	
 	def testIn
-		desiredSql = "select * from invoices where objId in (1, 2, 3)"
+		desiredSql = "select * from invoices where pkId in (1, 2, 3)"
 		assert_infer_match( desiredSql, Invoice ) { |inv|
-			inv.objId.in( 1, 2, 3 )
+			inv.pkId.in( 1, 2, 3 )
 		}
 	end
 	

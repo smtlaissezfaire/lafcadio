@@ -18,13 +18,13 @@ module Lafcadio
 			end
 
 			# Returns a cached domain object, or nil if none is found.
-			def get(objectType, objId)
-				hashByObjectType(objectType)[objId]
+			def get(objectType, pkId)
+				hashByObjectType(objectType)[pkId]
 			end
 
 			# Saves a domain object.
 			def save(dbObject)
-				hashByObjectType(dbObject.objectType)[dbObject.objId] = dbObject
+				hashByObjectType(dbObject.objectType)[dbObject.pkId] = dbObject
 				flush_collection_cache( dbObject.objectType )
 			end
 			
@@ -33,12 +33,12 @@ module Lafcadio
 					newObjects = @dbBridge.getCollectionByQuery(query)
 					newObjects.each { |dbObj| save dbObj }
 					@collections_by_query[query] = newObjects.collect { |dobj|
-						dobj.objId
+						dobj.pkId
 					}
 				end
 				collection = []
-				@collections_by_query[query].each { |objId|
-					dobj = get( query.objectType, objId )
+				@collections_by_query[query].each { |pkId|
+					dobj = get( query.objectType, pkId )
 					collection << dobj if dobj
 				}
 				collection
@@ -51,7 +51,7 @@ module Lafcadio
 
 			# Flushes a domain object.
 			def flush(dbObject)
-				hashByObjectType(dbObject.objectType).delete dbObject.objId
+				hashByObjectType(dbObject.objectType).delete dbObject.pkId
 				flush_collection_cache( dbObject.objectType )
 			end
 			

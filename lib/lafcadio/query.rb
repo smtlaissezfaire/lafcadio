@@ -19,7 +19,7 @@ module Lafcadio
 			
 			def method_missing( methId, *args )
 				fieldName = methId.id2name
-				if fieldName == 'objId'
+				if fieldName == 'pkId'
 					ObjectFieldImpostor.new( self, fieldName )
 				else
 					begin
@@ -55,8 +55,8 @@ module Lafcadio
 		
 			def initialize( domainObjectImpostor, class_field_or_name )
 				@domainObjectImpostor = domainObjectImpostor
-				if class_field_or_name == 'objId'
-					@db_field_name = 'objId'
+				if class_field_or_name == 'pkId'
+					@db_field_name = 'pkId'
 				else
 					@db_field_name = class_field_or_name.dbFieldName
 				end

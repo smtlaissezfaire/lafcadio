@@ -1,6 +1,6 @@
 module Lafcadio
 	class MockDbBridge
-		attr_reader :lastObjIdInserted, :retrievalsByType
+		attr_reader :lastPkIdInserted, :retrievalsByType
 
 		def initialize
 			@objects = {}
@@ -18,17 +18,18 @@ module Lafcadio
 				@objects[dbObject.objectType] = objectsByObjectType
 			end
 			if dbObject.delete
-				objectsByObjectType.delete dbObject.objId
+				objectsByObjectType.delete dbObject.pkId
 			else
-				unless dbObject.objId
-					maxObjId = 0
-					objectsByObjectType.keys.each { |objId|
-						maxObjId = objId if objId > maxObjId
+				object_pkId = dbObject.pkId
+				unless object_pkId
+					maxpkId = 0
+					objectsByObjectType.keys.each { |pkId|
+						maxpkId = pkId if pkId > maxpkId
 					}
-					@lastObjIdInserted = maxObjId + 1
-					dbObject.objId = @lastObjIdInserted
+					@lastPkIdInserted = maxpkId + 1
+					object_pkId = @lastPkIdInserted
 				end
-				objectsByObjectType[dbObject.objId] = dbObject
+				objectsByObjectType[object_pkId] = dbObject
 			end
 		end
 		
@@ -59,8 +60,8 @@ module Lafcadio
 
 		def getMax(objectType)
 			max = nil
-			@objects[objectType].keys.each { |objId|
-				max = objId if !max || objId > max
+			@objects[objectType].keys.each { |pkId|
+				max = pkId if !max || pkId > max
 			}
 			max
 		end

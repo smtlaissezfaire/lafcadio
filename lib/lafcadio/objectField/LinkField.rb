@@ -39,10 +39,10 @@ module Lafcadio
 			require 'lafcadio/objectStore/DomainObjectInitError'
 			if !value
 				"null"
-			elsif value.objId
-				value.objId
+			elsif value.pkId
+				value.pkId
 			else
-				raise( DomainObjectInitError, "Can't commit #{name} without objId", 
+				raise( DomainObjectInitError, "Can't commit #{name} without pkId", 
 				       caller )
 			end
 		end
@@ -52,9 +52,9 @@ module Lafcadio
 			string != nil ? DomainObjectProxy.new(@linkedType, string.to_i) : nil
 		end
 
-		def verify(value, objId)
+		def verify(value, pkId)
 			super
-			if @linkedType != @objectType && objId
+			if @linkedType != @objectType && pkId
 				subsetLinkField = nil
 				@linkedType.classFields.each { |field|
 					if field.class == SubsetLinkField && field.subsetField == @name
@@ -63,10 +63,10 @@ module Lafcadio
 				}
 				if subsetLinkField
 					begin
-						prevObj = ObjectStore.getObjectStore.get(objectType, objId)
+						prevObj = ObjectStore.getObjectStore.get(objectType, pkId)
 						prevObjLinkedTo = prevObj.send(name)
 						possiblyMyObj = prevObjLinkedTo.send(subsetLinkField.name)
-						if possiblyMyObj && possiblyMyObj.objId == objId
+						if possiblyMyObj && possiblyMyObj.pkId == pkId
 							cantChangeMsg = "You can't change that."
 							raise FieldValueError, cantChangeMsg, caller
 						end
