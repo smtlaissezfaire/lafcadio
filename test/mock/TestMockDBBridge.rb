@@ -4,6 +4,7 @@ require 'test/mock/domain/SKU'
 
 class TestMockDBBridge < LafcadioTestCase
   def setup
+  	super
 		@mockDbBridge = MockDbBridge.new
     @client = Client.new( {"objId" => 1, "name" => "clientName1"} )
   end
@@ -17,6 +18,14 @@ class TestMockDBBridge < LafcadioTestCase
     client = Client.new ( { "name" => "clientName1" } )
     @mockDbBridge.commit client
     assert_equal 1, @mockDbBridge.lastObjIdInserted
+    assert_equal 1, client.objId
+		client2 = Client.new ({ 'objId' => 2 })
+		@mockDbBridge.commit client2
+		assert_equal 2, client2.objId
+		client3 = Client.new ({ })
+		@mockDbBridge.commit client3
+		assert_equal 3, @mockDbBridge.lastObjIdInserted
+		assert_equal 3, client3.objId
   end
 
 	def testGetCollectionByQuery

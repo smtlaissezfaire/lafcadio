@@ -22,7 +22,11 @@ class MockDbBridge
 			objectsByObjectType.delete dbObject.objId
 		else
 			unless dbObject.objId
-				@lastObjIdInserted = @lastObjIdInserted ? @lastObjIdInserted + 1 : 1
+				maxObjId = 0
+				objectsByObjectType.keys.each { |objId|
+					maxObjId = objId if objId > maxObjId
+				}
+				@lastObjIdInserted = maxObjId + 1
 				dbObject.objId = @lastObjIdInserted
 			end
 			objectsByObjectType[dbObject.objId] = dbObject
