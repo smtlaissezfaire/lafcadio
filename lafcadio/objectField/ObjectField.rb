@@ -110,10 +110,6 @@ class ObjectField
     string
   end
 
-  def javaScriptFunction
-    nil
-  end
-
 	def <=>(other)
 		if @objectType == other.objectType && name == other.name
 			0
