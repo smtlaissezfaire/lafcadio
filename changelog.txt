@@ -1,5 +1,18 @@
 CHANGELOG
 
+0.3.4 -- December 31 2003
+* Fixed a bug in TextField#valueForSQL where committing a string value with backslashes before a newline caused a problem with apostrophe escaping
+* Fixed a bug where DateField#valueFromSQL needed to handle DBI::Date instead of String because of the move to DBI in 0.3.3
+* Condition#getField raises a useful exception if you enter an invalid fieldName
+* ClassUtil.getClass raises MissingError if it can't find the class
+* Domain classes don't need to live in their own files
+* responsibility for manipulating ClassDefinitionXmlParser moved from DomainObject to ObjectType
+* You can set a different tableName and sqlPrimaryKeyName in the class definition XML
+* added Query::Inferrer, but its interface will change soon so you probably shouldn't use it yet.
+* Renamed DomainObject.getField to DomainObject.getClassField
+* DomainObject.getField will look in itself and superclasses 
+* fixed some tutorial examples
+
 0.3.3 -- November 23 2003
 * ClassDefinitionXmlParser#execute raises an informative error message if you forget to define a field's class.
 * FieldManager captures the query string.
