@@ -509,7 +509,7 @@ module Lafcadio
 		end
 
 		class ObjectFieldImpostor #:nodoc:
-			def ObjectFieldImpostor.comparators
+			def self.comparators
 				{ 
 					'lt' => Compare::LESS_THAN, 'lte' => Compare::LESS_THAN_OR_EQUAL,
 					'gte' => Compare::GREATER_THAN_OR_EQUAL,
@@ -532,13 +532,13 @@ module Lafcadio
 			def method_missing( methId, *args )
 				methodName = methId.id2name
 				if !ObjectFieldImpostor.comparators.keys.index( methodName ).nil?
-					registerCompareCondition( methodName, *args )
+					register_compare_condition( methodName, *args )
 				else
 					super( methId, *args )
 				end
 			end
 			
-			def registerCompareCondition( compareStr, searchTerm)
+			def register_compare_condition( compareStr, searchTerm)
 				compareVal = ObjectFieldImpostor.comparators[compareStr]
 				Compare.new( @db_field_name, searchTerm,
 										 @domainObjectImpostor.domainClass, compareVal )

@@ -14,7 +14,7 @@ module Lafcadio
 			className = fieldElt.attributes['class'].to_s
 			name = fieldElt.attributes['name']
 			begin
-				fieldClass = Class.getClass( 'Lafcadio::' + className )
+				fieldClass = Class.get_class( 'Lafcadio::' + className )
 				register_name( name )
 				field = fieldClass.instantiate_from_xml( @domainClass, fieldElt )
 				set_field_attributes( field, fieldElt )
@@ -630,7 +630,7 @@ module Lafcadio
 				if (!@xmlParser.nil? && table_name = @xmlParser.table_name)
 					table_name
 				else
-					table_name = @object_type.bareName
+					table_name = @object_type.bare_name
 					table_name[0] = table_name[0..0].downcase
 					English.plural table_name
 				end
@@ -640,7 +640,7 @@ module Lafcadio
 		def try_load_xml_parser
 			require 'lafcadio/domain'
 			dirName = LafcadioConfig.new['classDefinitionDir']
-			xmlFileName = @object_type.bareName + '.xml'
+			xmlFileName = @object_type.bare_name + '.xml'
 			xmlPath = File.join( dirName, xmlFileName )
 			xml = ''
 			begin

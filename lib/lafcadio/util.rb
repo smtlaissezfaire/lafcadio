@@ -15,7 +15,7 @@ end
 
 class Class < Module
 	# Given a String, returns a class object by the same name.
-	def self.getClass(className)
+	def self.get_class(className)
 		theClass = nil
 		ObjectSpace.each_object(Class) { |aClass|
 			theClass = aClass if aClass.name == className
@@ -30,7 +30,7 @@ class Class < Module
 	
 	# Returns the name of <tt>aClass</tt> itself, stripping off the names of any 
 	# containing modules or outer classes.
-	def bareName
+	def bare_name
 		name =~ /::/
 		$' || name
 	end
@@ -61,7 +61,7 @@ module Lafcadio
 			@resources = {}
 		end
 		
-		def createInstance( resourceName, service_class ) #:nodoc:
+		def create_instance( resourceName, service_class ) #:nodoc:
 			resourceName = resourceName.underscore_to_camel_case
 			service_class = eval resourceName unless service_class
 			service_class.new self
@@ -72,11 +72,11 @@ module Lafcadio
 			@resources = {}
 		end
 
-		def getResource( resourceName, service_class = nil ) #:nodoc:
+		def get_resource( resourceName, service_class = nil ) #:nodoc:
 			resource = @resources[resourceName.underscore_to_camel_case]
 			unless resource
-				resource = createInstance( resourceName, service_class )
-				setResource resourceName.underscore_to_camel_case, resource
+				resource = create_instance( resourceName, service_class )
+				set_resource resourceName.underscore_to_camel_case, resource
 			end
 			resource
 		end
@@ -84,15 +84,15 @@ module Lafcadio
 		def method_missing(methId, *args) #:nodoc:
 			methodName = methId.id2name
 			if methodName =~ /^get_(.*)$/
-				getResource $1, *args
+				get_resource $1, *args
 			elsif methodName =~ /^set(.*)$/
-				setResource $1.underscore_to_camel_case, args[0]
+				set_resource $1.underscore_to_camel_case, args[0]
 			else
 				super
 			end
 		end	
 		
-		def setResource(resourceName, resource) #:nodoc:
+		def set_resource(resourceName, resource) #:nodoc:
 			@resources[resourceName] = resource
 		end
 	end
@@ -129,9 +129,9 @@ module Lafcadio
 
 	# A collection of English-language specific utility methods.
 	class English
-		# Turns a camel-case string ("camelCaseToEnglish") to plain English ("camel 
+		# Turns a camel-case string ("camel_case_to_english") to plain English ("camel 
 		# case to english"). Each word is decapitalized.
-		def self.camelCaseToEnglish(camelCaseStr)
+		def self.camel_case_to_english(camelCaseStr)
 			words = []
 			nextCapIndex =(camelCaseStr =~ /[A-Z]/)
 			while nextCapIndex != nil
@@ -145,7 +145,7 @@ module Lafcadio
 		end
 
 		# Turns an English language string into camel case.
-		def self.englishToCamelCase(englishStr)
+		def self.english_to_camel_case(englishStr)
 			cc = ""
 			englishStr.split.each { |word|
 				word = word.capitalize unless cc == ''

@@ -4,12 +4,12 @@ require 'lafcadio/util'
 class TestEnglish < LafcadioTestCase
   def testCamelCaseToEnglish
     assert_equal "product category",
-				English.camelCaseToEnglish("productCategory")
+				English.camel_case_to_english("productCategory")
 		assert_equal "product category",
-				English.camelCaseToEnglish("ProductCategory")
+				English.camel_case_to_english("ProductCategory")
 		assert_equal 'catalog order',
-				English.camelCaseToEnglish('catalogOrder')
-		assert_equal 'product', English.camelCaseToEnglish('product')
+				English.camel_case_to_english('catalogOrder')
+		assert_equal 'product', English.camel_case_to_english('product')
   end
 
   def testSentence

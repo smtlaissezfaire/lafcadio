@@ -67,7 +67,7 @@ module Lafcadio
 		end
 
 		def english_name #:nodoc:
-			@english_nameOrNil || English.camelCaseToEnglish(name).capitalize
+			@english_nameOrNil || English.camel_case_to_english(name).capitalize
 		end
 
 		# Returns the name that this field is referenced by in the MySQL table. By 

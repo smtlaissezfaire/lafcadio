@@ -14,7 +14,7 @@ module Lafcadio
 		def definition_terms( field )
 			definitionTerms = []
 			definitionTerms << field.db_field_name
-			definitionTerms << typeClause( field )
+			definitionTerms << type_clause( field )
 			definitionTerms << 'not null' if field.notNull
 			definitionTerms << 'unique' if field.unique
 			definitionTerms.join( ' ' )
@@ -35,7 +35,7 @@ module Lafcadio
 			SQL
 		end
 		
-		def typeClause( field )
+		def type_clause( field )
 			if ( type_clause = @@simple_field_clauses[field.class] )
 				type_clause
 			elsif ( field.class <= EnumField )
