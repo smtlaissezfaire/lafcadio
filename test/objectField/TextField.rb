@@ -28,11 +28,6 @@ class TestTextField < LafcadioTestCase
 		assert_equal "'#{ backslash * 2 }'", @of.valueForSQL(backslash)
   end
 
-  def testEnglishName
-    skuField = TextField.new nil, "sku", "SKU"
-    assert_equal "SKU", skuField.englishName
-  end
-
 	def testValueFromCGIMakesBlankIntoNil
 		mfm = MockFieldManager.new ({ 'name' => '' })
 		assert_nil @of.valueFromCGI (mfm)

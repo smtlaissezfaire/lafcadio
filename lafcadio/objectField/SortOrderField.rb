@@ -37,7 +37,7 @@ class SortOrderField < IntegerField
 	end
 
 	def allRelatedObjects (dbObject)
-		allRelatedObjs = @objectStore.getAll(dbObject.type)
+		allRelatedObjs = ObjectStore.getObjectStore.getAll(dbObject.type)
 		if @sortWithin !=  nil
 			sortWithinFieldName = @sortWithin.name.downcase
 			sortWithinValue = dbObject.send(sortWithinFieldName)

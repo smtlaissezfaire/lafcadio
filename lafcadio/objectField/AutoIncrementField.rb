@@ -13,7 +13,7 @@ class AutoIncrementField < IntegerField
       super value
     else
       highestValue = 0
-      @objectStore.getAll(objectType).each { |obj|
+      ObjectStore.getObjectStore.getAll(objectType).each { |obj|
         aValue = obj.send(name).to_i
         highestValue = aValue if aValue > highestValue
       }

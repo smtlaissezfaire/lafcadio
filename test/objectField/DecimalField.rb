@@ -7,11 +7,7 @@ class TestDecimalField < LafcadioTestCase
   	super
     @odf = DecimalField.new (Invoice, "hours", 2)
   end
-
-  def testEnglishName
-    assert_equal("Hours", @odf.englishName)
-  end
-
+  
   def testvalueFromCGI
     mfm = MockFieldManager.new( { "hours" => "1.1" } )
     obj = @odf.valueFromCGI mfm

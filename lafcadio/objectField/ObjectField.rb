@@ -5,7 +5,7 @@ require 'lafcadio/objectField/FieldValueError'
 class ObjectField
 	include Comparable
 
-  attr_reader :name, :englishName, :defaultFieldName, :objectType
+  attr_reader :name, :defaultFieldName, :objectType
   attr_accessor :notNull, :hideLabel, :writeOnce, :unique, :hideDisplay,
       :default, :dbFieldName, :notUniqueMsg
 
@@ -18,21 +18,16 @@ class ObjectField
   end
 
   def initialize (objectType, name, englishName = nil)
-		require 'lafcadio/objectStore/ObjectStore'
-
     @objectType = objectType
     @name = name
-		@dbFieldName = @name
-		if englishName == nil
-			@englishName = EnglishUtil.camelCaseToEnglish(name).capitalize
-		else
-			@englishName = englishName
-		end
+    @dbFieldName = name
     @notNull = true
-    @hideLabel = false
     @unique = false
     @default = nil
-    @objectStore = ObjectStore.getObjectStore
+  end
+  
+  def englishName
+		EnglishUtil.camelCaseToEnglish(name).capitalize
   end
 
   def nullErrorMsg
@@ -54,7 +49,7 @@ class ObjectField
   end
 
   def verifyUniqueness (value, objId)
-    collection = @objectStore.getAll(@objectType)
+    collection = ObjectStore.getObjectStore.getAll(@objectType)
     collisions = collection.filterObjects(self.name, value)
     collisions = collisions.removeObjects("objId", objId)
     if collisions.size > 0
@@ -82,7 +77,7 @@ class ObjectField
   end
 
   def prevValue(objId)
-    prevObject = @objectStore.get(@objectType, objId)
+    prevObject = ObjectStore.getObjectStore.get(@objectType, objId)
     prevObject.send(name)
   end
 

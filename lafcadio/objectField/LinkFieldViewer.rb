@@ -11,7 +11,7 @@ class LinkFieldViewer < FieldViewer
     if @field.listener != nil
       functionName = getBroadcastJavaScriptFunctionName
       ifElseTree = HTML::JSIfElseTree.new
-      @field.objectStore.getAll(@field.linkedType).each { |object|
+      ObjectStore.getObjectStore.getAll(@field.linkedType).each { |object|
         condition = "triggerValue == #{object.objId}"
         defaultValue = object.send(@field.listener.defaultFieldName)
         statement = "setValue = #{defaultValue}"
@@ -32,7 +32,7 @@ class LinkFieldViewer < FieldViewer
   end
 
   def optionObjs
-		optionObjs = @field.objectStore.getAll(@field.linkedType)
+		optionObjs = ObjectStore.getObjectStore.getAll(@field.linkedType)
 		if @field.linkedType == @field.objectType
 			optionObjs = optionObjs.removeObjects("objId", @objId)
 		end

@@ -36,7 +36,7 @@ class LinkField < ObjectField
   def valueFromCGI (fieldManager)
     objId = fieldManager.getInt(name)
 		if objId != nil
-	    @objectStore.get(@linkedType, objId)
+	    ObjectStore.getObjectStore.get(@linkedType, objId)
 		else
 			nil
 		end
@@ -62,7 +62,7 @@ class LinkField < ObjectField
 			}
 			if subsetLinkField
 				begin
-					prevObj = @objectStore.get(objectType, objId)
+					prevObj = ObjectStore.getObjectStore.get(objectType, objId)
 					prevObjLinkedTo = prevObj.send(name)
 					possiblyMyObj = prevObjLinkedTo.send(subsetLinkField.name)
 					if possiblyMyObj && possiblyMyObj.objId == objId

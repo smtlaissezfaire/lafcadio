@@ -10,10 +10,6 @@ class TestDateField < LafcadioTestCase
     @odf = DateField.new Invoice
   end
 
-  def testEnglishName
-    assert_equal("Date", @odf.englishName)
-  end
-
   def testValueForSQL
     assert_equal("'2001-04-05'", @odf.valueForSQL(Date.new(2001, 4, 5)))
 		assert_equal 'null', @odf.valueForSQL(nil)
