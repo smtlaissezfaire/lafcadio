@@ -45,4 +45,11 @@ class TestGMockObjectStore < LafcadioTestCase
 		@mockObjectStore.commit user
 		assert_equal 0, @mockObjectStore.getAll(User).size
 	end
+	
+	def testRespectsLimit
+		10.times { User.new({ 'firstNames' => 'John' }).commit }
+		query = Query.new( User, Query::Equals.new( 'firstNames', 'John', User ) )
+		query.limit = (1..5)
+		assert_equal( 5, @mockObjectStore.getSubset( query ).size )
+	end
 end

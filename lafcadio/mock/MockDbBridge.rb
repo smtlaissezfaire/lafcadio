@@ -56,7 +56,11 @@ class MockDbBridge
 				true
 			end
 		}
-		collection objectType, objects
+		coll = collection( objectType, objects )
+		if (range = query.limit)
+			coll = coll[0..(range.last - range.first)]
+		end
+		coll
 	end
 
 	def getMax(objectType)
