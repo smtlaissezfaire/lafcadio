@@ -1,7 +1,6 @@
 require 'lafcadio/test'
 require '../test/mock/domain'
 require 'lafcadio/objectStore'
-require '../test/mock/domain/User'
 
 class TestDomainObjectSqlMaker < LafcadioTestCase
   def testFieldNamesForSQL

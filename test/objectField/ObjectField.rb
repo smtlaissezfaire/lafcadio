@@ -1,6 +1,5 @@
 require 'lafcadio/test'
 require '../test/mock/domain'
-require '../test/mock/domain/User'
 
 class TestObjectField < LafcadioTestCase
 	def setup

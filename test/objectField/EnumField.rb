@@ -1,6 +1,6 @@
 require 'lafcadio/objectField'
 require 'lafcadio/test'
-require '../test/mock/domain/User'
+require '../test/mock/domain'
 
 class TestEnumField < LafcadioTestCase
 	def TestEnumField.getTestEnumField

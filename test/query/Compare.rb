@@ -2,7 +2,6 @@ require 'lafcadio/test'
 require 'date'
 require 'lafcadio/query'
 require '../test/mock/domain'
-require '../test/mock/domain/User'
 
 class TestCompare < LafcadioTestCase
 	def testComparators

@@ -1,6 +1,6 @@
 require 'lafcadio/domain'
 require 'lafcadio/objectField'
-require '../test/mock/domain/User'
+require '../test/mock/domain'
 
 class XmlSku2 < Lafcadio::DomainObject
 	boolean    'boolean1',

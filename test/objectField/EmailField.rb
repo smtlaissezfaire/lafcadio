@@ -1,5 +1,5 @@
 require 'lafcadio/test'
-require '../test/mock/domain/User'
+require '../test/mock/domain'
 
 class TestEmailField < LafcadioTestCase
   def testVerify

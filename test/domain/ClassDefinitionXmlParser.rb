@@ -21,7 +21,6 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 
 	def testClassFieldsFromXml
 		require 'lafcadio/objectField'
-		require '../test/mock/domain/User'
 		matchField( XmlSku, 'boolean1', BooleanField,
 		            { 'enum_type' => BooleanField::ENUMS_CAPITAL_YES_NO } )
 		matchField( XmlSku, 'boolean2', BooleanField,

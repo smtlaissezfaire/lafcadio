@@ -1,5 +1,4 @@
 require '../test/mock/domain'
-require '../test/mock/domain/User'
 require 'lafcadio/test'
 require 'lafcadio/objectStore'
 require 'dbi'

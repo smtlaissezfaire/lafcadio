@@ -1,7 +1,6 @@
 require 'lafcadio/test'
 require 'lafcadio/query'
 require 'date'
-require '../test/mock/domain/User'
 require '../test/mock/domain'
 
 class TestCompoundCondition < LafcadioTestCase
