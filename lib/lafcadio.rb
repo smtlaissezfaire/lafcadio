@@ -16,7 +16,7 @@
 # http://lafcadio.rubyforge.org/tutorial.html.
 
 module Lafcadio
-	Version = "0.7.1"
+	Version = "0.7.2"
 
 	require 'lafcadio/dateTime'
 	require 'lafcadio/depend'

@@ -1,5 +1,36 @@
 CHANGELOG
 
+0.7.2 -- February 26 2005
+* WARNING: changed DomainObject one-line directive from
+  "link field_name { 'linked_type' => linked_type }" to
+  "link linked_type, [ field_name ], [{ other_args }]"
+* WARNING: changed dynamic methods like Client.get_invoices to Client.invoices
+* Added DomainObject.all, .last, .first, .only, .[]
+* LafcadioTestCase uses LafcadioConfig.set_values instead of
+  LafcadioConfig.set_filename
+* DomainObject.table_name defaults to underscored version of class name, not
+  camel-case
+* children of ContextualService can be instantiated with parameters, and they 
+  will be cached based on those parameters
+* DomainObject will only do field verification if you're using the
+  MockObjectStore; this is far more useful for testing than for live code
+* If you're creating a DomainObject, and the hash has a key that doesn't
+  correspond to a field, it'll raise an error
+* Added DomainObject.get( pk_id ) and DomainObject.get { |dobj| ... }
+* You can define a domain class' field name with a Symbol or a String
+* DomainObject.method_missing raises the normal error
+* When you call ObjectStore#get_<dobj>( linked_dobj ), it looks for a link
+  field that matches the domain class type, so you don't have to explicitly
+  enter the field name
+* 'domainFiles' in LafcadioConfig can be a String or an Array
+* ContextualService is more restrictive about accepting methods starting with
+  'get_' or 'set_'
+* Fixed MapObject.get_class_fields
+* Fixed bug with boolean query inference in Query.And or Query.Or
+* Fixed a bug where the MockObjectStore was incorrectly handling a query with
+  both a limit and an order_by
+* MockObjectStore#get_all will automatically order results by pk_id
+
 0.7.1 -- January 27 2005
 * LinkField sets the name to the underscored version of the domain class
 * ObjectStore#get_< plural domain class >( search_term ) knows to look up a link
