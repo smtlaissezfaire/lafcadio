@@ -3,7 +3,7 @@
 #                                                                              #
 #  Name: install.rb                                                            #
 #  Author: Sean E Russell <ser@germane-software.com>                           #
-#  Version: $Id: install.rb,v 1.3 2003/10/17 23:41:49 francis Exp $
+#  Version: $Id: install.rb,v 1.4 2004/03/22 04:44:53 francis Exp $
 #  Date: *2002-174                                                             #
 #  Description:                                                                #
 #    This is a generic installation script for pure ruby sources.  Features    #
@@ -39,6 +39,7 @@ if $0 == __FILE__
 	
 	destdir = File.join Config::CONFIG['sitedir'], 
 		"#{Config::CONFIG['MAJOR']}.#{Config::CONFIG['MINOR']}"
+	bindir = '/usr/local/bin'
 	
 	uninstall = false
 	append = nil
@@ -71,7 +72,7 @@ if $0 == __FILE__
 	
 	destdir = File.join append, destdir if append
 	
-	def install destdir
+	def install destdir, bindir
 		puts "Installing in #{destdir}"
 		begin
 			Find.find(SRC) { |file|
@@ -87,12 +88,12 @@ if $0 == __FILE__
 		rescue
 			puts $!
 		end
-		puts "Installing binaries in #{ Config::CONFIG['bindir'] }"
+		puts "Installing binaries in #{ bindir }"
 		begin
 			Dir.entries( BIN ).each { |entry|
 				src = File.join( BIN, entry )
 				next unless FileTest.executable?( src ) && !FileTest.directory?( src )
-				dst = File.join( Config::CONFIG['bindir'], entry )
+				dst = File.join( bindir, entry )
 				if defined? NOOP
 					puts ">> #{ dst }"
 				else
@@ -104,7 +105,7 @@ if $0 == __FILE__
 		end
 	end
 	
-	def uninstall destdir
+	def uninstall destdir, bindir
 		puts "Uninstalling in #{destdir}"
 		begin
 			puts "Deleting:"
@@ -129,12 +130,12 @@ if $0 == __FILE__
 			}
 		rescue
 		end
-		puts "Uninstalling binaries in #{ Config::CONFIG['bindir'] }"
+		puts "Uninstalling binaries in #{ bindir }"
 		begin
 			Dir.entries( BIN ).each { |entry|
 				orig = File.join( BIN, entry )
 				next unless FileTest.executable?( orig ) && !FileTest.directory?( orig )
-				to_uninstall = File.join( Config::CONFIG['bindir'], entry )
+				to_uninstall = File.join( bindir, entry )
 				if defined? NOOP
 					puts "-- #{to_uninstall}" if File.file? to_uninstall
 				else
@@ -146,8 +147,8 @@ if $0 == __FILE__
 	end
 	
 	if uninstall
-		uninstall destdir
+		uninstall destdir, bindir
 	else
-		install destdir
+		install destdir, bindir
 	end
 end
