@@ -1,4 +1,4 @@
-require 'lafcadio/objectStore/DomainComparable'
+require 'lafcadio/domain'
 
 module Lafcadio
 	# The DomainObjectProxy is used when retrieving domain objects that are 
