@@ -61,7 +61,7 @@ class ObjectType
 		else
 			tableName = @objectType.bareName
 			tableName[0] = tableName[0..0].downcase
-			EnglishUtil.plural tableName
+			English.plural tableName
 		end
 	end
 end

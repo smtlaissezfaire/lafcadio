@@ -65,10 +65,10 @@ class Collector
 	end
 
 	def method_missing(methodId, searchTerm = nil, fieldName = nil)
-		require 'lafcadio/util/EnglishUtil'
+		require 'lafcadio/util/English'
 		methodName = methodId.id2name
 		if methodName =~ /^get(.*)$/
-			objectTypeName = EnglishUtil.singular($1)
+			objectTypeName = English.singular($1)
 			if block_given?
 				dispatch_get_method( objectTypeName, searchTerm, fieldName ) { |obj|
 					yield( obj )

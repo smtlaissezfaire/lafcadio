@@ -1,4 +1,4 @@
-require 'lafcadio/util/EnglishUtil'
+require 'lafcadio/util/English'
 require 'lafcadio/objectField/FieldValueError'
 
 class ObjectField
@@ -42,11 +42,11 @@ class ObjectField
   end
   
   def englishName
-		@englishNameOrNil || EnglishUtil.camelCaseToEnglish(name).capitalize
+		@englishNameOrNil || English.camelCaseToEnglish(name).capitalize
   end
 
   def nullErrorMsg
-		EnglishUtil.sentence "Please enter %a %nam.", englishName.downcase
+		English.sentence "Please enter %a %nam.", englishName.downcase
   end
 
   def verify(value, objId)

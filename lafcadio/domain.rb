@@ -32,7 +32,7 @@ class ClassDefinitionXmlParser
 		
 		def valueFromElt( elt )
 			hash = {}
-			elt.elements.each( EnglishUtil.singular( @name ) ) { |subElt|
+			elt.elements.each( English.singular( @name ) ) { |subElt|
 				key = subElt.attributes['key'] == 'true'
 				value = subElt.text.to_s
 				hash[key] = value

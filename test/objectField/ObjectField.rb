@@ -79,7 +79,7 @@ class TestObjectField < LafcadioTestCase
 			@name = name
 			@dbFieldName = @name
 			if englishName == nil
-				@englishName = EnglishUtil.camelCaseToEnglish(name).capitalize
+				@englishName = English.camelCaseToEnglish(name).capitalize
 			else
 				@englishName = englishName
 			end
