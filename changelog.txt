@@ -1,5 +1,11 @@
 CHANGELOG
 
+0.7.0 -- January 20 2005
+* fixed bug where requiring lafcadio would cause an empty test case to run
+* MockObjectStore raises an error if you try to commit a domain object with a
+  non-Integer pk_id
+* ObjectStore::Cache knows when one query implies another
+
 0.6.0 -- January 2 2005
 * WARNING: Removed AutoIncrementField, MockSession, MoneyField, PasswordField,
   Query::Link
