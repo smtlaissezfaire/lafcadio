@@ -10,7 +10,7 @@ class TestDbObjectCommitter < LafcadioTestCase
 		context = Context.instance
 		context.flush
 		@mockDBBridge = MockDbBridge.new
-		@testObjectStore = ObjectStore.new context, @mockDBBridge
+		@testObjectStore = ObjectStore.new( @mockDBBridge )
     context.set_object_store @testObjectStore
 	end
 	

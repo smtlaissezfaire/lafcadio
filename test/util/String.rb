@@ -42,4 +42,8 @@ class TestString < RUNIT::TestCase
 	def test_underscore_to_camel_case
 		assert_equal( 'ObjectStore', 'object_store'.underscore_to_camel_case )
 	end
+	
+	def test_camel_case_to_underscore
+		assert_equal( 'object_store', 'ObjectStore'.camel_case_to_underscore )
+	end
 end

@@ -16,14 +16,14 @@ class TestContext < RUNIT::TestCase
 	def testSetterAndGetter
 		context1 = Context.instance
 		context2 = Context.instance
-		mockObjectStore = MockObjectStore.new context1
-		context1.set_object_store mockObjectStore
+		context1.set_init_proc( ObjectStore, proc { MockObjectStore.new } )
+		mockObjectStore = context1.get_object_store
 		assert_equal mockObjectStore, context2.get_object_store
 	end
 	
 	def testCreatesStandardInstances
 		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
-		objectStore = Context.instance.get_object_store
+		objectStore = ObjectStore.get_object_store
 		assert_equal ObjectStore, objectStore.class
 	end
 end

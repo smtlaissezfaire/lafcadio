@@ -82,8 +82,8 @@ module Lafcadio
 	class MockObjectStore < ObjectStore
 		public_class_method :new
 
-		def initialize(context) # :nodoc:
-			super(context, MockDbBridge.new)
+		def initialize # :nodoc:
+			super( MockDbBridge.new )
 		end
 	end
 end

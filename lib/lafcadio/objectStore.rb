@@ -171,8 +171,7 @@ module Lafcadio
 
 		def self.set_dbh( dbh ); @@dbh = dbh; end
 		
-		def initialize( pass_key )
-			super
+		def initialize
 			@@dbh = load_new_dbh if @@dbh.nil?
 			@dbh = @@dbh
 		end
@@ -411,8 +410,7 @@ module Lafcadio
 			DbConnection.set_db_name dbName
 		end
 		
-		def initialize(context, dbBridge = nil) #:nodoc:
-			super context
+		def initialize( dbBridge = nil ) #:nodoc:
 			@dbBridge = dbBridge == nil ? DbBridge.new : dbBridge
 			@cache = ObjectStore::Cache.new( @dbBridge )
 		end

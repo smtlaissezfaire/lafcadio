@@ -10,7 +10,7 @@ class LafcadioTestCase < RUNIT::TestCase
   def setup
   	context = Context.instance
   	context.flush
-    @mockObjectStore = MockObjectStore.new context
+    @mockObjectStore = MockObjectStore.new
 		context.set_object_store @mockObjectStore
 		LafcadioConfig.set_filename 'lafcadio/test/testConfig.dat'
   end

@@ -234,7 +234,7 @@ end
 class AccTestObjectStore < AcceptanceTestCase
 	def test_diff_pk
 		mock = TestDiffPkRow.new( 'pk_id' => 1, 'text_field' => 'sample text' )
-		mock_object_store = MockObjectStore.new( Context.instance )
+		mock_object_store = MockObjectStore.new
 		mock_object_store.commit( mock )
 		testdiffpkrow1_prime = mock_object_store.getTestDiffPkRows( 1,
 		                                                            'objId' ).first

@@ -59,12 +59,17 @@ module Lafcadio
 
 		def initialize
 			@resources = {}
+			@init_procs = {}
 		end
 		
 		def create_instance( resourceName, service_class ) #:nodoc:
-			resourceName = resourceName.underscore_to_camel_case
-			service_class = eval resourceName unless service_class
-			service_class.new self
+			if ( proc = @init_procs[service_class] )
+				proc.call
+			else
+				resourceName = resourceName.underscore_to_camel_case
+				service_class = eval resourceName unless service_class
+				service_class.new
+			end
 		end
 		
 		# Flushes all cached ContextualServices.
@@ -90,7 +95,11 @@ module Lafcadio
 			else
 				super
 			end
-		end	
+		end
+		
+		def set_init_proc( service_class, proc )
+			@init_procs[service_class] = proc
+		end
 		
 		def set_resource(resourceName, resource) #:nodoc:
 			@resources[resourceName] = resource
@@ -113,16 +122,22 @@ module Lafcadio
 			end
 		end
 
+		def self.set_init_proc
+			proc = proc { yield }
+			Context.instance.set_init_proc( self, proc )
+		end
+
 		# The +passKey+ needs to be the Context instance, or else this method fails. 
 		# Note that this isn't hard security of any kind; it's simply a gentle 
 		# reminder to users of a ContextualService that the class should not be 
 		# instantiated directly.
-		def initialize(passKey)
-			if passKey.class != Context
+		def initialize
+			regexp = %r{lafcadio/util\.rb.*create_instance}
+			unless caller.any? { |line| line =~ regexp }
 				raise ArgumentError,
-						  "#{ self.class.name.to_s } should only be instantiated by a " +
-							  "Context",
-						  caller
+				"#{ self.class.name.to_s } should be instantiated by calling " +
+				    self.class.name.to_s + ".get_" + self.class.name.camel_case_to_underscore,
+				caller
 			end
 		end
 	end
@@ -370,6 +385,11 @@ class Numeric
 end
 
 class String
+	# Returns the underscored version of a camel-case string.
+	def camel_case_to_underscore
+		( gsub( /(.)([A-Z])/ ) { $1 + '_' + $2.downcase } ).downcase
+	end
+
 	# Returns the number of times that <tt>regexp</tt> occurs in the string.
 	def count_occurrences(regexp)
 		count = 0
