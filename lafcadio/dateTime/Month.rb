@@ -13,7 +13,13 @@ class Month
 
 	attr_reader :month, :year
 
-	def initialize(month, year)
+	def initialize( month = nil, year = nil )
+		require 'date'
+		if month.nil? || year.nil?
+			date = Date.today
+			month = date.mon unless month
+			year = date.year unless year
+		end
 		fail "invalid month" if month < 1 || month > 12
 		@month = month
 		@year = year

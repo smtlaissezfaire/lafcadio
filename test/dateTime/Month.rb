@@ -36,4 +36,11 @@ class TestMonth < LafcadioTestCase
 		normalHash[@jan2000] = 'q'
 		assert_equal 'q', normalHash[newJan2000]
 	end
+	
+	def testDefaultInitToCurrentMonth
+		month = Month.new
+		date = Date.today
+		assert_equal( date.mon, month.month )
+		assert_equal( date.year, month.year )
+	end
 end
