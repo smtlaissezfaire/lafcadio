@@ -1,5 +1,21 @@
 CHANGELOG
 
+0.5.1 -- October 5 2004
+* WARNING: Moved class files into submodule files. This will only affect you if for some reason you included files like "lafcadio/domain/DomainObject" directly instead of just including "lafcadio"
+* BooleanField#toSql handles '1'/'0' enum properly
+* fixed bug with Query with a limit
+* fixed bug where ObjectStore#getMax( domain_class ) failed with a domain class with a non-standard pk
+* fixed bug where SqlValueConverter wasn't converting over a field if it had a non-default dbFieldName
+* fixed bug with lafcadio_schema output
+* you can now set "checkFields" in your LafcadioConfig to "onAllStates", "onCommit", or "onInstantiate" to verify field values
+* Update gem to include installing lafcadio_schema as an executable
+* DomainObject#to_s is now a valid method
+* ContextualService can handle a child that's an inner class, like ObjectStore::DbConnection
+* When you run a query keyed on a domain object not committed, it raises an error
+* You can use comparison to query against a link, whether or not such an index actually dereferences to a row in the other table
+* ObjectStore#commit returns the object that was just committed
+* Removed MockObjectStore#addObject and MockDbBridge#addObject
+
 0.5.0 -- September 5 2004
 * ObjectStore raises an informative error if a domain class' primary key is defined incorrectly
 * instead of using an external config file, you can set LafcadioConfig's values using LafcadioConfig.setValues
