@@ -246,7 +246,7 @@ class XmlSku2 < Lafcadio::DomainObject
 	           { 'enums' => { true => 'yin', false => 'yang' },
 		           'english_name' => 'boolean 2' }
 	date       'date1', { 'not_null' => false }
-	date       'date2', { 'range' => Lafcadio::DateField::RANGE_PAST }
+	date       'date2'
 	dateTime   'dateTime1'
 	decimal    'decimal1', { 'precision' => 4, 'english_name' => 'decimal 1' }
 	email      'email1'

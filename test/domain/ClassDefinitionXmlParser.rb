@@ -25,8 +25,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		matchField( XmlSku, 'boolean2', BooleanField,
 		            { 'enums' => { true => 'yin', false => 'yang' } } )
 		matchField( XmlSku, 'date1', DateField, { 'not_null' => false } )
-		matchField( XmlSku, 'date2', DateField,
-		            { 'range' => DateField::RANGE_PAST } )
+		matchField( XmlSku, 'date2', DateField )
 		matchField( XmlSku, 'dateTime1', DateTimeField )
 		matchField( XmlSku, 'decimal1', DecimalField )
 		matchField( XmlSku, 'email1', EmailField )

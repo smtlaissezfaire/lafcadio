@@ -223,18 +223,12 @@ module Lafcadio
 
 	# DateField represents a Date.
 	class DateField < ObjectField
-		RANGE_NEAR_FUTURE = 0
-		RANGE_PAST = 1
-
 		def self.value_type # :nodoc:
 			Date
 		end
 
-		attr_accessor :range
-
 		def initialize( object_type, name = "date" )
 			super( object_type, name )
-			@range = RANGE_NEAR_FUTURE
 		end
 
 		def value_for_sql(value) # :nodoc:
