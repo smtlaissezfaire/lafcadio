@@ -339,7 +339,7 @@ module Lafcadio
 			end
 		end
 
-		def self.getObjectTypeFromString(typeString) #:nodoc:
+		def self.get_object_type_from_string(typeString) #:nodoc:
 			objectType = nil
 			requireDomainFile( typeString )
 			subclasses.each { |subclass|
@@ -357,11 +357,11 @@ module Lafcadio
 			@@subclassHash[subclass] = true
 		end
 		
-		def self.isBasedOn? #:nodoc:
-		  self.superclass.isConcrete?
+		def self.is_based_on? #:nodoc:
+		  self.superclass.is_concrete?
 		end
 
-		def self.isConcrete? #:nodoc:
+		def self.is_concrete? #:nodoc:
 		  (self != DomainObject && abstract_subclasses.index(self).nil?)
 		end
 

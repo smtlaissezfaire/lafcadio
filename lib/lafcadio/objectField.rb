@@ -450,7 +450,7 @@ module Lafcadio
 		def LinkField.instantiationParameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			linkedTypeStr = fieldElt.attributes['linkedType']
-			linkedType = DomainObject.getObjectTypeFromString( linkedTypeStr )
+			linkedType = DomainObject.get_object_type_from_string( linkedTypeStr )
 			parameters['linkedType'] = linkedType
 			parameters['deleteCascade'] = fieldElt.attributes['deleteCascade'] == 'y'
 			parameters

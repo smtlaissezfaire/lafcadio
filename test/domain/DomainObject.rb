@@ -248,16 +248,16 @@ class TestDomainObject < LafcadioTestCase
 	end
 	
 	def testGetObjectTypeFromString
-		assert_equal Class,((DomainObject.getObjectTypeFromString('Invoice')).class)
+		assert_equal Class,((DomainObject.get_object_type_from_string('Invoice')).class)
 		assert_equal Class,(
-				(DomainObject.getObjectTypeFromString('Domain::LineItem')).class)
+				(DomainObject.get_object_type_from_string('Domain::LineItem')).class)
 		begin
-			assert_equal nil,(DomainObject.getObjectTypeFromString('notAnObjectType'))
+			assert_equal nil,(DomainObject.get_object_type_from_string('notAnObjectType'))
 			fail "Should throw an error when matching fails"
 		rescue CouldntMatchObjectTypeError
 			# ok
 		end
-		attributeClass = DomainObject.getObjectTypeFromString( 'Attribute' )
+		attributeClass = DomainObject.get_object_type_from_string( 'Attribute' )
 		assert_equal( Class, attributeClass.class )
 		assert_equal( 'Attribute', attributeClass.to_s )
 	end
@@ -265,7 +265,7 @@ class TestDomainObject < LafcadioTestCase
 	def testGetObjectTypeFromStringWithoutDomainFile
 		LafcadioConfig.set_filename '../test/testData/config_no_domain_file.dat'
 		assert_equal( 'Invoice',
-		              DomainObject.getObjectTypeFromString( 'Invoice' ).name )
+		              DomainObject.get_object_type_from_string( 'Invoice' ).name )
 	end
 	
 	def test_hash_and_eql

@@ -295,7 +295,7 @@ module Lafcadio
 		def insertSQL(objectType)
 			fields = objectType.class_fields
 			nameValuePairs = getNameValuePairs(objectType)
-			if objectType.isBasedOn?
+			if objectType.is_based_on?
 				nameValuePairs[objectType.sql_primary_key_name] = 'LAST_INSERT_ID()'
 			end
 			fieldNameStr = nameValuePairs.keys.join ", "
@@ -449,7 +449,7 @@ module Lafcadio
 		end
 
 		def getFiltered(objectTypeName, searchTerm, fieldName = nil) #:nodoc:
-			objectType = DomainObject.getObjectTypeFromString objectTypeName
+			objectType = DomainObject.get_object_type_from_string objectTypeName
 			fieldName = get_field_name( searchTerm ) unless fieldName
 			if searchTerm.class <= DomainObject
 				cond_class = Query::Link
@@ -475,7 +475,7 @@ module Lafcadio
 		end
 
 		def getMapped(searchTerm, resultTypeName) #:nodoc:
-			resultType = DomainObject.getObjectTypeFromString resultTypeName
+			resultType = DomainObject.get_object_type_from_string resultTypeName
 			firstTypeName = searchTerm.class.bareName
 			secondTypeName = resultType.bareName
 			mapTypeName = firstTypeName + secondTypeName
@@ -672,7 +672,7 @@ module Lafcadio
 					objectTypeName = English.singular( method_name_after_get )
 					begin
 						@domain_class = DomainObject.
-						                getObjectTypeFromString( objectTypeName )
+						                get_object_type_from_string( objectTypeName )
 						dispatch_get_plural
 					rescue CouldntMatchObjectTypeError
 						raise_no_method_error
@@ -682,7 +682,7 @@ module Lafcadio
 			
 			def dispatch_get_singular
 				objectType = DomainObject.
-				             getObjectTypeFromString( method_name_after_get )
+				             get_object_type_from_string( method_name_after_get )
 				if @orig_args[0].class <= Integer
 					@symbol = :get
 					@args = [ objectType, @orig_args[0] ]
