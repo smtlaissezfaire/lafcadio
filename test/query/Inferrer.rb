@@ -88,6 +88,8 @@ class TestQueryInferrer < LafcadioTestCase
 		assert_infer_match( desired_sql2, XmlSku ) { |xml_sku|
 			xml_sku.text1.equals( xml_sku.text2 )
 		}
+		desired_sql3 = 'select * from invoices where invoices.pk_id > 10'
+		assert_infer_match( desired_sql3, Invoice ) { |inv| inv.pk_id.gt( 10 ) }
 	end
 	
 	def testIn
