@@ -1,4 +1,5 @@
 require "mysql"
+require 'lafcadio/util/LafcadioConfig'
 
 # The DbBridge manages the MySQL connection for the ObjectStore.
 class DbBridge
@@ -26,7 +27,6 @@ class DbBridge
   end
 
   def initialize(db = nil, mysqlClass = Mysql)
-		require 'lafcadio/util/LafcadioConfig'
     if db == nil
       if @@db == nil
         config = LafcadioConfig.new
@@ -44,7 +44,8 @@ class DbBridge
 	# Hook for logging: Useful for testing.
 	def maybeLog(sql)
 		require 'lafcadio/util/Logger'
-#		Logger.log sql, 'sql'
+		config = LafcadioConfig.new
+		Logger.log sql, 'sql' if config['logSql'] == 'y'
 	end
 
 	# Sends a insert, update, or delete statement to the database. This is only 

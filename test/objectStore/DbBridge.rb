@@ -141,4 +141,15 @@ class TestDBBridge < RUNIT::TestCase
 		db = DbBridge.new nil, MockMysql
 		assert_equal 'some_other_db', MockMysql.dbName
 	end
+	
+	def testLogsSql
+		logFilePath = 'test/testOutput/sql'
+		@dbb.executeQuery( 'select * from users' )
+		if FileTest.exist?( logFilePath )
+			fail if Time.now - File.ctime( logFilePath ) < 5
+		end
+		LafcadioConfig.setFilename( 'test/testData/config_with_sql_logging.dat' )
+		@dbb.executeQuery( 'select * from clients' )
+		fail if Time.now - File.ctime( logFilePath ) > 5
+	end
 end

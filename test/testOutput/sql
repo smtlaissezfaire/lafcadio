@@ -1,0 +1,12 @@
+Wed Oct 22 08:39:14 EDT 2003: update clients set name='clientName1', standard_rate=null, referringClient=null, priorityInvoice=null where objId=1
+Wed Oct 22 08:39:14 EDT 2003: update internalClients set billingType='trade' where objId=1
+Wed Oct 22 08:39:14 EDT 2003: update clients set name='client name', standard_rate=null, referringClient=null, priorityInvoice=null where objId=1
+Wed Oct 22 08:39:15 EDT 2003: select * from lineItems
+Wed Oct 22 08:39:15 EDT 2003: select max(objId) from clients
+Wed Oct 22 08:39:15 EDT 2003: insert into clients(name, standard_rate, referringClient, priorityInvoice) values('clientName1', null, null, null)
+Wed Oct 22 08:39:15 EDT 2003: select last_insert_id()
+Wed Oct 22 08:39:15 EDT 2003: select * from users
+Wed Oct 22 08:39:15 EDT 2003: delete from clients where objId=1
+Wed Oct 22 08:41:21 EDT 2003: select * from clients
+Wed Oct 22 08:41:40 EDT 2003: select * from clients
+Wed Oct 22 08:44:20 EDT 2003: select * from clients
