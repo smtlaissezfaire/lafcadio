@@ -1,7 +1,7 @@
 require 'lafcadio/cgi/ImageUpload'
 require 'lafcadio/test/LafcadioTestCase'
 require 'tempfile'
-require 'test/mock/MockFileManager'
+require 'lafcadio/mock/MockFileManager'
 
 class TestImageUpload < LafcadioTestCase
   def setup
