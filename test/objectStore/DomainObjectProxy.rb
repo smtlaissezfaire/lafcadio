@@ -41,8 +41,8 @@ class TestDomainObjectProxy < LafcadioTestCase
 	end
 
 	def testEqlAndHash
-		assert (@client.eql? (@clientProxy))
-		assert (@clientProxy.eql? (@client))
+		assert( @client.eql?(@clientProxy))
+		assert( @clientProxy.eql?(@client))
 		assert_equal(@mockObjectStore.getClient(1).hash, @clientProxy.hash)
 	end
 
