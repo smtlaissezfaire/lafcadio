@@ -11,7 +11,11 @@ else
 		fileName =~ /(\w*)\.rb/
 		className = $1
 		domainClass = ClassUtil.getClass( className )
-		statement = CreateTableStatement.new( domainClass )
-		puts statement.toSql
+		if domainClass
+			statement = CreateTableStatement.new( domainClass )
+			puts statement.toSql
+		else
+			puts "No domain class in #{ fileName }"
+		end
 	}
 end
