@@ -1,0 +1,26 @@
+require 'lafcadio/lafcadio'
+
+@@versionStr = Lafcadio::Version
+
+def releaseTag
+	( uber, major, minor ) = @@versionStr.split( '.' ).collect! { |str| str.to_i }
+	"rel-#{ uber }-#{ major }-#{ minor }"
+end
+
+def releaseDirName
+	"lafcadio-#{ @@versionStr }"
+end
+
+task :exportReleaseDir do
+	Dir.chdir('../releases')
+	ext = "-d:ext:francis@rubyforge.org:/var/cvs/lafcadio"
+	`cvs #{ ext } export -r #{ releaseTag } -d #{ releaseDirName } lafcadio`
+end
+
+task :updateDocs do
+	Dir.chdir( 'lafcadio' )
+	`rdoc --op ../../lafcadio.rubyforge.org/doc/`
+	Dir.chdir( '..' )
+	releaseDirPath = "../releases/#{ releaseDirName }"
+	`cp -r ../lafcadio.rubyforge.org/ #{ releaseDirPath }/docs`
+end
