@@ -103,7 +103,7 @@ create table testrows (
 	boolean   'bool_field'
 	blob      'blob_field'
 	text      'text2', { 'db_field_name' => 'text_field2' }
-	link      'test_diff_pk_row', { 'linked_type' => TestDiffPkRow }
+	link      TestDiffPkRow
 
 	def TestRow.sql_primary_key_name
 		'pk_id'

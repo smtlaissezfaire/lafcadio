@@ -390,9 +390,16 @@ module Lafcadio
 
 	# A LinkField is used to link from one domain class to another.
 	class LinkField < ObjectField
+		def self.auto_name( linked_type )
+			linked_type.name =~ /::/
+			( $' || linked_type.name ).camel_case_to_underscore
+		end
+
 		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
+			linked_type = parameters['linked_type']
 			instance = self.new(
-				domain_class, parameters['linked_type'], parameters['name'],
+				domain_class, linked_type,
+				parameters['name'] || auto_name( linked_type ),
 				parameters['delete_cascade']
 			)
 			if parameters['db_field_name']
@@ -421,11 +428,7 @@ module Lafcadio
 		#                   as well.
 		def initialize( domain_class, linked_type, name = nil,
 		                delete_cascade = false )
-			unless name
-				linked_type.name =~ /::/
-				name = $' || linked_type.name
-				name = name.camel_case_to_underscore
-			end
+			name = self.class.auto_name( linked_type ) unless name
 			super( domain_class, name )
 			( @linked_type, @delete_cascade ) = linked_type, delete_cascade
 		end

@@ -282,13 +282,21 @@ module Lafcadio
 			class_fields
 		end
 
-		def self.create_field( field_class, name, att_hash )
+		def self.create_field( field_class, *args )
 			class_fields = @@class_fields[self]
 			if class_fields.nil?
 				class_fields = [ @@pk_fields[self] ]
 				@@class_fields[self] = class_fields
 			end
-			att_hash['name'] = name == String ? name : name.to_s
+			if field_class == LinkField
+				att_hash = args.last.is_a?( Hash ) ? args.last : {}
+				att_hash['linked_type'] = args.first
+				att_hash['name'] = args[1] if args[1] and !args[1].is_a? Hash
+			else
+				att_hash = args[1] || {}
+				name = args.first
+				att_hash['name'] = name == String ? name : name.to_s
+			end
 			field = field_class.instantiate_with_parameters( self, att_hash )
 			att_hash.each { |field_name, value|
 				setter = field_name + '='
@@ -413,7 +421,7 @@ module Lafcadio
 				maybe_field_class_name = method_name.underscore_to_camel_case + 'Field'
 				begin
 					field_class = Lafcadio.const_get( maybe_field_class_name )
-					create_field( field_class, args[0], args[1] || {} )
+					create_field( field_class, *args )
 				rescue NameError
 					super
 				end
