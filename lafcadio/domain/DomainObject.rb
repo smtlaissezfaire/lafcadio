@@ -3,6 +3,8 @@ require 'lafcadio/objectStore/DomainComparable'
 require 'lafcadio/objectStore/DomainObjectProxy'
 
 class DomainObject
+	@@subclassHash = {}
+
 	COMMIT_ADD = 1
 	COMMIT_EDIT = 2
 	COMMIT_DELETE = 3
@@ -47,9 +49,8 @@ class DomainObject
 	end
 
   def DomainObject.dependentClasses
-		require 'lafcadio/util/ClassUtil'
     dependentClasses = {}
-		ClassUtil.subclasses(DomainObject).each { |aClass|
+		DomainObject.subclasses.each { |aClass|
 			if aClass != DomainObjectProxy &&
 					(!DomainObject.abstractSubclasses.index(aClass))
 				aClass.classFields.each { |field|
@@ -72,6 +73,14 @@ class DomainObject
 			aClass.classFields.each { |field| allFields << field }
 		}
 		allFields
+	end
+	
+	def DomainObject.inherited (subclass)
+		@@subclassHash[subclass] = true
+	end
+	
+	def DomainObject.subclasses
+		@@subclassHash.keys
 	end
 
   attr_accessor :delete, :errorMessages, :objId, :lastCommit, :fields
