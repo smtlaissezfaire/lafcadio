@@ -349,10 +349,10 @@ class Numeric
 	# <tt>false</tt> and the number rounds to a whole number, there will be no 
 	# decimals shown.
 	#
-	#   (24.55).precisionFormat( 3 )    -> "24.550"
-	#   (24.55).precisionFormat( 0 )    -> "24"
-	#   100.precisionFormat( 2, false ) -> "100"
-  def precisionFormat(precision, padDecimals = true)
+	#   (24.55).precision_format( 3 )    -> "24.550"
+	#   (24.55).precision_format( 0 )    -> "24"
+	#   100.precision_format( 2, false ) -> "100"
+  def precision_format(precision, padDecimals = true)
     str = floor.to_s
     if precision > 0
       decimal = self - self.floor
@@ -371,7 +371,7 @@ end
 
 class String
 	# Returns the number of times that <tt>regexp</tt> occurs in the string.
-	def countOccurrences(regexp)
+	def count_occurrences(regexp)
 		count = 0
 		str = self.clone
 		while str =~ regexp
@@ -404,10 +404,10 @@ class String
 	# that number; otherwise it appends a "_1" after the filename but before the 
 	# file extension.
 	#
-	#   "john.jpg".incrementFilename   -> "john_1.jpg"
-	#   "john_1.jpg".incrementFilename -> "john_2.jpg"
-	#   "john_2.jpg".incrementFilename -> "john_3.jpg"
-  def incrementFilename
+	#   "john.jpg".increment_filename   -> "john_1.jpg"
+	#   "john_1.jpg".increment_filename -> "john_2.jpg"
+	#   "john_2.jpg".increment_filename -> "john_3.jpg"
+  def increment_filename
 		filename = self.clone
     extension = filename.split(/\./).last
     filename.sub!(/\..*$/, '')
@@ -423,9 +423,9 @@ class String
 
 	# Breaks a string into lines no longer than <tt>lineLength</tt>.
 	#
-	#   'the quick brown fox jumped over the lazy dog.'.lineWrap( 10 ) ->
+	#   'the quick brown fox jumped over the lazy dog.'.line_wrape( 10 ) ->
 	#     "the quick\nbrown fox\njumped\nover the\nlazy dog."
-	def lineWrap(lineLength)
+	def line_wrape(lineLength)
 		words = split ' '
 		line = ''
 		lines = []
@@ -443,9 +443,9 @@ class String
 	# Turns a numeric string into U.S. format if it's not already formatted that
 	# way.
 	#
-	#   "10,00".numericStringToUsFormat -> "10.00"
-	#   "10.00".numericStringToUsFormat -> "10.00"
-	def numericStringToUsFormat
+	#   "10,00".numeric_string_to_us_format -> "10.00"
+	#   "10.00".numeric_string_to_us_format -> "10.00"
+	def numeric_string_to_us_format
 		numericString = clone
 		numericString.gsub!(/,/, '.') if numericString =~ /,\d{2}$/
 		numericString
@@ -466,9 +466,9 @@ class String
 	# delimiter, and returns an array containing both the substrings and the 
 	# portions that matched <tt>regexp</tt>.
 	#
-	#   'theZquickZZbrownZfox'.splitKeepInBetweens(/Z+/) ->
+	#   'theZquickZZbrownZfox'.split_keep_in_betweens(/Z+/) ->
 	#     ['the', 'Z', 'quick', 'ZZ', 'brown', 'Z', 'fox' ]
-	def splitKeepInBetweens(regexp)
+	def split_keep_in_betweens(regexp)
 		result = []
 		string = clone
 		while string =~ regexp
