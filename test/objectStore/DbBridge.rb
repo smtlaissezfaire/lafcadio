@@ -148,6 +148,13 @@ class TestDBBridge < RUNIT::TestCase
 		fail if Time.now - File.ctime( logFilePath ) > 5
 	end
 	
+	def testLogsSqlToDifferentFileName
+		LafcadioConfig.setFilename( 'test/testData/config_with_log_path.dat' )
+		logFilePath = 'test/testOutput/another.sql'
+		@dbb.executeSelect( 'select * from users' )
+		fail if Time.now - File.ctime( logFilePath ) > 5
+	end
+	
 	def testDisconnect
 		DbBridge.disconnect
 		assert !@mockDbh.connected?

@@ -55,7 +55,7 @@ class DbBridge
 	def maybeLog(sql)
 		require 'lafcadio/util/Logger'
 		config = LafcadioConfig.new
-		Logger.log sql, 'sql' if config['logSql'] == 'y'
+		Logger.log( sql, config['sqlLogFile'] || 'sql' ) if config['logSql'] == 'y'
 	end
 	
 	# Sends an insert, update, or delete statement to the database. This is only 
