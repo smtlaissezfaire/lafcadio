@@ -266,3 +266,12 @@ class XmlSku2 < Lafcadio::DomainObject
 	table_name         'that_table'
 	sql_primary_key_name 'xml_sku2_id'
 end
+
+class XmlSku3 < Lafcadio::DomainObject
+	boolean    'boolean1',
+	           { 'enum_type' => Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO }
+
+	def self.sql_primary_key_name; 'xml_sku3_id'; end
+	
+	def self.table_name; 'this_table'; end
+end

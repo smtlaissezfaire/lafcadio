@@ -324,6 +324,12 @@ class TestDomainObject < LafcadioTestCase
 		@mockObjectStore.commit client
 		assert_equal client.name, invoice.client.name
 	end
+	
+	def test_override_class_defaults
+		assert_equal( 'this_table', XmlSku3.table_name )
+		assert_equal( 'xml_sku3_id', XmlSku3.sql_primary_key_name )
+		assert_equal( 'xml_sku3_id', XmlSku3.get_field( 'pk_id' ).db_field_name )
+	end
 
 	def test_override_class_defaults_from_one_liners
 		assert_equal( 'that_table', XmlSku2.table_name )

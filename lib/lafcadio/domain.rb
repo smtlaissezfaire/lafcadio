@@ -243,9 +243,13 @@ module Lafcadio
 	class DomainObject
 		@@subclassHash = {}
 		@@class_fields = {}
-		@@pk_fields =    Hash.new { |hash, key|
-		                   hash[key] = PrimaryKeyField.new( key )
-		                 }
+		@@pk_fields =
+			Hash.new { |hash, key|
+				pk_field = PrimaryKeyField.new( key )
+				pk_field.db_field_name = @@sql_primary_keys[key]
+				hash[key] = pk_field
+			}
+		@@sql_primary_keys = Hash.new( 'pk_id' )
 
 		COMMIT_ADD = 1
 		COMMIT_EDIT = 2
@@ -428,6 +432,16 @@ module Lafcadio
 			classes
 		end
 
+		def self.singleton_method_added( symbol )
+			if symbol.id2name == 'sql_primary_key_name' && self < DomainObject
+				begin
+					get_field( 'pk_id' ).db_field_name = self.send( symbol )
+				rescue NameError
+					@@sql_primary_keys[self] = self.send( symbol )
+				end
+			end
+		end
+		
 		# Returns the name of the primary key in the database, retrieving it from
 		# the class definition XML if necessary.
 		def self.sql_primary_key_name( set_sql_primary_key_name = nil )
