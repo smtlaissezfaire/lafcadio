@@ -13,47 +13,26 @@ module Lafcadio
 				if pkIdOrCondition.class <= Condition
 					@condition = pkIdOrCondition
 				else
-					@condition = Query::Equals.new(objectType.sqlPrimaryKeyName,
-							pkIdOrCondition, objectType)
+					@condition = Query::Equals.new( objectType.sqlPrimaryKeyName,
+					                                pkIdOrCondition, objectType )
 				end
 			end
 			@orderByOrder = ASC
 		end
 		
+		def eql?( other ); other.class <= Query && other.toSql == toSql; end
+
+		def fields; '*'; end
+
 		def hash; toSql.hash; end
 		
-		def eql?( other )
-			other.class <= Query && other.toSql == toSql
-		end
+		def limitClause; "limit #{ @limit.begin }, #{ @limit.end }" if @limit; end
 
-		def tables
-			tableNames = []
-			anObjectType = objectType
-			until(DomainObject.abstractSubclasses.index(anObjectType) != nil ||
-					anObjectType == DomainObject)
-				tableNames.unshift anObjectType.tableName
-				anObjectType = anObjectType.superclass
-			end
-			tableNames.join ', '
-		end
-
-		def whereClause
-			whereClauses = []
-			anObjectType = objectType
-			superclass = anObjectType.superclass
-			until(DomainObject.abstractSubclasses.index(superclass) != nil ||
-					superclass == DomainObject)
-				joinClause = "#{ sqlPrimaryKeyField(superclass) } = " +
-						"#{ sqlPrimaryKeyField(anObjectType) }"
-				whereClauses.unshift joinClause
-				anObjectType = superclass
-				superclass = superclass.superclass
-			end
-			whereClauses << @condition.toSql if @condition
-			if whereClauses.size > 0
-				"where #{ whereClauses.join(' and ') }"
-			else
-				nil
+		def orderClause
+			if @orderBy
+				clause = "order by #{ @orderBy } "
+				clause += @orderByOrder == ASC ? 'asc' : 'desc'
+				clause
 			end
 		end
 
@@ -61,26 +40,12 @@ module Lafcadio
 			"#{ objectType.tableName }.#{ objectType.sqlPrimaryKeyName }"
 		end
 
-		def fields
-			'*'
-		end
-
-		def orderClause
-			if @orderBy
-				clause = "order by #{ @orderBy } "
-				if @orderByOrder == ASC
-					clause += 'asc'
-				else
-					clause += 'desc'
-				end
-				clause
-			end
-		end
-
-		def limitClause
-			if @limit
-				"limit #{ @limit.begin }, #{ @limit.end }"
-			end
+		def tables
+			concrete_classes = objectType.selfAndConcreteSuperclasses.reverse
+			table_names = concrete_classes.collect { |domain_class|
+				domain_class.tableName
+			}
+			table_names.join( ', ' )
 		end
 
 		def toSql
@@ -89,6 +54,21 @@ module Lafcadio
 			clauses << orderClause if orderClause
 			clauses << limitClause if limitClause
 			clauses.join ' '
+		end
+
+		def whereClause
+			concrete_classes = objectType.selfAndConcreteSuperclasses.reverse
+			where_clauses = []
+			concrete_classes.each_with_index { |domain_class, i|
+				if i < concrete_classes.size - 1
+					join_clause = sqlPrimaryKeyField( domain_class ) + ' = ' +
+					              sqlPrimaryKeyField( concrete_classes[i+1] )
+					where_clauses << join_clause
+				else
+					where_clauses << @condition.toSql if @condition
+				end
+			}
+			where_clauses.size > 0 ? 'where ' + where_clauses.join( ' and ' ) : nil
 		end
 	end
 end

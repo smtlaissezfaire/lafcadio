@@ -7,15 +7,15 @@ module Lafcadio
 				@unCondition = unCondition
 			end
 
-			def toSql
-				"!(#{ @unCondition.toSql })"
-			end
-
 			def objectMeets(obj)
 				!@unCondition.objectMeets(obj)
 			end
 			
 			def objectType; @unCondition.objectType; end
+
+			def toSql
+				"!(#{ @unCondition.toSql })"
+			end
 		end
 	end
 end

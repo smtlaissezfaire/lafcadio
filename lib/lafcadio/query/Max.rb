@@ -9,10 +9,9 @@ module Lafcadio
 			end
 		
 			def collect( coll )
-				max = nil
-				coll.each { |d_obj|
+				max = coll.inject( nil ) { |max, d_obj|
 					a_value = d_obj.send( @field_name )
-					max = a_value if max.nil? || a_value > max
+					( max.nil? || a_value > max ) ? a_value : max
 				}
 				[ max ]
 			end
