@@ -1,6 +1,6 @@
 require 'runit/testcase'
 require 'lafcadio/util/Context'
-require 'lafcadio/mock/MockObjectStore'
+require 'lafcadio/mock'
 require 'lafcadio/util/LafcadioConfig'
 
 class TestContext < RUNIT::TestCase

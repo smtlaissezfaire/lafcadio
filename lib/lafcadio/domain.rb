@@ -1,5 +1,3 @@
-require 'lafcadio/includer'
-Includer.include( 'domain' )
 require 'lafcadio/objectField'
 require 'lafcadio/objectStore'
 require 'lafcadio/util'

@@ -1,6 +1,6 @@
 require 'lafcadio/test/LafcadioTestCase'
 require '../test/mock/domain/Invoice'
-require 'lafcadio/objectField/AutoIncrementField'
+require 'lafcadio/objectField'
 
 class TestAutoIncrementField < LafcadioTestCase
   def testIncrementFromNothing

@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'lafcadio/objectField/BooleanField'
+require 'lafcadio/objectField'
 
 class TestBooleanField < LafcadioTestCase
   def setup

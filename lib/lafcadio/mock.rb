@@ -1,5 +1,4 @@
-require 'lafcadio/includer'
-Includer.include( 'mock' )
+require 'lafcadio/objectStore/ObjectStore'
 
 module Lafcadio
 	class MockDbBridge #:nodoc:
@@ -72,6 +71,22 @@ module Lafcadio
 			if query.class == Query::Max
 				query.collect( @objects[query.objectType].values )
 			end
+		end
+	end
+
+	# Externally, the MockObjectStore looks and acts exactly like the ObjectStore,
+	# but stores all its data in memory. This makes it very useful for unit
+	# testing, and in fact LafcadioTestCase#setup creates a new instance of
+	# MockObjectStore for each test case.
+	class MockObjectStore < ObjectStore
+		public_class_method :new
+
+		def initialize(context) # :nodoc:
+			super(context, MockDbBridge.new)
+		end
+
+		def addObject(dbObject) # :nodoc:
+			commit dbObject
 		end
 	end
 end

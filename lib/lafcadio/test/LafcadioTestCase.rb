@@ -1,5 +1,5 @@
 require 'runit/testcase'
-require 'lafcadio/mock/MockObjectStore'
+require 'lafcadio/mock'
 require 'lafcadio/util/LafcadioConfig'
 
 # A test case that sets up a number of mock services. In writing an application 
