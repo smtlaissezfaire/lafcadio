@@ -382,6 +382,19 @@ module Lafcadio
 				"#{ db_field_name } in (#{ @searchTerm.join(', ') })"
 			end
 		end
+		
+		class Include < CompoundCondition
+			def initialize( field_name, search_term, domain_class )
+				begin_cond = Like.new( field_name, search_term + ',', domain_class,
+				                       Like::POST_ONLY )
+				mid_cond = Like.new( field_name, ',' + search_term + ',',
+				                     domain_class )
+				end_cond = Like.new( field_name, ',' + search_term, domain_class,
+				                     Like::PRE_ONLY )
+				only_cond = Equals.new( field_name, search_term, domain_class )
+				super( begin_cond, mid_cond, end_cond, only_cond, OR )
+			end
+		end
 
 		class Inferrer #:nodoc:
 			def initialize( domain_class, &action )
@@ -549,6 +562,15 @@ module Lafcadio
 					search_term.class_field
 				else
 					search_term
+				end
+			end
+			
+			def include?( search_term )
+				if @class_field.instance_of?( TextListField )
+					Include.new( @db_field_name, search_term,
+					             @domainObjectImpostor.domain_class )
+				else
+					raise ArgumentError
 				end
 			end
 			

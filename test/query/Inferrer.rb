@@ -141,4 +141,19 @@ class TestQueryInferrer < LafcadioTestCase
 			inv.hours.equals( 10 ).not
 		}
 	end
+	
+	def test_include?
+		desired_sql =
+			"select * from some_other_table where (" +
+			"some_other_table.text_list1 like '123,%' or " +
+			"some_other_table.text_list1 like '%,123,%' or " +
+			"some_other_table.text_list1 like '%,123' or " +
+			"some_other_table.text_list1 = '123')"
+		assert_infer_match( desired_sql, XmlSku ) { |xml_sku|
+			xml_sku.textList1.include?( '123' )
+		}
+		assert_raise( ArgumentError ) {
+			Query.infer( Client ) { |cli| cli.name.include?( 'a' ) }
+		}
+	end
 end

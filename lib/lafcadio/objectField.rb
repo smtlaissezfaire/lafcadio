@@ -600,7 +600,12 @@ module Lafcadio
 		end
 
 		def value_for_sql(objectValue) #:nodoc:
-			"'" + objectValue.join(',') + "'"
+			if objectValue.respond_to?( :join )
+				str = objectValue.join(',')
+			else
+				str = objectValue
+			end
+			"'" + str + "'"
 		end
 
 		def value_from_sql(sqlString, lookupLink = true) #:nodoc:
