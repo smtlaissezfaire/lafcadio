@@ -4,12 +4,22 @@ class CreateTableStatement
 	end
 	
 	def typeClause( field )
-		if field.class == TextField
+		require 'lafcadio/objectField/TextField'
+		require 'lafcadio/objectField/DecimalField'
+		require 'lafcadio/objectField/LinkField'
+		require 'lafcadio/objectField/IntegerField'
+		require 'lafcadio/objectField/DateField'
+		require 'lafcadio/objectField/ImageField'
+		if ( field.class <= TextField || field.class <= ImageField )
 			'varchar(255)'
 		elsif field.class <= DecimalField
 			"float(10, #{ field.precision })"
-		elsif field.class <= LinkField
+		elsif ( field.class <= LinkField || field.class <= IntegerField )
 			'int'
+		elsif field.class <= DateField
+			'date'
+		elsif field.class <= BooleanField
+			'bool'
 		end
 	end
 	
@@ -20,7 +30,7 @@ class CreateTableStatement
 		createDefinitions << "primary key (#{ @domainClass.sqlPrimaryKeyName })"
 		@domainClass.classFields.each { |field|
 			definitionTerms = []
-			definitionTerms << field.name
+			definitionTerms << field.dbFieldName
 			definitionTerms << typeClause( field )
 			definitionTerms << 'not null' if field.notNull
 			definitionTerms << 'unique' if field.unique
