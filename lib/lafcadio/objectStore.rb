@@ -494,7 +494,16 @@ module Lafcadio
 		# Retrieves a collection of domain objects by +pk_id+.
 		#   ObjectStore#get_objects( Clients, [ 1, 2, 3 ] )
 		def get_objects(object_type, pk_ids)
-			get_subset Query::In.new('pk_id', pk_ids, object_type)
+			if pk_ids.is_a?( Array ) && pk_ids.all? { |elt| elt.is_a?( Integer ) }
+				get_subset Query::In.new('pk_id', pk_ids, object_type)
+			else
+				raise(
+					ArgumentError, 
+					"ObjectStore#get_objects( domain_class, pk_ids ): pk_ids needs to " +
+							"be an array of integers",
+					caller
+				)
+			end
 		end
 
 		def get_subset(conditionOrQuery) #:nodoc:

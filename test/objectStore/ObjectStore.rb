@@ -213,8 +213,12 @@ class TestObjectStore < LafcadioTestCase
 		}
 		assert foundOne
 		assert foundTwo
-		coll2 = @testObjectStore.get_objects(Client, [ "1", "2" ])
-		assert_equal 2, coll.size
+		assert_raise( ArgumentError ) {
+			@testObjectStore.get_objects(Client, [ "1", "2" ])
+		}
+		assert_raise( ArgumentError ) {
+			@testObjectStore.get_objects( Client, 1 )
+		}
 	end
 
 	def testGetSubset
