@@ -61,4 +61,19 @@ class TestHashOfArrays < LafcadioTestCase
 		hoa.getArray(jan2001Prime) << "b"
 		assert_equal 3, hoa.keys.size
 	end
+
+	def testEach
+		hoa = HashOfArrays.new
+		hoa[1] = [ 'a', 'b' ]
+		hoa[2] = [ 'c', 'd', 'e' ]
+		hoa.each { |key, array|
+			if key == 1
+				assert_equal [ 'a', 'b' ], array
+			elsif key == 2
+				assert_equal [ 'c', 'd', 'e' ], array
+			else
+				fail "key #{ key }"
+			end
+		}
+	end
 end

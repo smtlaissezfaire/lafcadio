@@ -8,6 +8,10 @@ class HashOfArrays
 		@values[key] = array
 	end
 
+	def []= (key, array)
+		set key, array
+	end
+
 	def getArray (key)
 		array = @values[key]
 		if array == nil
@@ -30,5 +34,9 @@ class HashOfArrays
 
 	def keys
 		@values.keys
+	end
+
+	def each
+		@values.each { |key, array| yield key, array }
 	end
 end
