@@ -80,8 +80,9 @@ class TestDomainObject < LafcadioTestCase
 	def testCommit
 		assert_equal 0, @mockObjectStore.getAll(Client).size
 		client = newTestClientWithoutPkId
-		client.commit
+		something = client.commit
 		assert_equal 1, @mockObjectStore.getAll(Client).size
+		assert_equal( Client, something.class )
 	end
 	
 	def testCreateWithLinkedProxies

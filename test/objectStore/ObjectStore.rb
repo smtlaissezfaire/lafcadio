@@ -31,6 +31,12 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 1, @mockDbBridge.retrievalsByType[Client]
 	end
 
+	def test_commit_returns_dobj
+		client = Client.new({ 'name' => 'client name' })
+		something = @testObjectStore.commit( client )
+		assert_equal( Client, something.class )
+	end
+
 	def testConvertsFixnums
 		@mockDbBridge.addObject Client.getTestClient
 		@testObjectStore.get Client, 1

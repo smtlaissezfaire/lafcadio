@@ -418,7 +418,10 @@ module Lafcadio
 
 		# Commits a domain object to the database. You can also simply call
 		#   myDomainObject.commit
-		def commit(dbObject); @cache.commit( dbObject ); end
+		def commit(dbObject)
+			@cache.commit( dbObject )
+			dbObject
+		end
 		
 		# Flushes one domain object from its cache.
 		def flush(dbObject)
