@@ -23,8 +23,12 @@ class ObjectType
 		xmlFileName = ClassUtil.bareClassName( @objectType ) + '.xml'
 		xmlPath = File.join( dirName, xmlFileName )
 		xml = ''
-		File.open( xmlPath ) { |file| xml = file.readlines.join }
-		@xmlParser = ClassDefinitionXmlParser.new( @objectType, xml )
+		begin
+			File.open( xmlPath ) { |file| xml = file.readlines.join }
+			@xmlParser = ClassDefinitionXmlParser.new( @objectType, xml )
+		rescue Errno::ENOENT
+			# no xml file, so no @xmlParser
+		end
 	end
 
 	# Returns the table name, which is assumed to be the domain class name 
@@ -42,7 +46,7 @@ class ObjectType
 	end
 
 	def sqlPrimaryKeyName
-		@xmlParser.sqlPrimaryKeyName || 'objId'
+		!@xmlParser.nil? && ( spkn = @xmlParser.sqlPrimaryKeyName ) ? spkn : 'objId'
 	end
 
   def englishName

@@ -2,6 +2,7 @@ require 'lafcadio/domain/ObjectType'
 require 'lafcadio/test/LafcadioTestCase'
 require 'test/mock/domain/User'
 require 'test/mock/domain/LineItem'
+require 'test/mock/domain'
 
 class TestObjectType < LafcadioTestCase
 	def testTableName
@@ -14,5 +15,10 @@ class TestObjectType < LafcadioTestCase
 		assert_equal( "line item",
 		              ObjectType.getObjectType(Domain::LineItem).englishName )
 		assert_equal( "user", ObjectType.getObjectType(User).englishName )
+	end
+	
+	def testHandlesClassWithoutXml
+		ot = ObjectType.getObjectType( NoXml )
+		assert_equal( 'objId', ot.sqlPrimaryKeyName )
 	end
 end

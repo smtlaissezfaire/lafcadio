@@ -33,3 +33,5 @@ class TestAttribute < LafcadioTestCase
 		att
 	end
 end
+
+class NoXml < DomainObject; def NoXml.getClassFields; []; end; end
