@@ -1,7 +1,7 @@
 require 'lafcadio/test'
 require 'date'
 require 'lafcadio/query'
-require '../test/mock/domain/InternalClient'
+require '../test/mock/domain'
 require '../test/mock/domain/Invoice'
 require '../test/mock/domain/User'
 

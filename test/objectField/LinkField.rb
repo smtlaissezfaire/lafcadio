@@ -1,7 +1,6 @@
 require 'lafcadio/objectStore'
 require 'lafcadio/test'
 require '../test/mock/domain'
-require '../test/mock/domain/InternalClient'
 require 'lafcadio/objectField'
 require '../test/mock/domain/Invoice'
 require '../test/mock/domain/LineItem'

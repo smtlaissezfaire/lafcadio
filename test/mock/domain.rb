@@ -47,6 +47,14 @@ class Client < Lafcadio::DomainObject
   end
 end
 
+class InternalClient < Client; end
+
+class NoXml < Lafcadio::DomainObject
+	def NoXml.get_class_fields; super; end
+	
+	sql_primary_key_name 'no_xml_id'
+end
+
 class TestAttribute < LafcadioTestCase
 	def TestAttribute.getTestAttribute
 		Attribute.new( { "pk_id" => 1, "name" => "attribute name" })
@@ -57,10 +65,4 @@ class TestAttribute < LafcadioTestCase
 		ObjectStore.get_object_store.commit att
 		att
 	end
-end
-
-class NoXml < Lafcadio::DomainObject
-	def NoXml.get_class_fields; super; end
-	
-	sql_primary_key_name 'no_xml_id'
 end

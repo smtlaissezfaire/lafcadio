@@ -1,7 +1,6 @@
 require 'lafcadio/test'
 require '../test/mock/domain/User'
 require '../test/mock/domain/Invoice'
-require '../test/mock/domain/InternalClient'
 require '../test/mock/domain'
 
 class TestEquals < LafcadioTestCase

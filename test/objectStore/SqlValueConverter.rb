@@ -1,4 +1,3 @@
-require '../test/mock/domain/InternalClient'
 require '../test/mock/domain'
 require '../test/mock/domain/User'
 require 'lafcadio/test'
