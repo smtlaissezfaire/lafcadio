@@ -32,9 +32,17 @@ class ObjectType
 	# assumed to be stored in a "users" table, while a ProductCategory class is
 	# assumed to be stored in a "productCategories" table.
 	def tableName
-		tableName = ClassUtil.bareClassName @objectType
-		tableName[0] = tableName[0..0].downcase
-		EnglishUtil.plural tableName
+		if (tableName = @xmlParser.tableName)
+			tableName
+		else
+			tableName = ClassUtil.bareClassName @objectType
+			tableName[0] = tableName[0..0].downcase
+			EnglishUtil.plural tableName
+		end
+	end
+
+	def sqlPrimaryKeyName
+		@xmlParser.sqlPrimaryKeyName || 'objId'
 	end
 
   def englishName

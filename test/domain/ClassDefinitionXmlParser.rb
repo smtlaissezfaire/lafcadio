@@ -77,4 +77,11 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 			assert_equal( "Couldn't find field class '' for field 'date1'", $!.to_s )
 		end
 	end
+
+	def testSetPkNameAndTableNameInXml
+		assert_equal( 'some_other_id', XmlSku.sqlPrimaryKeyName )
+		assert_equal( 'objId', Attribute.sqlPrimaryKeyName )
+		assert_equal( 'some_other_table', XmlSku.tableName )
+		assert_equal( 'attributes', Attribute.tableName )
+	end
 end

@@ -56,17 +56,18 @@ class ClassDefinitionXmlParser
 	end
 
 	def initialize( domainClass, xml )
-		@domainClass = domainClass; @xml = xml
+		require 'rexml/document'
+
+		@domainClass = domainClass
+		@xmlDocRoot = REXML::Document.new( xml ).root
 	end
 
 	def getClassFields
-		require 'rexml/document'
 		require 'lafcadio/util'
 		
 		namesProcessed = {}
 		fields = []
-		rexmlDoc = REXML::Document.new( @xml )
-		rexmlDoc.root.elements.each('field') { |fieldElt|
+		@xmlDocRoot.elements.each('field') { |fieldElt|
 			className = fieldElt.attributes['class']
 			name = fieldElt.attributes['name']
 			begin
@@ -84,6 +85,14 @@ class ClassDefinitionXmlParser
 			end
 		}
 		fields
+	end
+	
+	def sqlPrimaryKeyName
+		@xmlDocRoot.attributes['sqlPrimaryKeyName']
+	end
+	
+	def tableName
+		@xmlDocRoot.attributes['tableName']
 	end
 	
 	def possibleFieldAttributes

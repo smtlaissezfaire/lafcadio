@@ -80,13 +80,6 @@ class DomainObject
 		field
 	end
 
-	# Returns 'objId' by default. If the primary key for your database table uses
-	# is named something else, override this method in every such affected domain
-	# class.
-	def DomainObject.sqlPrimaryKeyName
-		'objId'
-	end
-
 	# Returns an array of every other domain class that has a LinkField that
 	# points to this domain class.
   def DomainObject.dependentClasses
