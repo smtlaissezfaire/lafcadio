@@ -20,7 +20,7 @@ class Attribute < Lafcadio::DomainObject
 	end
 end
 
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 
 class TestAttribute < LafcadioTestCase
 	def TestAttribute.getTestAttribute

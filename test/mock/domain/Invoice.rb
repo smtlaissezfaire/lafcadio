@@ -1,5 +1,5 @@
 require 'lafcadio/domain'
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 require 'date'
 require '../test/mock/domain/Client'
 require '../test/domain/ClassDefinitionXmlParser'

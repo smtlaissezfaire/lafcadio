@@ -1,4 +1,4 @@
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 require '../test/mock/domain/Client'
 
 class TestMoneyField < LafcadioTestCase

@@ -1,4 +1,4 @@
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 require 'lafcadio/query'
 require 'date'
 require '../test/mock/domain/User'

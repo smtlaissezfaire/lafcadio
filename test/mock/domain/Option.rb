@@ -8,7 +8,7 @@ class Option < Lafcadio::DomainObject
 	end
 end
 
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 
 class TestOption < LafcadioTestCase
 	def TestOption.getTestOption

@@ -1,5 +1,5 @@
 require 'lafcadio/objectField'
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 require '../test/mock/domain/User'
 
 class TestEnumField < LafcadioTestCase

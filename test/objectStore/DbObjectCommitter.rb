@@ -1,5 +1,5 @@
 require 'date'
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 require 'lafcadio/mock'
 require '../test/mock/domain/Client'
 require 'lafcadio/objectStore'

@@ -1,4 +1,4 @@
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 require 'lafcadio/util/English'
 
 class TestEnglish < LafcadioTestCase

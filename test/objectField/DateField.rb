@@ -1,6 +1,6 @@
 require 'dbi'
 require 'lafcadio/objectField'
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 require '../test/mock/domain/Invoice'
 
 class TestDateField < LafcadioTestCase

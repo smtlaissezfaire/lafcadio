@@ -1,5 +1,5 @@
 require 'lafcadio/objectStore'
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 require '../test/mock/domain/User'
 
 class TestObjectStoreCache < LafcadioTestCase

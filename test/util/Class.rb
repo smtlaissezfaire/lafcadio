@@ -1,5 +1,5 @@
 require 'lafcadio/util'
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 
 class TestClass < LafcadioTestCase
 	def testGetClass

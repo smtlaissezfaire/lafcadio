@@ -8,7 +8,7 @@ class InventoryLineItemOption < Lafcadio::MapObject
 	end
 end
 
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 
 class TestInventoryLineItemOption < LafcadioTestCase
 	def TestInventoryLineItemOption.getTestInventoryLineItemOption

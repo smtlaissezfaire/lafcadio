@@ -1,5 +1,5 @@
 require 'lafcadio/dateTime'
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 
 class TestMonth < LafcadioTestCase
 	def setup

@@ -1,4 +1,4 @@
-require 'lafcadio/test/LafcadioTestCase'
+require 'lafcadio/test'
 require '../test/mock/domain/LineItem'
 require '../test/mock/domain/SKU'
 require '../test/mock/domain/User'
