@@ -1,9 +1,23 @@
 require 'lafcadio/includer'
 Includer.include( 'objectField' )
 require 'date'
+require 'lafcadio/dateTime'
 require 'lafcadio/util'
 
 module Lafcadio
+	# A TextField is expected to contain a string value.
+	class TextField < ObjectField
+		def valueForSQL(value) #:nodoc:
+			if value
+				value = value.gsub(/(\\?')/) { |m| m.length == 1 ? "''" : m }
+				value = value.gsub(/\\/) { '\\\\' }
+				"'#{value}'"
+			else
+				"null"
+			end
+		end
+	end
+
 	class AutoIncrementField < IntegerField # :nodoc:
 		attr_reader :objectType
 
@@ -166,6 +180,116 @@ module Lafcadio
 		end
 	end
 	
+	# DecimalField represents a decimal value.
+	class DecimalField < ObjectField
+		def self.instantiateWithParameters( domainClass, parameters ) #:nodoc:
+			self.new( domainClass, parameters['name'], parameters['englishName'] )
+		end
+
+		def self.valueType #:nodoc:
+			Numeric
+		end
+
+		def processBeforeVerify(value) #:nodoc:
+			value = super value
+			value != nil && value != '' ? value.to_f : nil
+		end
+
+		def valueFromSQL(string, lookupLink = true) #:nodoc:
+			string != nil ? string.to_f : nil
+		end
+	end
+
+	# EmailField takes a text value that is expected to be formatted as a single
+	# valid email address.
+	class EmailField < TextField
+		# Is +address+ a valid email address?
+		def self.validAddress(address)
+			address =~ /^[^ @]+@[^ \.]+\.[^ ,]+$/
+		end
+
+		def initialize(objectType, name = "email", englishName = nil)
+			super(objectType, name, englishName)
+		end
+
+		def nullErrorMsg #:nodoc:
+			"Please enter an email address."
+		end
+
+		def verify(value, pkId) #:nodoc:
+			super(value, pkId)
+			if !EmailField.validAddress(value)
+				raise FieldValueError, "Please enter a valid email address.", caller
+			end
+		end
+	end
+
+	# EnumField represents an enumerated field that can only be set to one of a
+	# set range of string values. To set the enumeration in the class definition
+	# XML, use the following format:
+	#   <field name="flavor" class="EnumField">
+	#     <enums>
+	#       <enum>Vanilla</enum>
+	#       <enum>Chocolate</enum>
+	#       <enum>Lychee</enum>
+	#     </enums>
+	#   </field>
+	# If you're defining the field in Ruby, you can simply pass in an array of
+	# enums as the +enums+ argument.
+	#
+	class EnumField < TextField
+		def self.instantiateWithParameters( domainClass, parameters ) #:nodoc:
+			self.new( domainClass, parameters['name'], parameters['enums'],
+								parameters['englishName'] )
+		end
+
+		def self.enum_queue_hash( fieldElt )
+			enumValues = []
+			fieldElt.elements.each( 'enums/enum' ) { |enumElt|
+				enumValues << enumElt.attributes['key']
+				enumValues << enumElt.text.to_s
+			}
+			QueueHash.new( *enumValues )
+		end
+
+		def self.instantiationParameters( fieldElt ) #:nodoc:
+			parameters = super( fieldElt )
+			if fieldElt.elements['enums'][1].attributes['key']
+				parameters['enums'] = enum_queue_hash( fieldElt )
+			else
+				parameters['enums'] = []
+				fieldElt.elements.each( 'enums/enum' ) { |enumElt|
+					parameters['enums'] << enumElt.text.to_s
+				}
+			end
+			parameters
+		end
+		
+		attr_reader :enums
+
+		# [objectType]  The domain class that this field belongs to.
+		# [name]        The name of this domain class.
+		# [enums]       An array of Strings representing the possible choices for
+		#               this field.
+		# [englishName] The English name of this field. (Deprecated)
+		def initialize(objectType, name, enums, englishName = nil)
+			require 'lafcadio/util/QueueHash'
+			super objectType, name, englishName
+			if enums.class == Array 
+				@enums = QueueHash.newFromArray enums
+			else
+				@enums = enums
+			end
+		end
+		
+		def valueForSQL(value) #:nodoc:
+			value != '' ?(super(value)) : 'null'
+		end
+	end
+	
+	class MoneyField < DecimalField #:nodoc:
+	end
+
 	# Accepts a Month as a value. This field automatically saves in MySQL as a 
 	# date corresponding to the first day of the month.
 	class MonthField < DateField
@@ -175,6 +299,28 @@ module Lafcadio
 
 		def valueForSQL(value) #:nodoc:
 			"'#{value.year}-#{value.month}-01'"
+		end
+	end
+
+	# A PasswordField is simply a TextField that is expected to contain a password
+	# value. It can be set to auto-generate a password at random.
+	class PasswordField < TextField
+		# Returns a random 8-letter alphanumeric password.
+		def PasswordField.randomPassword
+			chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".
+					split(//)
+			value = ""
+			0.upto(8) { |i| value += chars[rand(chars.size)] }
+			value
+		end
+	end
+
+	# A StateField is a specialized subclass of EnumField; its possible values are
+	# any of the 50 states of the United States, stored as each state's two-letter
+	# postal code.
+	class StateField < EnumField
+		def initialize(objectType, name = "state", englishName = nil)
+			super objectType, name, UsStates.states, englishName
 		end
 	end
 

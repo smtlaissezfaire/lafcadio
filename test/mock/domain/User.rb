@@ -1,7 +1,5 @@
 require 'lafcadio/domain'
 require 'lafcadio/objectField/SubsetLinkField'
-require 'lafcadio/objectField/EmailField'
-require 'lafcadio/objectField/TextField'
 require 'lafcadio/objectField'
 
 class User < Lafcadio::DomainObject

@@ -1,5 +1,5 @@
 require 'lafcadio/test/LafcadioTestCase'
-require 'lafcadio/objectField/PasswordField'
+require 'lafcadio/objectField'
 require '../test/mock/domain/User'
 
 class TestPasswordField < LafcadioTestCase

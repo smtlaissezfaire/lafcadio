@@ -1,8 +1,7 @@
 require '../test/mock/domain/Invoice'
 require 'lafcadio/objectField/SubsetLinkField'
 require 'lafcadio/domain'
-require 'lafcadio/objectField/TextField'
-require 'lafcadio/objectField/MoneyField'
+require 'lafcadio/objectField'
 
 class Client < Lafcadio::DomainObject
 	include Lafcadio

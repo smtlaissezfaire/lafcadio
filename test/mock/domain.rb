@@ -1,4 +1,4 @@
-require 'lafcadio/objectField/TextField'
+require 'lafcadio/objectField'
 require 'lafcadio/domain'
 require '../test/mock/domain/Option'
 

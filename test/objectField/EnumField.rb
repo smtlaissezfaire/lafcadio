@@ -1,4 +1,4 @@
-require 'lafcadio/objectField/EnumField'
+require 'lafcadio/objectField'
 require 'lafcadio/test/LafcadioTestCase'
 require '../test/mock/domain/User'
 
