@@ -83,31 +83,13 @@ module Lafcadio
 			end
 			resource
 		end
-
-		def method_missing(methId, *args) #:nodoc:
-			methodName = methId.id2name
-			if methodName =~ /^get_(.*)/ || methodName =~ /^set_(.*)/
-				begin
-					service_class = Kernel.const_get( $1.underscore_to_camel_case )
-				rescue NameError
-					service_class = args.first
-				end
-				if methodName =~ /^get_(.*)/
-					get_resource( service_class )
-				else
-					set_resource( service_class, *args )
-				end
-			else
-				super
-			end
-		end
 		
 		def set_init_proc( service_class, proc )
 			@init_procs[service_class] = proc
 		end
 		
-		def set_resource(resourceName, resource) #:nodoc:
-			@resources[resourceName] = resource
+		def set_resource(service_class, resource) #:nodoc:
+			@resources[service_class] = resource
 		end
 	end
 
@@ -118,12 +100,16 @@ module Lafcadio
 	#
 	# For example: ObjectStore.getObjectStore
 	class ContextualService
-		def self.method_missing(methodId)
+		def self.method_missing( methodId, *args )
 			methodName = methodId.id2name
-			if methodName =~ /^get.*/
-				Context.instance.send( methodName, self )
+			if methodName =~ /^get_(.*)/ || methodName =~ /^set_(.*)/
+				if methodName =~ /^get_(.*)/
+					Context.instance.get_resource( self )
+				else
+					Context.instance.set_resource( self, *args )
+				end
 			else
-				super methodId
+				super
 			end
 		end
 

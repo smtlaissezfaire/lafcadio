@@ -12,11 +12,11 @@ class TestContextualService < RUNIT::TestCase
 	def testClassMethodAccess
 		context = Context.instance
 		serviceA = ServiceA.get_service_a
-		context.set_service_a serviceA
-		assert_equal serviceA, context.get_service_a
+		ServiceA.set_service_a serviceA
+		assert_equal serviceA, context.get_resource( ServiceA )
 		assert_equal serviceA, ServiceA.get_service_a
 		serviceB = ServiceB.get_service_b
-		context.set_service_b serviceB
+		context.set_resource( ServiceB, serviceB )
 		assert_equal serviceB, ServiceB.get_service_b
 		assert ServiceA.get_service_a != ServiceB.get_service_b
 		assert_exception( NoMethodError ) { context.setServiceA }

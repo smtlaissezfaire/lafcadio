@@ -17,8 +17,8 @@ class TestContext < RUNIT::TestCase
 		context1 = Context.instance
 		context2 = Context.instance
 		context1.set_init_proc( ObjectStore, proc { MockObjectStore.new } )
-		mockObjectStore = context1.get_object_store
-		assert_equal mockObjectStore, context2.get_object_store
+		mockObjectStore = context1.get_resource( ObjectStore )
+		assert_equal mockObjectStore, context2.get_resource( ObjectStore )
 	end
 	
 	def testCreatesStandardInstances

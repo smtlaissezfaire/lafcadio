@@ -16,7 +16,7 @@ class AcceptanceTestCase < RUNIT::TestCase
 	
 	def teardown
 		domain_classes.each { |domain_class| domain_class.drop_table( @dbh ) }
-		Context.instance.set_object_store( nil )
+		ObjectStore.set_object_store( nil )
 	end
 
 	def domain_classes; [ TestBadRow, TestRow, TestChildRow, TestDiffPkRow ]; end

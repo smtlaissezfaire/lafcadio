@@ -16,7 +16,7 @@ module Lafcadio
 		def initialize(db_object, dbBridge)
 			@db_object = db_object
 			@dbBridge = dbBridge
-			@objectStore = Context.instance.get_object_store
+			@objectStore = ObjectStore.get_object_store
 			@commit_type = nil
 		end
 		
@@ -161,7 +161,7 @@ module Lafcadio
 		@@dbh = nil
 
 		def self.flush
-			Context.instance.set_db_connection( nil )
+			DbConnection.set_db_connection( nil )
 			@@dbh = nil
 		end
 
