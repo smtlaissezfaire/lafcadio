@@ -1,4 +1,4 @@
-require '../test/mock/domain/Client'
+require '../test/mock/domain'
 
 class InternalClient < Client
 end

@@ -1,6 +1,6 @@
 require '../test/mock/domain/InternalClient'
 require "runit/testcase"
-require '../test/mock/domain/Client'
+require '../test/mock/domain'
 require '../test/mock/domain/LineItem'
 require 'lafcadio/query'
 

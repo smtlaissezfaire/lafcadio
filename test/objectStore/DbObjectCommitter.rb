@@ -1,7 +1,7 @@
 require 'date'
 require 'lafcadio/test'
 require 'lafcadio/mock'
-require '../test/mock/domain/Client'
+require '../test/mock/domain'
 require 'lafcadio/objectStore'
 
 class TestDbObjectCommitter < LafcadioTestCase

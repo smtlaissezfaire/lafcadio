@@ -7,14 +7,22 @@ require 'lafcadio/util'
 require 'getoptlong'
 include Lafcadio
 
-opts = GetoptLong.new( [ '--config', '-c', GetoptLong::REQUIRED_ARGUMENT ] )
+opts = GetoptLong.new(
+	[ '--config', '-c', GetoptLong::REQUIRED_ARGUMENT ],
+	[ '--class',  '-C', GetoptLong::OPTIONAL_ARGUMENT ]
+)
 if ( ( optArray = opts.get ) && ARGV.size >= 1 )
 	configFile = optArray[1]
 	LafcadioConfig.set_filename( configFile )
+	class_opts = opts.get
 	ARGV.each { |fileName|
 		require "#{ fileName }"
-		fileName =~ /(\w*)\.rb/
-		className = $1
+		if class_opts
+			className = class_opts.last
+		else
+			fileName =~ /(\w*)\.rb/
+			className = $1
+		end
 		domainClass = Class.get_class( className )
 		if domainClass
 			statement = CreateTableStatement.new( domainClass )

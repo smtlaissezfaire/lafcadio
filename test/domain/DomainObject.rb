@@ -2,7 +2,7 @@ require 'lafcadio/test'
 require 'lafcadio/domain'
 require '../test/mock/domain/InternalClient'
 require '../test/mock/domain/Invoice'
-require '../test/mock/domain/Client'
+require '../test/mock/domain'
 require '../test/mock/domain/User'
 require '../test/mock/domain/XmlSku2'
 

@@ -1,5 +1,5 @@
 require '../test/mock/domain/InternalClient'
-require '../test/mock/domain/Client'
+require '../test/mock/domain'
 require '../test/mock/domain/User'
 require 'lafcadio/test'
 require '../test/mock/domain/Invoice'

@@ -1,7 +1,7 @@
 require 'lafcadio/domain'
 require 'lafcadio/test'
 require 'date'
-require '../test/mock/domain/Client'
+require '../test/mock/domain'
 require '../test/domain/ClassDefinitionXmlParser'
 
 class Invoice < Lafcadio::DomainObject

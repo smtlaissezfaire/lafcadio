@@ -1,6 +1,6 @@
 require 'lafcadio/schema'
 require 'lafcadio/test'
-require '../test/mock/domain/Client'
+require '../test/mock/domain'
 
 class TestCreateTableStatement < LafcadioTestCase
 	def test_to_sql
