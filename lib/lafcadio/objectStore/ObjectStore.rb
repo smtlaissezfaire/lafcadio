@@ -1,4 +1,6 @@
-require 'lafcadio'
+require 'lafcadio/objectStore'
+require 'lafcadio/query'
+require 'lafcadio/util'
 
 module Lafcadio
 	# The ObjectStore represents the database in a Lafcadio application.

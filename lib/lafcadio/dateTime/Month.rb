@@ -28,31 +28,6 @@ module Lafcadio
 			@year = year
 		end
 
-		# Compare this Month to another Month.
-		def <=>(anOther)
-			if @year == anOther.year
-				@month <=> anOther.month
-			else
-				@year <=> anOther.year
-			end
-		end
-
-		# Returns a string of the format "January 2001".
-		def to_s
-			Month.monthNames[@month-1][0..2] + " " + @year.to_s
-		end
-		
-		# Calculate a hash value for this Month.
-		def hash
-			"#{@year}#{@month}".to_i
-		end
-
-		# Is this Month equal to +anOther+? +anOther+ must be another Month of the
-		# same value.
-		def eql?(anOther)
-			self == anOther
-		end
-		
 		# Returns a new Month that is +amountToAdd+ months later.
 		def +( amountToAdd )
 			( fullYears, remainingMonths ) = amountToAdd.divmod( 12 )
@@ -70,14 +45,39 @@ module Lafcadio
 			self + (-amountToSubtract)
 		end
 		
-		# Returns the previous Month.
-		def prev
-			self - 1
+		# Compare this Month to another Month.
+		def <=>(anOther)
+			if @year == anOther.year
+				@month <=> anOther.month
+			else
+				@year <=> anOther.year
+			end
+		end
+
+		# Returns the last Date of the month.
+		def endDate
+			self.next.startDate - 1
+		end
+
+		# Is this Month equal to +anOther+? +anOther+ must be another Month of the
+		# same value.
+		def eql?(anOther)
+			self == anOther
 		end
 		
+		# Calculate a hash value for this Month.
+		def hash
+			"#{@year}#{@month}".to_i
+		end
+
 		# Returns the next Month.
 		def next
 			self + 1
+		end
+		
+		# Returns the previous Month.
+		def prev
+			self - 1
 		end
 		
 		# Returns the first Date of the month.
@@ -85,9 +85,9 @@ module Lafcadio
 			Date.new( @year, @month, 1 )
 		end
 		
-		# Returns the last Date of the month.
-		def endDate
-			self.next.startDate - 1
+		# Returns a string of the format "January 2001".
+		def to_s
+			Month.monthNames[@month-1][0..2] + " " + @year.to_s
 		end
 	end
 end

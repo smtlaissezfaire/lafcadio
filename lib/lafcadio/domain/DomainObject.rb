@@ -1,6 +1,6 @@
-require 'lafcadio/objectField/LinkField'
-require 'lafcadio/objectStore/DomainComparable'
-require 'lafcadio/objectStore/DomainObjectProxy'
+require 'lafcadio/objectField'
+require 'lafcadio/objectStore'
+require 'lafcadio/domain/ObjectType'
 
 module Lafcadio
 	# All classes that correspond to a table in the database need to be children 
@@ -110,6 +110,30 @@ module Lafcadio
 
 		include DomainComparable
 		
+		def self.abstractSubclasses #:nodoc:
+			require 'lafcadio/domain'
+			[ MapObject ]
+		end
+
+		# Returns an array of all fields defined for this class and all concrete
+		# superclasses.
+		def DomainObject.allFields
+			allFields = []
+			selfAndConcreteSuperclasses.each { |aClass|
+				aClass.classFields.each { |field| allFields << field }
+			}
+			allFields
+		end
+
+		def self.classFields #:nodoc:
+			classFields = @@classFields[self]
+			unless classFields
+				@@classFields[self] = self.getClassFields
+				classFields = @@classFields[self]
+			end
+			classFields
+		end
+
 		def self.createField( field_class, name, att_hash )
 			class_fields = @@classFields[self]
 			if class_fields.nil?
@@ -125,44 +149,22 @@ module Lafcadio
 			class_fields << field
 		end
 		
-		def DomainObject.classFields #:nodoc:
-			classFields = @@classFields[self]
-			unless classFields
-				@@classFields[self] = self.getClassFields
-				classFields = @@classFields[self]
-			end
-			classFields
+		def self.dependentClasses #:nodoc:
+			dependentClasses = {}
+			DomainObject.subclasses.each { |aClass|
+				if aClass != DomainObjectProxy &&
+						(!DomainObject.abstractSubclasses.index(aClass))
+					aClass.classFields.each { |field|
+						if field.class <= LinkField && field.linkedType == self.objectType
+							dependentClasses[aClass] = field
+						end
+					}
+				end
+			}
+			dependentClasses
 		end
 
-		def DomainObject.abstractSubclasses #:nodoc:
-			require 'lafcadio/domain'
-			[ MapObject ]
-		end
-
-		def DomainObject.selfAndConcreteSuperclasses # :nodoc:
-			classes = [ ]
-			anObjectType = self
-			until(anObjectType == DomainObject ||
-					abstractSubclasses.index(anObjectType) != nil)
-				classes << anObjectType
-				anObjectType = anObjectType.superclass
-			end
-			classes
-		end
-
-		def DomainObject.method_missing( methodId, *args ) #:nodoc:
-			method_name = methodId.id2name
-			maybe_field_class_name = ( method_name.gsub( /^(.)/ ) { $&.upcase } ) +
-			                         'Field'
-			begin
-				field_class = Lafcadio.const_get( maybe_field_class_name )
-				createField( field_class, args[0], args[1] || {} )
-			rescue NameError
-				ObjectType.getObjectType( self ).send( method_name, *args )
-			end
-		end
-
-		def DomainObject.getClassField(fieldName) #:nodoc:
+		def self.getClassField(fieldName) #:nodoc:
 			field = nil
 			self.classFields.each { |aField|
 				field = aField if aField.name == fieldName
@@ -170,7 +172,18 @@ module Lafcadio
 			field
 		end
 		
-		def DomainObject.getField( fieldName ) #:nodoc:
+		def self.getDomainDirs #:nodoc:
+			config = LafcadioConfig.new
+			classPath = config['classpath']
+			domainDirStr = config['domainDirs']
+			if domainDirStr
+				domainDirs = domainDirStr.split(',')
+			else
+				domainDirs = [ classPath + 'domain/' ]
+			end
+		end
+		
+		def self.getField( fieldName ) #:nodoc:
 			aDomainClass = self
 			field = nil
 			while aDomainClass < DomainObject && !field
@@ -186,65 +199,49 @@ module Lafcadio
 			end
 		end
 
-		def DomainObject.dependentClasses #:nodoc:
-			dependentClasses = {}
-			DomainObject.subclasses.each { |aClass|
-				if aClass != DomainObjectProxy &&
-						(!DomainObject.abstractSubclasses.index(aClass))
-					aClass.classFields.each { |field|
-						if field.class <= LinkField && field.linkedType == self.objectType
-							dependentClasses[aClass] = field
-						end
-					}
-				end
+		def self.getObjectTypeFromString(typeString) #:nodoc:
+			objectType = nil
+			requireDomainFile( typeString )
+			subclasses.each { |subclass|
+				objectType = subclass if subclass.to_s == typeString
 			}
-			dependentClasses
+			if objectType
+				objectType
+			else
+				raise CouldntMatchObjectTypeError,
+						"couldn't match objectType #{typeString}", caller
+			end
 		end
 
-		def DomainObject.objectType #:nodoc:
-			self
-		end
-
-		# Returns an array of all fields defined for this class and all concrete
-		# superclasses.
-		def DomainObject.allFields
-			allFields = []
-			selfAndConcreteSuperclasses.each { |aClass|
-				aClass.classFields.each { |field| allFields << field }
-			}
-			allFields
-		end
-		
-		def DomainObject.inherited(subclass) #:nodoc:
+		def self.inherited(subclass) #:nodoc:
 			@@subclassHash[subclass] = true
 		end
 		
-		def DomainObject.subclasses #:nodoc:
-			@@subclassHash.keys
-		end
-
-		def DomainObject.isConcrete? #:nodoc:
-		  (self != DomainObject && abstractSubclasses.index(self).nil?)
-		end
-		
-		def DomainObject.isBasedOn? #:nodoc:
+		def self.isBasedOn? #:nodoc:
 		  self.superclass.isConcrete?
 		end
 
-		def self.getDomainDirs #:nodoc:
-			config = LafcadioConfig.new
-			classPath = config['classpath']
-			domainDirStr = config['domainDirs']
-			if domainDirStr
-				domainDirs = domainDirStr.split(',')
-			else
-				domainDirs = [ classPath + 'domain/' ]
+		def self.isConcrete? #:nodoc:
+		  (self != DomainObject && abstractSubclasses.index(self).nil?)
+		end
+
+		def self.method_missing( methodId, *args ) #:nodoc:
+			method_name = methodId.id2name
+			maybe_field_class_name = ( method_name.gsub( /^(.)/ ) { $&.upcase } ) +
+			                         'Field'
+			begin
+				field_class = Lafcadio.const_get( maybe_field_class_name )
+				createField( field_class, args[0], args[1] || {} )
+			rescue NameError
+				ObjectType.getObjectType( self ).send( method_name, *args )
 			end
 		end
-		
-		def self.getObjectTypeFromString(typeString) #:nodoc:
-			require 'lafcadio/objectStore/CouldntMatchObjectTypeError'
-			objectType = nil
+
+		def self.objectType #:nodoc:
+			self
+		end
+
+		def self.requireDomainFile( typeString )
 			typeString =~ /([^\:]*)$/
 			fileName = $1
 			getDomainDirs.each { |domainDir|
@@ -257,15 +254,21 @@ module Lafcadio
 					require domainFile
 				}
 			end
-			subclasses.each { |subclass|
-				objectType = subclass if subclass.to_s == typeString
-			}
-			if objectType
-				objectType
-			else
-				raise CouldntMatchObjectTypeError,
-						"couldn't match objectType #{typeString}", caller
+		end
+
+		def self.selfAndConcreteSuperclasses # :nodoc:
+			classes = [ ]
+			anObjectType = self
+			until(anObjectType == DomainObject ||
+					abstractSubclasses.index(anObjectType) != nil)
+				classes << anObjectType
+				anObjectType = anObjectType.superclass
 			end
+			classes
+		end
+
+		def self.subclasses #:nodoc:
+			@@subclassHash.keys
 		end
 
 		attr_accessor :errorMessages, :pkId, :lastCommit, :fields, :fields_set
@@ -295,16 +298,35 @@ module Lafcadio
 			@fields_set = []
 		end
 		
-		def method_missing( methId, *args ) #:nodoc:
-			if ( field = get_setter_field( methId ) )
-				set_field( field, args.first )
-			elsif ( field = get_getter_field( methId ) )
-				get_field( field )
-			else
-				super( methId, *args )
-			end
+		# Returns a clone, with all of the fields copied.
+		def clone
+			copy = super
+			copy.fields = @fields.clone
+			copy.fields_set = @fields_set.clone
+			copy
+		end
+		
+		# Commits this domain object to the database.
+		def commit
+			ObjectStore.getObjectStore.commit self
 		end
 
+		# Set the delete value to true if you want this domain object to be deleted
+		# from the database during its next commit.
+		def delete=(value)
+			if value && !pkId
+				raise "No point deleting an object that's not already in the DB"
+			end
+			@delete = value
+		end
+
+		def get_field( field ) #:nodoc:
+			unless @fields_set.include?( field )
+				set_field( field, @fieldHash[field.name] )
+			end
+			@fields[field.name]
+		end
+		
 		def get_getter_field( methId ) #:nodoc:
 			begin
 				self.class.getField( methId.id2name )
@@ -325,21 +347,14 @@ module Lafcadio
 			end
 		end
 		
-		def get_field( field ) #:nodoc:
-			unless @fields_set.include?( field )
-				set_field( field, @fieldHash[field.name] )
+		def method_missing( methId, *args ) #:nodoc:
+			if ( field = get_setter_field( methId ) )
+				set_field( field, args.first )
+			elsif ( field = get_getter_field( methId ) )
+				get_field( field )
+			else
+				super( methId, *args )
 			end
-			@fields[field.name]
-		end
-		
-		def set_field( field, value ) #:nodoc:
-			if field.class <= LinkField
-				if value.class != DomainObjectProxy && value
-					value = DomainObjectProxy.new(value)
-				end
-			end
-			@fields[field.name] = value
-			@fields_set << field
 		end
 
 		# Returns the subclass of DomainObject that this instance represents.
@@ -361,33 +376,20 @@ module Lafcadio
 			nil
 		end
 
-		# Set the delete value to true if you want this domain object to be deleted
-		# from the database during its next commit.
-		def delete=(value)
-			if value && !pkId
-				raise "No point deleting an object that's not already in the DB"
+		def set_field( field, value ) #:nodoc:
+			if field.class <= LinkField
+				if value.class != DomainObjectProxy && value
+					value = DomainObjectProxy.new(value)
+				end
 			end
-			@delete = value
+			@fields[field.name] = value
+			@fields_set << field
 		end
 
 		# By default, to_s is considered an invalid operation for domain objects,
 		# and will raise an error. This behavior can be overridden by subclasses.
 		def to_s
 			raise "Don't make me into a string unless the type asks"
-		end
-		
-		# Returns a clone, with all of the fields copied.
-		def clone
-			copy = super
-			copy.fields = @fields.clone
-			copy.fields_set = @fields_set.clone
-			copy
-		end
-		
-		# Commits this domain object to the database.
-		def commit
-			require 'lafcadio/objectStore/ObjectStore'
-			ObjectStore.getObjectStore.commit self
 		end
 	end
 end

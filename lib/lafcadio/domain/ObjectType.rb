@@ -1,4 +1,3 @@
-require 'lafcadio/domain'
 require 'lafcadio/util'
 
 module Lafcadio
@@ -83,6 +82,7 @@ module Lafcadio
 		end
 		
 		def try_load_xml_parser
+			require 'lafcadio/domain'
 			dirName = LafcadioConfig.new['classDefinitionDir']
 			xmlFileName = @objectType.bareName + '.xml'
 			xmlPath = File.join( dirName, xmlFileName )
