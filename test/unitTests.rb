@@ -9,6 +9,7 @@ dir.each { |entry|
 			subDir = Dir.new( File.join( test_base, subDirName ) )
 			subDir.each { |entry|
 				if entry =~ /.rb$/
+$stderr.puts File.join( test_base, subDirName, entry )
 					require File.join( test_base, subDirName, entry )
 				end
 			}

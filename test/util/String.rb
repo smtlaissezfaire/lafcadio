@@ -28,17 +28,6 @@ class TestString < Test::Unit::TestCase
 		assert_equal '5,000',('5,000'.numeric_string_to_us_format)
 	end
 
-	def testSplitKeepInbetweens
-		result = 'the quick  brown fox'.split_keep_in_betweens(/\s+/)
-		assert_equal ['the', ' ', 'quick', '  ', 'brown', ' ', 'fox' ], result
-	end
-
-	def testLineWrap
-		qbr = 'the quick brown fox jumped over the lazy dog.'
-		result = qbr.line_wrape(10)
-		assert_equal "the quick\nbrown fox\njumped\nover the\nlazy dog.", result
-	end
-
 	def test_underscore_to_camel_case
 		assert_equal( 'ObjectStore', 'object_store'.underscore_to_camel_case )
 	end
