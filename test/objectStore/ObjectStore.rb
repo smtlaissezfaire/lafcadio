@@ -303,4 +303,15 @@ class TestObjectStore < LafcadioTestCase
 			# ok
 		end
 	end
+	
+	def test_query_field_comparison
+		inv1 = Invoice.new( 'date' => Date.today, 'paid' => Date.today + 30 )
+		inv1.commit
+		inv2 = Invoice.new( 'date' => Date.today, 'paid' => Date.today )
+		inv2.commit
+		matches = @testObjectStore.getInvoices { |inv|
+			inv.date.equals( inv.paid )
+		}
+		assert_equal( 1, matches.size )
+	end
 end

@@ -210,4 +210,16 @@ class AccTestObjectStore < AcceptanceTestCase
 		row2.commit
 		assert_equal( y2k, @object_store.getMax( TestRow, 'date_time' ) )
 	end
+	
+	def test_query_field_comparison
+		row1 = TestRow.new( 'text_field' => 'a', 'text2' => 'b' )
+		row1.commit
+		row2 = TestRow.new( 'text_field' => 'c', 'text2' => 'c' )
+		row2.commit
+		matches = @object_store.getTestRows { |test_row|
+			test_row.text_field.equals( test_row.text2 )
+		}
+		assert_equal( 1, matches.size )
+		assert_equal( 'c', matches.only.text_field )
+	end
 end

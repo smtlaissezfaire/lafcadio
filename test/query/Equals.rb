@@ -36,4 +36,12 @@ class TestEquals < LafcadioTestCase
 		equals = Query::Equals.new( 'text1', 'foobar', XmlSku )
 		assert_equal( "text_one = 'foobar'", equals.toSql )
 	end
+	
+	def test_compare_to_other_field
+		email_field = User.getField( 'email' )
+		equals = Query::Equals.new( 'firstNames', email_field, User )
+		assert_equal( 'firstNames = email', equals.toSql )
+		odd_user = User.new( 'email' => 'foobar', 'firstNames' => 'foobar' )
+		assert( equals.objectMeets( odd_user ) )
+	end
 end

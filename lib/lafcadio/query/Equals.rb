@@ -12,7 +12,11 @@ module Lafcadio
 						sql += @searchTerm.to_s
 					else
 						field = getField
-						sql += field.valueForSQL(@searchTerm).to_s
+						if @searchTerm.class <= ObjectField
+							sql += @searchTerm.dbFieldName
+						else
+							sql += field.valueForSQL(@searchTerm).to_s
+						end
 					end
 				else
 					sql += "is null"
@@ -22,11 +26,17 @@ module Lafcadio
 
 			def objectMeets(anObj)
 				if @fieldName == @objectType.sqlPrimaryKeyName
-					value = anObj.pkId
+					object_value = anObj.pkId
 				else
-					value = anObj.send @fieldName
+					object_value = anObj.send @fieldName
 				end
-				@searchTerm == value
+				compare_value =
+				if @searchTerm.class <= ObjectField
+					compare_value = anObj.send( @searchTerm.name )
+				else
+					compare_value = @searchTerm
+				end
+				compare_value == object_value
 			end
 		end
 	end

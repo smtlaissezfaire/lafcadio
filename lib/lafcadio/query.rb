@@ -52,12 +52,15 @@ module Lafcadio
 					'gt' => Compare::GREATER_THAN
 				}
 			end
+			
+			attr_reader :class_field
 		
 			def initialize( domainObjectImpostor, class_field_or_name )
 				@domainObjectImpostor = domainObjectImpostor
 				if class_field_or_name == 'pkId'
 					@db_field_name = 'pkId'
 				else
+					@class_field = class_field_or_name
 					@db_field_name = class_field_or_name.dbFieldName
 				end
 			end
@@ -78,8 +81,16 @@ module Lafcadio
 			end
 			
 			def equals( searchTerm )
-				Equals.new( @db_field_name, searchTerm,
-										@domainObjectImpostor.domainClass )
+				Equals.new( @db_field_name, field_or_field_name( searchTerm ),
+				            @domainObjectImpostor.domainClass )
+			end
+			
+			def field_or_field_name( search_term )
+				if search_term.class == ObjectFieldImpostor
+					search_term.class_field
+				else
+					search_term
+				end
 			end
 			
 			def like( regexp )

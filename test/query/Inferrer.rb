@@ -70,6 +70,13 @@ class TestQueryInferrer < LafcadioTestCase
 		assert_infer_match( desiredSql, Invoice ) { |inv| inv.hours.equals( 10 ) }
 	end
 	
+	def test_field_compare
+		desired_sql = 'select * from invoices where date = paid'
+		assert_infer_match( desired_sql, Invoice ) { |inv|
+			inv.date.equals( inv.paid )
+		}
+	end
+	
 	def testIn
 		desiredSql = "select * from invoices where pkId in (1, 2, 3)"
 		assert_infer_match( desiredSql, Invoice ) { |inv|
