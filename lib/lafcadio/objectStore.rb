@@ -54,9 +54,9 @@ module Lafcadio
 		end
 
 		def update_dependent_domain_objects
-			dependentClasses = @dbObject.objectType.dependentClasses
-			dependentClasses.keys.each { |aClass|
-				field = dependentClasses[aClass]
+			dependent_classes = @dbObject.objectType.dependent_classes
+			dependent_classes.keys.each { |aClass|
+				field = dependent_classes[aClass]
 				collection = @objectStore.getFiltered( aClass.name, @dbObject,
 																							 field.name )
 				collection.each { |dependentObject|

@@ -13,7 +13,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def matchField( domainClass, fieldName, fieldClass, attributes = nil )
-		field = domainClass.getClassField( fieldName )
+		field = domainClass.get_class_field( fieldName )
 		assert_not_nil( field )
 		assert_equal( fieldClass, field.class )
 		if attributes
@@ -234,7 +234,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def testGetField
-		name = Client.getClassField 'name'
+		name = Client.get_class_field 'name'
 		assert_not_nil name
 		assert_equal( 'name', InternalClient.getField( 'name' ).name )
 		assert_equal( 'billingType', InternalClient.getField( 'billingType' ).name )

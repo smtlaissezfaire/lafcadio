@@ -274,7 +274,7 @@ module Lafcadio
 			class_fields
 		end
 
-		def self.createField( field_class, name, att_hash )
+		def self.create_field( field_class, name, att_hash )
 			class_fields = @@class_fields[self]
 			if class_fields.nil?
 				class_fields = []
@@ -289,22 +289,22 @@ module Lafcadio
 			class_fields << field
 		end
 		
-		def self.dependentClasses #:nodoc:
-			dependentClasses = {}
+		def self.dependent_classes #:nodoc:
+			dependent_classes = {}
 			DomainObject.subclasses.each { |aClass|
 				if aClass != DomainObjectProxy &&
 						(!DomainObject.abstract_subclasses.index(aClass))
 					aClass.class_fields.each { |field|
 						if field.class <= LinkField && field.linkedType == self.objectType
-							dependentClasses[aClass] = field
+							dependent_classes[aClass] = field
 						end
 					}
 				end
 			}
-			dependentClasses
+			dependent_classes
 		end
 
-		def self.getClassField(fieldName) #:nodoc:
+		def self.get_class_field(fieldName) #:nodoc:
 			field = nil
 			self.class_fields.each { |aField|
 				field = aField if aField.name == fieldName
@@ -312,7 +312,7 @@ module Lafcadio
 			field
 		end
 		
-		def self.getDomainDirs #:nodoc:
+		def self.get_domain_dirs #:nodoc:
 			config = LafcadioConfig.new
 			classPath = config['classpath']
 			domainDirStr = config['domainDirs']
@@ -327,7 +327,7 @@ module Lafcadio
 			aDomainClass = self
 			field = nil
 			while aDomainClass < DomainObject && !field
-				field = aDomainClass.getClassField( fieldName )
+				field = aDomainClass.get_class_field( fieldName )
 				aDomainClass = aDomainClass.superclass
 			end
 			if field
@@ -371,7 +371,7 @@ module Lafcadio
 			                         'Field'
 			begin
 				field_class = Lafcadio.const_get( maybe_field_class_name )
-				createField( field_class, args[0], args[1] || {} )
+				create_field( field_class, args[0], args[1] || {} )
 			rescue NameError
 				ObjectType.getObjectType( self ).send( method_name, *args )
 			end
@@ -384,7 +384,7 @@ module Lafcadio
 		def self.requireDomainFile( typeString )
 			typeString =~ /([^\:]*)$/
 			fileName = $1
-			getDomainDirs.each { |domainDir|
+			get_domain_dirs.each { |domainDir|
 				if Dir.entries(domainDir).index("#{fileName}.rb")
 					require "#{ domainDir }#{ fileName }"
 				end
