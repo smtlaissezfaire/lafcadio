@@ -17,7 +17,7 @@ Lafcadio is an object-relational mapping layer for Ruby and MySQL. It lets you t
 	s.email = 'sera@fhwang.net'
 	s.homepage = 'http://lafcadio.rubyforge.org/'
 	s.autorequire = 'lafcadio'
-	s.executables = [ 'bin/lafcadio_schema' ]
+	s.executables = [ 'lafcadio_schema' ]
 	s.bindir = 'bin'
 end
 if $0==__FILE__
