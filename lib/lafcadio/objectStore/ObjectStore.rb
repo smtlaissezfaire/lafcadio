@@ -50,6 +50,8 @@ module Lafcadio
 		def get(objectType, objId)
 			@retriever.get objectType, objId
 		end
+		
+		def getDbBridge; @dbBridge; end
 
 		def getLastCommit(dbObject)
 			if dbObject.delete

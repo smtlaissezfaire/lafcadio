@@ -80,6 +80,13 @@ class TestObjectStore < LafcadioTestCase
 			@testObjectStore.notAMethod
 			raise "Should raise NoMethodError"
 		rescue NoMethodError
+			assert_match( /undefined method 'notAMethod'/, $!.to_s )
+		end
+		begin
+			@testObjectStore.getFooBar
+			raise "Should raise NoMethodError"
+		rescue NoMethodError
+			assert_match( /undefined method 'getFooBar'/, $!.to_s )
 			# ok
 		end
 	end
@@ -89,6 +96,10 @@ class TestObjectStore < LafcadioTestCase
 		client = Client.new({ })
 		@testObjectStore.commit client
 		assert_equal 1, @testObjectStore.getAll(Client).size
+	end
+	
+	def testGetDbBridge
+		assert_equal( @mockDbBridge, @testObjectStore.getDbBridge )
 	end
 
 	def testGetSubset

@@ -111,4 +111,13 @@ class TestObjectCollector < LafcadioTestCase
 			# okay
 		end
 	end
+	
+	def test_method_missing
+		begin
+			@collector.getFooBar
+			raise "Should raise NoMethodError"
+		rescue NoMethodError
+			# okay
+		end
+	end
 end

@@ -39,7 +39,8 @@ module Lafcadio
 					if @resolved
 						@result
 					else
-						super @methodId
+						raise( NoMethodError, "undefined method '#{ methodName }'",
+						       caller )
 					end
 				end
 			end

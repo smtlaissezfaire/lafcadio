@@ -72,12 +72,17 @@ module Lafcadio
 			methodName = methodId.id2name
 			if methodName =~ /^get(.*)$/
 				objectTypeName = English.singular($1)
-				if block_given?
-					dispatch_get_method( objectTypeName, searchTerm, fieldName ) { |obj|
-						yield( obj )
-					}
-				else
-					dispatch_get_method( objectTypeName, searchTerm, fieldName )
+				begin
+					DomainObject.getObjectTypeFromString( objectTypeName )
+					if block_given?
+						dispatch_get_method( objectTypeName, searchTerm, fieldName ) { |obj|
+							yield( obj )
+						}
+					else
+						dispatch_get_method( objectTypeName, searchTerm, fieldName )
+					end
+				rescue CouldntMatchObjectTypeError
+					super( methodId )
 				end
 			else
 				super(methodId)
