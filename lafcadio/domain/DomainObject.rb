@@ -23,8 +23,8 @@ class DomainObject
 	def DomainObject.selfAndConcreteSuperclasses
 		classes = [ ]
 		anObjectType = self
-		until (abstractSubclasses.index(anObjectType) != nil ||
-				anObjectType == DomainObject)
+		until (anObjectType == DomainObject ||
+				abstractSubclasses.index(anObjectType) != nil)
 			classes << anObjectType
 			anObjectType = anObjectType.superclass
 		end
