@@ -12,12 +12,12 @@ class Context
 		@resources = {}
 	end
 	
-	def createInstance (resourceName)
+	def createInstance(resourceName)
 		resourceClass = eval resourceName
 		resourceClass.new self
 	end
 
-	def getResource (resourceName)
+	def getResource(resourceName)
 		resource = @resources[resourceName]
 		unless resource
 			resource = createInstance resourceName
@@ -26,11 +26,11 @@ class Context
 		resource
 	end
 	
-	def setResource (resourceName, resource)
+	def setResource(resourceName, resource)
 		@resources[resourceName] = resource
 	end
 
-	def method_missing (methId, *args)
+	def method_missing(methId, *args)
 		methodName = methId.id2name
 		if methodName =~ /^get(.*)$/
 			getResource $1

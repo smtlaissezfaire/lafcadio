@@ -6,7 +6,7 @@ class SKU < DomainObject
     "skus"
   end
 
-  def SKU.classFields (fieldSet = "default")
+  def SKU.classFields(fieldSet = "default")
 		require 'lafcadio/objectField/TextField'
 		require 'lafcadio/objectField/LinkField'
 		require 'lafcadio/objectField/MoneyField'
@@ -31,7 +31,7 @@ class SKU < DomainObject
 		"SKU"
 	end
 
-	def SKU.addEditButtons (fieldManager)
+	def SKU.addEditButtons(fieldManager)
 		aeButtons = QueueHash.new
 		aeButtons["Add another product"] = "cgi-bin/addEdit.rb?objectType=Product"
 		aeButtons["Add another SKU"] =
@@ -70,7 +70,7 @@ require 'runit/testcase'
 
 class TestSKU < RUNIT::TestCase
 	def TestSKU.getTestSKU
-		SKU.new ({ 'objId' => 1, 'sku' => 'sku0001', 'standardPrice' => 99.95 })
+		SKU.new({ 'objId' => 1, 'sku' => 'sku0001', 'standardPrice' => 99.95 })
 	end
 
 	def TestSKU.storedTestSKU

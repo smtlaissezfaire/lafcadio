@@ -7,10 +7,10 @@ class Query
 		end
 
 		def toSql
-			"#{ @fieldName } in (#{ @searchTerm.join(',') })"
+			"#{ @fieldName } in(#{ @searchTerm.join(',') })"
 		end
 
-		def objectMeets (anObj)
+		def objectMeets(anObj)
 			value = anObj.send @fieldName
 			@searchTerm.index(value) != nil
 		end

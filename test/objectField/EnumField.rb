@@ -4,7 +4,7 @@ require 'test/mock/domain/User'
 
 class TestEnumField < LafcadioTestCase
 	def TestEnumField.getTestEnumField
-		cardTypes = QueueHash.new ( 'AX', 'American Express', 'MC', 'MasterCard',
+		cardTypes = QueueHash.new( 'AX', 'American Express', 'MC', 'MasterCard',
 				'VI', 'Visa', 'DS', 'Discover' )
 		EnumField.new nil, "cardType", cardTypes,	"Credit card type"
 	end

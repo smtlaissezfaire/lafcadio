@@ -18,7 +18,7 @@ class Query
 			sql
 		end
 
-		def objectMeets (anObj)
+		def objectMeets(anObj)
 			if @fieldName == @objectType.sqlPrimaryKeyName
 				value = anObj.objId
 			else

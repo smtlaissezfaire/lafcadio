@@ -13,16 +13,16 @@ class DecimalField < ObjectField
     DecimalFieldViewer
   end
 
-  def initialize (objectType, name, precision, englishName = nil)
-    super (objectType, name, englishName)
+  def initialize(objectType, name, precision, englishName = nil)
+    super(objectType, name, englishName)
     @precision = precision
   end
 
-  def valueFromSQL (string, lookupLink = true)
+  def valueFromSQL(string, lookupLink = true)
     string != nil ? string.to_f : nil
   end
 
-  def processBeforeVerify (value)
+  def processBeforeVerify(value)
     value = super value
     value != nil && value != '' ? value.to_f : nil
   end

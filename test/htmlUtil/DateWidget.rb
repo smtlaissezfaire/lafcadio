@@ -6,7 +6,7 @@ class TestDateWidget < RUNIT::TestCase
 	def testToHTML
 		widget = DateWidget.new
 		html = widget.toHTML
-		widget2 = DateWidget.new ('widgetName', Date.today)
+		widget2 = DateWidget.new('widgetName', Date.today)
 		monthSelect = widget2.monthSelect
 	end
 	

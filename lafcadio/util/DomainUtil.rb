@@ -1,5 +1,5 @@
 class DomainUtil
-  def DomainUtil.getObjectTypeFromString (typeString)
+  def DomainUtil.getObjectTypeFromString(typeString)
 		require 'lafcadio/domain/DomainObject'
 		require 'lafcadio/objectStore/CouldntMatchObjectTypeError'
 		require 'lafcadio/util/Config'

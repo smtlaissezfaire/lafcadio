@@ -22,7 +22,7 @@ class ImageFieldViewer < FieldViewer
 	def currentImageHTML
 		require 'lafcadio/html/HTML'
 		if @value != nil
-			html = HTML::HTML.new
+			html = HTML.new
 			html << "current #{StrUtil.decapitalize(@field.englishName)}:"
 			html.addP
 			html << imgTag
@@ -33,7 +33,7 @@ class ImageFieldViewer < FieldViewer
 		end
 	end
 
-  def toHTMLWidget (fieldType = @field.type)
+  def toHTMLWidget(fieldType = @field.class)
 		require 'lafcadio/html/InputHidden'
     widget = "<input type='file' name='#{@field.name}'>"
     if @value != nil

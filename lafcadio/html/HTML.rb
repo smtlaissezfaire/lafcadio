@@ -1,5 +1,5 @@
 class HTML < Array
-	def initialize (firstEl = nil)
+	def initialize(firstEl = nil)
 		self[0] = firstEl if firstEl
 	end
 
@@ -7,7 +7,7 @@ class HTML < Array
 		text = ""
 		each { |element|
 			if element != nil
-				text += (element.respond_to? "toHTML") ? element.toHTML : element
+				text +=(element.respond_to? "toHTML") ? element.toHTML : element
 				text += "\n"
 			end
 		}

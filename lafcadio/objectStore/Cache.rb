@@ -6,26 +6,26 @@ class ObjectStore < ContextualService
 			@objects = {}
 		end
 
-		def hashByObjectType (objectType)
+		def hashByObjectType(objectType)
 			unless @objects[objectType]
 				@objects[objectType] = {}
 			end
 			@objects[objectType]
 		end
 
-		def get (objectType, objId)
+		def get(objectType, objId)
 			hashByObjectType(objectType)[objId]
 		end
 
-		def save (dbObject)
+		def save(dbObject)
 			hashByObjectType(dbObject.objectType)[dbObject.objId] = dbObject
 		end
 
-		def getAll (objectType)
+		def getAll(objectType)
 			hashByObjectType(objectType).values
 		end
 
-		def flush (dbObject)
+		def flush(dbObject)
 			hashByObjectType(dbObject.objectType).delete dbObject.objId
 		end
 	end

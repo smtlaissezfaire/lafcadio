@@ -3,7 +3,7 @@ require 'lafcadio/util/ClassUtil'
 class SqlValueConverter
   attr_reader :objectType, :rowHash
 
-  def initialize (objectType, rowHash)
+  def initialize(objectType, rowHash)
     @objectType = objectType
     @rowHash = rowHash
   end

@@ -1,29 +1,29 @@
 class DateFormatter
-	def initialize (f)
+	def initialize(f)
 		@format = f
-		@sprintfFormat = (@format =~ /%/) != nil
+		@sprintfFormat =(@format =~ /%/) != nil
 	end
 
-	def monthName (month)
+	def monthName(month)
 		[ 'January', 'February', 'March', 'April', 'May', 'June', 'July',
 				'August', 'September', 'October', 'November', 'December' ][month - 1]
 	end
 
-	def dayName (date)
+	def dayName(date)
 		[ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
 				'Saturday' ][ date.wday ]
 	end
 	
-	def monthAbbrev (date)
+	def monthAbbrev(date)
 		[ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',
 				'Nov', 'Dec' ][ date.mon - 1 ]
 	end
 	
-	def getTime (date)
-		date.type == Date ? (DateTimeUtil.dateToTime (date)) : date
+	def getTime(date)
+		date.class == Date ? (DateTimeUtil.dateToTime(date)) : date
 	end
 
-	def to_s (date)
+	def to_s(date)
 		if date
 			str = @format.clone
 			if @sprintfFormat

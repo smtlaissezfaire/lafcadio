@@ -23,30 +23,30 @@ class TestObjectCollection < LafcadioTestCase
 		assert_not_nil @invoice.client
     filtered = @objColl.filterObjects("client", @invoice.client)
     assert_equal(1, filtered.size)
-    client2 = Client.new ( { "name" => "clientName2" } )
+    client2 = Client.new( { "name" => "clientName2" } )
     filtered2 = @objColl.filterObjects("client", client2)
     assert_equal(0, filtered2.size)
   end
 
   def testGetObjectCollection
     oc = Collection.new User
-    assert_equal(Collection, oc.type)
+    assert_equal(Collection, oc.class)
   end
 
 	def testSort
 		assert @clientColl.index(@client1) > @clientColl.index(@client3)
 		otherClientColl = @clientColl.sort( ["name"] )
 		assert otherClientColl.index(@client1) < otherClientColl.index(@client3)
-		@clientColl.sort! ([ "name" ])
+		@clientColl.sort!([ "name" ])
 		assert @clientColl.index(@client1) < @clientColl.index(@client3)
 	end
 
 	def testMultiValSort
 		newClientColl = Collection.new Client
-		newClientColl << (Client.new ({ 'objId' => 10, 'name' => 'name' }))
-		newClientColl << (Client.new ({ 'objId' => 1, 'name' => 'name' }))
+		newClientColl <<(Client.new({ 'objId' => 10, 'name' => 'name' }))
+		newClientColl <<(Client.new({ 'objId' => 1, 'name' => 'name' }))
 		assert_equal 10, newClientColl[0].objId
-		newClientColl.sort! ([ 'name', 'objId' ])
+		newClientColl.sort!([ 'name', 'objId' ])
 		assert_equal 1, newClientColl[0].objId
 	end
 

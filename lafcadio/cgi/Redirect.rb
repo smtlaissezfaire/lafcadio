@@ -1,7 +1,7 @@
 require 'lafcadio/util/Config'
 
 class Redirect
-	def initialize (localPath, solApDir = true)
+	def initialize(localPath, solApDir = true)
 		@localPath = localPath
 		@soleApacheDirective = solApDir
 	end

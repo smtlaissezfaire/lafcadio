@@ -10,7 +10,7 @@ class Query
 			"#{ @fieldName } = #{ @searchTerm.objId }"
 		end
 
-		def objectMeets (anObj)
+		def objectMeets(anObj)
 			value = anObj.send @fieldName
 			value ? value.objId == @searchTerm.objId : false
 		end

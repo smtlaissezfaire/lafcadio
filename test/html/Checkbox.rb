@@ -3,8 +3,8 @@ require 'lafcadio/html/Checkbox'
 
 class TestCheckbox < RUNIT::TestCase
 	def testToHTML
-		checkbox = HTML::Checkbox.new ({ 'name' => 'checkbox' })
-		assert_equal HTML::Checkbox, checkbox.type
+		checkbox = HTML::Checkbox.new({ 'name' => 'checkbox' })
+		assert_equal HTML::Checkbox, checkbox.class
 		html = checkbox.toHTML
 		assert_not_nil html.index(" type='checkbox'"), html
 		checkbox.checked = true

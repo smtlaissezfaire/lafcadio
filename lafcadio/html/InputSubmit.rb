@@ -7,7 +7,7 @@ class HTML
 			[]
 		end
 
-		def initialize (attHash = {})
+		def initialize(attHash = {})
 			attHash['type'] = 'submit'
 			super attHash
 		end

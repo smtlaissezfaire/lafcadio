@@ -5,13 +5,13 @@ class Query
 	attr_reader :objectType, :condition
 	attr_accessor :orderBy, :orderByOrder, :limit
 
-	def initialize (objectType, objIdOrCondition = nil)
+	def initialize(objectType, objIdOrCondition = nil)
 		@objectType = objectType
 		if objIdOrCondition
-			if objIdOrCondition.type <= Condition
+			if objIdOrCondition.class <= Condition
 				@condition = objIdOrCondition
 			else
-				@condition = Query::Equals.new (objectType.sqlPrimaryKeyName,
+				@condition = Query::Equals.new(objectType.sqlPrimaryKeyName,
 						objIdOrCondition, objectType)
 			end
 		end
@@ -21,7 +21,7 @@ class Query
 	def tables
 		tableNames = []
 		anObjectType = objectType
-		until (DomainObject.abstractSubclasses.index(anObjectType) != nil ||
+		until(DomainObject.abstractSubclasses.index(anObjectType) != nil ||
 				anObjectType == DomainObject)
 			tableNames.unshift anObjectType.tableName
 			anObjectType = anObjectType.superclass
@@ -33,7 +33,7 @@ class Query
 		whereClauses = []
 		anObjectType = objectType
 		superclass = anObjectType.superclass
-		until (DomainObject.abstractSubclasses.index(superclass) != nil ||
+		until(DomainObject.abstractSubclasses.index(superclass) != nil ||
 				superclass == DomainObject)
 			joinClause = "#{ sqlPrimaryKeyField(superclass) } = " +
 					"#{ sqlPrimaryKeyField(anObjectType) }"

@@ -5,7 +5,7 @@ class IntegerField < ObjectField
     5
   end
 
-	def valueFromSQL (string)
+	def valueFromSQL(string)
 		value = super
 		value ? value.to_i : nil
 	end

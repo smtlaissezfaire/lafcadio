@@ -8,11 +8,11 @@ class MockDbBridge
 		@retrievalsByType = Hash.new 0
 	end
 
-	def addObject (dbObject)
+	def addObject(dbObject)
 		commit dbObject
 	end
 
-	def commit (dbObject)
+	def commit(dbObject)
 		objectsByObjectType = @objects[dbObject.objectType]
 		unless objectsByObjectType
 			objectsByObjectType = {}
@@ -33,20 +33,20 @@ class MockDbBridge
 		end
   end
 	
-	def collection (objectType, objects)
+	def collection(objectType, objects)
 		coll = Collection.new objectType
 		coll = coll.concat objects
 		coll
 	end
 
-	def _getAll (objectType)
+	def _getAll(objectType)
 		@retrievalsByType[objectType] = @retrievalsByType[objectType] + 1
 		coll = Collection.new objectType
 		coll = coll.concat(@objects[objectType].values) if @objects[objectType]
 		coll
 	end
 
-	def getCollectionByQuery (query)
+	def getCollectionByQuery(query)
 		objectType = query.objectType
 		condition = query.condition
 		objects = _getAll(objectType).filter { |dbObj|
@@ -59,7 +59,7 @@ class MockDbBridge
 		collection objectType, objects
 	end
 
-	def getMax (objectType)
+	def getMax(objectType)
 		max = nil
 		@objects[objectType].keys.each { |objId|
 			max = objId if !max || objId > max

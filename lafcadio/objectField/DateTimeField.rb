@@ -2,10 +2,10 @@ require 'lafcadio/objectField/ObjectField'
 require 'lafcadio/util/StrUtil'
 
 class DateTimeField < ObjectField
-	def valueFromSQL (valueStr, lookupLink = true)
+	def valueFromSQL(valueStr, lookupLink = true) 
 		value = nil
-		if (valueStr =~ /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/) ||
-				(valueStr =~ /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/)
+		if ((valueStr =~ /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/) ||
+				(valueStr =~ /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/))
 			if $1.to_i != 0
 				begin
 					value = Time.local $1, $2, $3, $4, $5, $6
@@ -17,7 +17,7 @@ class DateTimeField < ObjectField
 		value
 	end
 
-	def valueForSQL (value)
+	def valueForSQL(value)
 		if value
 			year = value.year
 			month = StrUtil.pad value.mon.to_s, 2, "0"

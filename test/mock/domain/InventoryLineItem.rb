@@ -1,7 +1,7 @@
 require 'lafcadio/domain/DomainObject'
 
 class InventoryLineItem < DomainObject
-	def InventoryLineItem.classFields (fieldSet = 'default')
+	def InventoryLineItem.classFields(fieldSet = 'default')
 		require 'lafcadio/objectField/LinkField'
 		require 'test/mock/domain/SKU'
 		require 'lafcadio/objectField/IntegerField'
@@ -17,7 +17,7 @@ require 'test/mock/domain/SKU'
 
 class TestInventoryLineItem < RUNIT::TestCase
 	def TestInventoryLineItem.getTestInventoryLineItem
-		InventoryLineItem.new ({ 'objId' => 1, 'sku' => TestSKU.getTestSKU })
+		InventoryLineItem.new({ 'objId' => 1, 'sku' => TestSKU.getTestSKU })
 	end
 
 	def TestInventoryLineItem.storedTestInventoryLineItem

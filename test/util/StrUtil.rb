@@ -10,10 +10,10 @@ class TestStrUtil < RUNIT::TestCase
   end
   
   def testFloatFormatWithoutDecimalPadding
-  	assert_equal '100.00', (StrUtil.floatFormat (100, 2))
-  	assert_equal '100', (StrUtil.floatFormat (100, 2, false))
-  	assert_equal '99.95', (StrUtil.floatFormat (99.95, 2))
-  	assert_equal '99.95', (StrUtil.floatFormat (99.95, 2, false))
+  	assert_equal '100.00',(StrUtil.floatFormat(100, 2))
+  	assert_equal '100',(StrUtil.floatFormat(100, 2, false))
+  	assert_equal '99.95',(StrUtil.floatFormat(99.95, 2))
+  	assert_equal '99.95',(StrUtil.floatFormat(99.95, 2, false))
   end
 
   def testIncrementsFilename
@@ -38,8 +38,8 @@ class TestStrUtil < RUNIT::TestCase
 	end
 
 	def testNumericStringToUsFormat
-		assert_equal '5.00', (StrUtil.numericStringToUsFormat ('5,00'))
-		assert_equal '5,000', (StrUtil.numericStringToUsFormat ('5,000'))
+		assert_equal '5.00',(StrUtil.numericStringToUsFormat('5,00'))
+		assert_equal '5,000',(StrUtil.numericStringToUsFormat('5,000'))
 	end
 
 	def testSplitKeepInbetweens
@@ -49,7 +49,7 @@ class TestStrUtil < RUNIT::TestCase
 
 	def testLineWrap
 		qbr = 'the quick brown fox jumped over the lazy dog.'
-		result = StrUtil.lineWrap (qbr, 10)
+		result = StrUtil.lineWrap(qbr, 10)
 		assert_equal "the quick\nbrown fox\njumped\nover the\nlazy dog.", result
 	end
 end

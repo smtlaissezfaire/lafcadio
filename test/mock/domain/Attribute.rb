@@ -7,8 +7,8 @@ class Attribute < DomainObject
 		"attributes"
 	end
 
-	def Attribute.classFields (fieldSet = "default")
-		[ TextField.new (self, "name") ]
+	def Attribute.classFields(fieldSet = "default")
+		[ TextField.new(self, "name") ]
 	end
 
 	def Attribute.additionalHeaderFieldNames

@@ -1,11 +1,11 @@
 class SortOrderRangeCalculator
-	def initialize (sortOrderField, allRelatedObjects)
+	def initialize(sortOrderField, allRelatedObjects)
 		@sortOrderField = sortOrderField
 		@allRelatedObjects = allRelatedObjects
 		@objectStore = Context.instance.getObjectStore
 	end
 
-	def getSortOrderRange (allRelatedObjects)
+	def getSortOrderRange(allRelatedObjects)
 		highestSortOrder = 0
 		lowestSortOrder = nil
 		allRelatedObjects.each { |anObj|

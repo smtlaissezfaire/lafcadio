@@ -28,7 +28,7 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
   end
 
   def testCantCommitInvalidObj
-    client = Client.new ( {} )
+    client = Client.new( {} )
     client.errorMessages << "Please enter a first name."
     caught = false
     begin
@@ -61,7 +61,7 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
   end
 
 	def testSetsNulls
-		client = Client.new ({ 'objId' => 1, 'name' => 'client name',
+		client = Client.new({ 'objId' => 1, 'name' => 'client name',
 				'referringClient' => nil, 'priorityInvoice' => nil })
 		sqlMaker = DomainObjectSqlMaker.new client
 		sql = sqlMaker.sqlStatements[0]
@@ -70,7 +70,7 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
 	end
 
 	def testInheritanceCommit
-		ic = InternalClient.new ({ 'objId' => 1, 'name' => 'client name',
+		ic = InternalClient.new({ 'objId' => 1, 'name' => 'client name',
 				'billingType' => 'trade' })
 		sqlMaker = DomainObjectSqlMaker.new ic
 		statements = sqlMaker.sqlStatements

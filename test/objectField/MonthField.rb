@@ -9,7 +9,7 @@ class TestMonthField < LafcadioTestCase
 	end
 
 	def testValueFromCGI
-		fm = MockFieldManager.new ({ 'expirationDate.month' => '12',
+		fm = MockFieldManager.new({ 'expirationDate.month' => '12',
 																	'expirationDate.year' => '2005' })
 		value = @field.valueFromCGI fm
 		assert_equal 12, value.month
@@ -17,10 +17,10 @@ class TestMonthField < LafcadioTestCase
 	end
 
 	def testVerifyMonths
-		@field.verify ((Month.new (12, 2005)), nil)
+		@field.verify((Month.new(12, 2005)), nil)
 		caught = false
 		begin
-			@field.verify (Date.new (5, 12, 2005))
+			@field.verify(Date.new(5, 12, 2005))
 		rescue
 			caught = true
 		end
@@ -28,6 +28,6 @@ class TestMonthField < LafcadioTestCase
 	end
 
 	def testValueForSQL
-		assert_equal "'2005-12-01'", @field.valueForSQL(Month.new 12, 2005)
+		assert_equal("'2005-12-01'", @field.valueForSQL(Month.new(12, 2005)))
 	end
 end

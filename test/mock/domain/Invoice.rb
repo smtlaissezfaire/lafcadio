@@ -31,8 +31,8 @@ class Invoice < DomainObject
     dateField = DateField.new Invoice
     rateField = MoneyField.new Invoice, "rate"
     rateField.setDefault(clientField, "standard_rate")
-    hoursField = DecimalField.new (Invoice, "hours", 2)
-    paidField = DateField.new (Invoice, "paid", "Paid")
+    hoursField = DecimalField.new(Invoice, "hours", 2)
+    paidField = DateField.new(Invoice, "paid", "Paid")
     paidField.notNull = false
     [ invoiceNumField, clientField, dateField, rateField, hoursField,
       paidField ]

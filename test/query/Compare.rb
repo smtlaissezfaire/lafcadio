@@ -14,7 +14,7 @@ class TestCompare < LafcadioTestCase
 			Query::Compare::GREATER_THAN => '>'
 		}
 		comparators.each { |compareType, comparisonSymbol|
-			dc = Query::Compare.new ('date', Date.new(2003, 1, 1), Invoice,
+			dc = Query::Compare.new('date', Date.new(2003, 1, 1), Invoice,
 					compareType)
 			assert_equal "date #{ comparisonSymbol } '2003-01-01'", dc.toSql
 		}
@@ -31,24 +31,24 @@ class TestCompare < LafcadioTestCase
 		invoice2.date = date2
 		invoice3 = invoice.clone
 		invoice3.date = date3
-		dc1 = Query::Compare.new (
+		dc1 = Query::Compare.new(
 				'date', date2, Invoice, Query::Compare::LESS_THAN)
 		assert dc1.objectMeets(invoice1)
 		assert !dc1.objectMeets(invoice2)
 		assert !dc1.objectMeets(invoice3)
-		dc2 = Query::Compare.new (
+		dc2 = Query::Compare.new(
 				'date', date2, Invoice,
 				Query::Compare::LESS_THAN_OR_EQUAL)
 		assert dc2.objectMeets(invoice1)
 		assert dc2.objectMeets(invoice2)
 		assert !dc2.objectMeets(invoice3)
-		dc3 = Query::Compare.new (
+		dc3 = Query::Compare.new(
 				'date', date2, Invoice,
 				Query::Compare::GREATER_THAN)
 		assert !dc3.objectMeets(invoice1)
 		assert !dc3.objectMeets(invoice2)
 		assert dc3.objectMeets(invoice3)
-		dc4 = Query::Compare.new (
+		dc4 = Query::Compare.new(
 				'date', date2, Invoice,
 				Query::Compare::GREATER_THAN_OR_EQUAL)
 		assert !dc4.objectMeets(invoice1)
@@ -59,7 +59,7 @@ class TestCompare < LafcadioTestCase
 	def testMockComparatorAndNilValue
 		invoice = Invoice.getTestInvoice
 		invoice.date = nil
-		dc = Query::Compare.new (
+		dc = Query::Compare.new(
 				'date', Date.today, Invoice, Query::Compare::LESS_THAN)
 		assert !dc.objectMeets(invoice)
 	end
@@ -77,7 +77,7 @@ class TestCompare < LafcadioTestCase
 	end
 	
 	def testFieldBelongingToSuperclass
-		condition = Query::Compare.new ('standard_rate', 10, InternalClient,
+		condition = Query::Compare.new('standard_rate', 10, InternalClient,
 				Query::Compare::LESS_THAN)
 		assert_equal 'standard_rate < 10', condition.toSql
 	end

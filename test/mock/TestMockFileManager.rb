@@ -27,25 +27,25 @@ class TestMockFileManager < LafcadioTestCase
 	def testSave
 		xmlStr = "<product></product>"
 		xmlFullPath = "cache/product5.xml"
-		@mfm.save (xmlFullPath, xmlStr)
-		assert_equal xmlStr, (@mfm.read (xmlFullPath))
+		@mfm.save(xmlFullPath, xmlStr)
+		assert_equal xmlStr,(@mfm.read(xmlFullPath))
 	end
 
 	def testWrite
 		testData = "The quick brown fox"
 		testPath = "test.dat"
-		@mfm.write (testPath, testData)
+		@mfm.write(testPath, testData)
 		assert_equal testData, @mfm.read(testPath)
 	end
 
 	def testDelete
 		path = "cache/product5.xml.lock"
-		@mfm.touch (path)
+		@mfm.touch(path)
 		@mfm.delete path
 		assert !@mfm.exists("cache", 'product5.xml.lock')
 	end
 
 	def testCopy
-		@mfm.copy ("test/file.new", "test/tile")
+		@mfm.copy("test/file.new", "test/tile")
 	end
 end

@@ -1,7 +1,7 @@
 module DomainComparable
 	include Comparable
 
-	def <=> (anOther)
+	def <=>(anOther)
 		if self.objectType == anOther.objectType
 			self.objId <=> anOther.objId
 		else
@@ -9,7 +9,7 @@ module DomainComparable
 		end
 	end
 	
-	def eql? (otherObj)
+	def eql?(otherObj)
 		self == otherObj
 	end
 end

@@ -7,7 +7,7 @@ class TestObjectField < LafcadioTestCase
 	def setup
 		super
 		@client = Client.storedTestClient
-		@user = User.new ({ "salutation" => "Mr", "firstNames" => "Francis",
+		@user = User.new({ "salutation" => "Mr", "firstNames" => "Francis",
 				"lastName" => "Hwang", "phone" => "", "address1" => "",
 				"address2" => "", "city" => "", "state" => "",
 				"zip" => "", "email" => "test@test.com",
@@ -49,7 +49,7 @@ class TestObjectField < LafcadioTestCase
   def testUniqueAllowsEditsOfSameRow
     field = ObjectField.new User, "email"
     field.unique = true
-    field.verify ("test@test.com", 1)
+    field.verify("test@test.com", 1)
   end
 
 	def testNameForSQL
@@ -68,7 +68,7 @@ class TestObjectField < LafcadioTestCase
 
 	def testValueForSQL
     omf = ObjectField.new nil, "someField"
-		assert_equal String, omf.valueForSQL(nil).type
+		assert_equal String, omf.valueForSQL(nil).class
 		assert_equal 'null', omf.valueForSQL(nil)
 	end
 	
@@ -76,12 +76,12 @@ class TestObjectField < LafcadioTestCase
 		of = ObjectField.new nil, 'someField'
 		of.notNull = false
 		valueFromSql = of.valueFromSQL(nil)
-		assert_equal NilClass, valueFromSql.type
+		assert_equal NilClass, valueFromSql.class
 		assert_equal nil, valueFromSql
 	end
 	
 	class ObjectField_OLD
-		def initialize (objectType, name, englishName = nil)
+		def initialize(objectType, name, englishName = nil)
 			require 'lafcadio/objectStore/ObjectStore'
 	
 			@objectType = objectType

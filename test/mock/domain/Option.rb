@@ -5,7 +5,7 @@ require 'test/mock/domain/Attribute'
 require 'lafcadio/objectField/LinkField'
 
 class Option < DomainObject
-	def Option.classFields (fieldSet = "default")
+	def Option.classFields(fieldSet = "default")
 		attributeField = LinkField.new self, Attribute
 		attributeField.newDuringEdit = false
 		nameField = TextField.new self, "name"

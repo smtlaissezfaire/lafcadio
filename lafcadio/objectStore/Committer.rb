@@ -7,7 +7,7 @@ class Committer
 
 	attr_reader :commitType
 
-	def initialize (dbObject, dbBridge)
+	def initialize(dbObject, dbBridge)
 		@dbObject = dbObject
 		@dbBridge = dbBridge
 		@objectStore = Context.instance.getObjectStore
@@ -26,7 +26,7 @@ class Committer
 
 	def execute
 		setCommitType
-    @dbObject.lastCommit = @objectStore.getLastCommit (@dbObject)
+    @dbObject.lastCommit = @objectStore.getLastCommit(@dbObject)
 		@dbObject.preCommitTrigger
     if @dbObject.delete
       dependentClasses = @dbObject.objectType.dependentClasses
@@ -36,7 +36,7 @@ class Committer
         		field.name, @dbObject)
         collection.each { |dependentObject|
 					eval %{ dependentObject.#{field.name} = nil }
-					@objectStore.commit (dependentObject)
+					@objectStore.commit(dependentObject)
         }
       }
     end

@@ -8,13 +8,13 @@ class Month
 
 	attr_reader :month, :year
 
-	def initialize (month, year)
+	def initialize(month, year)
 		fail "invalid month" if month < 1 || month > 12
 		@month = month
 		@year = year
 	end
 
-	def <=> (anOther)
+	def <=>(anOther)
 		if @year == anOther.year
 			@month <=> anOther.month
 		else
@@ -30,7 +30,7 @@ class Month
 		"#{@year}#{@month}".to_i
 	end
 
-	def eql? (anOther)
+	def eql?(anOther)
 		self == anOther
 	end
 end

@@ -5,13 +5,13 @@ require 'test/mock/domain/Invoice'
 class TestDecimalField < LafcadioTestCase
   def setup
   	super
-    @odf = DecimalField.new (Invoice, "hours", 2)
+    @odf = DecimalField.new(Invoice, "hours", 2)
   end
   
   def testvalueFromCGI
     mfm = MockFieldManager.new( { "hours" => "1.1" } )
     obj = @odf.valueFromCGI mfm
-    assert_equal(Float, obj.type)
+    assert_equal(Float, obj.class)
     assert_equal(1.1, obj)
   end
 
@@ -26,18 +26,18 @@ class TestDecimalField < LafcadioTestCase
 
 	def testVerifiedValue
 		@odf.notNull = false
-		mfm = MockFieldManager.new ({ 'hours' => '' })
+		mfm = MockFieldManager.new({ 'hours' => '' })
 		assert_nil @odf.verifiedValue(mfm)
 	end
 
   def testNeedsNumeric
     caught = false
     begin
-      @odf.verify ("36.5", nil)
+      @odf.verify("36.5", nil)
     rescue
       caught = true
     end
     assert(caught)
-    @odf.verify (36.5, nil)
+    @odf.verify(36.5, nil)
   end
 end

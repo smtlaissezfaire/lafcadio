@@ -7,11 +7,11 @@ class MoneyField < DecimalField
 		MoneyFieldViewer
 	end
 
-  def initialize (objectType, name, englishName = nil)
-    super (objectType, name, 2, englishName)
+  def initialize(objectType, name, englishName = nil)
+    super(objectType, name, 2, englishName)
   end
 
-  def valueAsHTML (dbObject)
+  def valueAsHTML(dbObject)
     floatValue = super dbObject
     floatValue != nil ? "$" + StrUtil.floatFormat(floatValue, 2) : ""
   end

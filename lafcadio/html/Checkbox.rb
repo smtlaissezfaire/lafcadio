@@ -7,7 +7,7 @@ class HTML
 			super << 'checked'
 		end
 
-		def initialize (attHash = {})
+		def initialize(attHash = {})
 			attHash['type'] = 'checkbox'
 			super attHash
 		end

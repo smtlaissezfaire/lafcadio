@@ -17,15 +17,15 @@ class PasswordField < TextField
   attr_reader :maxLength
 	attr_accessor :autoGenerate
 
-  def initialize (objectType, maxLength, name = "password", englishName = nil)
-    super (objectType, name, englishName)
+  def initialize(objectType, maxLength, name = "password", englishName = nil)
+    super(objectType, name, englishName)
     @maxLength = maxLength
 		@autoGenerate = true
   end
 
-  def valueFromCGI (fieldManager)
+  def valueFromCGI(fieldManager)
 		require 'lafcadio/objectField/FieldValueError'
-    if (firstTime (fieldManager)) && @autoGenerate
+    if(firstTime(fieldManager)) && @autoGenerate
 			value = PasswordField.randomPassword
 		else
       val1 = fieldManager.get("#{name}1")

@@ -17,7 +17,7 @@ class ObjectField
     FieldViewer
   end
 
-  def initialize (objectType, name, englishName = nil)
+  def initialize(objectType, name, englishName = nil)
     @objectType = objectType
     @name = name
     @dbFieldName = name
@@ -34,13 +34,13 @@ class ObjectField
 		EnglishUtil.sentence "Please enter %a %nam.", englishName.downcase
   end
 
-  def verify (value, objId)
+  def verify(value, objId)
     if !value && notNull
       raise FieldValueError, nullErrorMsg, caller
     end
     if value
-      valueType = self.type.valueType
-			unless value.type <= valueType
+      valueType = self.class.valueType
+			unless value.class <= valueType
         raise FieldValueError, 
 						"#{name} needs an object of type #{valueType.name}", caller
       end
@@ -48,7 +48,7 @@ class ObjectField
     end
   end
 
-  def verifyUniqueness (value, objId)
+  def verifyUniqueness(value, objId)
     collection = ObjectStore.getObjectStore.getAll(@objectType)
     collisions = collection.filterObjects(self.name, value)
     collisions = collisions.removeObjects("objId", objId)
@@ -67,11 +67,11 @@ class ObjectField
     dbFieldName
   end
 
-  def valueForSQL (value)
+  def valueForSQL(value)
     value || 'null'
   end
 
-  def firstTime (fieldManager)
+  def firstTime(fieldManager)
     objId = fieldManager.getObjId
     objId == nil
   end
@@ -81,7 +81,7 @@ class ObjectField
     prevObject.send(name)
   end
 
-  def valueFromCGI (fieldManager)
+  def valueFromCGI(fieldManager)
     objId = fieldManager.getObjId
     firstTime = firstTime fieldManager
     if writeOnce && !firstTime
@@ -93,26 +93,26 @@ class ObjectField
     value
   end
 
-  def verifiedValue (fieldManager)
+  def verifiedValue(fieldManager)
     value = valueFromCGI(fieldManager)
-    verify (value, fieldManager.getObjId)
+    verify(value, fieldManager.getObjId)
     value
   end
 
-  def processBeforeVerify (value)
+  def processBeforeVerify(value)
     value = @default if value == nil
     value
   end
 
-  def valueFromSQL (string)
+  def valueFromSQL(string)
     string
   end
 
-  def valueAsHTML (dbObject)
+  def valueAsHTML(dbObject)
     dbObject.send(name)
   end
 
-  def setDefault (linkField, fieldName)
+  def setDefault(linkField, fieldName)
     linkField.listener = self
     @defaultFieldName = fieldName
   end
@@ -121,11 +121,11 @@ class ObjectField
     nil
   end
 
-	def viewer (value, objId)
-		self.type.viewerType.new(value, self, objId)
+	def viewer(value, objId)
+		self.class.viewerType.new(value, self, objId)
 	end
 
-	def <=> (other)
+	def <=>(other)
 		if @objectType == other.objectType && name == other.name
 			0
 		else

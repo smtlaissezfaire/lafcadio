@@ -6,13 +6,13 @@ class HTML
 			"</#{tagName}>"
 		end
 
-		def initialize (attHash = {}, firstElt = nil)
+		def initialize(attHash = {}, firstElt = nil)
 			super attHash
 			self << firstElt if firstElt
 		end
 
 		def toHTML
-			super + contents + self.type.endTag
+			super + contents + self.class.endTag
 		end
 
 		def contents
@@ -22,7 +22,7 @@ class HTML
 			eltToHTML.join "\n"
 		end
 
-		def eltHTML (elt)
+		def eltHTML(elt)
 			( elt.respond_to? "toHTML" ) ? elt.toHTML : elt.to_s
 		end
 	end

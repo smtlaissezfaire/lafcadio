@@ -6,8 +6,8 @@ require 'lafcadio/query/Not'
 class TestNot < LafcadioTestCase
 	def setup
 		super
-		@not = Query::Not.new (
-				Query::Equals.new ('email', 'test@test.com', User))
+		@not = Query::Not.new(
+				Query::Equals.new('email', 'test@test.com', User))
 	end
 
 	def testToSql
@@ -17,7 +17,7 @@ class TestNot < LafcadioTestCase
 	def testObjectsMeets
 		user = User.getTestUser
 		assert !@not.objectMeets(user)
-		user2 = User.new ({ 'email' => 'jane.doe@email.com' })
+		user2 = User.new({ 'email' => 'jane.doe@email.com' })
 		assert @not.objectMeets(user2)
 	end
 end

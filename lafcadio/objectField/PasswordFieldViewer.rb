@@ -9,7 +9,7 @@ class PasswordFieldViewer < FieldViewer
     nil
   end
 
-  def passwordField (num)
+  def passwordField(num)
     "<input name='#{@field.name}#{num}' value='' size='#{textBoxSize}' " +
 	"type='password'>"
   end

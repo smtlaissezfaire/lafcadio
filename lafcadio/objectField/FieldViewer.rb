@@ -1,5 +1,5 @@
 class FieldViewer
-  def initialize (value, field, objId)
+  def initialize(value, field, objId)
     @value = value
     @field = field
     @objId = objId
@@ -21,19 +21,19 @@ class FieldViewer
     25
   end
 
-  def toHTMLRow (rightContent, label = @field.englishName)
+  def toHTMLRow(rightContent, label = @field.englishName)
 		require 'lafcadio/html/TD'
 		require 'lafcadio/html/TR'
     leftContent = @field.hideLabel ? "" : label.downcase + ":"
-    if leftContent == "" && (rightContent == "" || rightContent == nil)
+    if leftContent == "" &&(rightContent == "" || rightContent == nil)
       nil
     else
-      row = HTML::TR.new ({ 'bgcolor' => "#ffffff" })
+      row = HTML::TR.new({ 'bgcolor' => "#ffffff" })
 			row.valign = 'top'
 			labelCellArgs = { 'valign' => 'top', 'align' => 'right' }
 			labelCellArgs['class'] = 'tableCellBold' if leftContent != ""
-      row << (HTML::TD.new ( labelCellArgs, leftContent))
-      row << (HTML::TD.new ({ 'class' => 'tableCell', 'valign' => 'top' },
+      row <<(HTML::TD.new( labelCellArgs, leftContent))
+      row <<(HTML::TD.new({ 'class' => 'tableCell', 'valign' => 'top' },
 					rightContent))
       row
     end

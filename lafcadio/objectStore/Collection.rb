@@ -1,7 +1,7 @@
 class Collection < Array
 	attr_reader :objectType, :filteredByName, :filteredByValue
 
-  def initialize (objectType, filteredByName = nil, filteredByValue = nil)
+  def initialize(objectType, filteredByName = nil, filteredByValue = nil)
 		unless objectType && objectType <= DomainObject
 			raise "Collection can only store DomainObjects"
 		end
@@ -10,7 +10,7 @@ class Collection < Array
 		@filteredByValue = filteredByValue
   end
 
-	def elementCompare (x, y, accessors)
+	def elementCompare(x, y, accessors)
 		xSortValue = x.send(accessors[0])
 		ySortValue = y.send(accessors[0])
 		if xSortValue.respond_to? 'upcase'
@@ -25,15 +25,15 @@ class Collection < Array
 		end
 	end
 
-	def sort! ( accessors = [ 'objId' ] )
+	def sort!( accessors = [ 'objId' ] )
 		if block_given?
-			super &(proc { |x, y| yield (x, y) } )
+			super &(proc { |x, y| yield(x, y) } )
 		else
 			super &(proc { |x, y| elementCompare(x, y, accessors) } )
 		end
 	end
 
-	def sort ( accessors = [ 'objId' ] )
+	def sort( accessors = [ 'objId' ] )
 		otherColl = self.clone
 		if block_given?
 			otherColl.sort! { |x, y| yield(x, y) }
@@ -43,10 +43,10 @@ class Collection < Array
 		otherColl
 	end
 
-	def filter (fieldName = nil, searchTerm = nil)
+	def filter(fieldName = nil, searchTerm = nil)
     filteredCollection = Collection.new @objectType, fieldName,
 				searchTerm
-		if (fieldName && searchTerm)
+		if(fieldName && searchTerm)
 	    each { |obj|
   	    filteredCollection << obj if obj.send(fieldName) == searchTerm
     	}
@@ -60,15 +60,15 @@ class Collection < Array
 		filter { |obj| yield obj }
   end
 
-  def filterObjects (fieldName, searchTerm)
+  def filterObjects(fieldName, searchTerm)
 		filter fieldName, searchTerm
   end
 
-	def remove (fieldName, searchTerm)
+	def remove(fieldName, searchTerm)
 		filter { |obj| obj.send(fieldName) != searchTerm }
 	end
 
-  def removeObjects (fieldName, searchTerm)
+  def removeObjects(fieldName, searchTerm)
 		remove fieldName, searchTerm
   end
 end

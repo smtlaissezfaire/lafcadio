@@ -9,20 +9,20 @@ class ImageField < ObjectField
 
   @@imgDir = "../html/img/"
 
-  def initialize (objectType, name = "image", englishName = nil,
+  def initialize(objectType, name = "image", englishName = nil,
       fileManager = FileManager)
     super objectType, name, englishName
     @fileManagerClass = fileManager
   end
 
-  def valueFromCGI (fieldManager)
+  def valueFromCGI(fieldManager)
 		require 'lafcadio/cgi/ImageUpload'
 		value = super fieldManager
-		if value.type <= ImageUpload
+		if value.class <= ImageUpload
       if value.desiredFilename == ""
         value = fieldManager.get("#{name}.prev")
         if value == nil
-          if firstTime (fieldManager)
+          if firstTime(fieldManager)
             value = nil
           else
             value = prevValue fieldManager.getObjId
@@ -35,11 +35,11 @@ class ImageField < ObjectField
     value
   end
 
-  def valueForSQL (value)
+  def valueForSQL(value)
     "'#{value}'"
   end
 
-  def valueAsHTML (dbObject)
+  def valueAsHTML(dbObject)
 		require 'lafcadio/html/IMG'
     filename = super dbObject
 		if filename != "" && filename != nil

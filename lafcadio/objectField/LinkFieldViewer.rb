@@ -17,7 +17,7 @@ class LinkFieldViewer < FieldViewer
         statement = "setValue = #{defaultValue}"
         ifElseTree.addPair(condition, statement)
       }
-      aFunction = "function #{functionName} (triggerField) {\n" +
+      aFunction = "function #{functionName}(triggerField) {\n" +
 	  "triggerValue = triggerField.value;\nsetValue = 0;\n" +
 	  "#{ifElseTree.toJavaScript}\n"
 	  "document.ae.#{@field.listener.name}.value = setValue;\n}"
@@ -36,7 +36,7 @@ class LinkFieldViewer < FieldViewer
 		if @field.linkedType == @field.objectType
 			optionObjs = optionObjs.removeObjects("objId", @objId)
 		end
-		optionObjs.sort! ( [@field.sortField || 'objId'] )
+		optionObjs.sort!( [@field.sortField || 'objId'] )
 		optionObjs
   end
 

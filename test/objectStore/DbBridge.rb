@@ -34,7 +34,7 @@ class TestDBBridge < RUNIT::TestCase
 			@sqlStatements = []
 		end
 
-    def query (str)
+    def query(str)
       @lastSQL = str
 			@sqlStatements << str
       if str == "select last_insert_id()"
@@ -50,7 +50,7 @@ class TestDBBridge < RUNIT::TestCase
       end
     end
 
-    def getAll (objectType)
+    def getAll(objectType)
       Collection.new objectType
     end
   end
@@ -91,23 +91,23 @@ class TestDBBridge < RUNIT::TestCase
 			@@dbName
 		end
 
-    def initialize (host, user, password)
+    def initialize(host, user, password)
       @@instances += 1
       raise "initialize me just once, please" if @@instances > 1
     end
 
-    def select_db (dbName)
+    def select_db(dbName)
     	@@dbName = dbName
     end
   end
 
   def testConnectionPooling
-    0.upto(100) { |i| DbBridge.new (nil, MockMysql) }
+    0.upto(100) { |i| DbBridge.new(nil, MockMysql) }
     DbBridge.flushConnection
   end
 
   def testLastObjIdInserted
-    client = Client.new ( { "name" => "clientName1" } )
+    client = Client.new( { "name" => "clientName1" } )
     @dbb.commit client
     assert_equal 12, @dbb.lastObjIdInserted
 		dbb2 = DbBridge.new @mockDB
@@ -117,11 +117,11 @@ class TestDBBridge < RUNIT::TestCase
 	def testGetAll
 		query = Query.new Domain::LineItem
 		coll = @dbb.getCollectionByQuery query
-		assert_equal Collection, coll.type
+		assert_equal Collection, coll.class
 	end
 
 	def testCommitsForInheritedObjects
-		ic = InternalClient.new ({ 'objId' => 1, 'name' => 'client name',
+		ic = InternalClient.new({ 'objId' => 1, 'name' => 'client name',
 				'billingType' => 'trade' })
 		@dbb.commit ic
 		assert_equal 2, @mockDB.sqlStatements.size

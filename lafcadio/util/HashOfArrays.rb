@@ -3,16 +3,16 @@ class HashOfArrays
 		@values = {}
 	end
 
-	def set (key, array)
-		raise "HashOfArrays.[]= needs a value of type Array" if array.type != Array
+	def set(key, array)
+		raise "HashOfArrays.[]= needs a value of type Array" if array.class != Array
 		@values[key] = array
 	end
 
-	def []= (key, array)
+	def []=(key, array)
 		set key, array
 	end
 
-	def getArray (key)
+	def getArray(key)
 		array = @values[key]
 		if array == nil
 			array = []
@@ -21,12 +21,12 @@ class HashOfArrays
 		array
 	end
 
-	def get (key)
+	def get(key)
 		array = @values[key]
 		array != nil ? array[0] : nil
 	end
 
-	def [] (key)
+	def [](key)
 		getArray key
 	end
 

@@ -39,7 +39,7 @@ class TestQueueHash < LafcadioTestCase
   end
 
 	def testNewFromArray
-		qh = QueueHash.newFromArray ([ 'a', 'b', 'c' ])
+		qh = QueueHash.newFromArray([ 'a', 'b', 'c' ])
 		assert_equal 'a', qh['a']
 		assert_equal 'b', qh['b']
 		assert_equal 'c', qh['c']

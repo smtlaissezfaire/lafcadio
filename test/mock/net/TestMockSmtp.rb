@@ -10,14 +10,14 @@ class TestMockSmtp < LafcadioTestCase
 	end
 
 	def testMessageSent
-		assert (!MockSmtp.messageSent)
+		assert(!MockSmtp.messageSent)
 		msg = [ "Subject: test subject\n", "\n", 'msg' ]
 		MockSmtp.start("localhost") { |smtp|
 			smtp.sendmail(msg, 'from', 'test_recipient@mail.com')
 		}
 		assert MockSmtp.messageSent
 		assert_equal "msg", MockSmtp.lastMessage
-		assert_equal String, MockSmtp.lastMessage.type
+		assert_equal String, MockSmtp.lastMessage.class
 		assert_equal "test subject", MockSmtp.lastSubject
 	end
 
@@ -48,7 +48,7 @@ class TestMockSmtp < LafcadioTestCase
 		MockSmtp.start('localhost') { |smtp|
 			smtp.sendmail('msg', 'from', [ "test@test.com" ])
 		}
-		emailObject = Email.new ('subject', 'to', 'from')
+		emailObject = Email.new('subject', 'to', 'from')
 		caught = false
 		begin
 			MockSmtp.start('localhost') { |smtp|

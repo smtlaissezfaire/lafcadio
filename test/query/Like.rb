@@ -21,16 +21,16 @@ class TestLike < LafcadioTestCase
 	
 	def testObjectMeets
 		like4 = Query::Like.new('client', '1', Invoice)
-		client212 = Client.new ({ 'objId' => 212 })
-		invoiceWith212 = Invoice.new ({ 'client' => client212 })
+		client212 = Client.new({ 'objId' => 212 })
+		invoiceWith212 = Invoice.new({ 'client' => client212 })
 		assert like4.objectMeets(invoiceWith212)
-		client234 = Client.new ({ 'objId' => 234 })
-		invoiceWith234 = Invoice.new ({ 'client' => client234 })
+		client234 = Client.new({ 'objId' => 234 })
+		invoiceWith234 = Invoice.new({ 'client' => client234 })
 		assert !like4.objectMeets(invoiceWith234)
 	end
 	
 	def testFieldBelongingToSuperclass
-		condition = Query::Like.new ('name', 'client name', InternalClient)
+		condition = Query::Like.new('name', 'client name', InternalClient)
 		assert_equal "name like '%client name%'", condition.toSql
 	end
 end

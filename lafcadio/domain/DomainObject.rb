@@ -23,7 +23,7 @@ class DomainObject
 	def DomainObject.selfAndConcreteSuperclasses
 		classes = [ ]
 		anObjectType = self
-		until (anObjectType == DomainObject ||
+		until(anObjectType == DomainObject ||
 				abstractSubclasses.index(anObjectType) != nil)
 			classes << anObjectType
 			anObjectType = anObjectType.superclass
@@ -31,12 +31,12 @@ class DomainObject
 		classes
 	end
 
-	def DomainObject.method_missing (methodId)
+	def DomainObject.method_missing(methodId)
 		require 'lafcadio/domain/ObjectType'
 		ObjectType.new(self).send(methodId.id2name)
 	end
 
-	def DomainObject.getField (fieldName)
+	def DomainObject.getField(fieldName)
 		field = nil
 		self.classFields.each { |aField|
 			field = aField if aField.name == fieldName
@@ -54,7 +54,7 @@ class DomainObject
 			if aClass != DomainObjectProxy &&
 					(!DomainObject.abstractSubclasses.index(aClass))
 				aClass.classFields.each { |field|
-					if field.type <= LinkField && field.linkedType == self.objectType
+					if field.class <= LinkField && field.linkedType == self.objectType
 						dependentClasses[aClass] = field
 					end
 				}
@@ -75,7 +75,7 @@ class DomainObject
 		allFields
 	end
 	
-	def DomainObject.inherited (subclass)
+	def DomainObject.inherited(subclass)
 		@@subclassHash[subclass] = true
 	end
 	
@@ -86,21 +86,21 @@ class DomainObject
   attr_accessor :delete, :errorMessages, :objId, :lastCommit, :fields
   protected :fields
 
-  def initialize (fieldHash)
+  def initialize(fieldHash)
 		@objId = fieldHash["objId"] != nil ? fieldHash["objId"].to_i : nil
     @errorMessages = []
     @fields = {}
-    type.allFields.each { |field|
+    self.class.allFields.each { |field|
     	self.send("#{ field.name }=", fieldHash[field.name])
 		}
   end
   
-  def method_missing (methId, arg1 = nil)
+  def method_missing(methId, arg1 = nil)
 		methodName = methId.id2name
 		getter = false
 		setter = false
 		field = nil
-		type.allFields.each { |aField|
+		self.class.allFields.each { |aField|
 			if aField.name == methodName
 				getter = true
 				field = aField
@@ -112,19 +112,19 @@ class DomainObject
 		if getter
 			@fields[field.name]
 		elsif setter
-			if field.type <= LinkField
-				if arg1.type != DomainObjectProxy && arg1
+			if field.class <= LinkField
+				if arg1.class != DomainObjectProxy && arg1
 					arg1 = DomainObjectProxy.new(arg1)
 				end
 			end
 			@fields[field.name] = arg1
 		else
-			super (methId)
+			super(methId)
 		end
   end
 
 	def objectType
-		self.type.objectType
+		self.class.objectType
 	end
 
 	def preCommitTrigger
@@ -135,7 +135,7 @@ class DomainObject
 		nil
 	end
 
-	def delete= (value)
+	def delete=(value)
 		if value && !objId
 			raise "No point deleting an object that's not already in the DB"
 		end

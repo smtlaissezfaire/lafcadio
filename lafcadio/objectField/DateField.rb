@@ -16,27 +16,27 @@ class DateField < ObjectField
 
 	attr_accessor :range
 
-  def initialize (objectType, name = "date", englishName = nil)
-    super (objectType, name, englishName)
+  def initialize(objectType, name = "date", englishName = nil)
+    super(objectType, name, englishName)
 		@range = RANGE_NEAR_FUTURE
   end
 
-  def valueFromCGI (fieldManager)
+  def valueFromCGI(fieldManager)
     fieldManager.getDate name
   end
 
-  def valueForSQL (value)
+  def valueForSQL(value)
 		value ? "'#{value.to_s}'" : 'null'
   end
 
-  def valueFromSQL (string, lookupLink = true)
+  def valueFromSQL(string, lookupLink = true)
 		if string != nil
 	    dateFields = string.split("-")
   	  year = dateFields[0].to_i
     	month = dateFields[1].to_i
 	    dom = dateFields[2].to_i
   	  if year != 0 && month != 0 && dom != 0
-    	  Date.new (year, month, dom)
+    	  Date.new(year, month, dom)
 	    else
   	    nil
     	end

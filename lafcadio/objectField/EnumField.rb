@@ -8,18 +8,18 @@ class EnumField < TextField
 
 	attr_reader :enums
 
-	def initialize (objectType, name, enums, englishName = nil)
+	def initialize(objectType, name, enums, englishName = nil)
 		require 'lafcadio/util/QueueHash'
 		super objectType, name, englishName
-		if enums.type == Array 
+		if enums.class == Array 
 			@enums = QueueHash.newFromArray enums
 		else
 			@enums = enums
 		end
 	end
 	
-	def valueForSQL (value)
-		value != '' ? (super (value)) : 'null'
+	def valueForSQL(value)
+		value != '' ?(super(value)) : 'null'
 	end
 end
 

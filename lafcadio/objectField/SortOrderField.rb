@@ -8,12 +8,12 @@ class SortOrderField < IntegerField
 
 	attr_accessor :sortWithin
 
-	def initialize (objectType, name = "sortOrder", englishName = "Sort order")
+	def initialize(objectType, name = "sortOrder", englishName = "Sort order")
 		super objectType, name, englishName
 		@sortWithin = nil
 	end
 
-	def valueFromCGI (fieldManager)
+	def valueFromCGI(fieldManager)
 		if firstTime fieldManager
 			highestSortOrder = 0
 			objectStore = Context.instance.getObjectStore
@@ -26,7 +26,7 @@ class SortOrderField < IntegerField
 		end
 	end
 
-	def glyph (direction, objId)
+	def glyph(direction, objId)
 		require 'lafcadio/html/A'
 		href = "/cgi-bin/editSortOrder.rb?objectType=Option&objId=#{objId}&" +
 				"direction=#{direction}"
@@ -34,8 +34,8 @@ class SortOrderField < IntegerField
 		HTML::A.new({ 'href' => href }, arrow).toHTML
 	end
 
-	def allRelatedObjects (dbObject)
-		allRelatedObjs = ObjectStore.getObjectStore.getAll(dbObject.type)
+	def allRelatedObjects(dbObject)
+		allRelatedObjs = ObjectStore.getObjectStore.getAll(dbObject.class)
 		if @sortWithin !=  nil
 			sortWithinFieldName = @sortWithin.name.downcase
 			sortWithinValue = dbObject.send(sortWithinFieldName)
@@ -45,7 +45,7 @@ class SortOrderField < IntegerField
 		allRelatedObjs
 	end
 
-	def valueAsHTML (dbObject)
+	def valueAsHTML(dbObject)
 		require 'lafcadio/objectField/SortOrderRangeCalculator'
 		calculator = SortOrderRangeCalculator.new self, allRelatedObjects(dbObject)
 		sortOrderRange = calculator.execute

@@ -5,7 +5,7 @@ require 'lafcadio/test/LafcadioTestCase'
 class TestLinkFieldViewer < LafcadioTestCase
   def setup
   	super
-    @fieldWithListener = LinkField.new (nil, Client, "client", "Client")
+    @fieldWithListener = LinkField.new(nil, Client, "client", "Client")
     rateField = MoneyField.new nil, "rate"
     rateField.setDefault(@fieldWithListener, "standard_rate")
   end
@@ -24,7 +24,7 @@ class TestLinkFieldViewer < LafcadioTestCase
 
   def testJavaScriptFunction
 		js = @fieldWithListener.viewer(nil, nil).javaScriptFunction
-    assert_not_nil(js.index("setRateDefault (triggerField)"))
+    assert_not_nil(js.index("setRateDefault(triggerField)"))
   end
 
   def testHTMLWidgetForListenedField
@@ -38,14 +38,14 @@ class TestLinkFieldViewer < LafcadioTestCase
   end
 
   def testNullOption
-    olf = LinkField.new (nil, Client, "client", "Client")
+    olf = LinkField.new(nil, Client, "client", "Client")
     olf.notNull = false
 		html = olf.viewer(nil, nil).toHTMLWidget
     assert_not_nil html.index("<option value=''>")
   end
 
 	def testNewDuringEditIsFalse
-		olf = LinkField.new (nil, Client, "client", "Client")
+		olf = LinkField.new(nil, Client, "client", "Client")
 		olf.newDuringEdit = false
 		html = olf.viewer(nil, nil).toHTMLWidget
 		assert_nil html.index("new client ..."), html

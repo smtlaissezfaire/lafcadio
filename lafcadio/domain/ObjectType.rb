@@ -1,5 +1,5 @@
 class ObjectType
-	def initialize (objectType)
+	def initialize(objectType)
 		@objectType = objectType
 	end
 

@@ -2,11 +2,11 @@ require 'lafcadio/objectStore/DbBridge'
 require 'lafcadio/util/ContextualService'
 
 class ObjectStore < ContextualService
-	def ObjectStore.setDbName (dbName)
+	def ObjectStore.setDbName(dbName)
 		DbBridge.setDbName dbName
 	end
   
-  def initialize (context, dbBridge = nil)
+  def initialize(context, dbBridge = nil)
   	super context
 		require 'lafcadio/objectStore/Collector'
 		require 'lafcadio/objectStore/Retriever'
@@ -15,11 +15,11 @@ class ObjectStore < ContextualService
 		@collector = Collector.new self
   end
 
-	def get (objectType, objId)
+	def get(objectType, objId)
 		@retriever.get objectType, objId
 	end
 
-	def getLastCommit (dbObject)
+	def getLastCommit(dbObject)
 		if dbObject.delete
 			DomainObject::COMMIT_DELETE
 		elsif dbObject.objId
@@ -29,7 +29,7 @@ class ObjectStore < ContextualService
 		end
 	end
 
-  def commit (dbObject)
+  def commit(dbObject)
 		require 'lafcadio/objectStore/Committer'
   	committer = Committer.new dbObject, @dbBridge
   	committer.execute
@@ -41,12 +41,12 @@ class ObjectStore < ContextualService
 		end
   end
 
-  def getAll (objectType)
+  def getAll(objectType)
 		@retriever.getAll objectType
   end
 
-	def getSubset (conditionOrQuery)
-		if conditionOrQuery.type <= Query::Condition
+	def getSubset(conditionOrQuery)
+		if conditionOrQuery.class <= Query::Condition
 			condition = conditionOrQuery
 			query = Query.new condition.objectType, condition
 		else
@@ -55,22 +55,22 @@ class ObjectStore < ContextualService
 		@dbBridge.getCollectionByQuery query
 	end
 
-	def method_missing (methodId, *args)
+	def method_missing(methodId, *args)
 		require 'lafcadio/util/DomainUtil'
 		require 'lafcadio/objectStore/CouldntMatchObjectTypeError'
 		methodName = methodId.id2name
 		begin
 			methodName =~ /^get(.*)$/
 			objectType = DomainUtil.getObjectTypeFromString $1
-			if args[0].type <= Integer
+			if args[0].class <= Integer
 				get objectType, args[0]
-			elsif args[0].type <= DomainObject
+			elsif args[0].class <= DomainObject
 				@collector.getMapObject objectType, args[0], args[1]
 			end
 		rescue CouldntMatchObjectTypeError
 			subsystems = [ @collector, @dbBridge, @retriever ]
 			resolved = false
-			while (subsystems.size > 0 && !resolved)
+			while(subsystems.size > 0 && !resolved)
 				subsystem = subsystems.shift
 				begin
 					result = subsystem.send methodName, *args

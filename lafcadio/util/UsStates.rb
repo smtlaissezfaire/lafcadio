@@ -1,7 +1,7 @@
 class UsStates
 	def UsStates.states
 		require 'lafcadio/util/QueueHash'
-		QueueHash.new ( 'AL', 'Alabama', 'AK', 'Alaska', 'AZ', 'Arizona',
+		QueueHash.new( 'AL', 'Alabama', 'AK', 'Alaska', 'AZ', 'Arizona',
 										'AR', 'Arkansas', 'CA', 'California', 'CO', 'Colorado',
 										'CT', 'Connecticut', 'DE', 'Delaware',
 										'DC', 'District of Columbia', 'FL', 'Florida',

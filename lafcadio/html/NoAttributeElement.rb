@@ -7,8 +7,8 @@ class HTML
 			[]
 		end
 
-		def initialize (firstElt = nil)
-			super ({}, firstElt)
+		def initialize(firstElt = nil)
+			super({}, firstElt)
 		end
 	end
 end

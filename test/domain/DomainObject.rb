@@ -7,7 +7,7 @@ require 'test/mock/domain/User'
 
 class TestDomainObject < LafcadioTestCase
 	def newTestClientWithoutObjId
-		Client.new ( { "name" => "clientName" } )
+		Client.new( { "name" => "clientName" } )
 	end
 
   def testDefinesSetters
@@ -21,7 +21,7 @@ class TestDomainObject < LafcadioTestCase
     client = newTestClientWithoutObjId
     data = Marshal.dump client
     newClient = Marshal.load data
-    assert_equal Client, newClient.type
+    assert_equal Client, newClient.class
 		assert_nil newClient.objId
 		client2 = Client.getTestClient
 		assert_equal 1, client2.objId
@@ -37,14 +37,14 @@ class TestDomainObject < LafcadioTestCase
   end
 
 	def testObjIdNeedsFixnum
-		assert_equal Fixnum, Client.getTestClient.objId.type
+		assert_equal Fixnum, Client.getTestClient.objId.class
 	end
 
 	def testEquality
 		client = Client.getTestClient
 		clientPrime = Client.getTestClient
 		assert_equal client, clientPrime
-		assert client.eql? clientPrime
+		assert (client.eql? clientPrime)
 		invoice = Invoice.getTestInvoice
 		assert_equal 1, invoice.objId
 		assert_equal 1, client.objId
@@ -81,10 +81,10 @@ class TestDomainObject < LafcadioTestCase
 	def testAssignProxies
 		invoice = Invoice.storedTestInvoice
 		assert_equal 1, invoice.client.objId
-		client2 = Client.new ({ 'objId' => 2, 'name' => 'client 2' })
+		client2 = Client.new({ 'objId' => 2, 'name' => 'client 2' })
 		invoice.client = client2
 		client2Proxy = invoice.client
-		assert_equal DomainObjectProxy, client2Proxy.type
+		assert_equal DomainObjectProxy, client2Proxy.class
 		assert_equal 2, client2Proxy.objId
 		invoice.client = nil
 		assert_nil invoice.client
@@ -97,7 +97,7 @@ class TestDomainObject < LafcadioTestCase
 				'objId' => 1 }
 		invoice = Invoice.new hash
 		proxyPrime = invoice.client
-		assert_equal DomainObjectProxy, proxyPrime.type
+		assert_equal DomainObjectProxy, proxyPrime.class
 		assert_equal Client, proxyPrime.objectType
 		assert_equal 99, proxyPrime.objId
 		begin
@@ -123,7 +123,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def testInheritance
-		ic = InternalClient.new ({ 'name' => 'clientName1',
+		ic = InternalClient.new({ 'name' => 'clientName1',
 				'billingType' => 'trade' })
 		assert_equal 'clientName1', ic.name
 		assert_equal 'trade', ic.billingType

@@ -9,7 +9,7 @@ class DateWidget
 
 	attr_accessor :showDomSelect, :textEntryYear
 
-	def initialize (name = 'date', date = nil)
+	def initialize(name = 'date', date = nil)
 		@name = name
 		@date = date
     @selectedMonth = @date != nil ? @date.mon : nil
@@ -20,10 +20,10 @@ class DateWidget
 	end
 
 	def monthSelect
-    select = HTML::Select.new ({ 'name' => "#{@name}.month" })
+    select = HTML::Select.new({ 'name' => "#{@name}.month" })
 		select.selected = @selectedMonth
     monthCount = 1
-		type.months.each { |month|
+		self.class.months.each { |month|
       select.addOption(monthCount, month)
       monthCount += 1
     }
@@ -31,21 +31,21 @@ class DateWidget
 	end
 
 	def domSelect
-		select = HTML::Select.new ({ 'name' => "#{@name}.dom" })
+		select = HTML::Select.new({ 'name' => "#{@name}.dom" })
 		select.selected = @selectedDom
 		1.upto(31) { |dom| select.addOption dom }
 		select
 	end
 
 	def yearSelect
-		select = HTML::Select.new ({ 'name' => "#{@name}.year" })
+		select = HTML::Select.new({ 'name' => "#{@name}.year" })
 		select.selected = @selectedYear
 		2000.upto(2010) { |year| select.addOption year }
 		select
 	end
 	
 	def yearInput
-		HTML::Input.new ({ 'name' => "#{@name}.year", 'value' => @selectedYear,
+		HTML::Input.new({ 'name' => "#{@name}.year", 'value' => @selectedYear,
 				'size' => '4' })
 	end
 

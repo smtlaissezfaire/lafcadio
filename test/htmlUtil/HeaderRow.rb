@@ -26,16 +26,16 @@ class TestHeaderRow < LafcadioTestCase
 		row << "a"
 		caught = false
 		begin
-			row << (HTML::Strong.new ('b'))
+			row <<(HTML::Strong.new('b'))
 		rescue
 			caught = true
 		end
 		assert caught
-		row << (HTML::TD.new({ 'colspan' => 2 }, 'c'))
+		row <<(HTML::TD.new({ 'colspan' => 2 }, 'c'))
 	end
 
 	def testInitWithArray
-		row = HeaderRow.new ({}, [ 'a', 'b' ])
+		row = HeaderRow.new({}, [ 'a', 'b' ])
 		html = row.toHTML
 		assert_not_nil html =~ /<td><strong>a<\/strong><\/td>/
 		assert_not_nil html =~ /<td><strong>b<\/strong><\/td>/

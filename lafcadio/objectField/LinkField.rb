@@ -9,19 +9,19 @@ class LinkField < ObjectField
   attr_reader :linkedType
   attr_accessor :listener, :objectStore, :newDuringEdit, :sortField
 
-  def initialize (objectType, linkedType, name = nil, englishName = nil)
+  def initialize(objectType, linkedType, name = nil, englishName = nil)
 		unless name
 			linkedType.name =~ /::/
 			name = $' || linkedType.name
 			name = StrUtil.decapitalize name
 		end
-    super (objectType, name, englishName)
+    super(objectType, name, englishName)
     @linkedType = linkedType
     @listener = nil
 		@newDuringEdit = true
   end
 
-  def valueForSQL (value)
+  def valueForSQL(value)
 		require 'lafcadio/objectStore/DomainObjectInitError'
 		if !value
 			"null"
@@ -32,7 +32,7 @@ class LinkField < ObjectField
 		end
   end
 
-  def valueFromCGI (fieldManager)
+  def valueFromCGI(fieldManager)
     objId = fieldManager.getInt(name)
 		if objId != nil
 	    ObjectStore.getObjectStore.get(@linkedType, objId)
@@ -41,22 +41,22 @@ class LinkField < ObjectField
 		end
   end
 
-  def valueFromSQL (string)
+  def valueFromSQL(string)
 		require 'lafcadio/objectStore/DomainObjectProxy'
 		string != nil ? DomainObjectProxy.new(@linkedType, string.to_i) : nil
   end
 
-  def valueAsHTML (dbObject)
+  def valueAsHTML(dbObject)
     obj = super(dbObject)
     obj != nil ? obj.name : ""
   end
 
-	def verify (value, objId)
+	def verify(value, objId)
 		super
 		if @linkedType != @objectType && objId
 			subsetLinkField = nil
 			@linkedType.classFields.each { |field|
-				if field.type == SubsetLinkField && field.subsetField == @name				
+				if field.class == SubsetLinkField && field.subsetField == @name				
 					subsetLinkField = field
 				end
 			}

@@ -1,5 +1,5 @@
 class Config < Hash
-	def Config.setFilename (filename)
+	def Config.setFilename(filename)
 		@@filename = filename
 	end
 

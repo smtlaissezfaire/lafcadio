@@ -33,10 +33,10 @@ class TestObjectCollector < LafcadioTestCase
 	def testGetInvoices
 		client = Client.getTestClient
 		@mockObjectStore.addObject client
-		inv1 = Invoice.new ({ 'invoiceNum' => 1, 'client' => client,
+		inv1 = Invoice.new({ 'invoiceNum' => 1, 'client' => client,
 				'date' => Date.today, 'rate' => 30, 'hours' => 40 })
 		@mockObjectStore.addObject inv1
-		inv2 = Invoice.new ({ 'invoiceNum' => 2, 'client' => client,
+		inv2 = Invoice.new({ 'invoiceNum' => 2, 'client' => client,
 				'date' => Date.today - 7, 'rate' => 30, 'hours' => 40 })
 		@mockObjectStore.addObject inv2
 		coll = @collector.getInvoices(client)
@@ -46,7 +46,7 @@ class TestObjectCollector < LafcadioTestCase
 	def testGetWithaNonLinkingField	
 		client = Client.getTestClient
 		@mockObjectStore.addObject client
-		client2 = Client.new ({ 'objId' => 2, 'name' => 'client 2' })
+		client2 = Client.new({ 'objId' => 2, 'name' => 'client 2' })
 		@mockObjectStore.addObject client2
 		assert_equal 2, @collector.getClients('client 2', 'name')[0].objId
 	end
@@ -54,10 +54,10 @@ class TestObjectCollector < LafcadioTestCase
 	def testHandlesLinksThroughProxies
 		invoice = Invoice.storedTestInvoice
 		origClient = @mockObjectStore.get(Client, 1)
-		assert_equal Client, origClient.type
+		assert_equal Client, origClient.class
 		clientProxy = invoice.client
-		assert_equal DomainObjectProxy, clientProxy.type
-		matches = @collector.getInvoices (clientProxy)
+		assert_equal DomainObjectProxy, clientProxy.class
+		matches = @collector.getInvoices(clientProxy)
 		assert_equal 1, matches.size
 	end
 

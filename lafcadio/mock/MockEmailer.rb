@@ -5,7 +5,7 @@ class MockEmailer
 		@messagesSent = []
 	end
 	
-	def sendEmail (email)
+	def sendEmail(email)
 		email.verifySendable
 		@messagesSent << email
 	end

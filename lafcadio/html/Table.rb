@@ -13,13 +13,13 @@ class HTML < Array
 
   	attr_accessor :bgColor, :cellPadding, :cellSpacing, :border
 
-	  def << (element)
+	  def <<(element)
 			require 'lafcadio/html/Form'
 			if element != nil
-				if element.type <= HTML::TR || element.type <= HTML::Form
+				if element.class <= HTML::TR || element.class <= HTML::Form
 					super element
 				else
-      	  raise "Can't insert object of type #{element.type} into Table"
+      	  raise "Can't insert object of type #{element.class} into Table"
     	  end
 	    end
   	end

@@ -1,10 +1,10 @@
 class XmlElement < Array
-	def initialize (n, attHash = nil)
+	def initialize(n, attHash = nil)
 		@name = n
 		@attributes = attHash
 	end
 
-	def xmlEncode (contents)
+	def xmlEncode(contents)
 		safeContents = contents.to_s
 		if safeContents
 			safeContents.gsub! /&/, "&amp;"
@@ -16,7 +16,7 @@ class XmlElement < Array
 		safeContents
 	end
 
-	def spaces (level)
+	def spaces(level)
 		"  " * level
 	end
 
@@ -28,9 +28,9 @@ class XmlElement < Array
 		str
 	end
 
-	def toXml (level = 0)
+	def toXml(level = 0)
 		str = spaces(level).to_s + "<#{@name}" + attributeString + ">\n"
-		self.each { |child| str += child.toXml (level + 1) }
+		self.each { |child| str += child.toXml(level + 1) }
 		str += spaces(level).to_s + "</#{@name}>\n"
 	end
 end

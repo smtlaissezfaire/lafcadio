@@ -6,7 +6,7 @@ class TestRetriever < LafcadioTestCase
 	def setup
 		super
 		@mockDbBridge = MockDbBridge.new
-		@retriever = ObjectStore::Retriever.new (@mockDbBridge)
+		@retriever = ObjectStore::Retriever.new(@mockDbBridge)
 	end
 
 	def testConvertsFixnums

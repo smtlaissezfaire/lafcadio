@@ -17,16 +17,16 @@ class TestQuery < LafcadioTestCase
 	end
 
 	def testByCondition
-		client = Client.new ({ 'objId' => 13 })
-		condition = Query::Equals.new ('client', client, Invoice)
+		client = Client.new({ 'objId' => 13 })
+		condition = Query::Equals.new('client', client, Invoice)
 		query = Query.new Invoice, condition
 		assert_equal 'select * from invoices where client = 13', query.toSql
 	end
 
 	def testGetSubsetWithCondition
-		condition = Query::In.new ('client', [ 1, 2, 3 ], Invoice)
+		condition = Query::In.new('client', [ 1, 2, 3 ], Invoice)
 		query = Query.new Invoice, condition
-		assert_equal 'select * from invoices where client in (1,2,3)', query.toSql
+		assert_equal 'select * from invoices where client in(1,2,3)', query.toSql
 	end
 
 	def testTableJoinsForInheritance
@@ -50,7 +50,7 @@ class TestQuery < LafcadioTestCase
 
 	def testLimit
 		query = Query.new Client
-		query.limit = (10..29)
+		query.limit =(10..29)
 		assert_equal 'select * from clients limit 10, 29', query.toSql
 	end
 end

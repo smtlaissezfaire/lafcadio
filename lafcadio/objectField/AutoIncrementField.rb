@@ -3,12 +3,12 @@ require 'lafcadio/objectField/IntegerField'
 class AutoIncrementField < IntegerField
   attr_reader :objectType
 
-  def initialize (objectType, name, englishName = nil)
-    super (objectType, name, englishName)
+  def initialize(objectType, name, englishName = nil)
+    super(objectType, name, englishName)
     @objectType = objectType
   end
 
-  def HTMLWidgetValueStr (value)
+  def HTMLWidgetValueStr(value)
     if value != nil
       super value
     else
@@ -17,7 +17,7 @@ class AutoIncrementField < IntegerField
         aValue = obj.send(name).to_i
         highestValue = aValue if aValue > highestValue
       }
-      (highestValue + 1).to_s
+     (highestValue + 1).to_s
     end
   end
 end

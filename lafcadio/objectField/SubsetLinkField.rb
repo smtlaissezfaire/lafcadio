@@ -8,9 +8,9 @@ class SubsetLinkField < LinkField
 
   attr_accessor :subsetField
 
-  def initialize (objectType, linkedType, subsetField,
+  def initialize(objectType, linkedType, subsetField,
       name = linkedType.name.downcase, englishName = nil)
-    super (objectType, linkedType, name, englishName)
+    super(objectType, linkedType, name, englishName)
     @subsetField = subsetField
   end
 end

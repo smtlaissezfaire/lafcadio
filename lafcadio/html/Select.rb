@@ -12,8 +12,8 @@ class HTML
 
 		attr_accessor :selected
 
-	  def addOption (value, displayName = value)
-			attHash = { 'value' => value, 'selected' => (selected == value) }
+	  def addOption(value, displayName = value)
+			attHash = { 'value' => value, 'selected' =>(selected == value) }
   	  self << HTML::Option.new(attHash, displayName)
 	  end
 	end

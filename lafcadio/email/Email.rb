@@ -5,7 +5,7 @@ class Email
 	attr_accessor :subject, :toAddress, :fromAddress, :toName, :fromName,
 			:contentType, :body, :charSet
 
-	def initialize (subject, toAddress, fromAddress, body = nil)
+	def initialize(subject, toAddress, fromAddress, body = nil)
 		@subject = subject
 		@toAddress = toAddress
 		@fromAddress = fromAddress

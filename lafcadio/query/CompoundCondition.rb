@@ -5,8 +5,8 @@ class Query
 		AND = 1
 		OR  = 2
 	
-		def initialize (*conditions)
-			if ( [ AND, OR ].index(conditions.last) )
+		def initialize(*conditions)
+			if( [ AND, OR ].index(conditions.last) )
 				@compoundType = conditions.last
 				conditions.pop
 			else
@@ -22,7 +22,7 @@ class Query
 			"(#{ subSqlStrings.join(" #{ booleanString } ") })"
 		end
 
-		def objectMeets (anObj)
+		def objectMeets(anObj)
 			if @compoundType == AND
 				om = true
 				@conditions.each { |cond| om = om && cond.objectMeets(anObj) }

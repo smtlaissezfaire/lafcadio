@@ -33,11 +33,11 @@ class TestBooleanField < LafcadioTestCase
 	def testWithDifferentEnums
 		bf2 = BooleanField.new nil, 'whatever'
 		bf2.enumType = BooleanField::ENUMS_CAPITAL_YES_NO
-		assert_equal ("'N'", bf2.valueForSQL(false))
+		assert_equal("'N'", bf2.valueForSQL(false))
 		assert_equal true, bf2.valueFromSQL('Y')
 		assert_equal false, bf2.valueFromSQL('N')
 		bf3 = BooleanField.new nil, 'whatever'
-		bf3.enums = ({ true => '', false => 'N' })
+		bf3.enums =({ true => '', false => 'N' })
 		assert_equal true, bf3.valueFromSQL('')
 		assert_equal false, bf3.valueFromSQL('N')
 	end

@@ -8,12 +8,12 @@ class TextField < ObjectField
 
   attr_accessor :large, :size
 
-  def initialize (objectType, name, englishName = nil)
+  def initialize(objectType, name, englishName = nil)
     super objectType, name, englishName
     @large = false
   end
 
-  def valueForSQL (value)
+  def valueForSQL(value)
 		if value
 			value = value.gsub(/'/) { $` =~ /\\$/ ? "'" : "''" }
 			value = value.gsub(/\\/) { '\\\\' }
@@ -23,7 +23,7 @@ class TextField < ObjectField
 		end
   end
 
-	def valueFromCGI (fieldManager)
+	def valueFromCGI(fieldManager)
 		value = super fieldManager
 		value != '' ? value : nil
 	end

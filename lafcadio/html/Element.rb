@@ -16,7 +16,7 @@ class HTML
 			[ 'class', 'type' ]
 		end
 
-		def methodName (attribute)
+		def methodName(attribute)
 			if attribute == 'type'
 				'eltType'
 			elsif attribute == 'class'
@@ -26,18 +26,18 @@ class HTML
 			end
 		end
 
-		def initialize (attHash = {})
-			self.type.requiredAttributes.each { |required|
+		def initialize(attHash = {})
+			self.class.requiredAttributes.each { |required|
 				raise "needs #{required}" unless attHash[required]
 			}
-			self.type.attributes.each { |att|
+			self.class.attributes.each { |att|
 				attName = methodName att
 				eval %{
       	  def self.#{attName}
         	  @#{attName}
 	        end
 
-  	      def self.#{attName}= (value)
+  	      def self.#{attName}=(value)
     	      @#{attName} = value
       	  end
 
@@ -47,10 +47,10 @@ class HTML
 		end
 
 		def toHTML
-			tag = "<" + type.tagName
-			self.type.attributes.each { |att|
+			tag = "<" + self.class.tagName
+			self.class.attributes.each { |att|
 				attName = methodName att
-				if (value = self.send(attName))
+				if(value = self.send(attName))
 					if [ true, false ].index(value) == nil
 						tag += " #{att}='#{value}'"
 					else

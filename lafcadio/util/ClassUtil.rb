@@ -1,5 +1,5 @@
 class ClassUtil
-  def ClassUtil.subclasses (theClass)
+  def ClassUtil.subclasses(theClass)
     subclasses = []
     ObjectSpace.each_object(Class) { |aClass|
 			if aClass <= theClass && aClass != theClass
@@ -9,12 +9,12 @@ class ClassUtil
     subclasses
   end
 
-	def ClassUtil.bareClassName (aClass)
+	def ClassUtil.bareClassName(aClass)
 		aClass.name =~ /::/
 		$' || aClass.name
 	end
 	
-	def ClassUtil.getClass (className)
+	def ClassUtil.getClass(className)
 		theClass = nil
 		ObjectSpace.each_object(Class) { |aClass|
 			theClass = aClass if aClass.name == className

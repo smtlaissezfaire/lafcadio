@@ -1,7 +1,7 @@
 require 'lafcadio/domain/DomainObject'
 
 class MapObject < DomainObject
-	def MapObject.otherMappedType (firstType)
+	def MapObject.otherMappedType(firstType)
 		types = mappedTypes
 		if types.index(firstType) == 0
 			types[1]

@@ -11,7 +11,7 @@ class Client < DomainObject
 				"Standard Rate")
     standardRateField.notNull = false
 		fields << standardRateField
-		fields << (LinkField.new (self, Client, 'referringClient'))
+		fields <<(LinkField.new(self, Client, 'referringClient'))
 		priorityInvoice = SubsetLinkField.new self, Invoice, 'client',
 				'priorityInvoice'
 		priorityInvoice.notNull = false
@@ -36,8 +36,8 @@ class Client < DomainObject
 
   def testEquality
     dbd = "clientName1"
-    client1 = Client.new ( { "name" => dbd, "objId" => 1 } )
-    client2 = Client.new ( { "name" => dbd, "objId" => 1 } )
+    client1 = Client.new( { "name" => dbd, "objId" => 1 } )
+    client2 = Client.new( { "name" => dbd, "objId" => 1 } )
     assert_equal(client1, client2)
   end
 end

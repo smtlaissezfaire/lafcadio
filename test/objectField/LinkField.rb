@@ -16,7 +16,7 @@ class TestLinkField < LafcadioTestCase
 				{ "objId" => 1, "name" => "clientName1" } )
 		@mockObjectStore.addObject Client.new(
 				{ "objId" => 2, "name" => "clientName2" } )
-    @fieldWithListener = LinkField.new (nil, Client, "client", "Client")
+    @fieldWithListener = LinkField.new(nil, Client, "client", "Client")
     rateField = MoneyField.new nil, "rate"
     rateField.setDefault(@fieldWithListener, "standard_rate")
   end
@@ -31,9 +31,9 @@ class TestLinkField < LafcadioTestCase
   end
 
   def testValueForSQL
-    client = Client.new ( { "name" => "my name", "objId" => 10 } )
+    client = Client.new( { "name" => "my name", "objId" => 10 } )
     assert_equal(10, @olf.valueForSQL(client))
-		badClient = Client.new ({ 'name' => 'Bad client' })
+		badClient = Client.new({ 'name' => 'Bad client' })
 		begin
 			@olf.valueForSQL(badClient)
 			fail 'needs to throw DBObjectInitError'
@@ -51,7 +51,7 @@ class TestLinkField < LafcadioTestCase
   def testValueFromCGI
 		@mockObjectStore.addObject Client.getTestClient
     olf = LinkField.new(nil, Client, "client", "Client")
-    mfm = MockFieldManager.new ( { "client" => "1"} )
+    mfm = MockFieldManager.new( { "client" => "1"} )
     assert_not_nil olf.valueFromCGI(mfm)
   end
 
@@ -63,14 +63,14 @@ class TestLinkField < LafcadioTestCase
 		client = Client.getTestClient
 		@mockObjectStore.addObject client
 		clientFromLinkField = @olf.valueFromSQL("1")
-		assert_equal DomainObjectProxy, clientFromLinkField.type
+		assert_equal DomainObjectProxy, clientFromLinkField.class
 		assert_equal client.name, clientFromLinkField.name
 		assert_nil @olf.valueFromSQL(nil)
   end
 
   def testvalueAsHTMLNil
 		lf = LinkField.new(Invoice, Client)
-		invoice = Invoice.new ( {} )
+		invoice = Invoice.new( {} )
 		assert_equal '', lf.valueAsHTML(invoice)
   end
 
@@ -88,7 +88,7 @@ class TestLinkField < LafcadioTestCase
 		@mockObjectStore.commit client2
 		linkField = Invoice.getField 'client'
 		begin
-			linkField.verify (client2, 1)
+			linkField.verify(client2, 1)
 			fail 'should throw FieldValueError'
 		rescue FieldValueError
 			# ok

@@ -5,13 +5,13 @@ class DomainObjectProxy
 
 	attr_accessor :objectType, :objId
 
-	def initialize (objectTypeOrDbObject, objId = nil)
+	def initialize(objectTypeOrDbObject, objId = nil)
 		if objId
 			@objectType = objectTypeOrDbObject
 			@objId = objId
 		else
 			dbObject = objectTypeOrDbObject
-			@objectType = dbObject.type
+			@objectType = dbObject.class
 			@objId = dbObject.objId
 		end
 	end
@@ -20,7 +20,7 @@ class DomainObjectProxy
 		Context.instance.getObjectStore.get(@objectType, @objId)
 	end
 
-	def method_missing (methodId)
+	def method_missing(methodId)
 		getDbObject.send(methodId.id2name)
 	end
 

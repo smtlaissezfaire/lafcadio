@@ -1,5 +1,5 @@
 class StrUtil
-	def StrUtil.countOccurrences (str, regexp)
+	def StrUtil.countOccurrences(str, regexp)
 		count = 0
 		while str =~ regexp
 			count += 1
@@ -8,13 +8,13 @@ class StrUtil
 		count
 	end
 
-  def StrUtil.floatFormat (floatValue, precision, padDecimals = true)
+  def StrUtil.floatFormat(floatValue, precision, padDecimals = true)
     str = floatValue.floor.to_s
     if precision > 0
       decimal = floatValue - floatValue.floor
-      decimalStr = (decimal * 10 ** precision).floor.to_s
+      decimalStr =(decimal * 10 ** precision).floor.to_s
       if decimalStr.size < precision
-        decimalStr += "0" * (precision - decimalStr.size)
+        decimalStr += "0" *(precision - decimalStr.size)
       end
       if padDecimals || decimalStr =~ /[123456789]/
 	      str += "."
@@ -24,11 +24,11 @@ class StrUtil
     str
   end
 
-	def StrUtil.moneyFormat (value)
+	def StrUtil.moneyFormat(value)
 		"$#{floatFormat value, 2}"
 	end
 
-  def StrUtil.incrementFilename (filename)
+  def StrUtil.incrementFilename(filename)
     extension = filename.split(/\./).last
     filename.sub!(/\..*$/, '')
     if filename =~ /_(\d*)$/
@@ -41,7 +41,7 @@ class StrUtil
     filename
   end
 
-	def StrUtil.decapitalize (string)
+	def StrUtil.decapitalize(string)
 		firstLetter = string[0..0].downcase
 		string = firstLetter + string[1..string.length]
 		newString = ""
@@ -54,19 +54,19 @@ class StrUtil
 		newString
 	end
 
-	def StrUtil.pad (string, size, fillChar)
+	def StrUtil.pad(string, size, fillChar)
 		while string.length < size
 			string = fillChar + string
 		end
 		string
 	end
 
-	def StrUtil.numericStringToUsFormat (numericString)
-		numericString.gsub! (/,/, '.') if numericString =~ /,\d{2}$/
+	def StrUtil.numericStringToUsFormat(numericString)
+		numericString.gsub!(/,/, '.') if numericString =~ /,\d{2}$/
 		numericString
 	end
 
-	def StrUtil.splitKeepInBetweens (string, regexp)
+	def StrUtil.splitKeepInBetweens(string, regexp)
 		result = []
 		while string =~ regexp
 			result << $`
@@ -77,7 +77,7 @@ class StrUtil
 		result
 	end
 	
-	def StrUtil.lineWrap (string, lineLength)
+	def StrUtil.lineWrap(string, lineLength)
 		words = string.split ' '
 		line = ''
 		lines = []

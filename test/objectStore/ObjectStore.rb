@@ -21,8 +21,8 @@ class TestObjectStore < LafcadioTestCase
 	end
 
   def testDumpable
-		newOs = Marshal.load (Marshal.dump @testObjectStore)
-    assert_equal ObjectStore, newOs.type
+		newOs = Marshal.load(Marshal.dump(@testObjectStore))
+    assert_equal ObjectStore, newOs.class
   end
 
 	def testDynamicMethodNames
@@ -41,7 +41,7 @@ class TestObjectStore < LafcadioTestCase
 		client1 = Client.getTestClient
 		@mockDbBridge.addObject client1
 		client1Proxy = DomainObjectProxy.new(Client, 1)
-		client2 = Client.new ({ 'objId' => 2, 'name' => 'client 2',
+		client2 = Client.new({ 'objId' => 2, 'name' => 'client 2',
 				'referringClient' => client1Proxy })
 		@mockDbBridge.addObject client2
 		client2Prime = @testObjectStore.getClient 2
@@ -51,11 +51,11 @@ class TestObjectStore < LafcadioTestCase
 	def testSelfLinking
 		client1Proxy = DomainObjectProxy.new(Client, 1)
 		client2Proxy = DomainObjectProxy.new(Client, 2)
-		client1 = Client.new ({ 'objId' => 1, 'name' => 'client 1',
+		client1 = Client.new({ 'objId' => 1, 'name' => 'client 1',
 														'standard_rate' => 50,
 														'referringClient' => client2Proxy })
 		@mockDbBridge.addObject client1
-		client2 = Client.new ({ 'objId' => 2, 'name' => 'client 2',
+		client2 = Client.new({ 'objId' => 2, 'name' => 'client 2',
 														'standard_rate' => 100,
 														'referringClient' => client1Proxy })
 		@mockDbBridge.addObject client2
@@ -71,10 +71,10 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testUpdateFlushesCache
-		client = Client.new ({ 'objId' => 100, 'name' => 'client 100' })
+		client = Client.new({ 'objId' => 100, 'name' => 'client 100' })
 		@testObjectStore.commit client
 		assert_equal 'client 100', @testObjectStore.get(Client, 100).name
-		clientPrime = Client.new ({ 'objId' => 100, 'name' => 'client 100.1' })
+		clientPrime = Client.new({ 'objId' => 100, 'name' => 'client 100.1' })
 		@testObjectStore.commit clientPrime
 		assert_equal 'client 100.1', @testObjectStore.get(Client, 100).name
 		clientPrime.name = 'client 100.2'
@@ -83,7 +83,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testDeleteClearsCachedValue
-		client = Client.new ({ 'objId' => 100, 'name' => 'client 100' })
+		client = Client.new({ 'objId' => 100, 'name' => 'client 100' })
 		@testObjectStore.commit client
 		assert_equal 1, @testObjectStore.getAll(Client).size
 		client.delete = true
@@ -117,7 +117,7 @@ class TestObjectStore < LafcadioTestCase
 
 	def testFlushCacheAfterNewObjectCommit
 		assert_equal 0, @testObjectStore.getAll(Client).size
-		client = Client.new ({ })
+		client = Client.new({ })
 		@testObjectStore.commit client
 		assert_equal 1, @testObjectStore.getAll(Client).size
 	end

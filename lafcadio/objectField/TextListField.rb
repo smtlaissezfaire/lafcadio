@@ -1,7 +1,7 @@
 require 'lafcadio/objectField/ObjectField'
 
 class TextListField < ObjectField
-	def valueFromSQL (sqlString, lookupLink = true)
+	def valueFromSQL(sqlString, lookupLink = true)
 		if sqlString
 			sqlString.split ','
 		else
@@ -9,7 +9,7 @@ class TextListField < ObjectField
 		end
 	end
 
-	def valueForSQL (objectValue)
+	def valueForSQL(objectValue)
 		"'" + objectValue.join(',') + "'"
 	end
 end

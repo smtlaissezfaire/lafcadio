@@ -5,7 +5,7 @@ class DbBridge
 	@@lastObjIdInserted = nil
 	@@dbName = nil
 
-	def DbBridge.setDbName (dbName)
+	def DbBridge.setDbName(dbName)
 		@@dbName = dbName
 	end
 
@@ -24,7 +24,7 @@ class DbBridge
     @@db = nil
   end
 
-  def initialize (db = nil, mysqlClass = Mysql)
+  def initialize(db = nil, mysqlClass = Mysql)
 		require 'lafcadio/util/Config'
     if db == nil
       if @@db == nil
@@ -40,7 +40,7 @@ class DbBridge
     end
   end
 
-	def maybeLog (sql)
+	def maybeLog(sql)
 		require 'lafcadio/util/Logger'
 #		Logger.log sql, 'sql'
 	end
@@ -58,7 +58,7 @@ class DbBridge
     end
   end
 
-	def getCollectionByQuery (query)
+	def getCollectionByQuery(query)
 		require 'lafcadio/objectStore/Collection'
 		require 'lafcadio/objectStore/SqlValueConverter'
 		objectType = query.objectType
@@ -74,7 +74,7 @@ class DbBridge
 		coll
 	end
 
-	def executeQuery (sql)
+	def executeQuery(sql)
 		maybeLog sql
 		begin
 			result = @db.query sql
@@ -84,11 +84,11 @@ class DbBridge
 		result		
 	end
 
-  def _dump (aDepth)
+  def _dump(aDepth)
 		if @db.respond_to? '_dump'
 			dbDump = @db._dump
 		else
-			dbDump = @db.type.to_s
+			dbDump = @db.class.to_s
 		end
     "db:#{dbDump}"
   end
@@ -97,7 +97,7 @@ class DbBridge
 		@@lastObjIdInserted
 	end
 
-	def getMax (objectType)
+	def getMax(objectType)
 		require 'lafcadio/query/Max'
 		sql = Query::Max.new(objectType).toSql
 		result = executeQuery sql

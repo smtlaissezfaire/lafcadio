@@ -10,15 +10,15 @@ class Emailer < ContextualService
 		@@messagesSent = []
 	end
 
-	def Emailer.setSMTPClass (smtpClass)
+	def Emailer.setSMTPClass(smtpClass)
 		@@smtpClass = smtpClass
 	end
 
-	def Emailer.validAddress (address)
+	def Emailer.validAddress(address)
 		(address =~ /\w@\w*\./) != nil
 	end
 
-	def sendEmail (email)
+	def sendEmail(email)
 		email.verifySendable
 		msg = []
 		email.headers.each { |header| msg << "#{header}\n" }

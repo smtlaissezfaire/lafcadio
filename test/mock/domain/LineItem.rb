@@ -2,7 +2,7 @@ require 'lafcadio/domain/DomainObject'
 
 module Domain
 	class LineItem < DomainObject
-		def LineItem.classFields (fieldSet = 'default')
+		def LineItem.classFields(fieldSet = 'default')
 			require 'test/mock/domain/SKU'
 			require 'lafcadio/objectField/LinkField'
 			require 'lafcadio/objectField/IntegerField'

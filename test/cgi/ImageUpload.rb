@@ -70,12 +70,12 @@ class TestImageUpload < LafcadioTestCase
 
   def testCleanUpCopiesFileOutOfTempDir
     @imgUpload.cleanUp
-    assert @mFileManager.exists ("../img/", "john.jpg")
+    assert @mFileManager.exists("../img/", "john.jpg")
   end
 
 	def testCleanUpChmod0666
 		@imgUpload.cleanUp
-		assert_equal (0666, @mFileManager.perms["../img/john.jpg"])
+		assert_equal(0666, @mFileManager.perms["../img/john.jpg"])
 	end
 
 	def testEmptyDoesntDoAnythingDuringCleanup
@@ -83,7 +83,7 @@ class TestImageUpload < LafcadioTestCase
 		def tf.local_path
 			""
 		end
-		iu = ImageUpload.new (Tempfile.new(""), @mFileManager)
+		iu = ImageUpload.new(Tempfile.new(""), @mFileManager)
 		iu.cleanUp
 	end
 end

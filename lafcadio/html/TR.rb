@@ -7,8 +7,8 @@ class HTML < Array
 			[ 'align', 'valign', 'bgcolor' ]
 		end
 
-		def eltHTML (elt)
-			if elt.type == TD
+		def eltHTML(elt)
+			if elt.class == TD
 				elt.toHTML
 			elsif elt =~ /^<td/
 				elt

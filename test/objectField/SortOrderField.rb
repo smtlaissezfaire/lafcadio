@@ -11,7 +11,7 @@ class TestSortOrderField < LafcadioTestCase
 	end
 
 	def testValueFromCGI
-		mfm = MockFieldManager.new ( { "objectType" => "Option",
+		mfm = MockFieldManager.new( { "objectType" => "Option",
 																		"attribute" => "1", "name" => "small" } )
 		assert_equal 2, @sortOrderField.valueFromCGI(mfm)
 		@mockObjectStore.addObject TestOption.getTestOption

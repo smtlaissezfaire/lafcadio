@@ -2,7 +2,7 @@ require 'lafcadio/query/Condition'
 
 class Query
 	class Not < Condition
-		def initialize (unCondition)
+		def initialize(unCondition)
 			@unCondition = unCondition
 		end
 
@@ -10,7 +10,7 @@ class Query
 			"!(#{ @unCondition.toSql })"
 		end
 
-		def objectMeets (obj)
+		def objectMeets(obj)
 			!@unCondition.objectMeets(obj)
 		end
 	end

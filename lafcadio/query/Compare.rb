@@ -14,7 +14,7 @@ class Query
 			GREATER_THAN => '>'
 		}
 
-		def initialize (fieldName, searchTerm, objectType, compareType)
+		def initialize(fieldName, searchTerm, objectType, compareType)
 			super fieldName, searchTerm, objectType
 			@compareType = compareType
 		end
@@ -23,7 +23,7 @@ class Query
 			useFieldForSqlValue = false
 			if @fieldName != @objectType.sqlPrimaryKeyName
 				field = getField
-				useFieldForSqlValue = true unless field.type <= LinkField
+				useFieldForSqlValue = true unless field.class <= LinkField
 			end
 			if useFieldForSqlValue
 				"#{ @fieldName } #{ @@comparators[@compareType] } " +
@@ -40,9 +40,9 @@ class Query
 			GREATER_THAN => Proc.new { |d1, d2| d1 > d2 }
 		}
 
-		def objectMeets (anObj)
+		def objectMeets(anObj)
 			value = anObj.send @fieldName
-			value = value.objId if value.type <= DomainObject
+			value = value.objId if value.class <= DomainObject
 			value ? @@mockComparators[@compareType].call(value, @searchTerm) : false
 		end
 	end

@@ -3,7 +3,7 @@ require 'lafcadio/html/Select'
 
 class TestSelect < RUNIT::TestCase
   def testNoOnChange
-    select = HTML::Select.new ({ 'name' => "name" })
+    select = HTML::Select.new({ 'name' => "name" })
     assert_nil select.toHTML.index("onChange=\"")
   end
 

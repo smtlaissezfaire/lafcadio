@@ -6,13 +6,13 @@ class Query
 
 		attr_reader :objectType
 
-		def initialize (fieldName, searchTerm, objectType)
+		def initialize(fieldName, searchTerm, objectType)
 			require 'lafcadio/domain/DomainObject'
 
 			@fieldName = fieldName
 			@searchTerm = searchTerm
-			unless @searchTerm.type <= self.type.searchTermType
-				raise "Incorrect searchTerm type #{ searchTerm.type }"
+			unless @searchTerm.class <= self.class.searchTermType
+				raise "Incorrect searchTerm type #{ searchTerm.class }"
 			end
 			@objectType = objectType
 			if @objectType
@@ -25,7 +25,7 @@ class Query
 		def getField
 			anObjectType = @objectType
 			field = nil
-			while (anObjectType < DomainObject || anObjectType < DomainObject) &&
+			while(anObjectType < DomainObject || anObjectType < DomainObject) &&
 						!field
 				field = anObjectType.getField @fieldName
 				anObjectType = anObjectType.superclass

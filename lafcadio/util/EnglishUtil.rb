@@ -1,18 +1,18 @@
 class EnglishUtil
-  def EnglishUtil.camelCaseToEnglish (camelCaseStr)
+  def EnglishUtil.camelCaseToEnglish(camelCaseStr)
     words = []
-    nextCapIndex = (camelCaseStr =~ /[A-Z]/)
+    nextCapIndex =(camelCaseStr =~ /[A-Z]/)
     while nextCapIndex != nil
       words << $` if $`.size > 0
       camelCaseStr = $& + $'
       camelCaseStr[0] = camelCaseStr[0..0].downcase
-      nextCapIndex = (camelCaseStr =~ /[A-Z]/)
+      nextCapIndex =(camelCaseStr =~ /[A-Z]/)
     end
     words << camelCaseStr
 		words.join ' '
   end
 
-  def EnglishUtil.sentence (format, name, number = 1)
+  def EnglishUtil.sentence(format, name, number = 1)
     sentence = format
     sentence.gsub! /%num/, number.to_s
     isVerb = number == 1 ? "is" : "are"
@@ -24,13 +24,13 @@ class EnglishUtil
     sentence
   end
 
-	def EnglishUtil.startsWithVowelSound (word)
+	def EnglishUtil.startsWithVowelSound(word)
 		uSomethingUMatch = word =~ /^u[^aeiuo][aeiou]/
 				# 'user' and 'usury' don't start with a vowel sound
 		word =~ /^[aeiou]/ && !uSomethingUMatch
 	end
 
-  def EnglishUtil.plural (singular)
+  def EnglishUtil.plural(singular)
     consonantYPattern = Regexp.new("([^aeiou])y$", Regexp::IGNORECASE)
     if singular =~ consonantYPattern
 			singular.gsub consonantYPattern, '\1ies'
@@ -41,9 +41,9 @@ class EnglishUtil
     end
   end
 
-	def EnglishUtil.properNoun (string)
+	def EnglishUtil.properNoun(string)
 		properNoun = ""
-		while (matchIndex = string =~ /[\. ]/)
+		while(matchIndex = string =~ /[\. ]/)
 			word = string[0..matchIndex-1]
 			word = word.capitalize unless [ 'and', 'the', 'of' ].index(word) != nil
 			properNoun += word + $&
@@ -55,7 +55,7 @@ class EnglishUtil
 		properNoun
 	end
 
-	def EnglishUtil.singular (plural)
+	def EnglishUtil.singular(plural)
 		if plural =~ /(.*)ies/
 			$1 + 'y'
 		elsif plural =~ /(.*s)es/
@@ -66,7 +66,7 @@ class EnglishUtil
 		end
 	end
 
-	def EnglishUtil.englishToCamelCase (englishStr)
+	def EnglishUtil.englishToCamelCase(englishStr)
 		cc = ""
 		englishStr.split.each { |word|
 			word = word.capitalize unless cc == ''

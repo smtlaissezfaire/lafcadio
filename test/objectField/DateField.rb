@@ -24,7 +24,7 @@ class TestDateField < LafcadioTestCase
 
   def testCatchesBadFormat
     begin
-      @odf.verify ("2001-04-05", nil)
+      @odf.verify("2001-04-05", nil)
       fail "Should raise an error with a bad value"
     rescue
 			# ok
@@ -34,7 +34,7 @@ class TestDateField < LafcadioTestCase
 
   def testValueFromSQL
     obj = @odf.valueFromSQL "2001-04-05"
-    assert_equal(Date, obj.type)
+    assert_equal(Date, obj.class)
     obj2 = @odf.valueFromSQL "0000-00-00"
     assert_nil obj2
 		obj3 = @odf.valueFromSQL nil
@@ -44,6 +44,6 @@ class TestDateField < LafcadioTestCase
   def testValueFromCGI
     fm = MockFieldManager.new( { "date.year" => "2001", "date.month" => "1",
 				  "date.dom" => "30" } )
-    assert_equal (Date.new(2001, 1, 30), @odf.valueFromCGI(fm))
+    assert_equal(Date.new(2001, 1, 30), @odf.valueFromCGI(fm))
   end
 end

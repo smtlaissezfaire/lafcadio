@@ -1,7 +1,7 @@
 require 'lafcadio/objectField/LinkFieldViewer'
 
 class SubsetLinkFieldViewer < LinkFieldViewer
-  def keepObjsLinkedToMe (optionObjs)
+  def keepObjsLinkedToMe(optionObjs)
     optionObjs.filterByBlock { |obj|
       subsetFieldValue = obj.send(@field.subsetField)
       if subsetFieldValue != nil

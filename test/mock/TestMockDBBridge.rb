@@ -10,19 +10,19 @@ class TestMockDBBridge < LafcadioTestCase
   end
 
   def testDumpable
-		assert_equal MockDbBridge, Marshal.load(Marshal.dump(@mockDbBridge)).type
+		assert_equal MockDbBridge, Marshal.load(Marshal.dump(@mockDbBridge)).class
   end
 
   def testLastObjIdInserted
 		assert_equal nil, @mockDbBridge.lastObjIdInserted
-    client = Client.new ( { "name" => "clientName1" } )
+    client = Client.new( { "name" => "clientName1" } )
     @mockDbBridge.commit client
     assert_equal 1, @mockDbBridge.lastObjIdInserted
     assert_equal 1, client.objId
-		client2 = Client.new ({ 'objId' => 2 })
+		client2 = Client.new({ 'objId' => 2 })
 		@mockDbBridge.commit client2
 		assert_equal 2, client2.objId
-		client3 = Client.new ({ })
+		client3 = Client.new({ })
 		@mockDbBridge.commit client3
 		assert_equal 3, @mockDbBridge.lastObjIdInserted
 		assert_equal 3, client3.objId
@@ -30,7 +30,7 @@ class TestMockDBBridge < LafcadioTestCase
 
 	def testGetCollectionByQuery
 		@mockDbBridge.commit @client
-		client2 = Client.new ({ 'objId' => 2, 'name' => 'client2' })
+		client2 = Client.new({ 'objId' => 2, 'name' => 'client2' })
 		@mockDbBridge.commit client2
 		query = Query.new Client, 2
 		coll = @mockDbBridge.getCollectionByQuery(query)
@@ -38,7 +38,7 @@ class TestMockDBBridge < LafcadioTestCase
 		assert_equal client2, coll[0]
 	end
 
-	def getAll (objectType)
+	def getAll(objectType)
 		query = Query.new objectType
 		@mockDbBridge.getCollectionByQuery query
 	end
@@ -49,7 +49,7 @@ class TestMockDBBridge < LafcadioTestCase
 	end
 
   def test_returnsCollection
-    assert_equal(Collection, getAll(Client).type)
+    assert_equal(Collection, getAll(Client).class)
   end
 
 	def testRetrievalsByType
@@ -60,7 +60,7 @@ class TestMockDBBridge < LafcadioTestCase
 		assert_equal 2, @mockDbBridge.retrievalsByType[Client]
 	end
 
-	def get (objectType, objId)
+	def get(objectType, objId)
 		query = Query.new objectType, objId
 		@mockDbBridge.getCollectionByQuery(query)[0]
 	end
@@ -76,7 +76,7 @@ class TestMockDBBridge < LafcadioTestCase
 
 	def testDelete
 		@mockDbBridge.commit @client
-		client2 = Client.new ({ 'objId' => 2, 'name' => 'client2' })
+		client2 = Client.new({ 'objId' => 2, 'name' => 'client2' })
 		@mockDbBridge.commit client2
 		assert_equal 2, getAll(Client).size
 		@client.delete = true

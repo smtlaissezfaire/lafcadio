@@ -11,7 +11,7 @@ class TestPasswordField < LafcadioTestCase
   end
 
   def testValueFromCGINewUser
-    fm = FieldManager.new ({})
+    fm = FieldManager.new({})
     previous = []
     0.upto(20) { |i|
       nextRnd = @pf.valueFromCGI fm
@@ -44,25 +44,25 @@ class TestPasswordField < LafcadioTestCase
 
 	def testDontAutoGenerate
 		@pf.autoGenerate = false
-		fm = FieldManager.new ({})
+		fm = FieldManager.new({})
 		assert_nil @pf.valueFromCGI(fm)
 		caught = false
 		begin
-			@pf.verifiedValue (fm)
+			@pf.verifiedValue(fm)
 		rescue FieldValueError
 			caught = true
 		end
 		assert caught
-		fm2 = MockFieldManager.new ({ 'password1' => 'abc',
+		fm2 = MockFieldManager.new({ 'password1' => 'abc',
 																	 'password2' => 'def' })
 		caught = false
 		begin
-			@pf.verifiedValue (fm2)
+			@pf.verifiedValue(fm2)
 		rescue FieldValueError
 			caught = true
 		end
 		assert caught
-		fm3 = MockFieldManager.new ({ 'password1' => 'abc',
+		fm3 = MockFieldManager.new({ 'password1' => 'abc',
 																	 'password2' => 'abc' })
 		assert_equal 'abc', @pf.verifiedValue(fm3)
 	end

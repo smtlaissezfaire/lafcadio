@@ -2,7 +2,7 @@ require 'cgi'
 require 'date'
 
 class FieldManager
-  def initialize (cgi = nil)
+  def initialize(cgi = nil)
 		require 'lafcadio/util/HashOfArrays'
     cgi = CGI.new if cgi == nil
 		@valueHash = HashOfArrays.new
@@ -12,26 +12,26 @@ class FieldManager
     }
   end
 
-  def get (fieldName)
-		raise "FieldManager only takes String keys" unless fieldName.type == String
+  def get(fieldName)
+		raise "FieldManager only takes String keys" unless fieldName.class == String
 		@valueHash.get fieldName
   end
 
-	def getArray (fieldName)
+	def getArray(fieldName)
 		@valueHash.getArray fieldName
 	end
 
-  def getInt (fieldName)
+  def getInt(fieldName)
     value = get fieldName
     value != nil ? value.to_i : nil
   end
 
-	def getFloat (fieldName)
+	def getFloat(fieldName)
 		value = get fieldName
 		value ? value.to_f : nil
 	end
 
-  def getDate (fieldName = "date")
+  def getDate(fieldName = "date")
     year = getInt("#{fieldName}.year")
     month = getInt("#{fieldName}.month")
     dom = getInt("#{fieldName}.dom")
@@ -46,22 +46,22 @@ class FieldManager
     getInt("objId")
   end
 
-  def getObjectType (key = "objectType")
+  def getObjectType(key = "objectType")
   	require 'lafcadio/util/DomainUtil'
 		objTypeString = get key
-		if (objTypeString && objTypeString != '')
+		if(objTypeString && objTypeString != '')
 			DomainUtil.getObjectTypeFromString get(key)
 		end
   end
 
-	def set (key, value)
+	def set(key, value)
 		@valueHash.set(key, [value])
 	end
 
-	def setDate (dateName, date)
+	def setDate(dateName, date)
 		@valueHash.set( dateName + ".year", [date.year] )
-		@valueHash.set (dateName + ".month", [date.month] )
-		@valueHash.set (dateName + ".dom", [date.day] )
+		@valueHash.set(dateName + ".month", [date.month] )
+		@valueHash.set(dateName + ".dom", [date.day] )
 	end
 
 	def keys

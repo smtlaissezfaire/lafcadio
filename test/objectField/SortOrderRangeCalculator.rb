@@ -21,7 +21,7 @@ class TestSortOrderRangeCalculator < LafcadioTestCase
 
 	def testSortWithinHTML
 		setupThreeSpacedOptions
-		attribute2 = Attribute.new ( { "objId" => 2, "name" => 'attribute 2' } )
+		attribute2 = Attribute.new( { "objId" => 2, "name" => 'attribute 2' } )
 		@mockObjectStore.addObject attribute2
 		fieldHash = { "attribute" => attribute2, 'name' => 'option name 4',
 									'sortOrder' => 20, "objId" => 4 }

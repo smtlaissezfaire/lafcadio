@@ -11,8 +11,8 @@ class BooleanField < ObjectField
 
 	attr_accessor :enumType, :enums
 
-  def initialize (objectType, name, englishName = nil)
-		super (objectType, name, englishName)
+  def initialize(objectType, name, englishName = nil)
+		super(objectType, name, englishName)
 		@enumType = ENUMS_ONE_ZERO
 	end
 
@@ -38,7 +38,7 @@ class BooleanField < ObjectField
 		@enumType == ENUMS_CAPITAL_YES_NO
 	end
 
-  def valueForSQL (value)
+  def valueForSQL(value)
     if value
 			vfs = trueEnum
     else
@@ -47,11 +47,11 @@ class BooleanField < ObjectField
 		textEnumType ? "'#{vfs}'" : vfs
   end
 
-	def valueFromSQL (value, lookupLink = true)
+	def valueFromSQL(value, lookupLink = true)
 		value == trueEnum
 	end
 
-	def valueFromCGI (fieldManager)
+	def valueFromCGI(fieldManager)
 		value = super fieldManager
 		value != nil ? value : false
 	end

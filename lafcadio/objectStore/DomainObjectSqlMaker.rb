@@ -1,31 +1,31 @@
 class DomainObjectSqlMaker
-  def initialize (obj)
+  def initialize(obj)
     @obj = obj
   end
 
-  def insertSQL (objectType)
+  def insertSQL(objectType)
     fields = objectType.classFields
 		nameValuePairs = getNameValuePairs(objectType)
     fieldNameStr = nameValuePairs.keys.join ", "
     fieldValueStr = nameValuePairs.values.join ", "
-    "insert into #{ objectType.tableName} (#{fieldNameStr}) " +
-				"values (#{fieldValueStr})"
+    "insert into #{ objectType.tableName}(#{fieldNameStr}) " +
+				"values(#{fieldValueStr})"
   end
 
-  def getNameValuePairs (objectType)
+  def getNameValuePairs(objectType)
 		require 'lafcadio/util/QueueHash'
     nameValues = []
     objectType.classFields.each { |field|
       value = @obj.send(field.name)
 			unless field.dbWillAutomaticallyWrite
 				nameValues << field.nameForSQL
-        nameValues << (field.valueForSQL (value))
+        nameValues <<(field.valueForSQL(value))
       end
     }
     QueueHash.new *nameValues
   end
 
-  def updateSQL (objectType)
+  def updateSQL(objectType)
     nameValueStrings = []
 		nameValuePairs = getNameValuePairs(objectType)
     nameValuePairs.each { |key, value|
@@ -36,7 +36,7 @@ class DomainObjectSqlMaker
 				"where #{ objectType.sqlPrimaryKeyName}=#{@obj.objId}"
   end
 
-	def deleteSql (objectType)
+	def deleteSql(objectType)
 		"delete from #{ objectType.tableName} " +
 				"where #{ objectType.sqlPrimaryKeyName }=#{ @obj.objId }"
 	end
@@ -46,14 +46,14 @@ class DomainObjectSqlMaker
     if @obj.errorMessages.size > 0
       raise DomainObjectInitError, @obj.errorMessages, caller
     end
-		@obj.type.selfAndConcreteSuperclasses.each { |objectType|
+		@obj.class.selfAndConcreteSuperclasses.each { |objectType|
 	    if @obj.objId == nil
-  	    statement = insertSQL (objectType)
+  	    statement = insertSQL(objectType)
     	else
 	      if @obj.delete
-					statement = deleteSql (objectType)
+					statement = deleteSql(objectType)
       	else
-        	statement = updateSQL (objectType)
+        	statement = updateSQL(objectType)
 	      end
 			end
 			statements << statement

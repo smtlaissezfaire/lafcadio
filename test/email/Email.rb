@@ -11,16 +11,16 @@ class TestEmail < LafcadioTestCase
 	def testHtmlHeaders
 		@email.contentType = Email::HTML_CONTENT_TYPE
 		headers = @email.headers
-		assert_not_nil (headers.index (
-				'Content-Type: text/html; charset="iso-8859-1"')), headers.to_s
-		assert_not_nil headers.index ('MIME-Version: 1.0')
+		assert_not_nil((headers.index(
+				'Content-Type: text/html; charset="iso-8859-1"')), headers.to_s)
+		assert_not_nil headers.index('MIME-Version: 1.0')
 	end
 	
 	def testMultipartHeaders
 		@email.contentType = Email::MULTIPART_CONTENT_TYPE
 		headers = @email.headers
-		assert_not_nil (headers.index (
+		assert_not_nil((headers.index(
 				'Content-Type: Multipart/Alternative; charset="iso-8859-1"')),
-				headers.to_s
+				headers.to_s)
 	end
 end

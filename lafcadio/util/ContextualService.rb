@@ -1,7 +1,7 @@
 require 'lafcadio/util/Context'
 
 class ContextualService
-	def ContextualService.method_missing (methodId)
+	def ContextualService.method_missing(methodId)
 		methodName = methodId.id2name
 		if methodName =~ /^get.*/
 			Context.instance.send(methodName)
@@ -10,7 +10,7 @@ class ContextualService
 		end
 	end
 
-	def initialize (passKey)
+	def initialize(passKey)
 		if passKey.class != Context
 			raise ArgumentError,
 					"#{ self.class.name.to_s } should only be instantiated by a Context",
