@@ -255,7 +255,7 @@ values( 1, 'sample text' )
 		BIG_STR
 		1.upto( num_rows ) { |i|
 			text = "'row #{ i }'"
-			date_time_str = date_time_field.valueForSQL( Time.now )
+			date_time_str = date_time_field.value_for_sql( Time.now )
 			bool_val = ( i % 2 == 0 ) ? "'1'" : "'0'"
 			sql = <<-SQL
 insert into testrows( text_field, date_time, bool_field, blob_field )

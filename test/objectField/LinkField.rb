@@ -29,24 +29,24 @@ class TestLinkField < LafcadioTestCase
 
   def testValueForSQL
     client = Client.new( { "name" => "my name", "pkId" => 10 } )
-    assert_equal(10, @olf.valueForSQL(client))
+    assert_equal(10, @olf.value_for_sql(client))
 		badClient = Client.new({ 'name' => 'Bad client' })
 		begin
-			@olf.valueForSQL(badClient)
+			@olf.value_for_sql(badClient)
 			fail 'needs to throw DBObjectInitError'
 		rescue DomainObjectInitError
 			# ok
 		end
-		assert_equal("null", @olf.valueForSQL(nil))
+		assert_equal("null", @olf.value_for_sql(nil))
   end
 
 	def testValueForSqlForProxies
 		clientProxy = DomainObjectProxy.new(Client, 45)
-		assert_equal 45, @olf.valueForSQL(clientProxy)
+		assert_equal 45, @olf.value_for_sql(clientProxy)
 	end
 
   def testNameForSQL
-    assert_equal("client", @olf.nameForSQL)
+    assert_equal("client", @olf.name_for_sql)
   end
 
   def testValueFromSQL

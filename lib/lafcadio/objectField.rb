@@ -73,33 +73,33 @@ module Lafcadio
 		# Returns the name that this field is referenced by in the MySQL table. By 
 		# default this is the same as the name; to override it, set 
 		# ObjectField#dbFieldName.
-		def nameForSQL
+		def name_for_sql
 			dbFieldName
 		end
 
-		def nullErrorMsg #:nodoc:
+		def null_error_msg #:nodoc:
 			"#{ self.object_type.name }##{ name } can not be nil."
 		end
 
-		def prevValue(pkId) #:nodoc:
+		def prev_value(pkId) #:nodoc:
 			prevObject = ObjectStore.get_object_store.get(@object_type, pkId)
 			prevObject.send(name)
 		end
 
-		def processBeforeVerify(value) #:nodoc:
+		def process_before_verify(value) #:nodoc:
 			value = @default if value == nil
 			value
 		end
 
 		# Returns a string value suitable for committing this field's value to 
 		# MySQL.
-		def valueForSQL(value)
+		def value_for_sql(value)
 			value || 'null'
 		end
 
 		def verify(value, pkId) #:nodoc:
 			if value.nil? && notNull
-				raise FieldValueError, nullErrorMsg, caller
+				raise FieldValueError, null_error_msg, caller
 			end
 			verify_non_nil( value, pkId ) if value
 		end
@@ -143,7 +143,7 @@ module Lafcadio
 
 	# A TextField is expected to contain a string value.
 	class TextField < ObjectField
-		def valueForSQL(value) #:nodoc:
+		def value_for_sql(value) #:nodoc:
 			if value
 				value = value.gsub(/(\\?')/) { |m| m.length == 1 ? "''" : m }
 				value = value.gsub(/\\/) { '\\\\' }
@@ -185,7 +185,7 @@ module Lafcadio
 
 		def bind_write?; true; end #:nodoc:
 
-		def valueForSQL(value); "?"; end #:nodoc:
+		def value_for_sql(value); "?"; end #:nodoc:
 	end
 
 	# BooleanField represents a boolean value. By default, it assumes that the
@@ -254,7 +254,7 @@ module Lafcadio
 			getEnums( value )[true]
 		end
 
-		def valueForSQL(value) # :nodoc:
+		def value_for_sql(value) # :nodoc:
 			if value
 				vfs = trueEnum
 			else
@@ -284,7 +284,7 @@ module Lafcadio
 			@range = RANGE_NEAR_FUTURE
 		end
 
-		def valueForSQL(value) # :nodoc:
+		def value_for_sql(value) # :nodoc:
 			value ? "'#{value.to_s}'" : 'null'
 		end
 
@@ -299,7 +299,7 @@ module Lafcadio
 	
 	# DateTimeField represents a DateTime.
 	class DateTimeField < ObjectField
-		def valueForSQL(value) # :nodoc:
+		def value_for_sql(value) # :nodoc:
 			if value
 				year = value.year
 				month = value.mon.to_s.pad( 2, "0" )
@@ -328,7 +328,7 @@ module Lafcadio
 			Numeric
 		end
 
-		def processBeforeVerify(value) #:nodoc:
+		def process_before_verify(value) #:nodoc:
 			value = super value
 			value != nil && value != '' ? value.to_f : nil
 		end
@@ -350,7 +350,7 @@ module Lafcadio
 			super(object_type, name, english_name)
 		end
 
-		def nullErrorMsg #:nodoc:
+		def null_error_msg #:nodoc:
 			"Please enter an email address."
 		end
 
@@ -421,7 +421,7 @@ module Lafcadio
 			end
 		end
 		
-		def valueForSQL(value) #:nodoc:
+		def value_for_sql(value) #:nodoc:
 			value != '' ?(super(value)) : 'null'
 		end
 		
@@ -480,7 +480,7 @@ module Lafcadio
 			string != nil ? DomainObjectProxy.new(@linkedType, string.to_i) : nil
 		end
 
-		def valueForSQL(value) #:nodoc:
+		def value_for_sql(value) #:nodoc:
 			if !value
 				"null"
 			elsif value.pkId
@@ -528,7 +528,7 @@ module Lafcadio
 			Month
 		end
 
-		def valueForSQL(value) #:nodoc:
+		def value_for_sql(value) #:nodoc:
 			"'#{value.year}-#{value.month}-01'"
 		end
 	end
@@ -586,7 +586,7 @@ module Lafcadio
 			Array
 		end
 
-		def valueForSQL(objectValue) #:nodoc:
+		def value_for_sql(objectValue) #:nodoc:
 			"'" + objectValue.join(',') + "'"
 		end
 

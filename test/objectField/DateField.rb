@@ -10,8 +10,8 @@ class TestDateField < LafcadioTestCase
   end
 
   def testValueForSQL
-    assert_equal("'2001-04-05'", @odf.valueForSQL(Date.new(2001, 4, 5)))
-		assert_equal 'null', @odf.valueForSQL(nil)
+    assert_equal("'2001-04-05'", @odf.value_for_sql(Date.new(2001, 4, 5)))
+		assert_equal 'null', @odf.value_for_sql(nil)
   end
 
   def testNotNull

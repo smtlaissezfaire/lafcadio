@@ -9,8 +9,8 @@ class TestDateTimeField < LafcadioTestCase
 	end
 
 	def testValueForSQL
-		assert_equal "'2002-08-24 13:08:22'",(@dateTimeField.valueForSQL(@aug24))
-		assert_equal "null", @dateTimeField.valueForSQL(nil)
+		assert_equal "'2002-08-24 13:08:22'",(@dateTimeField.value_for_sql(@aug24))
+		assert_equal "null", @dateTimeField.value_for_sql(nil)
 	end
 
 	def testValueFromSQL

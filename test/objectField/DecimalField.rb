@@ -13,7 +13,7 @@ class TestDecimalField < LafcadioTestCase
   end
 
 	def testValueForSQL
-		assert_equal 'null', @odf.valueForSQL(nil)
+		assert_equal 'null', @odf.value_for_sql(nil)
 	end
 
   def testNeedsNumeric

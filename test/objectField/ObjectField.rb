@@ -45,7 +45,7 @@ class TestObjectField < LafcadioTestCase
 	def testNameForSQL
 		field = ObjectField.new User, "id"
 		field.dbFieldName = "pkId"
-		assert_equal "pkId", field.nameForSQL
+		assert_equal "pkId", field.name_for_sql
 	end
 
 	def testComparable
@@ -58,8 +58,8 @@ class TestObjectField < LafcadioTestCase
 
 	def testValueForSQL
     omf = ObjectField.new nil, "someField"
-		assert_equal String, omf.valueForSQL(nil).class
-		assert_equal 'null', omf.valueForSQL(nil)
+		assert_equal String, omf.value_for_sql(nil).class
+		assert_equal 'null', omf.value_for_sql(nil)
 	end
 	
 	def testValueFromSql

@@ -8,7 +8,7 @@ class TestBooleanField < LafcadioTestCase
   end
 
   def testValueForSQL
-    assert_equal(0, @bf.valueForSQL(false))
+    assert_equal(0, @bf.value_for_sql(false))
   end
 
 	def testValueFromSQL
@@ -21,7 +21,7 @@ class TestBooleanField < LafcadioTestCase
 	def testWithDifferentEnums
 		bf2 = BooleanField.new nil, 'whatever'
 		bf2.enumType = BooleanField::ENUMS_CAPITAL_YES_NO
-		assert_equal("'N'", bf2.valueForSQL(false))
+		assert_equal("'N'", bf2.value_for_sql(false))
 		assert_equal true, bf2.valueFromSQL('Y')
 		assert_equal false, bf2.valueFromSQL('N')
 		bf3 = BooleanField.new nil, 'whatever'
@@ -42,7 +42,7 @@ class TestBooleanField < LafcadioTestCase
 	
 	def test_text_enums
 		@bf.enums = { true => '1', false => '0' }
-		assert_equal( "'1'", @bf.valueForSQL( true ) )
-		assert_equal( "'0'", @bf.valueForSQL( false ) )
+		assert_equal( "'1'", @bf.value_for_sql( true ) )
+		assert_equal( "'0'", @bf.value_for_sql( false ) )
 	end
 end
