@@ -1,5 +1,5 @@
 require 'runit/testcase'
-require 'test/mock/net/MockSMTP'
+require 'test/mock/net/MockSmtp'
 require 'lafcadio/email/Email'
 require 'lafcadio/email/Emailer'
 require 'lafcadio/util/Context'
@@ -13,15 +13,15 @@ class TestEmailer < RUNIT::TestCase
 	end
 
 	def testHandlesErrors
-		MockSMTP.reset
+		MockSmtp.reset
 		emailer = Emailer.new Context.instance
-		Emailer.setSMTPClass MockSMTP
+		Emailer.setSMTPClass MockSmtp
 		email = Email.new ('subject', 'john.doe@email.com', 'me@me.com', '')
-		MockSMTP.setError Net::ProtoFatalError.new('', nil), 'john.doe@email.com'
+		MockSmtp.setError Net::ProtoFatalError.new('', nil), 'john.doe@email.com'
 		emailer.sendEmail email
-		MockSMTP.setError TimeoutError.new, 'john.doe@email.com'
+		MockSmtp.setError TimeoutError.new, 'john.doe@email.com'
 		emailer.sendEmail email
-		MockSMTP.setError Errno::ECONNREFUSED.new, 'john.doe@email.com'
+		MockSmtp.setError Errno::ECONNREFUSED.new, 'john.doe@email.com'
 		emailer.sendEmail email
 	end
 end

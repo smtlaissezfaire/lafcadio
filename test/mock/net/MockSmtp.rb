@@ -1,5 +1,5 @@
-class MockSMTP
-	def MockSMTP.reset
+class MockSmtp
+	def MockSmtp.reset
 		@@messageSent = false
 		@@lastTo = nil
 		@@message = nil
@@ -7,34 +7,34 @@ class MockSMTP
 		@@errorEmailAddress = nil
 	end
 
-	MockSMTP.reset
+	MockSmtp.reset
 
-	def MockSMTP.setError (error, emailAddress = nil)
+	def MockSmtp.setError (error, emailAddress = nil)
 		@@error = error
 		@@errorEmailAddress = emailAddress
 	end
 
-  def MockSMTP.messageSent
+  def MockSmtp.messageSent
     @@messageSent
   end
 
-  def MockSMTP.start (hostname)
-		mSMTP = MockSMTP.new
+  def MockSmtp.start (hostname)
+		mSMTP = MockSmtp.new
 		yield mSMTP
     @@messageSent = true
 		@@lastTo = mSMTP.to
 		@@message = mSMTP.message
   end
 
-	def MockSMTP.lastTo
+	def MockSmtp.lastTo
 		@@lastTo
 	end
 
-	def MockSMTP.lastMessage
+	def MockSmtp.lastMessage
 		@@message.last
 	end
 
-	def MockSMTP.lastSubject
+	def MockSmtp.lastSubject
 		lastSubject = nil
 		i = 0
 		until lastSubject || i > @@message.size

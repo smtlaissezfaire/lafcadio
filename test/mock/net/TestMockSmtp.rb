@@ -3,36 +3,36 @@ require 'lafcadio/test/LafcadioTestCase'
 require 'lafcadio/email/Email'
 require 'test/mock/net/MockSmtp'
 
-class TestMockSMTP < LafcadioTestCase
+class TestMockSmtp < LafcadioTestCase
 	def setup
 		super
-		MockSMTP.reset
+		MockSmtp.reset
 	end
 
 	def testMessageSent
-		assert (!MockSMTP.messageSent)
+		assert (!MockSmtp.messageSent)
 		msg = [ "Subject: test subject\n", "\n", 'msg' ]
-		MockSMTP.start("localhost") { |smtp|
+		MockSmtp.start("localhost") { |smtp|
 			smtp.sendmail(msg, 'from', 'test_recipient@mail.com')
 		}
-		assert MockSMTP.messageSent
-		assert_equal "msg", MockSMTP.lastMessage
-		assert_equal String, MockSMTP.lastMessage.type
-		assert_equal "test subject", MockSMTP.lastSubject
+		assert MockSmtp.messageSent
+		assert_equal "msg", MockSmtp.lastMessage
+		assert_equal String, MockSmtp.lastMessage.type
+		assert_equal "test subject", MockSmtp.lastSubject
 	end
 
 	def testLastTo
-		assert_nil MockSMTP.lastTo
-		MockSMTP.start("localhost") { |smtp|
+		assert_nil MockSmtp.lastTo
+		MockSmtp.start("localhost") { |smtp|
 			smtp.sendmail('msg', 'from', 'test_recipient@email.com')
 		}
-		assert_equal 'test_recipient@email.com', MockSMTP.lastTo
+		assert_equal 'test_recipient@email.com', MockSmtp.lastTo
 	end
 
 	def testNeedsTo
 		caught = false
 		begin
-			MockSMTP.start('localhost') { |smtp|
+			MockSmtp.start('localhost') { |smtp|
 				smtp.sendmail('msg', 'from', '')
 			}
 		rescue
@@ -42,16 +42,16 @@ class TestMockSMTP < LafcadioTestCase
 	end
 	
 	def testNeedsStringOrArrayOfStrings
-		MockSMTP.start('localhost') { |smtp|
+		MockSmtp.start('localhost') { |smtp|
 			smtp.sendmail('msg', 'from', "test@test.com")
 		}
-		MockSMTP.start('localhost') { |smtp|
+		MockSmtp.start('localhost') { |smtp|
 			smtp.sendmail('msg', 'from', [ "test@test.com" ])
 		}
 		emailObject = Email.new ('subject', 'to', 'from')
 		caught = false
 		begin
-			MockSMTP.start('localhost') { |smtp|
+			MockSmtp.start('localhost') { |smtp|
 				smtp.sendmail('msg', 'from', emailObject)
 			}
 		rescue
@@ -61,31 +61,31 @@ class TestMockSMTP < LafcadioTestCase
 	end
 
 	def testValid
-		gmSMTP = MockSMTP.new
+		gmSMTP = MockSmtp.new
 		assert !gmSMTP.validEmail("a")
 		assert gmSMTP.validEmail("a@b.com")
 	end
 
 	def testSetError
-		MockSMTP.setError TimeoutError
+		MockSmtp.setError TimeoutError
 		begin
-			MockSMTP.start('localhost') { |smtp|
+			MockSmtp.start('localhost') { |smtp|
 				smtp.sendmail('msg', 'from', [ "test@test.com" ])
 			}
 			fail "TimeoutError not thrown"
 		rescue TimeoutError
 			# correct behavior
 		end
-		MockSMTP.setError TimeoutError, "test@test.com"
+		MockSmtp.setError TimeoutError, "test@test.com"
 		begin
-			MockSMTP.start('localhost') { |smtp|
+			MockSmtp.start('localhost') { |smtp|
 				smtp.sendmail('msg', 'from', [ "test@test.com" ])
 			}
 			fail "TimeoutError not thrown"
 		rescue TimeoutError
 			# correct behavior
 		end
-		MockSMTP.start('localhost') { |smtp|
+		MockSmtp.start('localhost') { |smtp|
 			smtp.sendmail('msg', 'from', [ "another@test.com" ])
 		}
 	end
