@@ -352,6 +352,16 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 end
 
 class AccTestQuery < AcceptanceTestCase
+	def test_boolean_compound
+		TestRow.new( 'text_field' => 'something', 'bool_field' => true ).commit
+		TestRow.new( 'text_field' => 'something', 'bool_field' => false ).commit
+		assert_equal(
+			1, @object_store.get_test_rows { |tr|
+				Query.And( tr.bool_field, tr.text_field.equals( 'something' ) )
+			}.size
+		)
+	end
+
 	def test_order_by
 		r1 = TestRow.new( 'text2' => 'zzz' )
 		r1.commit

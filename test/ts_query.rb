@@ -250,6 +250,19 @@ class TestQueryInferrer < LafcadioTestCase
 		assert_equal( desiredSql, inferrer.execute.to_sql )
 	end
 
+	def test_boolean_compound
+		assert_equal(
+			"select * from users where " +
+					"(users.administrator = 1 and " +
+					"users.email = 'administrator@hotmail.com')",
+			Query.infer( User ) { |user|
+				Query.And(
+					user.administrator, user.email.equals( 'administrator@hotmail.com' )
+				)
+			}.to_sql
+		)
+	end
+
 	def testCompare
 		date = Date.new( 2003, 1, 1 )
 		method_operator_hash = { 'lt' => '<', 'lte' => '<=', 'gte' => '>=',

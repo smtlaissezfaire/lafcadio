@@ -298,17 +298,19 @@ module Lafcadio
 			AND = 1
 			OR  = 2
 			
-			def initialize(*conditions)
-				if( [ AND, OR ].index(conditions.last) )
-					@compound_type = conditions.last
-					conditions.pop
+			def initialize( *args )
+				if( [ AND, OR ].index( args.last) )
+					@compound_type = args.last
+					args.pop
 				else
 					@compound_type = AND
 				end
-				@conditions = conditions
-				@domain_class = conditions[0].domain_class
+				@conditions = args.map { |arg|
+					arg.respond_to?( :to_condition ) ? arg.to_condition : arg
+				}
+				@domain_class = @conditions[0].domain_class
 			end
-			
+
 			def implied_by?( other_condition )
 				@compound_type == OR && @conditions.any? { |cond|
 					cond.implies?( other_condition )
