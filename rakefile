@@ -22,6 +22,5 @@ task :updateDocs do
 	Dir.chdir( 'lib' )
 	`rdoc --op ../../lafcadio.rubyforge.org/doc/`
 	Dir.chdir( '..' )
-	releaseDirPath = "../releases/#{ releaseDirName }"
-	`cp -r ../lafcadio.rubyforge.org/ #{ releaseDirPath }/docs`
+	`cp -r ../lafcadio.rubyforge.org/ ./docs`
 end

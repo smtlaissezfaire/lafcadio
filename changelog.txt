@@ -1,5 +1,17 @@
 CHANGELOG
 
+0.3.6 -- May 20 2004
+* WARNING: util/Logger replaced with the logger in log4r
+* TextField#valueForSQL handles three apostrophes at the start of a line. (Thanks to Mike Stok for the solution via comp.lang.ruby.)
+* When you're doing the insert for an inherited Domain Object, it inserts the parent table first, and child table second. (Thanks to Kaspar Schiess for this patch.)
+* Query conditions can handle fields with dbFieldName set to something besides the field's name.
+* Fixed hashing behavior of DomainObject and DomainObjectProxy.
+* Added BlobField. (Thanks to Kaspar Schiess for this patch.)
+* Domain classes with fields defined in XML can define dbFieldName as a field's attribute.
+* Added ObjectStore#getDbBridge.
+* ObjectStore dispatches queries correctly, so you can run inferred queries.
+* ObjectStore was seriously refactored; this shouldn't affect how it looks externally.
+
 0.3.5 -- March 31 2004
 * WARNING: Removed a lot of inessential files having to do with HTML, CGI, and XML
 * WARNING: Moved ClassUtil methods into Class, DomainUtil methods into DomainObject, StrUtil methods into String and Numeric. Renamed EnglishUtil to English.
