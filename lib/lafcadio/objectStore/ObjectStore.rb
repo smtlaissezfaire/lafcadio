@@ -28,7 +28,6 @@ module Lafcadio
 			super context
 			@dbBridge = dbBridge == nil ? DbBridge.new : dbBridge
 			@cache = ObjectStore::Cache.new
-			@objectTypesFullyRetrieved = []
 		end
 
 		def clear(dbObject)
@@ -69,8 +68,8 @@ module Lafcadio
 
 		# Returns all domain objects for the given domain class.
 		def getAll(objectType)
-			unless @objectTypesFullyRetrieved.index(objectType)
-				@objectTypesFullyRetrieved << objectType
+			unless @cache.fullyRetrieved?( objectType )
+				@cache.setFullyRetrieved( objectType )
 				query = Query.new objectType
 				newObjects = @dbBridge.getCollectionByQuery(query)
 				newObjects.each { |dbObj| @cache.save dbObj }

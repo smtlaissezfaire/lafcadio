@@ -6,6 +6,7 @@ module Lafcadio
 		class Cache
 			def initialize
 				@objects = {}
+				@objectTypesFullyRetrieved = []
 			end
 
 			def hashByObjectType(objectType)
@@ -33,6 +34,14 @@ module Lafcadio
 			# Flushes a domain object.
 			def flush(dbObject)
 				hashByObjectType(dbObject.objectType).delete dbObject.objId
+			end
+			
+			def fullyRetrieved?( objectType )
+				@objectTypesFullyRetrieved.include?( objectType )
+			end
+			
+			def setFullyRetrieved( objectType )
+				@objectTypesFullyRetrieved << objectType
 			end
 		end
 	end
