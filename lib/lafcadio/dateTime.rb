@@ -1,7 +1,7 @@
 module Lafcadio
-	# Represents a specific month in time. With the exception of Month.month_names
-	# (which returns a zero-based array), every usage of the month value assumes
-	# that 1 equals January and 12 equals December.
+	# Represents a specific month in time. With the exception of
+	# Month.month_names (which returns a zero-based array), every usage of the
+	# month value assumes that 1 equals January and 12 equals December.
 	class Month
 		# Returns an array of the full names of months (in English). Note that
 		# "January" is the 0th element, and "December" is the 11th element.
