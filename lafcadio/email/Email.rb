@@ -1,5 +1,6 @@
 class Email
-	HTML_CONTENT_TYPE = 0
+	HTML_CONTENT_TYPE 			= 0
+	MULTIPART_CONTENT_TYPE 	= 1
 
 	attr_accessor :subject, :toAddress, :fromAddress, :toName, :fromName,
 			:contentType, :body, :charSet
@@ -31,6 +32,9 @@ class Email
 		headers << fromHeader
 		if contentType == HTML_CONTENT_TYPE
 			headers << "Content-Type: text/html; charset=\"#{@charSet}\""
+			headers << "MIME-Version: 1.0"
+		elsif contentType == MULTIPART_CONTENT_TYPE
+			headers << "Content-Type: Multipart/Alternative; charset=\"#{@charSet}\""
 			headers << "MIME-Version: 1.0"
 		end
 		headers
