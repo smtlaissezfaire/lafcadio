@@ -1,7 +1,7 @@
 require 'runit/testcase'
 require 'lafcadio/util/Context'
 require 'lafcadio/mock/MockObjectStore'
-require 'lafcadio/util/Config'
+require 'lafcadio/util/LafcadioConfig'
 
 class TestContext < RUNIT::TestCase
 	def setup
@@ -21,7 +21,7 @@ class TestContext < RUNIT::TestCase
 	end
 	
 	def testCreatesStandardInstances
-		Config.setFilename 'lafcadio/testconfig.dat'
+		LafcadioConfig.setFilename 'lafcadio/testconfig.dat'
 		objectStore = Context.instance.getObjectStore
 		assert_equal ObjectStore, objectStore.class
 	end

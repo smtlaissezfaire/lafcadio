@@ -1,10 +1,10 @@
-require 'lafcadio/util/Config'
+require 'lafcadio/util/LafcadioConfig'
 require 'runit/testcase'
 
 class TestConfig < RUNIT::TestCase
 	def setup
-		Config.setFilename 'lafcadio/testconfig.dat'
-		@config = Config.new
+		LafcadioConfig.setFilename 'lafcadio/testconfig.dat'
+		@config = LafcadioConfig.new
 	end
 
 	def testURL

@@ -1,4 +1,4 @@
-require 'lafcadio/util/Config'
+require 'lafcadio/util/LafcadioConfig'
 
 class Logger
 	@@logging = true
@@ -10,7 +10,7 @@ class Logger
   def Logger.log(line, logName = "log")
 		if @@logging
 			begin
-				logDir =(Config.new)['logdir']
+				logDir =(LafcadioConfig.new)['logdir']
 		    fileName = logDir + logName
   		  file = File.open(fileName, File::APPEND | File::CREAT | File::WRONLY)
 				file.write "#{ Time.now.to_s }: "

@@ -1,5 +1,5 @@
-class Config < Hash
-	def Config.setFilename(filename)
+class LafcadioConfig < Hash
+	def LafcadioConfig.setFilename(filename)
 		@@filename = filename
 	end
 

@@ -56,7 +56,7 @@ class TestDBBridge < RUNIT::TestCase
   end
 
   def setup
-		Config.setFilename 'lafcadio/testconfig.dat'
+		LafcadioConfig.setFilename 'lafcadio/testconfig.dat'
     @mockDB = MockDB.new
     @dbb = DbBridge.new(@mockDB)
     @client = Client.new( {"objId" => 1, "name" => "clientName1"} )
