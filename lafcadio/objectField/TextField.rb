@@ -15,7 +15,7 @@ class TextField < ObjectField
 
   def valueForSQL(value)
 		if value
-			value = value.gsub(/'/) { $` =~ /\\$/ ? "'" : "''" }
+			value = value.gsub( /(^|[^\\])(?=')/ ) { $& + "'" }
 			value = value.gsub(/\\/) { '\\\\' }
   	  "'#{value}'"
 		else

@@ -26,6 +26,11 @@ class TestTextField < LafcadioTestCase
 		assert_equal "'EXH: #{ backslash * 6 }'",
 				@of.valueForSQL("EXH: #{ backslash * 3 }")
 		assert_equal "'#{ backslash * 2 }'", @of.valueForSQL(backslash)
+		assert_equal( "'// ~  $ #{ backslash * 4 }\n" +
+		              "some other line\napostrophe''s'",
+									@of.valueForSQL( "// ~  $ #{ backslash * 2 }\n" +
+									                 "some other line\napostrophe's" )
+							  )
   end
 
 	def testValueFromCGIMakesBlankIntoNil
