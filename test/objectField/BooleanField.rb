@@ -12,22 +12,22 @@ class TestBooleanField < LafcadioTestCase
   end
 
 	def testValueFromSQL
-		assert_equal true, @bf.valueFromSQL(1)
-		assert_equal true, @bf.valueFromSQL('1')
-		assert_equal false, @bf.valueFromSQL(0)
-		assert_equal false, @bf.valueFromSQL('0')
+		assert_equal true, @bf.value_from_sql(1)
+		assert_equal true, @bf.value_from_sql('1')
+		assert_equal false, @bf.value_from_sql(0)
+		assert_equal false, @bf.value_from_sql('0')
 	end
 
 	def testWithDifferentEnums
 		bf2 = BooleanField.new nil, 'whatever'
 		bf2.enumType = BooleanField::ENUMS_CAPITAL_YES_NO
 		assert_equal("'N'", bf2.value_for_sql(false))
-		assert_equal true, bf2.valueFromSQL('Y')
-		assert_equal false, bf2.valueFromSQL('N')
+		assert_equal true, bf2.value_from_sql('Y')
+		assert_equal false, bf2.value_from_sql('N')
 		bf3 = BooleanField.new nil, 'whatever'
 		bf3.enums =({ true => '', false => 'N' })
-		assert_equal true, bf3.valueFromSQL('')
-		assert_equal false, bf3.valueFromSQL('N')
+		assert_equal true, bf3.value_from_sql('')
+		assert_equal false, bf3.value_from_sql('N')
 	end
 	
 	def test_raise_error_if_no_enums_available

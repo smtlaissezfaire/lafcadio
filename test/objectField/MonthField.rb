@@ -19,6 +19,6 @@ class TestMonthField < LafcadioTestCase
 	end
 
 	def testValueForSQL
-		assert_equal("'2005-12-01'", @field.valueForSQL(Month.new(12, 2005)))
+		assert_equal("'2005-12-01'", @field.value_for_sql(Month.new(12, 2005)))
 	end
 end

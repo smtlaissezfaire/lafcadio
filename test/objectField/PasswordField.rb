@@ -9,6 +9,6 @@ class TestPasswordField < LafcadioTestCase
   end
 
   def testValueForSQL
-    assert_equal("'mypassword!'", @pf.valueForSQL("mypassword!"))
+    assert_equal("'mypassword!'", @pf.value_for_sql("mypassword!"))
   end
 end

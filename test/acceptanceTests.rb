@@ -163,7 +163,7 @@ class AccTestBlobField < AcceptanceTestCase
 end
 
 class AccTestBooleanField < AcceptanceTestCase
-	def test_valueFromSQL
+	def test_value_from_sql
 		@dbh.do( 'insert into testrows( bool_field ) values( 1 )' )
 		test_row = @object_store.getTestRow( 1 )
 		assert( test_row.bool_field )
@@ -174,7 +174,7 @@ class AccTestBooleanField < AcceptanceTestCase
 end
 
 class AccTestDateTimeField < AcceptanceTestCase
-	def test_valueFromSQL
+	def test_value_from_sql
 		@dbh.do( 'insert into testrows( date_time ) values( "2004-01-01" )' )
 		test_row = @object_store.getTestRow( 1 )
 		assert_equal( Time.gm( 2004, 1, 1 ), test_row.date_time )

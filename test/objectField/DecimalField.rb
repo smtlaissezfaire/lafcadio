@@ -7,8 +7,8 @@ class TestDecimalField < LafcadioTestCase
     @odf = DecimalField.new(Invoice, "hours", 2)
   end
   
-  def testGetvalueFromSQL
-    obj = @odf.valueFromSQL "1.1"
+  def testGetvalue_from_sql
+    obj = @odf.value_from_sql "1.1"
     assert_equal(1.1, obj)    
   end
 

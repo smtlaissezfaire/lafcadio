@@ -254,7 +254,7 @@ module Lafcadio
 				                            ( !( get_field.class <= LinkField ) ||
 																		  @searchTerm.respond_to?( :object_type ) ) )
 				search_val = ( use_field_for_sql_value ?
-				               get_field.valueForSQL( @searchTerm ).to_s :
+				               get_field.value_for_sql( @searchTerm ).to_s :
 											 @searchTerm.to_s )
 				"#{ dbFieldName } #{ @@comparators[@compareType] } " + search_val
 			end
@@ -335,7 +335,7 @@ module Lafcadio
 					if @searchTerm.class <= ObjectField
 						@searchTerm.db_table_and_field_name
 					else
-						field.valueForSQL(@searchTerm).to_s
+						field.value_for_sql(@searchTerm).to_s
 					end
 				end
 			end

@@ -32,11 +32,11 @@ class TestDateField < LafcadioTestCase
   end
 
   def testValueFromSQL
-		obj = @odf.valueFromSQL( DBI::Date.new( 2001, 4, 5 ) )
+		obj = @odf.value_from_sql( DBI::Date.new( 2001, 4, 5 ) )
     assert_equal(Date, obj.class)
-		obj2 = @odf.valueFromSQL( DBI::Date.new( 0, 0, 0 ) )
+		obj2 = @odf.value_from_sql( DBI::Date.new( 0, 0, 0 ) )
     assert_nil obj2
-		obj3 = @odf.valueFromSQL nil
+		obj3 = @odf.value_from_sql nil
 		assert_nil obj3
   end
 end

@@ -8,12 +8,12 @@ class TestTextListField < LafcadioTestCase
 	end
 
 	def testValueFromSQL
-		array = @tlf.valueFromSQL('a,b,c')
+		array = @tlf.value_from_sql('a,b,c')
 		assert_not_nil array.index('a')
 		assert_not_nil array.index('b')
 		assert_not_nil array.index('c')
 		assert_equal 3, array.size
-		array = @tlf.valueFromSQL(nil)
+		array = @tlf.value_from_sql(nil)
 		assert_equal 0, array.size
 	end
 

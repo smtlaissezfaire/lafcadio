@@ -52,10 +52,10 @@ class TestLinkField < LafcadioTestCase
   def testValueFromSQL
 		client = Client.getTestClient
 		@mockObjectStore.commit client
-		clientFromLinkField = @olf.valueFromSQL("1")
+		clientFromLinkField = @olf.value_from_sql("1")
 		assert_equal DomainObjectProxy, clientFromLinkField.class
 		assert_equal client.name, clientFromLinkField.name
-		assert_nil @olf.valueFromSQL(nil)
+		assert_nil @olf.value_from_sql(nil)
   end
 
 	def testRespectsOtherSubsetLinks

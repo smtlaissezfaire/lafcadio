@@ -112,10 +112,10 @@ module Lafcadio
 				           " value.",
 				       caller )
 			end
-			verifyUniqueness(value, pkId) if unique
+			verify_uniqueness(value, pkId) if unique
 		end
 
-		def verifyUniqueness(value, pkId) #:nodoc:
+		def verify_uniqueness(value, pkId) #:nodoc:
 			inferrer = Query::Inferrer.new( @object_type ) { |domain_obj|
 				Query.And( domain_obj.send( self.name ).equals( value ),
 									 domain_obj.pkId.equals( pkId ).not )
@@ -128,14 +128,14 @@ module Lafcadio
 		end
 
 		# Given the SQL value string, returns a Ruby-native value.
-		def valueFromSQL(string)
+		def value_from_sql(string)
 			string
 		end
 	end
 
 	# IntegerField represents an integer.
 	class IntegerField < ObjectField
-		def valueFromSQL(string) #:nodoc:
+		def value_from_sql(string) #:nodoc:
 			value = super
 			value ? value.to_i : nil
 		end
@@ -263,7 +263,7 @@ module Lafcadio
 			textEnumType ? "'#{vfs}'" : vfs
 		end
 
-		def valueFromSQL(value, lookupLink = true) # :nodoc:
+		def value_from_sql(value, lookupLink = true) # :nodoc:
 			value == trueEnum( value )
 		end
 	end
@@ -288,7 +288,7 @@ module Lafcadio
 			value ? "'#{value.to_s}'" : 'null'
 		end
 
-		def valueFromSQL(dbiDate, lookupLink = true) # :nodoc:
+		def value_from_sql(dbiDate, lookupLink = true) # :nodoc:
 			begin
 				dbiDate ? dbiDate.to_date : nil
 			rescue ArgumentError
@@ -313,7 +313,7 @@ module Lafcadio
 			end
 		end
 
-		def valueFromSQL(dbi_value, lookupLink = true) # :nodoc:
+		def value_from_sql(dbi_value, lookupLink = true) # :nodoc:
 			dbi_value ? dbi_value.to_time : nil
 		end
 	end
@@ -333,7 +333,7 @@ module Lafcadio
 			value != nil && value != '' ? value.to_f : nil
 		end
 
-		def valueFromSQL(string, lookupLink = true) #:nodoc:
+		def value_from_sql(string, lookupLink = true) #:nodoc:
 			string != nil ? string.to_f : nil
 		end
 	end
@@ -476,7 +476,7 @@ module Lafcadio
 			( @linkedType, @deleteCascade ) = linkedType, deleteCascade
 		end
 
-		def valueFromSQL(string) #:nodoc:
+		def value_from_sql(string) #:nodoc:
 			string != nil ? DomainObjectProxy.new(@linkedType, string.to_i) : nil
 		end
 
@@ -590,7 +590,7 @@ module Lafcadio
 			"'" + objectValue.join(',') + "'"
 		end
 
-		def valueFromSQL(sqlString, lookupLink = true) #:nodoc:
+		def value_from_sql(sqlString, lookupLink = true) #:nodoc:
 			if sqlString
 				sqlString.split ','
 			else

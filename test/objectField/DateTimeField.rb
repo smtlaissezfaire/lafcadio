@@ -15,13 +15,13 @@ class TestDateTimeField < LafcadioTestCase
 
 	def testValueFromSQL
 		ts1 = DBI::Timestamp.new( 2002, 8, 24, 13, 8, 22 )
-		value = @dateTimeField.valueFromSQL ts1, false
+		value = @dateTimeField.value_from_sql ts1, false
 		assert_equal Time, value.class
 		assert_equal @aug24, value
-		assert_nil(@dateTimeField.valueFromSQL(nil))
+		assert_nil(@dateTimeField.value_from_sql(nil))
 		oct6 = Time.local(2002, "oct", 6, 0, 0, 0)
 		dbi_oct6 = DBI::Timestamp.new( 2002, 10, 6 )
-		assert_equal oct6,(@dateTimeField.valueFromSQL dbi_oct6)
-		assert_equal nil,(@dateTimeField.valueFromSQL nil)
+		assert_equal oct6,(@dateTimeField.value_from_sql dbi_oct6)
+		assert_equal nil,(@dateTimeField.value_from_sql nil)
 	end
 end

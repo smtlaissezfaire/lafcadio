@@ -133,7 +133,7 @@ module Lafcadio
 			executeSelect( query.toSql )[0].collect { |val|
 				if query.field_name != query.object_type.sql_primary_key_name
 					a_field = query.object_type.get_field( query.field_name )
-					a_field.valueFromSQL( val )
+					a_field.value_from_sql( val )
 				else
 					val.to_i
 				end
@@ -721,7 +721,7 @@ module Lafcadio
 			else
 				begin
 					field = @object_type.get_field( key )
-					field.valueFromSQL( @rowHash[ field.dbFieldName ] )
+					field.value_from_sql( @rowHash[ field.dbFieldName ] )
 				rescue MissingError
 					nil
 				end
