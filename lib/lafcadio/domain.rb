@@ -63,10 +63,6 @@ module Lafcadio
 			}
 		end
 
-		def sql_primary_key_name
-			@xmlDocRoot.attributes['sql_primary_key_name']
-		end
-		
 		def table_name
 			@xmlDocRoot.attributes['table_name']
 		end
@@ -433,13 +429,6 @@ module Lafcadio
 		def self.sql_primary_key_name( set_sql_primary_key_name = nil )
 			if set_sql_primary_key_name
 				get_field( 'pk_id' ).db_field_name = set_sql_primary_key_name
-			elsif get_field( 'pk_id' ).db_field_name.nil?
-				xmlParser = try_load_xml_parser
-				if !xmlParser.nil? && ( spkn = xmlParser.sql_primary_key_name )
-					get_field( 'pk_id' ).db_field_name = spkn
-				else
-					get_field( 'pk_id' ).db_field_name = 'pk_id'
-				end
 			end
 			get_field( 'pk_id' ).db_field_name
 		end
