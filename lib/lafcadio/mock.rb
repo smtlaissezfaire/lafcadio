@@ -28,7 +28,7 @@ module Lafcadio
 		end
 		
 		def get_collection_by_query(query)
-			@query_count[query] += 1
+			@query_count[query.to_sql] += 1
 			objects = []
 			_get_all( query.domain_class ).each { |dbObj|
 				if query.condition

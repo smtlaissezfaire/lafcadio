@@ -837,14 +837,21 @@ class TestObjectStore < LafcadioTestCase
 	def testGetSubset
 		setTestClient
 		condition = Query::Equals.new 'name', 'clientName1', Client
-		assert_equal @client, @testObjectStore.get_subset(condition)[0]
 		query = Query.new Client, condition
+		assert_equal @client, @testObjectStore.get_subset(condition)[0]
+		assert_equal( 1, @mockDbBridge.query_count[query.to_sql])
 		assert_equal @client, @testObjectStore.get_subset(query)[0]
+		assert_equal( 1, @mockDbBridge.query_count[query.to_sql])
 		query2 = Query.new( Client, Query::Equals.new( 'name', 'foobar', Client ) )
 		assert_equal( 0, @testObjectStore.get_subset( query2 ).size )
-		assert_equal( 1, @mockDbBridge.query_count[query2])
+		assert_equal( 1, @mockDbBridge.query_count[query2.to_sql])
 		assert_equal( 0, @testObjectStore.get_subset( query2 ).size )
-		assert_equal( 1, @mockDbBridge.query_count[query])
+		assert_equal( 1, @mockDbBridge.query_count[query2.to_sql])
+		query2_prime = Query.new(
+			Client, Query::Equals.new( 'name', 'foobar', Client )
+		)
+		assert_equal( 0, @testObjectStore.get_subset( query2_prime ).size )
+		assert_equal( 1, @mockDbBridge.query_count[query2_prime.to_sql])
 	end
 
 	def testGetWithaNonLinkingField	
