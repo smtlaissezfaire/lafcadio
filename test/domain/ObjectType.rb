@@ -20,5 +20,6 @@ class TestObjectType < LafcadioTestCase
 	def testHandlesClassWithoutXml
 		ot = ObjectType.getObjectType( NoXml )
 		assert_equal( 'objId', ot.sqlPrimaryKeyName )
+		assert_equal( 'noXmls', ot.tableName )
 	end
 end

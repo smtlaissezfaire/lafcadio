@@ -36,7 +36,7 @@ class ObjectType
 	# assumed to be stored in a "users" table, while a ProductCategory class is
 	# assumed to be stored in a "productCategories" table.
 	def tableName
-		if (tableName = @xmlParser.tableName)
+		if (!@xmlParser.nil? && tableName = @xmlParser.tableName)
 			tableName
 		else
 			tableName = ClassUtil.bareClassName @objectType
