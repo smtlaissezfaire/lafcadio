@@ -45,8 +45,16 @@ class TestDomainObject < LafcadioTestCase
 
 	def test_checks_fields_on_instantiation
 		LafcadioConfig.setValues( 'checkFields' => 'onInstantiate' )
-		assert_exception( FieldValueError, "Client#name should not be null." ) {
-			Client.new( {} )
+		first_client = Client.new( 'name' => 'first client' )
+		first_client.commit
+		assert_exception( FieldValueError ) { Client.new( {} ) }
+		assert_exception( FieldValueError ) {
+			Client.new( 'name' => 'client name', 'referringClient' => first_client,
+			            'notes' => 123 )
+		}
+		assert_exception( FieldValueError ) {
+			Client.new( 'name' => 'client name', 'referringClient' => first_client,
+			            'standard_rate' => "Free!" )
 		}
 	end
 	

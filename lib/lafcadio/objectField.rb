@@ -176,6 +176,8 @@ module Lafcadio
 	# field in the database.
 	class BlobField < ObjectField
 		attr_accessor :size
+		
+		def self.valueType; String; end
 
 		def bind_write?; true; end #:nodoc:
 

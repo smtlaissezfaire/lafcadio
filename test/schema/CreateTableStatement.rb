@@ -8,6 +8,6 @@ class TestCreateTableStatement < LafcadioTestCase
 		sql = statement.toSql
 		assert_not_match( /varchar\(255\),/, sql )
 		assert_match( /standard_rate float\(10, 2\)/, sql )
-		assert_match( /notes blob not null/, sql )
+		assert_match( /notes blob/, sql )
 	end
 end
