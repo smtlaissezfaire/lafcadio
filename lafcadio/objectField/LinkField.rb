@@ -45,15 +45,6 @@ class LinkField < ObjectField
 		end
   end
 
-  def valueFromCGI(fieldManager)
-    objId = fieldManager.getInt(name)
-		if objId != nil
-	    ObjectStore.getObjectStore.get(@linkedType, objId)
-		else
-			nil
-		end
-  end
-
   def valueFromSQL(string)
 		require 'lafcadio/objectStore/DomainObjectProxy'
 		string != nil ? DomainObjectProxy.new(@linkedType, string.to_i) : nil

@@ -16,10 +16,6 @@ class DateField < ObjectField
 		@range = RANGE_NEAR_FUTURE
   end
 
-  def valueFromCGI(fieldManager)
-    fieldManager.getDate name
-  end
-
   def valueForSQL(value)
 		value ? "'#{value.to_s}'" : 'null'
   end

@@ -17,22 +17,5 @@ class PasswordField < TextField
     @maxLength = maxLength
 		@autoGenerate = true
   end
-
-  def valueFromCGI(fieldManager)
-		require 'lafcadio/objectField/FieldValueError'
-    if(firstTime(fieldManager)) && @autoGenerate
-			value = PasswordField.randomPassword
-		else
-      val1 = fieldManager.get("#{name}1")
-      val2 = fieldManager.get("#{name}2")
-      if val1 == val2
-				value = val1
-      else
-				raise FieldValueError, "The new passwords you entered did not match.",
-						caller
-      end
-    end
-    value
-  end
 end
 

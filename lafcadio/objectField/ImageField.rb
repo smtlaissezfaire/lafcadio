@@ -10,26 +10,6 @@ class ImageField < ObjectField
     @fileManagerClass = fileManager
   end
 
-  def valueFromCGI(fieldManager)
-		require 'lafcadio/cgi/ImageUpload'
-		value = super fieldManager
-		if value.class <= ImageUpload
-      if value.desiredFilename == ""
-        value = fieldManager.get("#{name}.prev")
-        if value == nil
-          if firstTime(fieldManager)
-            value = nil
-          else
-            value = prevValue fieldManager.getObjId
-          end
-        end
-      else
-        value = value.desiredFilename
-      end
-    end
-    value
-  end
-
   def valueForSQL(value)
     "'#{value}'"
   end

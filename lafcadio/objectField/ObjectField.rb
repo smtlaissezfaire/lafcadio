@@ -100,24 +100,6 @@ class ObjectField
     prevObject.send(name)
   end
 
-  def valueFromCGI(fieldManager)
-    objId = fieldManager.getObjId
-    firstTime = firstTime fieldManager
-    if writeOnce && !firstTime
-      value = prevValue objId
-    else
-      value = fieldManager.get(name)
-    end
-    value = processBeforeVerify value
-    value
-  end
-
-  def verifiedValue(fieldManager)
-    value = valueFromCGI(fieldManager)
-    verify(value, fieldManager.getObjId)
-    value
-  end
-
   def processBeforeVerify(value)
     value = @default if value == nil
     value

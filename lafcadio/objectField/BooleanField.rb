@@ -73,9 +73,4 @@ class BooleanField < ObjectField
 	def valueFromSQL(value, lookupLink = true)
 		value == trueEnum( value )
 	end
-
-	def valueFromCGI(fieldManager)
-		value = super fieldManager
-		value != nil ? value : false
-	end
 end

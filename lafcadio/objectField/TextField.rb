@@ -17,10 +17,5 @@ class TextField < ObjectField
 			"null"
 		end
   end
-
-	def valueFromCGI(fieldManager)
-		value = super fieldManager
-		value != '' ? value : nil
-	end
 end
 
