@@ -1,6 +1,7 @@
 require 'lafcadio/objectField/LinkField'
 require 'lafcadio/objectStore/DomainComparable'
 require 'lafcadio/objectStore/DomainObjectProxy'
+require 'lafcadio/domain'
 
 # All classes that correspond to a table in the database need to be children of DomainObject.
 #
@@ -42,7 +43,7 @@ class DomainObject
 	# method to return an array of ObjectField instances. You don't have to define
 	# an ObjectField instance for "objId".
 	def DomainObject.getClassFields
-		raise "getClassFields needs to be defined for #{ self.name }"
+		ClassDefinitionXmlParser.new( self ).execute
 	end
 	
 	def DomainObject.classFields
@@ -56,7 +57,6 @@ class DomainObject
 
 	# Returns an array of subclasses that cannot be instantiated.
 	def DomainObject.abstractSubclasses
-		require 'lafcadio/domain/MapObject'
 		[ MapObject ]
 	end
 
@@ -74,7 +74,6 @@ class DomainObject
 	end
 
 	def DomainObject.method_missing(methodId)
-		require 'lafcadio/domain/ObjectType'
 		ObjectType.new(self).send(methodId.id2name)
 	end
 

@@ -9,3 +9,4 @@ classpath:lafcadio/
 logdir:test/testOutput/
 domainDirs:lafcadio/domain/,test/mock/domain/
 logSql:n
+classDefinitionDir:test/testData
