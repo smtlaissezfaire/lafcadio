@@ -41,6 +41,8 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		matchField( XmlSku, 'integer1', IntegerField )
 		matchField( XmlSku, 'link1', LinkField,
 		            { 'linked_type' => User, 'delete_cascade' => true } )
+		matchField( XmlSku, 'link2', LinkField,
+		            { 'linked_type' => Invoice, 'db_field_name' => 'an_invoice' } )
 		matchField( XmlSku, 'money1', MoneyField )
 		matchField( XmlSku, 'month1', MonthField )
 		matchField( XmlSku, 'subsetLink1', SubsetLinkField,

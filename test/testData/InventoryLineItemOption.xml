@@ -2,5 +2,5 @@
 	<field name="inventoryLineItem" class="LinkField"
 	       linked_type="InventoryLineItem" />
 	<field name="option" class="LinkField" linked_type="Option"
-	       dbFieldName="optionId" />
+	       db_field_name="optionId" />
 </lafcadio_class_definition>

@@ -1,6 +1,7 @@
 require 'lafcadio/query'
 require 'lafcadio/test'
 require '../test/mock/domain/Invoice'
+require '../test/mock/domain/InventoryLineItemOption'
 require '../test/mock/domain/InternalClient'
 require '../test/mock/domain/Client'
 
@@ -70,6 +71,11 @@ class TestQueryInferrer < LafcadioTestCase
 	def testEquals
 		desiredSql = "select * from invoices where invoices.hours = 10"
 		assert_infer_match( desiredSql, Invoice ) { |inv| inv.hours.equals( 10 ) }
+		desired_sql2 = 'select * from inventoryLineItemOptions ' +
+		               'where inventoryLineItemOptions.optionId = 1'
+		assert_infer_match( desired_sql2, InventoryLineItemOption ) { |ilio|
+			ilio.option.equals( TestOption.storedTestOption )
+		}
 	end
 	
 	def test_field_compare

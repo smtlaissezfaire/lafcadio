@@ -443,8 +443,14 @@ module Lafcadio
 	# A LinkField is used to link from one domain class to another.
 	class LinkField < ObjectField
 		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
-			self.new( domain_class, parameters['linked_type'], parameters['name'],
-								parameters['english_name'], parameters['delete_cascade'] )
+			instance = self.new(
+				domain_class, parameters['linked_type'], parameters['name'],
+				parameters['english_name'], parameters['delete_cascade']
+			)
+			if parameters['db_field_name']
+				instance.db_field_name = parameters['db_field_name']
+			end
+			instance
 		end
 
 		def self.instantiation_parameters( fieldElt ) #:nodoc:
