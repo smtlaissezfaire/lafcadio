@@ -127,10 +127,9 @@ module Lafcadio
 			Context.instance.set_init_proc( self, proc )
 		end
 
-		# The +passKey+ needs to be the Context instance, or else this method fails. 
-		# Note that this isn't hard security of any kind; it's simply a gentle 
-		# reminder to users of a ContextualService that the class should not be 
-		# instantiated directly.
+		# ContextualServices can only be initialized through the Context instance.
+		# Note that if you're writing your own initialize method in a child class,
+		# you should make sure to call super() or you'll overwrite this behavior.
 		def initialize
 			regexp = %r{lafcadio/util\.rb.*create_instance}
 			unless caller.any? { |line| line =~ regexp }
