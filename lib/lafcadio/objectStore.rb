@@ -22,8 +22,8 @@ module Lafcadio
 		
 		def execute
 			@dbObject.verify if LafcadioConfig.new()['checkFields'] == 'onCommit'
-			setCommitType
-			@dbObject.lastCommit = getLastCommit
+			set_commit_type
+			@dbObject.lastCommit = get_last_commit
 			@dbObject.pre_commit_trigger
 			update_dependent_domain_objects if @dbObject.delete
 			@dbBridge.commit @dbObject
@@ -33,7 +33,7 @@ module Lafcadio
 			@dbObject.post_commit_trigger
 		end
 
-		def getLastCommit
+		def get_last_commit
 			if @dbObject.delete
 				DomainObject::COMMIT_DELETE
 			elsif @dbObject.pkId
@@ -43,7 +43,7 @@ module Lafcadio
 			end
 		end
 		
-		def setCommitType
+		def set_commit_type
 			if @dbObject.delete
 				@commitType = DELETE
 			elsif @dbObject.pkId
@@ -103,17 +103,17 @@ module Lafcadio
 		
 		def commit(dbObject)
 			sqlMaker = DomainObjectSqlMaker.new(dbObject)
-			sqlMaker.sqlStatements.each { |sql, binds| executeCommit( sql, binds ) }
+			sqlMaker.sqlStatements.each { |sql, binds| execute_commit( sql, binds ) }
 			if sqlMaker.sqlStatements[0].first =~ /insert/
 				sql = 'select last_insert_id()'
-				result = executeSelect( sql )
+				result = execute_select( sql )
 				@@lastPkIdInserted = result[0]['last_insert_id()'].to_i
 			end
 		end
 		
-		def executeCommit( sql, binds ); @db_conn.do( sql, *binds ); end
+		def execute_commit( sql, binds ); @db_conn.do( sql, *binds ); end
 		
-		def executeSelect(sql)
+		def execute_select(sql)
 			maybeLog sql
 			begin
 				@db_conn.select_all( sql )
@@ -124,13 +124,13 @@ module Lafcadio
 		
 		def get_collection_by_query(query)
 			object_type = query.object_type
-			executeSelect( query.toSql ).collect { |row_hash|
+			execute_select( query.toSql ).collect { |row_hash|
 				object_type.new( SqlValueConverter.new( object_type, row_hash ) )
 			}
 		end
 		
 		def group_query( query )
-			executeSelect( query.toSql )[0].collect { |val|
+			execute_select( query.toSql )[0].collect { |val|
 				if query.field_name != query.object_type.sql_primary_key_name
 					a_field = query.object_type.get_field( query.field_name )
 					a_field.value_from_sql( val )

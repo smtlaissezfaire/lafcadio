@@ -146,19 +146,19 @@ class TestDBBridge < RUNIT::TestCase
 	
 	def testLogsSql
 		logFilePath = '../test/testOutput/sql'
-		@dbb.executeSelect( 'select * from users' )
+		@dbb.execute_select( 'select * from users' )
 		if FileTest.exist?( logFilePath )
 			fail if Time.now - File.ctime( logFilePath ) < 5
 		end
 		LafcadioConfig.set_filename( '../test/testData/config_with_sql_logging.dat' )
-		@dbb.executeSelect( 'select * from clients' )
+		@dbb.execute_select( 'select * from clients' )
 		fail if Time.now - File.ctime( logFilePath ) > 5
 	end
 	
 	def testLogsSqlToDifferentFileName
 		LafcadioConfig.set_filename( '../test/testData/config_with_log_path.dat' )
 		logFilePath = '../test/testOutput/another.sql'
-		@dbb.executeSelect( 'select * from users' )
+		@dbb.execute_select( 'select * from users' )
 		fail if Time.now - File.ctime( logFilePath ) > 5
 	end
 end
