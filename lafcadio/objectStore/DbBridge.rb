@@ -1,5 +1,6 @@
 require 'lafcadio/query/Max'
 require 'lafcadio/query/Query'
+require 'lafcadio/objectStore/Collection'
 require 'lafcadio/objectStore/DomainObjectSqlMaker'
 require 'lafcadio/objectStore/SqlValueConverter'
 require "mysql"
