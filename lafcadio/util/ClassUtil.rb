@@ -1,3 +1,5 @@
+require 'lafcadio/util'
+
 class ClassUtil
 	# Returns an array of all the known subclasses of <tt>theClass</tt>.
   def ClassUtil.subclasses(theClass)
@@ -23,6 +25,10 @@ class ClassUtil
 		ObjectSpace.each_object(Class) { |aClass|
 			theClass = aClass if aClass.name == className
 		}
-		theClass
+		if theClass
+			theClass
+		else
+			raise( MissingError, "Couldn't find class \"#{ className }\"", caller )
+		end
 	end
 end

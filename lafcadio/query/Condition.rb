@@ -1,5 +1,4 @@
-class MissingError < RuntimeError
-end
+require 'lafcadio/util'
 
 class Query
 	# The abstract base class for all the other subconditions. Subclasses need to 
