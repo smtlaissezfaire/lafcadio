@@ -1,7 +1,9 @@
 require 'lafcadio/test'
+require '../test/mock/domain/Invoice'
 require '../test/mock/domain/LineItem'
 require '../test/mock/domain/SKU'
 require '../test/mock/domain/User'
+require '../test/mock/domain/XmlSku'
 require '../test/mock/domain'
 require 'lafcadio/query'
 
@@ -14,6 +16,12 @@ class TestQuery < LafcadioTestCase
 	def testOnePkId
 		query = Query.new SKU, 199
     assert_equal( 'select * from skus where skus.pk_id = 199', query.to_sql )
+		query2 = Query.new( XmlSku, 199 )
+		assert_equal(
+			'select * from some_other_table ' +
+					'where some_other_table.some_other_id = 199',
+			query2.to_sql
+		)
 	end
 
 	def testByCondition

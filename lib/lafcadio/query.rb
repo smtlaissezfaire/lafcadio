@@ -115,8 +115,8 @@ module Lafcadio
 				if pk_idOrCondition.class <= Condition
 					@condition = pk_idOrCondition
 				else
-					@condition = Query::Equals.new( object_type.sql_primary_key_name,
-					                                pk_idOrCondition, object_type )
+					@condition = Query::Equals.new( 'pk_id', pk_idOrCondition,
+					                                object_type )
 				end
 			end
 			@order_by_order = ASC
