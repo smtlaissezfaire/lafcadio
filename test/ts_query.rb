@@ -192,7 +192,7 @@ class TestCondition < LafcadioTestCase
 			fail "needs to raise MissingError"
 		rescue MissingError
 			errStr = "Couldn't find field \"att name\" in Attribute domain class"
-			assert_equal( $!.to_s, errStr )
+			assert_equal( errStr, $!.to_s )
 		end
 	end
 end
@@ -469,6 +469,14 @@ class TestQuery < LafcadioTestCase
 		[ query2, query3, query4 ].each_with_index { |other_query, i|
 			assert( !query5.implies?( other_query ), i )
 		}
+	end
+
+	def test_order_by
+		query = Query.new( XmlSku2 )
+		query.order_by = 'textList1'
+		assert_equal(
+			'select * from that_table order by text_list1 asc', query.to_sql
+		)
 	end
 
 	def testToSql

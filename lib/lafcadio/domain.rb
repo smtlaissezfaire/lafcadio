@@ -360,7 +360,7 @@ module Lafcadio
 			if field
 				field
 			else
-				errStr = "Couldn't find field \"#{ field }\" in " +
+				errStr = "Couldn't find field \"#{ fieldName }\" in " +
 								 "#{ self } domain class"
 				raise( MissingError, errStr, caller )
 			end

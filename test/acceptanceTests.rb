@@ -336,6 +336,23 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 	end
 end
 
+class AccTestQuery < AcceptanceTestCase
+	def test_order_by
+		r1 = TestRow.new( 'text2' => 'zzz' )
+		r1.commit
+		r2 = TestRow.new( 'text2' => 'aaa' )
+		r2.commit
+		query = Query.new( TestRow )
+		query.order_by = 'text2'
+		assert_equal(
+			'select * from testRows order by text_field2 asc', query.to_sql
+		)
+		coll = @object_store.get_subset( query )
+		assert_equal( 2, coll.size )
+		assert_equal( r2, coll.first )
+	end
+end
+
 class AccTestTextField < AcceptanceTestCase
 	def testEscaping
 		text = <<-TEXT

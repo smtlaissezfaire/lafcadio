@@ -147,7 +147,8 @@ module Lafcadio
 		
 		def order_clause
 			if @order_by
-				clause = "order by #{ @order_by } "
+				order_by_field = @domain_class.get_field( @order_by )
+				clause = "order by #{ order_by_field.db_field_name } "
 				clause += @order_by_order == ASC ? 'asc' : 'desc'
 				clause
 			end
@@ -234,21 +235,7 @@ module Lafcadio
 				other_cond.is_a?( Condition ) and other_cond.to_sql == to_sql
 			end
 			
-			def get_field
-				a_domain_class = @domain_class
-				field = nil
-				while ( a_domain_class < DomainObject ) && !field
-					field = a_domain_class.get_class_field( @fieldName )
-					a_domain_class = a_domain_class.superclass
-				end
-				if field
-					field
-				else
-					errStr = "Couldn't find field \"#{ @fieldName }\" in " +
-									 "#{ @domain_class } domain class"
-					raise( MissingError, errStr, caller )
-				end
-			end
+			def get_field; @domain_class.get_field( @fieldName ); end
 			
 			def query; Query.new( @domain_class, self ); end
 			
