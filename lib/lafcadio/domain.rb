@@ -555,6 +555,7 @@ module Lafcadio
 			@error_messages = []
 			@fields = {}
 			@fields_set = []
+			@original_values = OriginalValuesHash.new( @fieldHash )
 			check_fields = LafcadioConfig.new()['checkFields']
 			verify if %w( onInstantiate onAllStates ).include?( check_fields )
 		end
@@ -664,6 +665,10 @@ module Lafcadio
 					field.verify( self.send( field.name ), self.pk_id )
 				}
 			end
+		end
+		
+		class OriginalValuesHash < DelegateClass( Hash )
+			def []=( key, val ); raise NoMethodError; end
 		end
 	end
 

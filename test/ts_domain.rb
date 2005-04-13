@@ -93,6 +93,7 @@ class TestDomainObject < LafcadioTestCase
 		if FileTest.exist?( '../test/testData/Attribute.xml.tmp' )
 			`mv ../test/testData/Attribute.xml.tmp ../test/testData/Attribute.xml`
 		end
+		def Attribute.post_commit_trigger( att ); end
 	end
 
 	def matchField( domain_class, fieldName, fieldClass, attributes = nil )
@@ -443,6 +444,25 @@ class TestDomainObject < LafcadioTestCase
 		client.name = 'new name'
 		@mockObjectStore.commit client
 		assert_equal client.name, invoice.client.name
+	end
+	
+	def test_original_values_accessible_in_triggers
+		att1 = Attribute.new( 'name' => 'original name' )
+		def att1.post_commit_trigger
+			raise if self.name != @original_values['name']
+		end
+		att1.commit
+		att1.name = 'something else'
+		assert_raise( RuntimeError ) do att1.commit; end
+		att2 = Attribute.new( 'name' => 'Cthulhu' )
+		def att2.post_commit_trigger
+			raise if @original_values['name'] == 'Cthulhu'
+		end
+		assert_raise( RuntimeError ) do att2.commit; end
+		att2.name = 'something else'
+		assert_raise( RuntimeError ) do att2.commit; end
+		def att2.post_commit_trigger; @original_values['name'] = 'foobar'; end
+		assert_raise( NoMethodError ) do att2.commit; end
 	end
 	
 	def test_override_class_defaults
