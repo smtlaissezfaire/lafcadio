@@ -8,6 +8,7 @@ module Lafcadio
 			@objects = {}
 			@retrievals_by_type = Hash.new 0
 			@query_count = Hash.new( 0 )
+			@next_pk_ids = {}
 		end
 
 		def commit(db_object)
@@ -53,17 +54,23 @@ module Lafcadio
 		end
 		
 		def get_pk_id_before_committing( db_object )
-			object_pk_id = db_object.pk_id
-			unless object_pk_id
-				maxpk_id = 0
-				pk_ids = get_objects_by_domain_class( db_object.domain_class ).keys
-				pk_ids.each { |pk_id|
-					maxpk_id = pk_id if pk_id > maxpk_id
-				}
-				@last_pk_id_inserted = maxpk_id + 1
-				object_pk_id = @last_pk_id_inserted
+			if db_object.pk_id
+				db_object.pk_id
+			else
+				if ( next_pk_id = @next_pk_ids[db_object.domain_class] )
+					@last_pk_id_inserted = next_pk_id
+					@next_pk_ids[db_object.domain_class] = nil
+					next_pk_id
+				else
+					maxpk_id = 0
+					pk_ids = get_objects_by_domain_class( db_object.domain_class ).keys
+					pk_ids.each { |pk_id|
+						maxpk_id = pk_id if pk_id > maxpk_id
+					}
+					@last_pk_id_inserted = maxpk_id + 1
+					@last_pk_id_inserted
+				end
 			end
-			object_pk_id
 		end
 		
 		def get_objects_by_domain_class( domain_class )
@@ -87,6 +94,10 @@ module Lafcadio
 					[ nil ]
 				end
 			end
+		end
+		
+		def set_next_pk_id( domain_class, npi )
+			@next_pk_ids[ domain_class ] = npi
 		end
 	end
 
