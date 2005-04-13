@@ -416,7 +416,13 @@ module Lafcadio
 			end
 
 			def to_sql
-				"#{ db_field_name } in (#{ @searchTerm.join(', ') })"
+				if get_field.is_a?( TextField )
+					quoted = @searchTerm.map do |str| "'#{ str }'"; end
+					end_clause = quoted.join ', '
+				else
+					end_clause = @searchTerm.join ', '
+				end
+				"#{ db_field_name } in (#{ end_clause })"
 			end
 		end
 		

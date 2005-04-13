@@ -353,6 +353,11 @@ class TestQueryInferrer < LafcadioTestCase
 		assert_infer_match( desiredSql, Invoice ) { |inv|
 			inv.pk_id.in( 1, 2, 3 )
 		}
+		desired_sql2 =
+			"select * from clients where clients.name in ('name1', 'name2')"
+		assert_infer_match( desired_sql2, Client ) { |cli|
+			cli.name.in( 'name1', 'name2' )
+		}
 	end
 
 	def test_include?
