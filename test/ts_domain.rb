@@ -303,6 +303,7 @@ class TestDomainObject < LafcadioTestCase
 			client2,
 			Client.get { |cli| cli.referringClient.equals( client ) }.only
 		)
+		assert_equal( client2, Client.get( client, 'referringClient').only )
 	end
 	
 	def testDontSetDeleteWithoutPkId

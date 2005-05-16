@@ -422,8 +422,10 @@ module Lafcadio
 				if block_given?
 					query = Query.infer( self ) { |dobj| yield( dobj ) }
 					ObjectStore.get_object_store.get_subset( query )
-				else
+				elsif args.size == 1
 					ObjectStore.get_object_store.get( self, *args )
+				else
+					ObjectStore.get_object_store.get_filtered( self.name, *args )
 				end
 			else
 				maybe_field_class_name = method_name.underscore_to_camel_case + 'Field'
