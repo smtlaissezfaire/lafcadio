@@ -622,6 +622,11 @@ module Lafcadio
 			end
 			@delete = value
 		end
+		
+		def delete!
+			self.delete = true
+			commit
+		end
 
 		def get_field( field ) #:nodoc:
 			unless @fields_set.include?( field )
@@ -698,6 +703,11 @@ module Lafcadio
 			end
 			@fields[field.name] = value
 			@fields_set << field
+		end
+		
+		def update!( changes )
+			changes.each do |sym, value| self.send( sym.to_s + '=', value ); end
+			commit
 		end
 		
 		def verify

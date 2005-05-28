@@ -312,6 +312,13 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal( 345, xml_sku.pk_id )
 	end
 	
+	def test_delete!
+		client = Client.new( {} ).commit
+		assert_equal( 1, Client.all.size )
+		client.delete!
+		assert_equal( 0, Client.all.size )
+	end
+	
   def testDefinesSetters
     client = newTestClientWithoutPkId
     assert_equal("clientName", client.name)
@@ -524,6 +531,13 @@ class TestDomainObject < LafcadioTestCase
 		assert_match( /Client/, newTestClientWithoutPkId.to_s )
 	end
 
+	def test_update!
+		client = Client.new( {} ).commit
+		assert_equal( nil, Client.first.name )
+		client.update!( :name => 'new name' )
+		assert_equal( 'new name', Client.first.name )
+	end
+	
 	class MockDomainObject < DomainObject
 		@@classesInstantiated = false
 		
