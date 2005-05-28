@@ -234,6 +234,13 @@ class TestDomainObject < LafcadioTestCase
 	def test_convenience_class_methods
 		5.times { Client.new({}).commit }
 		assert_equal( 5, Client.all.size )
+		assert Client.exist?( 1 )
+		assert !Client.exist?( 100 )
+		cli = Client.first
+		cli.name = "new name"
+		cli.commit
+		assert Client.exist?( 'new name', 'name' )
+		assert Client.exist?( 'new name', :name )
 		assert_equal( 1, Client.first.pk_id )
 		assert_equal( 5, Client.last.pk_id )
 		assert_raise( IndexError ) { Client.only }

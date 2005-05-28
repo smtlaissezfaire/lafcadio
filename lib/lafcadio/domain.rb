@@ -335,6 +335,13 @@ module Lafcadio
 			dependent_classes
 		end
 		
+		def self.exist?( search_term, field_name = :pk_id )
+			query = Query.infer( self ) { |dobj|
+				dobj.send( field_name ).equals( search_term )
+			}
+			!ObjectStore.get_object_store.get_subset( query ).empty?
+		end
+		
 		def self.first; all.first; end
 
 		def self.get_class_field(fieldName) #:nodoc:
