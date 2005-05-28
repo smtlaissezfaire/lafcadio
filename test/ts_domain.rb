@@ -263,6 +263,17 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal client, clientPrime.priorityInvoice.client
 	end
 
+	def test_default_field_setup_hash
+		assert_equal(
+			BooleanField::ENUMS_CAPITAL_YES_NO,
+			DomainObjChild1.get_field( 'bool1' ).enum_type
+		)
+		assert_equal(
+			BooleanField::ENUMS_ONE_ZERO,
+			DomainObjChild1.get_field( 'bool2' ).enum_type
+		)
+	end
+
 	def test_defers_field_copying
 		row_hash = OneTimeAccessHash.new( 'pk_id' => '1', 'hours' => '36.5',
 		                                  'xmlSku' => nil )

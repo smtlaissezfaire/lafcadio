@@ -251,6 +251,9 @@ module Lafcadio
 				hash[key] = pk_field
 			}
 		@@sql_primary_keys = Hash.new( 'pk_id' )
+		@@default_field_setup_hashes = Hash.new { |hash, key|
+			hash[key] = Hash.new( {} )
+		}
 
 		COMMIT_ADD = 1
 		COMMIT_EDIT = 2
@@ -288,16 +291,19 @@ module Lafcadio
 
 		def self.create_field( field_class, *args )
 			class_fields = @@class_fields[self]
+			if args.last.is_a? Hash
+				att_hash = args.last
+			else
+				att_hash = @@default_field_setup_hashes[self][field_class].clone
+			end
 			if class_fields.nil?
 				class_fields = [ @@pk_fields[self] ]
 				@@class_fields[self] = class_fields
 			end
 			if field_class == LinkField
-				att_hash = args.last.is_a?( Hash ) ? args.last : {}
 				att_hash['linked_type'] = args.first
 				att_hash['name'] = args[1] if args[1] and !args[1].is_a? Hash
 			else
-				att_hash = args[1] || {}
 				name = args.first
 				att_hash['name'] = name == String ? name : name.to_s
 			end
@@ -309,6 +315,10 @@ module Lafcadio
 			class_fields << field
 		end
 		
+		def self.default_field_setup_hash( field_class, hash )
+			@@default_field_setup_hashes[self][field_class] = hash
+		end
+
 		def self.dependent_classes #:nodoc:
 			dependent_classes = {}
 			DomainObject.subclasses.each { |aClass|
