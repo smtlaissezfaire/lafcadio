@@ -298,6 +298,10 @@ class DomainObjChild1 < Lafcadio::DomainObject
 
 	boolean 'bool1'
 	boolean 'bool2', { 'enum_type' => Lafcadio::BooleanField::ENUMS_ONE_ZERO }
+	booleans 'bool3',
+           'bool4', { 'enum_type' => Lafcadio::BooleanField::ENUMS_ONE_ZERO },
+	         'bool5'
+	texts    'text1', 'text2'
 end
 
 

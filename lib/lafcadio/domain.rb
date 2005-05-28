@@ -443,7 +443,29 @@ module Lafcadio
 					field_class = Lafcadio.const_get( maybe_field_class_name )
 					create_field( field_class, *args )
 				rescue NameError
-					super
+					singular = English.singular method_name
+					if singular
+						maybe_field_class_name = singular.underscore_to_camel_case + 'Field'
+						begin
+							field_class = Lafcadio.const_get( maybe_field_class_name )
+							arg = args.shift
+							until args.empty?
+								next_arg = args.shift
+								if next_arg.is_a? String or next_arg.is_a? Symbol
+									create_field( field_class, arg )
+									arg = next_arg
+								else
+									create_field( field_class, arg, next_arg )
+									arg = args.shift
+								end
+							end
+							create_field( field_class, arg ) unless arg.nil?
+						rescue NameError
+							super
+						end
+					else
+						super
+					end
 				end
 			end
 		end

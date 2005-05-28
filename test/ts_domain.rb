@@ -205,6 +205,17 @@ class TestDomainObject < LafcadioTestCase
 		)
 	end
 	
+	def test_class_fields_plural
+		matchField( DomainObjChild1, 'bool3', BooleanField )
+		matchField(
+			DomainObjChild1, 'bool4', BooleanField,
+			{ 'enum_type' => BooleanField::ENUMS_ONE_ZERO }
+		)
+		matchField( DomainObjChild1, 'bool5', BooleanField )
+		matchField( DomainObjChild1, 'text1', TextField )
+		matchField( DomainObjChild1, 'text2', TextField )
+	end
+	
 	def testClone
 		client1 = newTestClientWithoutPkId
 		client2 = client1.clone
