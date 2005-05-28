@@ -122,6 +122,8 @@ class TestEnglish < LafcadioTestCase
     assert_equal "products", English.plural("product")
 		assert_equal 'addresses', English.plural('address')
 		assert_equal 'taxes', English.plural('tax')
+		assert_equal( 'axes', English.plural( 'axis' ) )
+		assert_equal( 'data', English.plural( 'datum' ) )
   end
 
 	def testProperNoun

@@ -132,12 +132,15 @@ module Lafcadio
 			consonantYPattern = Regexp.new("([^aeiou])y$", Regexp::IGNORECASE)
 			if singular =~ consonantYPattern
 				singular.gsub consonantYPattern, '\1ies'
+			elsif singular =~ /^(.*)xis$/
+				$1 + 'xes'
 			elsif singular =~ /[xs]$/
 				singular + "es"
+			elsif singular =~ /(.*)tum$/
+				$1 + 'ta'
 			else
 				singular + "s"
-			end
-		end
+			end		end
 
 		# Returns the proper noun form of a string by capitalizing most of the 
 		# words.
