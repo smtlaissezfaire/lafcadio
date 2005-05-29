@@ -28,22 +28,22 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		matchField( XmlSku, 'date1', DateField, { 'not_null' => false } )
 		matchField( XmlSku, 'date2', DateField )
 		matchField( XmlSku, 'dateTime1', DateTimeField )
-		matchField( XmlSku, 'decimal1', DecimalField )
+		matchField( XmlSku, 'decimal1', FloatField )
 		matchField( XmlSku, 'email1', EmailField )
 		matchField( XmlSku, 'enum1', EnumField,
 		            { 'enums' => QueueHash.new( 'a', 'a', 'b', 'b' ) } )
 		matchField( XmlSku, 'enum2', EnumField,
 		            { 'enums' => QueueHash.new( '1', '2', '3', '4' ) } )
 		matchField( XmlSku, 'integer1', IntegerField )
-		matchField( XmlSku, 'link1', LinkField,
+		matchField( XmlSku, 'link1', DomainObjectField,
 		            { 'linked_type' => User, 'delete_cascade' => true } )
-		matchField( XmlSku, 'link2', LinkField,
+		matchField( XmlSku, 'link2', DomainObjectField,
 		            { 'linked_type' => Invoice, 'db_field_name' => 'an_invoice' } )
 		matchField( XmlSku, 'month1', MonthField )
-		matchField( XmlSku, 'subsetLink1', SubsetLinkField,
+		matchField( XmlSku, 'subsetLink1', SubsetDomainObjectField,
 		            { 'subset_field' => 'xmlSku' } )
-		matchField( XmlSku, 'text1', TextField )
-		matchField( XmlSku, 'text2', TextField )
+		matchField( XmlSku, 'text1', StringField )
+		matchField( XmlSku, 'text2', StringField )
 		matchField( XmlSku, 'textList1', TextListField,
 		            { 'db_field_name' => 'text_list1' } )
 		matchField( Invoice, 'timestamp1', TimeStampField )
@@ -179,20 +179,20 @@ class TestDomainObject < LafcadioTestCase
 		matchField( XmlSku2, 'date1', DateField, { 'not_null' => false } )
 		matchField( XmlSku2, 'date2', DateField )
 		matchField( XmlSku2, 'dateTime1', DateTimeField )
-		matchField( XmlSku2, 'decimal1', DecimalField )
+		matchField( XmlSku2, 'decimal1', FloatField )
 		matchField( XmlSku2, 'email1', EmailField )
 		matchField( XmlSku2, 'enum1', EnumField,
 		            { 'enums' => QueueHash.new( 'a', 'a', 'b', 'b' ) } )
 		matchField( XmlSku2, 'enum2', EnumField,
 		            { 'enums' => QueueHash.new( '1', '2', '3', '4' ) } )
 		matchField( XmlSku2, 'integer1', IntegerField )
-		matchField( XmlSku2, 'link1', LinkField,
+		matchField( XmlSku2, 'link1', DomainObjectField,
 		            { 'linked_type' => User, 'delete_cascade' => true } )
 		matchField( XmlSku2, 'month1', MonthField )
-		matchField( XmlSku2, 'subsetLink1', SubsetLinkField,
+		matchField( XmlSku2, 'subsetLink1', SubsetDomainObjectField,
 		            { 'subset_field' => 'xmlSku' } )
-		matchField( XmlSku2, 'text1', TextField )
-		matchField( XmlSku2, 'text2', TextField )
+		matchField( XmlSku2, 'text1', StringField )
+		matchField( XmlSku2, 'text2', StringField )
 		matchField( XmlSku2, 'textList1', TextListField,
 		            { 'db_field_name' => 'text_list1' } )
 		matchField( XmlSku2, 'timestamp1', TimeStampField )
@@ -212,8 +212,8 @@ class TestDomainObject < LafcadioTestCase
 			{ 'enum_type' => BooleanField::ENUMS_ONE_ZERO }
 		)
 		matchField( DomainObjChild1, 'bool5', BooleanField )
-		matchField( DomainObjChild1, 'text1', TextField )
-		matchField( DomainObjChild1, 'text2', TextField )
+		matchField( DomainObjChild1, 'text1', StringField )
+		matchField( DomainObjChild1, 'text2', StringField )
 	end
 	
 	def testClone

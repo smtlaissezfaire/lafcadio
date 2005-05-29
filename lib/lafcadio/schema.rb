@@ -3,7 +3,7 @@ require 'lafcadio/objectField'
 module Lafcadio
 	class CreateTableStatement #:nodoc:
 		@@simple_field_clauses = {
-			DecimalField => 'float', DateField => 'date', BooleanField => 'bool',
+			FloatField => 'float', DateField => 'date', BooleanField => 'bool',
 			TimeStampField => 'timestamp', DateTimeField => 'datetime'
 		}
 	
@@ -42,11 +42,11 @@ module Lafcadio
 					"'#{ enumValue }'"
 				}
 				"enum( #{ singleQuotedValues.join( ', ' ) } )"
-			elsif ( field.class <= TextField || field.class <= TextListField )
+			elsif ( field.class <= StringField || field.class <= TextListField )
 				'varchar(255)'
-			elsif ( field.class <= LinkField || field.class <= IntegerField )
+			elsif ( field.class <= DomainObjectField || field.class <= IntegerField )
 				'int'
-			elsif ( field.class <= DecimalField )
+			elsif ( field.class <= FloatField )
 				'float(10, 2)'
 			elsif ( field.class <= BlobField )
 				'blob'

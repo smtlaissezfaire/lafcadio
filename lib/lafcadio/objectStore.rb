@@ -205,7 +205,7 @@ module Lafcadio
 	end
 
 	# The DomainObjectProxy is used when retrieving domain objects that are 
-	# linked to other domain objects with LinkFields. In terms of +domain_class+
+	# linked to other domain objects with DomainObjectFields. In terms of +domain_class+
 	# and 
 	# +pk_id+, a DomainObjectProxy instance looks to the outside world like the 
 	# domain object it's supposed to represent. It only retrieves its domain 

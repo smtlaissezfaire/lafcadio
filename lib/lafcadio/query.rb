@@ -274,7 +274,7 @@ module Lafcadio
 			end
 
 			def to_sql
-				if ( get_field.kind_of?( LinkField ) &&
+				if ( get_field.kind_of?( DomainObjectField ) &&
 				     !@searchTerm.respond_to?( :pk_id ) )
 					search_val = @searchTerm.to_s
 				else
@@ -416,7 +416,7 @@ module Lafcadio
 			end
 
 			def to_sql
-				if get_field.is_a?( TextField )
+				if get_field.is_a?( StringField )
 					quoted = @searchTerm.map do |str| "'#{ str }'"; end
 					end_clause = quoted.join ', '
 				else

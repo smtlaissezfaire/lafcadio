@@ -362,7 +362,7 @@ class TestDbObjectCommitter < LafcadioTestCase
 		assert_equal( 0, @testObjectStore.get_xml_skus.size )
 	end
 
-  def testDeleteSetsLinkFieldsToNil
+  def testDeleteSetsDomainObjectFieldsToNil
 		client = Client.new({ 'pk_id' => 1, 'name' => 'client name' })
 		invoice = Invoice.new({ 'pk_id' => 1,
 				'client' => DomainObjectProxy.new(client), 'date' => Date.new(2000, 1, 17),
@@ -543,7 +543,7 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
 	end
 
 	class InternalClientDiffPk < Client
-		def self.get_class_fields; [ TextField.new( self, 'billingType' ) ]; end
+		def self.get_class_fields; [ StringField.new( self, 'billingType' ) ]; end
 		
 		def self.sql_primary_key_name; 'primary_key'; end
 		

@@ -57,7 +57,7 @@ end
 
 class DiffSqlPrimaryKey < Lafcadio::DomainObject
 	def self.get_class_fields
-		super.concat( [ Lafcadio::TextField.new( self, 'text' ) ] )
+		super.concat( [ Lafcadio::StringField.new( self, 'text' ) ] )
 	end
 	
 	sql_primary_key_name 'objId'
@@ -248,29 +248,36 @@ end
 class XmlSku < Lafcadio::DomainObject; end
 
 class XmlSku2 < Lafcadio::DomainObject
-	boolean     'boolean1',
-	            { 'enum_type' => Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO }
-	boolean     'boolean2',
-	            { 'enums' => { true => 'yin', false => 'yang' },
-		            'english_name' => 'boolean 2' }
-	date        'date1', { 'not_null' => false }
-	date        'date2'
-	date_time   'dateTime1'
-	decimal     'decimal1', { 'precision' => 4, 'english_name' => 'decimal 1' }
-	email       'email1'
-	enum        'enum1',
-	            { 'enums' => Lafcadio::QueueHash.new( 'a', 'a', 'b', 'b' ) }
-	enum        'enum2',
-	            { 'enums' => Lafcadio::QueueHash.new( '1', '2', '3', '4' ) }
-	integer     'integer1'
-	link        User, 'link1', { 'delete_cascade' => true }
-	link        XmlSku
-	month       'month1'
-	subset_link 'subsetLink1', { 'subset_field' => 'xmlSku' }
-	text        'text1', { 'size' => 16, 'unique' => true }
-	text        'text2', { 'large' => true }
-	text_list   'textList1', { 'db_field_name' => 'text_list1' }
-	time_stamp  'timestamp1'
+	boolean              'boolean1',
+	                     { 'enum_type' =>
+											     Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO
+											 }
+	boolean              'boolean2',
+	                     { 'enums' => { true => 'yin', false => 'yang' },
+		                     'english_name' => 'boolean 2' }
+	date                 'date1', { 'not_null' => false }
+	date                 'date2'
+	date_time            'dateTime1'
+	domain_object        User, 'link1', { 'delete_cascade' => true }
+	domain_object        XmlSku
+	email                'email1'
+	enum                 'enum1',
+	                     { 'enums' => Lafcadio::QueueHash.new(
+											     'a', 'a', 'b', 'b'
+											 ) }
+	enum                 'enum2',
+	                     { 'enums' => Lafcadio::QueueHash.new(
+											     '1', '2', '3', '4'
+											 ) }
+	float                'decimal1',
+                       { 'precision' => 4, 'english_name' => 'decimal 1' }
+	integer              'integer1'
+	month                'month1'
+	subset_domain_object 'subsetLink1', { 'subset_field' => 'xmlSku' }
+	string               'text1', { 'size' => 16, 'unique' => true }
+	string               'text2', { 'large' => true }
+	text_list            'textList1', { 'db_field_name' => 'text_list1' }
+	time_stamp           'timestamp1'
 	
 	table_name         'that_table'
 	sql_primary_key_name 'xml_sku2_id'
@@ -296,12 +303,12 @@ class DomainObjChild1 < Lafcadio::DomainObject
 													   'enum_type' =>   Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO
 													 }
 
-	boolean 'bool1'
-	boolean 'bool2', { 'enum_type' => Lafcadio::BooleanField::ENUMS_ONE_ZERO }
+	boolean  'bool1'
+	boolean  'bool2', { 'enum_type' => Lafcadio::BooleanField::ENUMS_ONE_ZERO }
 	booleans 'bool3',
            'bool4', { 'enum_type' => Lafcadio::BooleanField::ENUMS_ONE_ZERO },
 	         'bool5'
-	texts    'text1', 'text2'
+	strings  'text1', 'text2'
 end
 
 

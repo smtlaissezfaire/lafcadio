@@ -113,16 +113,8 @@ module Lafcadio
 		end
 	end
 
-	# IntegerField represents an integer.
-	class IntegerField < ObjectField
-		def value_from_sql(string) #:nodoc:
-			value = super
-			value ? value.to_i : nil
-		end
-	end
-
-	# A TextField is expected to contain a string value.
-	class TextField < ObjectField
+	# A StringField is expected to contain a string value.
+	class StringField < ObjectField
 		def value_for_sql(value) #:nodoc:
 			if value
 				value = value.gsub(/(\\?')/) { |m| m.length == 1 ? "''" : m }
@@ -131,6 +123,14 @@ module Lafcadio
 			else
 				"null"
 			end
+		end
+	end
+
+	# IntegerField represents an integer.
+	class IntegerField < ObjectField
+		def value_from_sql(string) #:nodoc:
+			value = super
+			value ? value.to_i : nil
 		end
 	end
 
@@ -269,127 +269,9 @@ module Lafcadio
 			dbi_value ? dbi_value.to_time : nil
 		end
 	end
-	
-	# DecimalField represents a decimal value.
-	class DecimalField < ObjectField
-		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
-			self.new( domain_class, parameters['name'] )
-		end
 
-		def self.value_type #:nodoc:
-			Numeric
-		end
-
-		def process_before_verify(value) #:nodoc:
-			value = super value
-			value != nil && value != '' ? value.to_f : nil
-		end
-
-		def value_from_sql(string, lookupLink = true) #:nodoc:
-			string != nil ? string.to_f : nil
-		end
-	end
-
-	# EmailField takes a text value that is expected to be formatted as a single
-	# valid email address.
-	class EmailField < TextField
-		# Is +address+ a valid email address?
-		def self.valid_address(address)
-			address =~ /^[^ @]+@[^ \.]+\.[^ ,]+$/
-		end
-
-		def initialize( domain_class, name = "email" )
-			super( domain_class, name )
-		end
-
-		def verify_non_nil(value, pk_id) #:nodoc:
-			super(value, pk_id)
-			if !EmailField.valid_address(value)
-				raise(
-					FieldValueError,
-				  "#{ domain_class.name }##{ name } needs a valid email address.",
-				  caller
-				)
-			end
-		end
-	end
-
-	# EnumField represents an enumerated field that can only be set to one of a
-	# set range of string values. To set the enumeration in the class definition
-	# XML, use the following format:
-	#   <field name="flavor" class="EnumField">
-	#     <enums>
-	#       <enum>Vanilla</enum>
-	#       <enum>Chocolate</enum>
-	#       <enum>Lychee</enum>
-	#     </enums>
-	#   </field>
-	# If you're defining the field in Ruby, you can simply pass in an array of
-	# enums as the +enums+ argument.
-	#
-	class EnumField < TextField
-		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
-			self.new( domain_class, parameters['name'], parameters['enums'] )
-		end
-
-		def self.enum_queue_hash( fieldElt )
-			enumValues = []
-			fieldElt.elements.each( 'enums/enum' ) { |enumElt|
-				enumValues << enumElt.attributes['key']
-				enumValues << enumElt.text.to_s
-			}
-			QueueHash.new( *enumValues )
-		end
-
-		def self.instantiation_parameters( fieldElt ) #:nodoc:
-			parameters = super( fieldElt )
-			if fieldElt.elements['enums'][1].attributes['key']
-				parameters['enums'] = enum_queue_hash( fieldElt )
-			else
-				parameters['enums'] = []
-				fieldElt.elements.each( 'enums/enum' ) { |enumElt|
-					parameters['enums'] << enumElt.text.to_s
-				}
-			end
-			parameters
-		end
-		
-		attr_reader :enums
-
-		# [domain_class]  The domain class that this field belongs to.
-		# [name]          The name of this domain class.
-		# [enums]         An array of Strings representing the possible choices for
-		#                 this field.
-		def initialize( domain_class, name, enums )
-			super( domain_class, name )
-			if enums.class == Array 
-				@enums = QueueHash.new_from_array enums
-			else
-				@enums = enums
-			end
-		end
-		
-		def value_for_sql(value) #:nodoc:
-			value != '' ?(super(value)) : 'null'
-		end
-		
-		def verify_non_nil( value, pk_id ) #:nodoc:
-			super
-			if @enums[value].nil?
-				key_str = '[ ' +
-				          ( @enums.keys.map { |key| "\"#{ key }\"" } ).join(', ') + ' ]'
-				err_str = "#{ @domain_class.name }##{ name } needs a value that is " +
-				          "one of #{ key_str }"
-				raise( FieldValueError, err_str, caller )
-			end
-		end
-	end
-	
-	class FieldValueError < RuntimeError #:nodoc:
-	end
-
-	# A LinkField is used to link from one domain class to another.
-	class LinkField < ObjectField
+	# A DomainObjectField is used to link from one domain class to another.
+	class DomainObjectField < ObjectField
 		def self.auto_name( linked_type )
 			linked_type.name =~ /::/
 			( $' || linked_type.name ).camel_case_to_underscore
@@ -451,20 +333,20 @@ module Lafcadio
 		def verify_non_nil(value, pk_id) #:nodoc:
 			super
 			if @linked_type != @domain_class && pk_id
-				subsetLinkField = @linked_type.class_fields.find { |field|
-					field.class == SubsetLinkField && field.subset_field == @name
+				subsetDomainObjectField = @linked_type.class_fields.find { |field|
+					field.class == SubsetDomainObjectField && field.subset_field == @name
 				}
-				if subsetLinkField
-					verify_subset_link_field( subsetLinkField, pk_id )
+				if subsetDomainObjectField
+					verify_subset_link_field( subsetDomainObjectField, pk_id )
 				end
 			end
 		end
 
-		def verify_subset_link_field( subsetLinkField, pk_id )
+		def verify_subset_link_field( subsetDomainObjectField, pk_id )
 			begin
 				prevObj = ObjectStore.get_object_store.get( domain_class, pk_id )
 				prevObjLinkedTo = prevObj.send(name)
-				possiblyMyObj = prevObjLinkedTo.send(subsetLinkField.name)
+				possiblyMyObj = prevObjLinkedTo.send(subsetDomainObjectField.name)
 				if possiblyMyObj && possiblyMyObj.pk_id == pk_id
 					cantChangeMsg = "You can't change that."
 					raise FieldValueError, cantChangeMsg, caller
@@ -472,6 +354,124 @@ module Lafcadio
 			rescue DomainObjectNotFoundError
 				# no previous value, so nothing to check for
 			end
+		end
+	end
+
+	# EmailField takes a text value that is expected to be formatted as a single
+	# valid email address.
+	class EmailField < StringField
+		# Is +address+ a valid email address?
+		def self.valid_address(address)
+			address =~ /^[^ @]+@[^ \.]+\.[^ ,]+$/
+		end
+
+		def initialize( domain_class, name = "email" )
+			super( domain_class, name )
+		end
+
+		def verify_non_nil(value, pk_id) #:nodoc:
+			super(value, pk_id)
+			if !EmailField.valid_address(value)
+				raise(
+					FieldValueError,
+				  "#{ domain_class.name }##{ name } needs a valid email address.",
+				  caller
+				)
+			end
+		end
+	end
+
+	# EnumField represents an enumerated field that can only be set to one of a
+	# set range of string values. To set the enumeration in the class definition
+	# XML, use the following format:
+	#   <field name="flavor" class="EnumField">
+	#     <enums>
+	#       <enum>Vanilla</enum>
+	#       <enum>Chocolate</enum>
+	#       <enum>Lychee</enum>
+	#     </enums>
+	#   </field>
+	# If you're defining the field in Ruby, you can simply pass in an array of
+	# enums as the +enums+ argument.
+	#
+	class EnumField < StringField
+		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
+			self.new( domain_class, parameters['name'], parameters['enums'] )
+		end
+
+		def self.enum_queue_hash( fieldElt )
+			enumValues = []
+			fieldElt.elements.each( 'enums/enum' ) { |enumElt|
+				enumValues << enumElt.attributes['key']
+				enumValues << enumElt.text.to_s
+			}
+			QueueHash.new( *enumValues )
+		end
+
+		def self.instantiation_parameters( fieldElt ) #:nodoc:
+			parameters = super( fieldElt )
+			if fieldElt.elements['enums'][1].attributes['key']
+				parameters['enums'] = enum_queue_hash( fieldElt )
+			else
+				parameters['enums'] = []
+				fieldElt.elements.each( 'enums/enum' ) { |enumElt|
+					parameters['enums'] << enumElt.text.to_s
+				}
+			end
+			parameters
+		end
+		
+		attr_reader :enums
+
+		# [domain_class]  The domain class that this field belongs to.
+		# [name]          The name of this domain class.
+		# [enums]         An array of Strings representing the possible choices for
+		#                 this field.
+		def initialize( domain_class, name, enums )
+			super( domain_class, name )
+			if enums.class == Array 
+				@enums = QueueHash.new_from_array enums
+			else
+				@enums = enums
+			end
+		end
+		
+		def value_for_sql(value) #:nodoc:
+			value != '' ?(super(value)) : 'null'
+		end
+		
+		def verify_non_nil( value, pk_id ) #:nodoc:
+			super
+			if @enums[value].nil?
+				key_str = '[ ' +
+				          ( @enums.keys.map { |key| "\"#{ key }\"" } ).join(', ') + ' ]'
+				err_str = "#{ @domain_class.name }##{ name } needs a value that is " +
+				          "one of #{ key_str }"
+				raise( FieldValueError, err_str, caller )
+			end
+		end
+	end
+	
+	class FieldValueError < RuntimeError #:nodoc:
+	end
+
+	# FloatField represents a decimal value.
+	class FloatField < ObjectField
+		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
+			self.new( domain_class, parameters['name'] )
+		end
+
+		def self.value_type #:nodoc:
+			Numeric
+		end
+
+		def process_before_verify(value) #:nodoc:
+			value = super value
+			value != nil && value != '' ? value.to_f : nil
+		end
+
+		def value_from_sql(string, lookupLink = true) #:nodoc:
+			string != nil ? string.to_f : nil
 		end
 	end
 
@@ -503,7 +503,7 @@ module Lafcadio
 		end
 	end
 
-	class SubsetLinkField < LinkField #:nodoc:
+	class SubsetDomainObjectField < DomainObjectField #:nodoc:
 		def self.instantiate_with_parameters( domain_class, parameters )
 			self.new( domain_class, parameters['linked_type'],
 			          parameters['subset_field'], parameters['name'] )

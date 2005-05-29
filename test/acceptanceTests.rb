@@ -51,7 +51,7 @@ create table test_bad_rows (
 
 	def self.get_class_fields
 		fields = super
-		fields << TextField.new( self, 'text_field' )
+		fields << StringField.new( self, 'text_field' )
 		fields
 	end
 end
@@ -72,7 +72,7 @@ create table test_diff_pk_rows (
 	def self.drop_table( dbh ); dbh.do( 'drop table test_diff_pk_rows' ); end
 
 	def self.get_class_fields
-		super.concat( [ TextField.new( self, 'text_field' ) ] )
+		super.concat( [ StringField.new( self, 'text_field' ) ] )
 	end
 	
 	sql_primary_key_name 'objId'
@@ -98,12 +98,12 @@ create table test_rows (
 	
 	def self.drop_table( dbh ); dbh.do( 'drop table test_rows' ); end
 
-	text      'text_field'
-	date_time 'date_time'
-	boolean   'bool_field'
-	blob      'blob_field'
-	text      'text2', { 'db_field_name' => 'text_field2' }
-	link      TestDiffPkRow
+	string        'text_field'
+	date_time     'date_time'
+	boolean       'bool_field'
+	blob          'blob_field'
+	string        'text2', { 'db_field_name' => 'text_field2' }
+	domain_object TestDiffPkRow
 
 	def TestRow.sql_primary_key_name
 		'pk_id'
@@ -127,7 +127,7 @@ create table test_child_rows (
 
 	def self.get_class_fields
 		fields = []
-		fields << TextField.new( self, 'child_text_field' )
+		fields << StringField.new( self, 'child_text_field' )
 		fields
 	end
 	
@@ -209,7 +209,7 @@ class AccTestDomainObject < AcceptanceTestCase
 	def test_one_liners
 		assert(
 			TestRow.class_fields.any? { |field|
-				field.is_a?( LinkField ) && field.name == 'test_diff_pk_row'
+				field.is_a?( DomainObjectField ) && field.name == 'test_diff_pk_row'
 			},
 			TestRow.class_fields.inspect
 		)
@@ -383,7 +383,7 @@ class AccTestQuery < AcceptanceTestCase
 	end
 end
 
-class AccTestTextField < AcceptanceTestCase
+class AccTestStringField < AcceptanceTestCase
 	def testEscaping
 		text = <<-TEXT
 // ~  $ \\

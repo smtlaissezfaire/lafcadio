@@ -1,5 +1,5 @@
 <lafcadio_class_definition name="Domain::LineItem">
-	<field name="sku" class="LinkField" linked_type="SKU" />
+	<field name="sku" class="DomainObjectField" linked_type="SKU" />
 	<field name="quantity" class="IntegerField" />
 	<field name="price" class="IntegerField" />
 </lafcadio_class_definition>

@@ -93,7 +93,7 @@ class TestCompare < LafcadioTestCase
 		assert dc4.object_meets(invoice3)
 	end
 
-	def testNumericalSearchingOfaLinkField
+	def testNumericalSearchingOfaDomainObjectField
 		condition = Query::Compare.new('client', 10, Invoice,
 				Query::Compare::LESS_THAN)
 		assert_equal( 'invoices.client < 10', condition.to_sql )
@@ -285,7 +285,7 @@ class TestQueryInferrer < LafcadioTestCase
 		}
 	end
 
-	def testCompareToLinkField
+	def testCompareToDomainObjectField
 		desiredSql = "select * from invoices where invoices.client < 10"
 		assert_infer_match( desiredSql, Invoice ) { |inv| inv.client.lt( 10 ) }
 	end

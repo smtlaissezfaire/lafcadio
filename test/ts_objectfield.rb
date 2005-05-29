@@ -113,10 +113,10 @@ class TestDateTimeField < LafcadioTestCase
 	end
 end
 
-class TestDecimalField < LafcadioTestCase
+class TestFloatField < LafcadioTestCase
   def setup
   	super
-    @odf = DecimalField.new( Invoice, "hours" )
+    @odf = FloatField.new( Invoice, "hours" )
   end
 
   def testNeedsNumeric
@@ -202,15 +202,15 @@ class TestIntegerField < LafcadioTestCase
 	end
 end
 
-class TestLinkField < LafcadioTestCase
+class TestDomainObjectField < LafcadioTestCase
   def setup
 		super
-    @olf = LinkField.new(nil, Client)
+    @olf = DomainObjectField.new(nil, Client)
 		@mockObjectStore.commit Client.new(
 				{ "pk_id" => 1, "name" => "clientName1" } )
 		@mockObjectStore.commit Client.new(
 				{ "pk_id" => 2, "name" => "clientName2" } )
-    @fieldWithListener = LinkField.new(nil, Client, "client", "Client")
+    @fieldWithListener = DomainObjectField.new(nil, Client, "client", "Client")
   end
 
   def testNameForSQL
@@ -219,10 +219,10 @@ class TestLinkField < LafcadioTestCase
 
   def testNames
     assert_equal("client", @olf.name)
-		caLinkField = LinkField.new nil, InternalClient
-		assert_equal "internal_client", caLinkField.name
-		liLinkField = LinkField.new nil, Domain::LineItem
-		assert_equal "line_item", liLinkField.name
+		caDomainObjectField = DomainObjectField.new nil, InternalClient
+		assert_equal "internal_client", caDomainObjectField.name
+		liDomainObjectField = DomainObjectField.new nil, Domain::LineItem
+		assert_equal "line_item", liDomainObjectField.name
   end
 
 	def testRespectsOtherSubsetLinks
@@ -233,9 +233,9 @@ class TestLinkField < LafcadioTestCase
 		client2 = client.clone
 		client2.pk_id = 2
 		@mockObjectStore.commit client2
-		linkField = Invoice.get_class_field 'client'
+		domain_object_field = Invoice.get_class_field 'client'
 		begin
-			linkField.verify(client2, 1)
+			domain_object_field.verify(client2, 1)
 			fail 'should throw FieldValueError'
 		rescue FieldValueError
 			# ok
@@ -263,9 +263,9 @@ class TestLinkField < LafcadioTestCase
   def testValueFromSQL
 		client = Client.getTestClient
 		@mockObjectStore.commit client
-		clientFromLinkField = @olf.value_from_sql("1")
-		assert_equal DomainObjectProxy, clientFromLinkField.class
-		assert_equal client.name, clientFromLinkField.name
+		clientFromDomainObjectField = @olf.value_from_sql("1")
+		assert_equal DomainObjectProxy, clientFromDomainObjectField.class
+		assert_equal client.name, clientFromDomainObjectField.name
 		assert_nil @olf.value_from_sql(nil)
   end
 end
@@ -337,10 +337,10 @@ class TestObjectField < LafcadioTestCase
 	end
 end
 
-class TestTextField < LafcadioTestCase
+class TestStringField < LafcadioTestCase
   def setup
   	super
-    @of = TextField.new(nil, "name")
+    @of = StringField.new(nil, "name")
   end
 
   def testvalue_for_sql

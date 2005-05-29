@@ -1,9 +1,9 @@
 <lafcadio_class_definition name="Invoice">
-	<field name="client" class="LinkField" linked_type="Client" />
+	<field name="client" class="DomainObjectField" linked_type="Client" />
 	<field name="date" class="DateField" />
 	<field name="timestamp1" class="TimeStampField" />
 	<field name="rate" class="IntegerField" />
-	<field name="hours" class="DecimalField" precision="2" />
+	<field name="hours" class="FloatField" precision="2" />
 	<field name="paid" class="DateField" notNull="n" />
-	<field name="xmlSku" class="LinkField" linked_type="XmlSku" />
+	<field name="xmlSku" class="DomainObjectField" linked_type="XmlSku" />
 </lafcadio_class_definition>

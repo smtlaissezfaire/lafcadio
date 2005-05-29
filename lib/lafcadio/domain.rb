@@ -155,9 +155,9 @@ module Lafcadio
 	#    2. Write one XML file per domain class. For example, a User.xml file
 	#       might look like:
 	#         <lafcadio_class_definition name="User">
-	#           <field name="lastName" class="TextField"/>
-	#           <field name="email" class="TextField"/>
-	#           <field name="password" class="TextField"/>
+	#           <field name="lastName" class="StringField"/>
+	#           <field name="email" class="StringField"/>
+	#           <field name="password" class="StringField"/>
 	#           <field name="birthday" class="DateField"/>
 	#         </lafcadio_class_definition>
 	# 2. Overriding DomainObject.get_class_fields. The method should return an Array
@@ -166,10 +166,10 @@ module Lafcadio
 	#      class User < DomainObject 
 	#        def User.get_class_fields 
 	#          fields = [] 
-	#          fields << TextField.new(self, 'firstName') 
-	#          fields << TextField.new(self, 'lastName') 
-	#          fields << TextField.new(self, 'email') 
-	#          fields << TextField.new(self, 'password') 
+	#          fields << StringField.new(self, 'firstName') 
+	#          fields << StringField.new(self, 'lastName') 
+	#          fields << StringField.new(self, 'email') 
+	#          fields << StringField.new(self, 'password') 
 	#          fields << DateField.new(self, 'birthday') 
 	#          fields 
 	#        end 
@@ -188,13 +188,13 @@ module Lafcadio
 	#   john.email = 'john.doe@mail.email.com'
 	#
 	# If your domain class has fields that refer to other domain classes, or even
-	# to another row in the same table, you can use a LinkField to express the
+	# to another row in the same table, you can use a DomainObjectField to express the
 	# relation.
 	#   <lafcadio_class_definition name="Message">
-	#     <field name="subject" class="TextField" />
-	#     <field name="body" class="TextField" />
-	#     <field name="author" class="LinkField" linked_type="User" />
-	#     <field name="recipient" class="LinkField" linked_type="User" />
+	#     <field name="subject" class="StringField" />
+	#     <field name="body" class="StringField" />
+	#     <field name="author" class="DomainObjectField" linked_type="User" />
+	#     <field name="recipient" class="DomainObjectField" linked_type="User" />
 	#     <field name="dateSent" class="DateField" />
 	#   </lafcadio_class_definition>
  	#
@@ -300,7 +300,7 @@ module Lafcadio
 				class_fields = [ @@pk_fields[self] ]
 				@@class_fields[self] = class_fields
 			end
-			if field_class == LinkField
+			if field_class == DomainObjectField
 				att_hash['linked_type'] = args.first
 				att_hash['name'] = args[1] if args[1] and !args[1].is_a? Hash
 			else
@@ -325,7 +325,7 @@ module Lafcadio
 				if aClass != DomainObjectProxy &&
 						(!DomainObject.abstract_subclasses.index(aClass))
 					aClass.class_fields.each { |field|
-						if ( field.is_a?( LinkField ) &&
+						if ( field.is_a?( DomainObjectField ) &&
 						     field.linked_type == self.domain_class )
 							dependent_classes[aClass] = field
 						end
@@ -415,7 +415,7 @@ module Lafcadio
 		
 		def self.get_link_field( linked_domain_class ) # :nodoc:
 			class_fields.find { |field|
-				field.is_a? LinkField and field.linked_type == linked_domain_class
+				field.is_a? DomainObjectField and field.linked_type == linked_domain_class
 			}
 		end
 		
@@ -692,7 +692,7 @@ module Lafcadio
 		end
 
 		def set_field( field, value ) #:nodoc:
-			if field.class <= LinkField
+			if field.class <= DomainObjectField
 				if value.class != DomainObjectProxy && value
 					value = DomainObjectProxy.new(value)
 				end

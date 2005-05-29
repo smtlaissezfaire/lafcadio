@@ -2,6 +2,6 @@
 	<field name="email" class="EmailField" unique="y" writeOnce="y">
 		<notUniqueMsg>A profile already exists for the email address that you have entered. Please choose another email address.</notUniqueMsg>
 	</field>
-	<field name="firstNames" class="TextField" />
+	<field name="firstNames" class="StringField" />
 	<field name="administrator" class="BooleanField" />
 </lafcadio_class_definition>
