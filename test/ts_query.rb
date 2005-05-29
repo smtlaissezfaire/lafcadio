@@ -403,6 +403,13 @@ class TestQueryInferrer < LafcadioTestCase
 			inv.client.equals( aClient )
 		}
 	end
+	
+	def test_nil?
+		sql1 = 'select * from clients where clients.name is null'
+		assert_infer_match( sql1, Client ) { |cli| cli.name.nil? }
+		sql2 = 'select * from clients where !(clients.name is null)'
+		assert_infer_match( sql2, Client ) { |cli| cli.name.nil?.not }
+	end
 
 	def testNot
 		desired_sql = "select * from invoices where !(invoices.hours = 10)"

@@ -619,6 +619,8 @@ module Lafcadio
 											 @domainObjectImpostor.domain_class )
 			end
 			
+			def nil?; equals( nil ); end
+			
 			def to_condition
 				if @class_field.instance_of?( BooleanField )
 					Query::Equals.new( @field_name, true,
