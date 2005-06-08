@@ -174,3 +174,4 @@ class TestMockDBBridge < LafcadioTestCase
 		assert_equal 'client 100.1', get(Client, 100).name
 	end
 end
+

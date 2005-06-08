@@ -1,4 +1,5 @@
 require 'lafcadio/objectField'
+require 'lafcadio/depend'
 require 'lafcadio/domain'
 require 'lafcadio/test'
 
@@ -120,16 +121,6 @@ class SKU < Lafcadio::DomainObject
 
   def SKU.english_name
 		"SKU"
-	end
-
-	def SKU.addEditButtons(fieldManager)
-		aeButtons = QueueHash.new
-		aeButtons["Add another product"] = "cgi-bin/addEdit.rb?objectType=Product"
-		aeButtons["Add another SKU"] =
-				"cgi-bin/addEdit.rb?objectType=SKU&" +
-				"product=#{fieldManager.get('product')}"
-		aeButtons["Submit"] = "admin/catalogMgmt.rhtml"
-		aeButtons
 	end
 
 	def productNamePlusDescription
@@ -262,13 +253,9 @@ class XmlSku2 < Lafcadio::DomainObject
 	domain_object        XmlSku
 	email                'email1'
 	enum                 'enum1',
-	                     { 'enums' => Lafcadio::QueueHash.new(
-											     'a', 'a', 'b', 'b'
-											 ) }
+	                     { 'enums' => QueueHash.new( 'a', 'a', 'b', 'b' ) }
 	enum                 'enum2',
-	                     { 'enums' => Lafcadio::QueueHash.new(
-											     '1', '2', '3', '4'
-											 ) }
+	                     { 'enums' => QueueHash.new( '1', '2', '3', '4' ) }
 	float                'decimal1',
                        { 'precision' => 4, 'english_name' => 'decimal 1' }
 	integer              'integer1'

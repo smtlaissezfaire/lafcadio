@@ -1,4 +1,5 @@
 require 'lafcadio/test'
+require 'lafcadio/depend'
 require 'lafcadio/domain'
 require '../test/mock/domain'
 

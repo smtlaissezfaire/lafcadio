@@ -1,5 +1,6 @@
 require 'date'
 require 'lafcadio/dateTime'
+require 'lafcadio/depend'
 require 'lafcadio/util'
 
 module Lafcadio

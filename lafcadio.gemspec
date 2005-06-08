@@ -1,7 +1,8 @@
 require 'rubygems'
 spec = Gem::Specification.new do |s|
-	s.add_dependency( 'log4r' )
-	s.add_dependency( 'extensions' )
+	%w( extensions log4r queuehash ).each do |dependency|
+		s.add_dependency dependency
+	end
 	s.name = 'lafcadio'
 	s.version = '0.7.3'
 	s.platform = Gem::Platform::RUBY

@@ -1,4 +1,5 @@
 require 'dbi'
+require 'lafcadio/depend'
 require 'lafcadio/test'
 require 'lafcadio/objectField'
 require 'lafcadio/objectStore'
