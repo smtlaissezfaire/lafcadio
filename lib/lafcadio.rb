@@ -18,7 +18,6 @@
 module Lafcadio
 	Version = "0.7.3"
 
-	require 'lafcadio/dateTime'
 	require 'lafcadio/depend'
 	require 'lafcadio/domain'
 	require 'lafcadio/mock'

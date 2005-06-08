@@ -1,6 +1,5 @@
 require '../test/depend'
 require '../test/ts_bin'
-require '../test/ts_datetime'
 require '../test/ts_domain'
 require '../test/ts_mock'
 require '../test/ts_objectfield'
