@@ -250,32 +250,6 @@ module Lafcadio
 
 	class MissingError < RuntimeError
 	end
-
-	class UsStates
-		# Returns a QueueHash of states, with two-letter postal codes as keys and 
-		# state names as values.
-		def self.states
-			QueueHash.new( 'AL', 'Alabama', 'AK', 'Alaska', 'AZ', 'Arizona',
-			               'AR', 'Arkansas', 'CA', 'California', 'CO', 'Colorado',
-			               'CT', 'Connecticut', 'DE', 'Delaware',
-			               'DC', 'District of Columbia', 'FL', 'Florida',
-			               'GA', 'Georgia', 'HI', 'Hawaii', 'ID', 'Idaho',
-			               'IL', 'Illinois', 'IN', 'Indiana', 'IA', 'Iowa',
-			               'KS', 'Kansas', 'KY', 'Kentucky', 'LA', 'Louisiana',
-			               'ME', 'Maine', 'MD', 'Maryland', 'MA', 'Massachusetts',
-			               'MI', 'Michigan', 'MN', 'Minnesota', 'MS', 'Mississippi',
-			               'MO', 'Missouri', 'MT', 'Montana', 'NE', 'Nebraska',
-			               'NV', 'Nevada', 'NH', 'New Hampshire', 'NJ', 'New Jersey',
-			               'NM', 'New Mexico', 'NY', 'New York',
-			               'NC', 'North Carolina', 'ND', 'North Dakota', 'OH', 'Ohio',
-			               'OK', 'Oklahoma', 'OR', 'Oregon', 'PA', 'Pennsylvania',
-			               'PR', 'Puerto Rico', 'RI', 'Rhode Island',
-			               'SC', 'South Carolina', 'SD', 'South Dakota',
-			               'TN', 'Tennessee', 'TX', 'Texas', 'UT', 'Utah',
-			               'VT', 'Vermont', 'VA', 'Virginia', 'WA', 'Washington',
-			               'WV', 'West Virginia', 'WI', 'Wisconsin', 'WY', 'Wyoming' )
-		end
-	end
 end
 
 class String
@@ -312,17 +286,6 @@ class String
 		end
 		newString += string
 		newString
-	end
-
-	# Turns a numeric string into U.S. format if it's not already formatted that
-	# way.
-	#
-	#   "10,00".numeric_string_to_us_format -> "10.00"
-	#   "10.00".numeric_string_to_us_format -> "10.00"
-	def numeric_string_to_us_format
-		numericString = clone
-		numericString.gsub!(/,/, '.') if numericString =~ /,\d{2}$/
-		numericString
 	end
 
 	# Left-pads a string with +fillChar+ up to +size+ size.

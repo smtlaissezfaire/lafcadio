@@ -4,5 +4,4 @@ require 'extensions/module'
 require 'log4r'
 require 'month'
 require 'queuehash'
-require 'runit/testcase'
-
+require 'uscommerce'

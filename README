@@ -9,6 +9,7 @@ REQUIREMENTS:
 * REXML ( http://www.germane-software.com/software/rexml/ ). If you're using Ruby 1.8 or later you already have REXML.
 * Ruby DBI ( http://ruby-dbi.sourceforge.net/ )
 * Ruby Month ( http://month.rubyforge.org/ )
+* USCommerce ( http://uscommerce.rubyforge.org/ )
 
 INSTALLATION:
 As root, run "./install.rb", which will copy the Ruby files into the right

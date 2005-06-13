@@ -1,6 +1,6 @@
 require 'rubygems'
 spec = Gem::Specification.new do |s|
-	%w( extensions log4r month queuehash ).each do |dependency|
+	%w( extensions log4r month queuehash uscommerce ).each do |dependency|
 		s.add_dependency dependency
 	end
 	s.name = 'lafcadio'
