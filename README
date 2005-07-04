@@ -3,6 +3,7 @@ Lafcadio is an object-relational mapping layer for Ruby and MySQL.
 http://rubyforge.org/projects/lafcadio/
 
 REQUIREMENTS:
+* English Extensions ( http://englishext.rubyforge.org/ )
 * Extensions ( http://extensions.rubyforge.org/ )
 * QueueHash ( http://queuehash.rubyforge.org/ )
 * log4r ( http://log4r.sourceforge.net/ )

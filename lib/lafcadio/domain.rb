@@ -98,7 +98,7 @@ module Lafcadio
 
 			def value_from_elt( elt )
 				hash = {}
-				elt.elements.each( English.singular( @name ) ) { |subElt|
+				elt.elements.each( @name.singular ) { |subElt|
 					key = subElt.attributes['key'] == 'true'
 					value = subElt.text.to_s
 					hash[key] = value
@@ -450,7 +450,7 @@ module Lafcadio
 					field_class = Lafcadio.const_get( maybe_field_class_name )
 					create_field( field_class, *args )
 				rescue NameError
-					singular = English.singular method_name
+					singular = method_name.singular
 					if singular
 						maybe_field_class_name = singular.underscore_to_camel_case + 'Field'
 						begin
@@ -545,7 +545,7 @@ module Lafcadio
 				if (!xmlParser.nil? && table_name = xmlParser.table_name)
 					table_name
 				else
-					English.plural( self.basename.camel_case_to_underscore )
+					self.basename.camel_case_to_underscore.plural
 				end
 			end
 		end

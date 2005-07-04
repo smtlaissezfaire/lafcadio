@@ -702,9 +702,7 @@ module Lafcadio
 				begin
 					dispatch_get_singular
 				rescue CouldntMatchDomainClassError
-					domain_class_name = English.singular(
-						camel_case_method_name_after_get
-					)
+					domain_class_name = camel_case_method_name_after_get.singular
 					begin
 						@domain_class =
 								DomainObject.get_domain_class_from_string( domain_class_name )
