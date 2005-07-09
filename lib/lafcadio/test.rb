@@ -9,7 +9,7 @@ class LafcadioTestCase < Test::Unit::TestCase
 	include Lafcadio
 
   def setup
-  	context = Context.instance
+  	context = ContextualService::Context.instance
   	context.flush
     @mockObjectStore = MockObjectStore.new
 		ObjectStore.set_object_store @mockObjectStore

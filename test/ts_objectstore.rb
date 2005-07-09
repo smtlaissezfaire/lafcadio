@@ -305,7 +305,7 @@ end
 class TestDbObjectCommitter < LafcadioTestCase
 	def setup
 		super
-		context = Context.instance
+		context = ContextualService::Context.instance
 		context.flush
 		@mockDBBridge = MockDbBridge.new
 		@testObjectStore = ObjectStore.new( @mockDBBridge )
@@ -638,7 +638,7 @@ end
 class TestObjectStore < LafcadioTestCase
 	def setup
 		super
-		context = Context.instance
+		context = ContextualService::Context.instance
 		context.flush
 		@mockDbBridge = MockDbBridge.new
 		@testObjectStore = ObjectStore.new( @mockDbBridge )

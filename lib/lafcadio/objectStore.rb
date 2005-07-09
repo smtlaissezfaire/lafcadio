@@ -152,7 +152,7 @@ module Lafcadio
 		end
 	end
 
-	class DbConnection < ContextualService
+	class DbConnection < ContextualService::Service
 		@@connectionClass = DBI
 		@@db_name = nil
 		@@dbh = nil
@@ -404,7 +404,7 @@ module Lafcadio
 	# Domain classes can be set to fire triggers either before or after commits.
 	# Since these triggers are executed in Ruby, they're easy to test. See
 	# DomainObject#pre_commit_trigger and DomainObject#post_commit_trigger for more.
-	class ObjectStore < ContextualService
+	class ObjectStore < ContextualService::Service
 		def self.set_db_name(dbName) #:nodoc:
 			DbConnection.set_db_name dbName
 		end
