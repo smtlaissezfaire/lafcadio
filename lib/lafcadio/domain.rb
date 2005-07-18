@@ -315,11 +315,13 @@ module Lafcadio
 				att_hash['name'] = name == String ? name : name.to_s
 			end
 			field = field_class.instantiate_with_parameters( self, att_hash )
-			att_hash.each { |field_name, value|
-				setter = field_name + '='
-				field.send( setter, value ) if field.respond_to?( setter )
-			}
-			class_fields << field
+			unless class_fields.any? { |cf| cf.name == field.name }
+				att_hash.each { |field_name, value|
+					setter = field_name + '='
+					field.send( setter, value ) if field.respond_to?( setter )
+				}
+				class_fields << field
+			end
 		end
 		
 		def self.default_field_setup_hash( field_class, hash )

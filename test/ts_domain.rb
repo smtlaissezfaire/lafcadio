@@ -493,6 +493,12 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal client.name, invoice.client.name
 	end
 	
+	def test_one_liners_only_create_fields_once
+		assert_equal( 19, XmlSku2.class_fields.size )
+		require '../test/../test/mock/domain'
+		assert_equal( 19, XmlSku2.class_fields.size )
+	end
+	
 	def test_original_values_accessible_in_triggers
 		att1 = Attribute.new( 'name' => 'original name' )
 		def att1.post_commit_trigger
