@@ -87,6 +87,9 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 	end
 end
 
+# necessary for test_global_methods_dont_interfere_with_method_missing
+def name; 'global name'; end
+
 class TestDomainObject < LafcadioTestCase
 	def teardown
 		super
@@ -426,6 +429,12 @@ class TestDomainObject < LafcadioTestCase
     rescue MissingError
     	# ok
     end
+	end
+	
+	def test_global_methods_dont_interfere_with_method_missing
+		c = Client.new( 'name' => 'client name' )
+		assert_equal( 'client name', c.name )
+		assert_equal( 'client name', c.send( :name ) )
 	end
 	
 	def testHandlesClassWithoutXml

@@ -348,21 +348,39 @@ module Lafcadio
 			end
 		end
 
-		class DomainObjectImpostor #:nodoc:
-			attr_reader :domain_class
-		
-			def initialize( domain_class )
-				@domain_class = domain_class
-			end
+		module DomainObjectImpostor #:nodoc:
+			@@impostor_classes = {}
 			
-			def method_missing( methId, *args )
-				fieldName = methId.id2name
-				begin
-					classField = @domain_class.get_field( fieldName )
-					ObjectFieldImpostor.new( self, classField )
-				rescue MissingError
-					super( methId, *args )
+			def self.impostor( domain_class )
+				unless @@impostor_classes[domain_class]
+					i_class = Class.new
+					i_class.module_eval <<-CLASS_DEF
+						attr_reader :domain_class
+						
+						def initialize; @domain_class = #{ domain_class.name }; end
+						
+						def method_missing( methId, *args )
+							fieldName = methId.id2name
+							begin
+								classField = self.domain_class.get_field( fieldName )
+								ObjectFieldImpostor.new( self, classField )
+							rescue MissingError
+								super( methId, *args )
+							end
+						end
+						
+						#{ domain_class.name }.class_fields.each do |class_field|
+							begin
+								undef_method class_field.name.to_sym
+							rescue NameError
+								# not defined globally or in an included Module, skip it
+							end
+						end
+					CLASS_DEF
+					@@impostor_classes[domain_class] = i_class
 				end
+				i_class = @@impostor_classes[domain_class]
+				i_class.new
 			end
 		end
 		
@@ -445,7 +463,7 @@ module Lafcadio
 			end
 			
 			def execute
-				impostor = DomainObjectImpostor.new( @domain_class )
+				impostor = DomainObjectImpostor.impostor( @domain_class )
 				condition = @action.call( impostor ).to_condition
 				query = Query.new( @domain_class, condition )
 			end

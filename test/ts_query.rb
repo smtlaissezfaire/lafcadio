@@ -244,6 +244,9 @@ class TestEquals < LafcadioTestCase
 	end
 end
 
+# necessary for test_global_methods_dont_interfere_with_method_missing
+def name; 'global name'; end
+
 class TestQueryInferrer < LafcadioTestCase
 	def assert_infer_match( desiredSql, domain_class, &action )
 		inferrer = Query::Inferrer.new( domain_class ) { |obj| action.call( obj ) }
@@ -333,6 +336,12 @@ class TestQueryInferrer < LafcadioTestCase
 		}
 		desired_sql3 = 'select * from invoices where invoices.pk_id > 10'
 		assert_infer_match( desired_sql3, Invoice ) { |inv| inv.pk_id.gt( 10 ) }
+	end
+
+	def test_global_methods_dont_interfere_with_method_missing
+		assert_infer_match(
+			"select * from clients where clients.name = 'ClientCo'", Client
+		) { |c| c.send( :name ).equals( 'ClientCo' ) }
 	end
 
 	def test_implied_boolean_eval

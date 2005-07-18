@@ -285,6 +285,13 @@ module Lafcadio
 			unless class_fields
 				@@class_fields[self] = self.get_class_fields
 				class_fields = @@class_fields[self]
+				class_fields.each do |class_field|
+					begin
+						undef_method class_field.name.to_sym
+					rescue NameError
+						# not defined globally or in an included Module, skip it
+					end
+				end
 			end
 			class_fields
 		end
