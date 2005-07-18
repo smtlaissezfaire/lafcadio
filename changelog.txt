@@ -1,5 +1,28 @@
 CHANGELOG
 
+0.7.4 -- July 17 2005
+* WARNING: changed various field class names to be more Ruby-ish: TextField to
+  StringField, LinkField to DomainObjectField, DecimalField to FloatField, and 
+	SubsetLinkField to SubsetDomainObjectField
+* WARNING: extracted QueueHash, Ruby Month, USCommerce, English Extensions, and 
+  ContextualService into separate libraries
+* Fixed MockObjectStore#get_max
+* Fixed a bug where a DomainObjectProxy couldn't get the value of the newly 
+  committed dobj inside of the post_commit_trigger
+* @original_values hash available inside of DomainObject, for use in triggers
+* Query::In works for text fields, too
+* added MockDbBridge#set_next_pk_id; this is needed for DomainMock
+* DomainObject#get also dispatches to ObjectStore#get_filtered
+* you can set a default_setup_hash for a domain class' fields
+* DomainObject handles one-line field definitions in plural form: 'booleans', 
+  'texts', etc.
+* added DomainObject.exist?
+* added DomainObject#delete! and #update! 
+* Fixed English.plural with 'axis' and 'datum'
+* added nil? operators in query inference 
+* Global methods won't interfere with DomainObject methods
+* DomainObject's one-liners only create fields once
+
 0.7.3 -- March 1 2005
 * fixed bug with MockObjectStore handling Query#limit.
 
