@@ -1,5 +1,10 @@
 CHANGELOG
 
+0.7.5 -- August 14 2005
+* Query::Like is case-insensitive for the MockObjectStore, just as it is in
+  MySQL
+* Fixed bad reference to UsCommerce constant
+
 0.7.4 -- July 17 2005
 * WARNING: changed various field class names to be more Ruby-ish: TextField to
   StringField, LinkField to DomainObjectField, DecimalField to FloatField, and 
