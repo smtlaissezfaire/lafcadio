@@ -448,6 +448,13 @@ class TestLike < LafcadioTestCase
 				Query::Like::POST_ONLY)
 	end
 
+	def test_case_insensitive
+		like = Query::Like.new( 'name', 'foobar', Client )
+		assert like.object_meets( Client.new( 'name' => 'barfoobarfoo' ) )
+		assert like.object_meets( Client.new( 'name' => 'foobar' ) )
+		assert like.object_meets( Client.new( 'name' => 'FOobAR' ) )
+	end
+
 	def testDbFieldName
 		condition = Query::Like.new( 'text1', 'foobar', XmlSku )
 		assert_equal( "some_other_table.text_one like '%foobar%'", condition.to_sql )

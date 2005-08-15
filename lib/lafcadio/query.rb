@@ -482,11 +482,11 @@ module Lafcadio
 			
 			def get_regexp
 				if @matchType == PRE_AND_POST
-					Regexp.new(@searchTerm)
+					Regexp.new( @searchTerm, Regexp::IGNORECASE )
 				elsif @matchType == PRE_ONLY
-					Regexp.new(@searchTerm.to_s + "$")
+					Regexp.new( @searchTerm.to_s + "$", Regexp::IGNORECASE )
 				elsif @matchType == POST_ONLY
-					Regexp.new("^" + @searchTerm)
+					Regexp.new( "^" + @searchTerm, Regexp::IGNORECASE )
 				end
 			end
 
