@@ -338,6 +338,13 @@ class TestObjectField < LafcadioTestCase
 	end
 end
 
+class TestStateField < LafcadioTestCase
+	def test_enums
+		sf = StateField.new nil
+		assert_equal( 'Arizona', sf.enums['AZ'] )
+	end
+end
+
 class TestStringField < LafcadioTestCase
   def setup
   	super

@@ -499,7 +499,7 @@ module Lafcadio
 	# postal code.
 	class StateField < EnumField
 		def initialize( domain_class, name = "state" )
-			super( domain_class, name, UsCommerce::UsStates.states )
+			super( domain_class, name, USCommerce::UsStates.states )
 		end
 	end
 
