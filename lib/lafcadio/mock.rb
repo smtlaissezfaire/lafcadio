@@ -1,4 +1,5 @@
 require 'lafcadio/objectStore'
+require 'lafcadio/util'
 
 module Lafcadio
 	class MockDbBridge #:nodoc:
@@ -83,17 +84,7 @@ module Lafcadio
 		end
 
 		def group_query( query )
-			if query.class == Query::Max
-				dobjs_by_pk_id = @objects[query.domain_class]
-				if dobjs_by_pk_id
-					dobjs = dobjs_by_pk_id.values.sort_by { |dobj|
-						dobj.send( query.field_name )
-					}
-					[ dobjs.last.send( query.field_name ) ]
-				else
-					[ nil ]
-				end
-			end
+			query.collect( get_objects_by_domain_class( query.domain_class ).values )
 		end
 		
 		def set_next_pk_id( domain_class, npi )

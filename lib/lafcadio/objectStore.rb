@@ -131,10 +131,7 @@ module Lafcadio
 		end
 		
 		def group_query( query )
-			execute_select( query.to_sql )[0].collect { |val|
-				a_field = query.domain_class.get_field( query.field_name )
-				a_field.value_from_sql( val )
-			}
+			execute_select( query.to_sql ).map { |row| query.result_row( row ) }
 		end
 
 		def last_pk_id_inserted; @@last_pk_id_inserted; end
@@ -486,7 +483,8 @@ module Lafcadio
 		#   ObjectStore#get_max( Invoice, "rate" )
 		# will return the highest rate for all invoices.
 		def get_max( domain_class, field_name = 'pk_id' )
-			@dbBridge.group_query( Query::Max.new( domain_class, field_name ) ).only
+			qry = Query::Max.new( domain_class, field_name )
+			@dbBridge.group_query( qry ).only[:max]
 		end
 
 		# Retrieves a collection of domain objects by +pk_id+.
@@ -527,6 +525,8 @@ module Lafcadio
 		def mock? #:nodoc:
 			false
 		end
+		
+		def query( query ); @dbBridge.group_query( query ); end
 
 		def respond_to?( symbol, include_private = false )
 			begin

@@ -108,15 +108,16 @@ module Lafcadio
 		attr_reader :domain_class, :condition
 		attr_accessor :order_by, :order_by_order, :limit
 
-		def initialize(domain_class, pk_idOrCondition = nil)
-			@domain_class = domain_class
+		def initialize(domain_class, pk_id_or_condition = nil, opts = {} )
+			@domain_class, @opts = domain_class, opts
 			( @condition, @order_by, @limit ) = [ nil, nil, nil ]
-			if pk_idOrCondition
-				if pk_idOrCondition.class <= Condition
-					@condition = pk_idOrCondition
+			if pk_id_or_condition
+				if pk_id_or_condition.class <= Condition
+					@condition = pk_id_or_condition
 				else
-					@condition = Query::Equals.new( 'pk_id', pk_idOrCondition,
-					                                domain_class )
+					@condition = Query::Equals.new(
+						'pk_id', pk_id_or_condition, domain_class
+					)
 				end
 			end
 			@order_by_order = ASC
@@ -124,6 +125,14 @@ module Lafcadio
 		
 		def and( &action ); compound( CompoundCondition::AND, action ); end
 		
+		def collect( coll )
+			if @opts[:group_functions] == [:count]
+				[ result_row( [coll.size] ) ]
+			else
+				raise
+			end
+		end
+			
 		def compound( comp_type, action )
 			rquery = Query.infer( @domain_class ) { |dobj| action.call( dobj ) }
 			comp_cond = Query::CompoundCondition.new( @condition, rquery.condition,
@@ -133,7 +142,7 @@ module Lafcadio
 		
 		def eql?( other ); other.class <= Query && other.to_sql == to_sql; end
 
-		def fields; '*'; end
+		def fields; @opts[:group_functions] == [:count] ? 'count(*)' : '*'; end
 
 		def hash; to_sql.hash; end
 		
@@ -163,6 +172,14 @@ module Lafcadio
 				else
 					self.condition and self.condition.implies?( other_query.condition )
 				end
+			end
+		end
+		
+		def result_row( row )
+			if @opts[:group_functions] == [:count]
+				{ :count => row.first }
+			else
+				raise
 			end
 		end
 
@@ -528,12 +545,14 @@ module Lafcadio
 					a_value = d_obj.send( @field_name )
 					( max.nil? || a_value > max ) ? a_value : max
 				}
-				[ max ]
+				[ result_row( [max] ) ]
 			end
 		
 			def fields
 				"max(#{ @domain_class.get_field( @field_name ).db_field_name })"
 			end
+			
+			def result_row( row ); { :max => row.first }; end
 		end
 
 		class Not < Condition #:nodoc:

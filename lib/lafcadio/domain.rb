@@ -352,6 +352,23 @@ module Lafcadio
 		end
 		
 		def self.first; all.first; end
+			
+		def self.get( *args )
+			if block_given?
+				query = Query.infer( self ) { |dobj| yield( dobj ) }
+				ObjectStore.get_object_store.get_subset( query )
+			elsif args.size == 1
+				arg = args.first
+				if arg.is_a? Fixnum
+					ObjectStore.get_object_store.get( self, *args )
+				else
+					qry = Query.new( self, nil, { :group_functions => [ :count ] } )
+					ObjectStore.get_object_store.query qry
+				end
+			else
+				ObjectStore.get_object_store.get_filtered( self.name, *args )
+			end
+		end
 
 		def self.get_class_field(fieldName) #:nodoc:
 			field = nil
@@ -444,44 +461,33 @@ module Lafcadio
 		
 		def self.method_missing( methodId, *args ) #:nodoc:
 			method_name = methodId.id2name
-			if method_name == 'get'
-				if block_given?
-					query = Query.infer( self ) { |dobj| yield( dobj ) }
-					ObjectStore.get_object_store.get_subset( query )
-				elsif args.size == 1
-					ObjectStore.get_object_store.get( self, *args )
-				else
-					ObjectStore.get_object_store.get_filtered( self.name, *args )
-				end
-			else
-				maybe_field_class_name = method_name.underscore_to_camel_case + 'Field'
-				begin
-					field_class = Lafcadio.const_get( maybe_field_class_name )
-					create_field( field_class, *args )
-				rescue NameError
-					singular = method_name.singular
-					if singular
-						maybe_field_class_name = singular.underscore_to_camel_case + 'Field'
-						begin
-							field_class = Lafcadio.const_get( maybe_field_class_name )
-							arg = args.shift
-							until args.empty?
-								next_arg = args.shift
-								if next_arg.is_a? String or next_arg.is_a? Symbol
-									create_field( field_class, arg )
-									arg = next_arg
-								else
-									create_field( field_class, arg, next_arg )
-									arg = args.shift
-								end
+			maybe_field_class_name = method_name.underscore_to_camel_case + 'Field'
+			begin
+				field_class = Lafcadio.const_get( maybe_field_class_name )
+				create_field( field_class, *args )
+			rescue NameError
+				singular = method_name.singular
+				if singular
+					maybe_field_class_name = singular.underscore_to_camel_case + 'Field'
+					begin
+						field_class = Lafcadio.const_get( maybe_field_class_name )
+						arg = args.shift
+						until args.empty?
+							next_arg = args.shift
+							if next_arg.is_a? String or next_arg.is_a? Symbol
+								create_field( field_class, arg )
+								arg = next_arg
+							else
+								create_field( field_class, arg, next_arg )
+								arg = args.shift
 							end
-							create_field( field_class, arg ) unless arg.nil?
-						rescue NameError
-							super
 						end
-					else
+						create_field( field_class, arg ) unless arg.nil?
+					rescue NameError
 						super
 					end
+				else
+					super
 				end
 			end
 		end

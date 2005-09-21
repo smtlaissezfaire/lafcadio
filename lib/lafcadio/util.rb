@@ -2,7 +2,7 @@ require 'delegate'
 require 'lafcadio/depend'
 require 'singleton'
 
-module Lafcadio
+module Lafcadio	
 	# LafcadioConfig is a Hash that takes its data from the config file. You'll 
 	# have to set the location of that file before using it: Use 
 	# LafcadioConfig.set_filename.
