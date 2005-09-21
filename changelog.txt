@@ -1,5 +1,9 @@
 CHANGELOG
 
+0.8.0 -- September 21 2005
+* Production release. See changelog entries below for 0.7.* releases for the
+  full list.
+
 0.7.5 -- August 14 2005
 * Query::Like is case-insensitive for the MockObjectStore, just as it is in
   MySQL

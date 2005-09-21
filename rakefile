@@ -20,7 +20,7 @@ end
 
 task :updateDocs do
 	Dir.chdir( 'lib' )
-	`rdoc --op ../../lafcadio.rubyforge.org/doc/`
+	`rdoc --op ../../lafcadio.rubyforge.org/doc/ --main lafcadio.rb`
 	Dir.chdir( '..' )
 	`cp -r ../lafcadio.rubyforge.org/ ./docs`
 end
