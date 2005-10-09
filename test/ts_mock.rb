@@ -65,14 +65,15 @@ class TestMockDBBridge < LafcadioTestCase
 
 	def test_group_query
 		assert_equal(
-			[ nil ], @mockDbBridge.group_query( Query::Max.new( Client ) )
+			[ { :max => nil } ],
+			@mockDbBridge.group_query( Query::Max.new( Client ) )
 		)
 		@mockDbBridge.commit @client
 		assert_equal(
-			[ 1 ], @mockDbBridge.group_query( Query::Max.new( Client ) )
+			[ { :max => 1 } ], @mockDbBridge.group_query( Query::Max.new( Client ) )
 		)
 		assert_equal(
-			[ 'clientName1' ],
+			[ { :max => 'clientName1' } ],
 			@mockDbBridge.group_query( Query::Max.new( Client, 'name' ) )
 		)
 	end

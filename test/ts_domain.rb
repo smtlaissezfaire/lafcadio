@@ -251,6 +251,11 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal( 3, Client[3].pk_id )
 	end
 	
+	def test_count
+		3.times do Client.new( 'name' => 'name' ).commit; end
+		assert_equal( 3, Client.get( :group => :count ).only[:count] )
+	end
+	
 	def testCreateWithLinkedProxies
 		clientProxy = DomainObjectProxy.new Client, 99
 		invoice = Invoice.new(

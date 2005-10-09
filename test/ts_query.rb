@@ -483,6 +483,11 @@ class TestLike < LafcadioTestCase
 end
 
 class TestQuery < LafcadioTestCase
+	def test_count
+		qry = Query.new( Client, nil, { :group_functions => [ :count ] } )
+		assert_equal( 'select count(*) from clients', qry.to_sql )
+	end
+	
 	def test_implies?
 		query1 = Query.new( Client )
 		assert( query1.implies?( query1 ) )
