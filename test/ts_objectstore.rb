@@ -85,14 +85,14 @@ class TestDBBridge < Test::Unit::TestCase
 
 	def test_group_query
 		query = Query::Max.new( Client )
-		assert_equal( 1, @dbb.group_query( query ).only )
+		assert_equal( 1, @dbb.group_query( query ).only[:max] )
 		invoice = Invoice.storedTestInvoice
 		query2 = Query::Max.new( Invoice, 'date' )
-		assert_equal( invoice.date, @dbb.group_query( query2 ).only )
+		assert_equal( invoice.date, @dbb.group_query( query2 ).only[:max].to_date )
 		query3 = Query::Max.new( XmlSku )
-		assert_equal( 5, @dbb.group_query( query3 ).only )
+		assert_equal( 5, @dbb.group_query( query3 ).only[:max] )
 		query4 = Query::Max.new( Attribute )
-		assert_nil( @dbb.group_query( query4 ).only )
+		assert_nil( @dbb.group_query( query4 ).only[:max] )
 	end
 
   def testLastPkIdInserted
@@ -162,14 +162,14 @@ class TestDBBridge < Test::Unit::TestCase
       if str == "select last_insert_id()"
 				[ { 'last_insert_id()' => '12' } ]
 			elsif str == 'select max(pk_id) from clients'
-				[ [ '1' ] ]
+				[ [ 1 ] ]
 			elsif str == 'select max(date) from invoices'
 				[ [ DBI::Date.new( 2001, 4, 5 ) ] ]
 			elsif str == 'select * from some_other_table'
 				[ OneTimeAccessHash.new( 'some_other_id' => '16',
 				                         'text_one' => 'foobar', 'link1' => '1' ) ]
 			elsif str == 'select max(some_other_id) from some_other_table'
-				[ [ '5' ] ]
+				[ [ 5 ] ]
 			elsif str == 'select max(pk_id) from attributes'
 				[ [ nil ] ]
 			else

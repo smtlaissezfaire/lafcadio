@@ -76,18 +76,18 @@ module Lafcadio
 	end
 
 	class DbBridge #:nodoc:
-		@@dbh = nil
 		@@last_pk_id_inserted = nil
 		
 		def self._load(aString)
-			aString =~ /dbh:/
-			dbString = $'
+			aString =~ /db_conn:/
+			db_conn_str = $'
 			begin
-				dbh = Marshal.load(dbString)
+				db_conn = Marshal.load db_conn_str
 			rescue TypeError
-				dbh = nil
+				db_conn = nil
 			end
-			new dbh
+			DbConnection.set_db_connection db_conn
+			new
 		end
 		
 		def initialize

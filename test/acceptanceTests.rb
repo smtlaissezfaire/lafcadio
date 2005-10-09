@@ -1,6 +1,7 @@
 require '../test/depend'
 require 'dbi'
 require 'lafcadio/domain'
+require 'lafcadio/mock'
 require 'lafcadio/objectStore'
 require 'lafcadio/util'
 require 'test/unit'
@@ -278,6 +279,10 @@ values( 1, 'sample text' )
 		@dbh.do( sql )
 		assert_equal( 1, @object_store.get_max( TestDiffPkRow ) )
 	end
+	
+	def test_dumpable
+		os_prime = Marshal.load( Marshal.dump( @object_store ) )
+	end
 
 	def test_get_by_domain_class
 		diff_pk_row = TestDiffPkRow.new( 'text_field' => 'sample text' )
@@ -326,7 +331,7 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		row1.commit
 		row2 = TestRow.new( 'date_time' => Time.utc( 1999, 1, 1 ) )
 		row2.commit
-		assert_equal( y2k, @object_store.get_max( TestRow, 'date_time' ) )
+		assert_equal( y2k, @object_store.get_max( TestRow, 'date_time' ).to_time )
 	end
 	
 	def test_query_field_comparison
@@ -365,6 +370,13 @@ class AccTestQuery < AcceptanceTestCase
 				Query.And( tr.bool_field, tr.text_field.equals( 'something' ) )
 			}.size
 		)
+	end
+	
+	def test_count
+		TestRow.new( 'text2' => 'zzz' ).commit
+		TestRow.new( 'text2' => 'yyy' ).commit
+		TestRow.new( 'text2' => 'xxx' ).commit
+		assert_equal( 3, TestRow.get( :group => :count ).only[:count] )
 	end
 
 	def test_order_by
