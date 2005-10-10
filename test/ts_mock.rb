@@ -120,7 +120,10 @@ class TestMockDBBridge < LafcadioTestCase
 
 	def test_order_by
 		( 1..10 ).each { |day|
-			@mockDbBridge.commit Invoice.new( 'date' => Date.new( 2005, 1, day ) )
+			rate = day < 6 ? 50 : 40
+			@mockDbBridge.commit(
+				Invoice.new( 'date' => Date.new( 2005, 1, day ), 'rate' => rate )
+			)
 		}
 		query = Query.new( Invoice )
 		query.order_by = 'date'
@@ -135,6 +138,20 @@ class TestMockDBBridge < LafcadioTestCase
 				"Couldn't find Invoice for #{ date }"
 			)
 		}
+		query2 = Query.new( Invoice )
+		query2.order_by = [ :rate, :date ]
+		query2.order_by_order = Query::DESC
+		invoices2 = @mockDbBridge.get_collection_by_query query2
+		rates_and_days = [
+			[ 50, 5 ], [ 50, 4 ], [ 50, 3 ], [ 50, 2 ], [ 50, 1 ], [ 40, 10 ],
+		  [ 40, 9 ], [ 40, 8 ], [ 40, 7 ], [ 40, 6 ]
+		]
+		rates_and_days.each_with_index do |rate_and_day, i|
+			rate, day = *rate_and_day
+			invoice = invoices2[i]
+			assert_equal( rate, invoice.rate )
+			assert_equal( Date.new( 2005, 1, day ), invoice.date )
+		end
 	end
 
 	def testRetrievalsByType

@@ -43,7 +43,13 @@ module Lafcadio
 				end
 			}
 			if ( order_by = query.order_by )
-				objects = objects.sort_by { |dobj| dobj.send( order_by ) }
+				objects = objects.sort_by { |dobj|
+					if order_by.is_a?( Array )
+						order_by.map { |field_name| dobj.send( field_name ) }
+					else
+						dobj.send( order_by )
+					end
+				}
 				objects.reverse! if query.order_by_order == Query::DESC
 			else
 				objects = objects.sort_by { |dobj| dobj.pk_id }

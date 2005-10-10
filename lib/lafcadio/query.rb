@@ -90,10 +90,8 @@ module Lafcadio
 	class Query
 		def self.And( *conditions ); CompoundCondition.new( *conditions ); end
 		
-		def self.infer( domain_class, &action )
-			inferrer = Query::Inferrer.new( domain_class ) { |obj|
-				action.call( obj )
-			}
+		def self.infer( *args, &action )
+			inferrer = Query::Inferrer.new( *args ) { |obj| action.call( obj ) }
 			inferrer.execute
 		end
 		
@@ -156,8 +154,14 @@ module Lafcadio
 		
 		def order_clause
 			if @order_by
-				order_by_field = @domain_class.get_field( @order_by )
-				clause = "order by #{ order_by_field.db_field_name } "
+				if @order_by.is_a? Array
+					field_str = @order_by.map { |f_name|
+						@domain_class.get_field( f_name.to_s ).db_field_name
+					}.join( ', ' )
+				else
+					field_str = @domain_class.get_field( @order_by ).db_field_name
+				end
+				clause = "order by #{ field_str } "
 				clause += @order_by_order == ASC ? 'asc' : 'desc'
 				clause
 			end
@@ -475,14 +479,22 @@ module Lafcadio
 		end
 
 		class Inferrer #:nodoc:
-			def initialize( domain_class, &action )
-				@domain_class = domain_class; @action = action
+			def initialize( *args, &action )
+				@domain_class = args.first; @action = action
+				unless args.size == 1
+					h = args.last
+					@order_by = h[:order_by]
+					@order_by_order = h[:order_by_order]
+				end
 			end
 			
 			def execute
 				impostor = DomainObjectImpostor.impostor( @domain_class )
 				condition = @action.call( impostor ).to_condition
 				query = Query.new( @domain_class, condition )
+				query.order_by = @order_by
+				query.order_by_order = @order_by_order
+				query
 			end
 		end
 		

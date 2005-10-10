@@ -436,6 +436,19 @@ class TestQueryInferrer < LafcadioTestCase
 			          u.firstNames.equals( 'John' ) )
 		}
 	end
+	
+	def test_order
+		qry = Query.infer(
+			SKU,
+			:order_by => [ :standardPrice, :salePrice ],
+			:order_by_order => Query::DESC
+		) { |s| s.sku.nil? }
+		assert_equal(
+			"select * from skus where skus.sku is null " +
+					"order by standardPrice, salePrice desc",
+			qry.to_sql
+		)
+	end
 end
 
 class TestLike < LafcadioTestCase
