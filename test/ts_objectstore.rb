@@ -499,17 +499,18 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
 	end
 
 	def test_inheritance_insert
-		ic = InternalClientDiffPk.new( 'name' => 'client name',
-		                               'billingType' => 'trade' )
-		sql_maker = DomainObjectSqlMaker.new( ic )
+		cdo = ChildDomainObject.new(
+			'parent_string' => 'parent string', 'child_string' => 'child string'
+		)
+		sql_maker = DomainObjectSqlMaker.new( cdo )
 		statements = sql_maker.sql_statements
 		assert_equal( 2, statements.size )
 		sql1 = statements[0].first
-		assert_match( /insert into clients/, sql1 )
+		assert_match( /insert into parent_domain_objects/, sql1 )
 		bind1 = statements[0].last
 		assert_equal( 1, bind1.size )
 		sql2 = statements[1].first
-		assert_match( /insert into internalClients.*primary_key/, sql2 )
+		assert_match( /insert into table_name.*primary_key/, sql2 )
 		assert_match( /values.*LAST_INSERT_ID\(\)/, sql2 )
 		bind2 = statements[1].last
 		assert_equal( 0, bind2.size )
@@ -542,12 +543,17 @@ class TestDomainObjectSqlMaker < LafcadioTestCase
 		assert_not_nil sql =~ /priorityInvoice=null/, sql
 	end
 
-	class InternalClientDiffPk < Client
-		def self.get_class_fields; [ StringField.new( self, 'billingType' ) ]; end
-		
+	class ParentDomainObject < Lafcadio::DomainObject
+		string 'parent_string'
+		blob   'blob'
+	end
+	
+	class ChildDomainObject < ParentDomainObject
+		string 'child_string'
+				
 		def self.sql_primary_key_name; 'primary_key'; end
 		
-		def self.table_name; 'internalClients'; end
+		def self.table_name; 'table_name'; end
 	end
 end
 

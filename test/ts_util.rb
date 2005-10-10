@@ -14,6 +14,12 @@ class TestConfig < Test::Unit::TestCase
 	def teardown
 		LafcadioConfig.set_values( nil )
 	end
+	
+	def test_empty_ok
+		LafcadioConfig.set_values nil
+		LafcadioConfig.set_filename nil
+		lc = LafcadioConfig.new
+	end
 
 	def test_define_in_code
 		LafcadioConfig.set_filename( nil )

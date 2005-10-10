@@ -24,7 +24,7 @@ class TestMockDBBridge < LafcadioTestCase
 		bad_client = Client.new( 'pk_id' => '1', 'name' => 'my name' )
 		assert_raise( ArgumentError ) { @mockDbBridge.commit( bad_client ) }
 	end
-
+	
 	def testDelete
 		@mockDbBridge.commit @client
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client2' })

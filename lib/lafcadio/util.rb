@@ -14,6 +14,7 @@ module Lafcadio
 	#   dbname:lafcadio_test
 	#   dbhost:localhost
 	class LafcadioConfig < Hash
+		@@filename = nil
 		@@value_hash = nil
 	
 		def self.set_filename(filename); @@filename = filename; end
@@ -23,7 +24,7 @@ module Lafcadio
 		def initialize
 			if @@value_hash
 				@@value_hash.each { |key, value| self[key] = value }
-			else
+			elsif @@filename
 				File.new( @@filename ).each_line { |line|
 					line.chomp =~ /^(.*?):(.*)$/
 					self[$1] = $2
