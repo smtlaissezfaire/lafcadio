@@ -254,14 +254,21 @@ class TestQueryInferrer < LafcadioTestCase
 	end
 
 	def test_boolean_compound
+		sql = "select * from users where " +
+				"(users.administrator = 1 and " +
+				"users.email = 'administrator@hotmail.com')"
 		assert_equal(
-			"select * from users where " +
-					"(users.administrator = 1 and " +
-					"users.email = 'administrator@hotmail.com')",
+			sql,
 			Query.infer( User ) { |user|
 				Query.And(
 					user.administrator, user.email.equals( 'administrator@hotmail.com' )
 				)
+			}.to_sql
+		)
+		assert_equal(
+			sql,
+			Query.infer( User ) { |user|
+				user.administrator & user.email.equals( 'administrator@hotmail.com' )
 			}.to_sql
 		)
 	end
@@ -300,6 +307,9 @@ class TestQueryInferrer < LafcadioTestCase
 		assert_infer_match( desiredSql, Invoice ) { |inv|
 			Query.And( inv.date.gte( date ), inv.hours.equals( 10 ) )
 		}
+		assert_infer_match( desiredSql, Invoice ) { |inv|
+			inv.date.gte( date ) & inv.hours.equals( 10 )
+		}
 	end
 	
 	def testCompoundThree
@@ -310,6 +320,13 @@ class TestQueryInferrer < LafcadioTestCase
 		assert_infer_match( desiredSql, Invoice ) { |inv|
 			Query.And( inv.date.gte( date ), inv.rate.equals( 10 ),
 								 inv.hours.equals( 10 ) )
+		}
+		desired_sql =
+			"select * from invoices " +
+			"where ((invoices.date >= '2003-01-01' and invoices.rate = 10) and " +
+			"invoices.hours = 10)"
+		assert_infer_match( desired_sql, Invoice ) { |inv|
+			inv.date.gte( date ) & inv.rate.equals( 10 ) & inv.hours.equals( 10 )
 		}
 	end
 
@@ -354,6 +371,9 @@ class TestQueryInferrer < LafcadioTestCase
 			"where (!(users.administrator = 1) and users.email = 'test@test.com')"
 		assert_infer_match( desired_sql3, User ) { |user|
 			Query.And( user.administrator.not, user.email.equals( 'test@test.com' ) )
+		}
+		assert_infer_match( desired_sql3, User ) { |user|
+			user.administrator.not & user.email.equals( 'test@test.com' )
 		}
 	end
 
@@ -434,6 +454,15 @@ class TestQueryInferrer < LafcadioTestCase
 		assert_infer_match( desiredSql, User ) { |u|
 			Query.Or( u.email.equals( 'test@test.com' ),
 			          u.firstNames.equals( 'John' ) )
+		}
+		assert_infer_match( desiredSql, User ) { |u|
+			u.email.equals( 'test@test.com' ) | u.firstNames.equals( 'John' )
+		}
+		desired_sql2 =
+			"select * from users " +
+			"where (users.administrator = 1 or users.firstNames = 'John')"
+		assert_infer_match( desired_sql2, User ) { |u|
+			u.administrator | u.firstNames.equals( 'John' )
 		}
 	end
 	

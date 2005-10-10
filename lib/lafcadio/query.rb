@@ -243,6 +243,10 @@ module Lafcadio
 				end
 			end
 			
+			def |( other_cond ); Query.Or( self, other_cond ); end
+			
+			def &( other_cond ); Query.And( self, other_cond ); end
+			
 			def implies?( other_condition )
 				self.eql?( other_condition ) or (
 					other_condition.respond_to?( :implied_by? ) and 
@@ -613,6 +617,10 @@ module Lafcadio
 				end
 			end
 			
+			def |( condition ); Query.Or( to_condition, condition ); end
+			
+			def &( condition ); Query.And( to_condition, condition ); end
+
 			def register_compare_condition( compareStr, searchTerm)
 				compareVal = ObjectFieldImpostor.comparators[compareStr]
 				Compare.new( @field_name, searchTerm,
