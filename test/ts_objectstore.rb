@@ -245,6 +245,8 @@ class TestDbConnection < Test::Unit::TestCase
 			@@connected = true
 		end
 		
+		def[]= ( key, val ); end
+		
 		def do( sql, *binds )
 			logSql( sql )
 		end

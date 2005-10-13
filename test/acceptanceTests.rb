@@ -25,7 +25,9 @@ class AcceptanceTestCase < Test::Unit::TestCase
 	
 	def default_test; end
 
-	def domain_classes; [ TestBadRow, TestRow, TestChildRow, TestDiffPkRow ]; end
+	def domain_classes
+		[ TestBadRow, TestRow, TestChildRow, TestDiffPkRow, TestInnoDBRow ]
+	end
 	
 	def get_dbh
 		config = LafcadioConfig.new
@@ -77,6 +79,26 @@ create table test_diff_pk_rows (
 	end
 	
 	sql_primary_key_name 'objId'
+end
+
+class TestInnoDBRow < DomainObject
+	def self.create_table( dbh )
+		dbh.do( 'drop table if exists test_inno_db_rows' )
+		createSql = <<-CREATE
+create table test_inno_db_rows (
+	pk_id int not null auto_increment,
+	primary key (pk_id),
+	string varchar(15)
+) type=innodb
+		CREATE
+		dbh.do( createSql )
+	end
+	
+	def self.drop_table( dbh ); dbh.do( 'drop table test_inno_db_rows' ); end
+
+	string 'string'
+	
+	table_name 'test_inno_db_rows'
 end
 
 class TestRow < DomainObject
@@ -358,6 +380,33 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		assert_raise( FieldMatchError, error_msg ) {
 			@object_store.get_all( TestBadRow )
 		}
+	end
+	
+	def test_transaction
+		@object_store.transaction do |tr|
+			TestInnoDBRow.new( 'string' => 'some string' ).commit
+			tr.rollback
+			raise 'should stop block before you get to this line'
+		end
+		assert_equal( 0, TestInnoDBRow.all.size )
+		begin
+			@object_store.transaction do |tr|
+				TestInnoDBRow.new( 'string' => 'some string' ).commit
+				raise Errno::ENOENT, 'msg here', caller
+				raise 'should stop block before you get to this line'
+			end
+		rescue Errno::ENOENT
+			assert_match( /msg here/, $!.to_s )
+		end
+		assert_equal( 0, TestInnoDBRow.all.size )
+		@object_store.transaction do |tr|
+			TestInnoDBRow.new( 'string' => 'some string' ).commit
+		end
+		assert_equal( 1, TestInnoDBRow.all.size )
+		TestRow.new( 'text_field' => 'something' ).commit
+		@object_store.transaction do |tr|
+			tr.rollback
+		end
 	end
 end
 

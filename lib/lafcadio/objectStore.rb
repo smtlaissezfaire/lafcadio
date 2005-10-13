@@ -147,6 +147,34 @@ module Lafcadio
 				sqllog.info sql
 			end
 		end
+		
+		def transaction( action )
+			tr = Transaction.new @db_conn
+			tr.commit
+			begin
+				action.call tr
+				tr.commit
+			rescue RollbackError
+				# rollback handled by Transaction
+			rescue
+				err_to_raise = $!
+				tr.rollback false
+				raise err_to_raise
+			end
+		end
+		
+		class Transaction
+			def initialize( db_conn ); @db_conn = db_conn; end
+			
+			def commit; @db_conn.commit; end
+				
+			def rollback( raise_error = true )
+				@db_conn.rollback
+				raise RollbackError if raise_error
+			end
+		end
+		
+		class RollbackError < StandardError; end
 	end
 
 	class DbConnection < ContextualService::Service
@@ -183,6 +211,8 @@ module Lafcadio
 			end
 			@@dbh = @@connectionClass.connect( dbAndHost, config['dbuser'],
 																				 config['dbpassword'] )
+			@@dbh['AutoCommit'] = false
+			@@dbh
 		end
 		
 		def method_missing( symbol, *args )
@@ -535,6 +565,8 @@ module Lafcadio
 				super
 			end
 		end
+		
+		def transaction( &action ); @dbBridge.transaction( action ); end
 		
 		class Cache #:nodoc:
 			def initialize( dbBridge )
