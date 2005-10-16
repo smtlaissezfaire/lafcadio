@@ -4,37 +4,42 @@ require 'lafcadio/domain'
 require 'lafcadio/mock'
 require 'lafcadio/objectStore'
 require 'lafcadio/util'
+require 'monitor'
 require 'test/unit'
 
 include Lafcadio
 
+def connect_to_dbh
+	LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
+	config = LafcadioConfig.new
+	dbName = config['dbname']
+	dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"
+	DBI.connect( dbAndHost, config['dbuser'], config['dbpassword'] )
+end
+
 class AcceptanceTestCase < Test::Unit::TestCase
+	def self.domain_classes
+		[ TestBadRow, TestRow, TestChildRow, TestDiffPkRow, TestInnoDBRow ]
+	end
+	
 	def setup
 		super
-		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
-		@dbh = get_dbh
-		domain_classes.each { |domain_class| domain_class.create_table( @dbh ) }
+		@dbh = connect_to_dbh
+		AcceptanceTestCase.domain_classes.each do |domain_class|
+			domain_class.create_table @dbh
+		end
 		@object_store = ObjectStore.get_object_store
 	end
 	
 	def teardown
 		LafcadioConfig.set_values( nil )
-		domain_classes.each { |domain_class| domain_class.drop_table( @dbh ) }
+		self.class.domain_classes.each do |domain_class|
+			domain_class.drop_table( @dbh )
+		end
 		ObjectStore.set_object_store( nil )
 	end
 	
 	def default_test; end
-
-	def domain_classes
-		[ TestBadRow, TestRow, TestChildRow, TestDiffPkRow, TestInnoDBRow ]
-	end
-	
-	def get_dbh
-		config = LafcadioConfig.new
-		dbName = config['dbname']
-		dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"
-		DBI.connect( dbAndHost, config['dbuser'], config['dbpassword'] )
-	end
 end
 
 class TestBadRow < DomainObject
@@ -287,6 +292,27 @@ class AccTestEquals < AcceptanceTestCase
 end
 
 class AccTestObjectStore < AcceptanceTestCase
+	include MonitorMixin
+
+	def test_atomic_pk_retrievals_after_insert
+		rows = {}
+		threads = []
+		10.times do
+			threads << Thread.new {
+				result = `ruby ../test/acceptanceTests.rb --commit_one_row`
+				result =~ /(\d+):(.*)/
+				synchronize {
+					rows[$1] = $2
+				}
+			}
+		end
+		threads.each do |th| th.join; end
+		rows.keys.map { |key| key.to_i }.sort.each do |pk_id|
+			text = rows[pk_id.to_s]
+			assert_equal( text, TestRow[pk_id].text_field )
+		end
+	end
+	
 	def test_diff_pk
 		mock = TestDiffPkRow.new( 'pk_id' => 1, 'text_field' => 'sample text' )
 		mock_object_store = MockObjectStore.new
@@ -466,3 +492,13 @@ apostrophe's
 		assert_equal( text3, test_row3_prime.text_field )
 	end
 end
+
+if ARGV.include? '--commit_one_row'
+	connect_to_dbh
+	text = ''
+	10.times do text << 'abcdefghijklmnopqrstuvwxyz'.split( // )[rand(25)]; end
+	row = TestRow.new( 'text_field' => text ).commit
+	puts "#{ row.pk_id }:#{ row.text_field }"
+	exit
+end
+
