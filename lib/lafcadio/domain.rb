@@ -600,6 +600,7 @@ module Lafcadio
 		def initialize(fieldHash)
 			if fieldHash.respond_to? :keys
 				fieldHash.keys.each { |key|
+					key = key.to_s
 					begin
 						self.class.get_field( key )
 					rescue MissingError
@@ -607,7 +608,12 @@ module Lafcadio
 					end
 				}
 			end
-			@fieldHash = fieldHash
+			if fieldHash.is_a? Hash
+				@fieldHash = {}
+				fieldHash.each do |k, v| @fieldHash[k.to_s] = v; end
+			else
+				@fieldHash = fieldHash
+			end
 			@error_messages = []
 			@fields = {}
 			@fields_set = []
