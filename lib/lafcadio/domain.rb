@@ -240,18 +240,16 @@ module Lafcadio
 	# that each table has a +pk_id+ field that is used to match rows between
 	# different levels.
 	class DomainObject
-		@@subclassHash = {}
-		@@class_fields = {}
-		@@pk_fields =
-			Hash.new { |hash, key|
-				pk_field = PrimaryKeyField.new( key )
-				pk_field.db_field_name = @@sql_primary_keys[key]
-				hash[key] = pk_field
-			}
-		@@sql_primary_keys = Hash.new( 'pk_id' )
+		@@subclass_records = Hash.new do |h, k| h[k] = SubclassRecord.new( k ); end
 		@@default_field_setup_hashes = Hash.new { |hash, key|
 			hash[key] = Hash.new( {} )
 		}
+		@@pk_fields =
+			Hash.new { |hash, key|
+				pk_field = PrimaryKeyField.new( key )
+				pk_field.db_field_name = @@subclass_records[key].sql_primary_key
+				hash[key] = pk_field
+			}
 
 		COMMIT_ADD = 1
 		COMMIT_EDIT = 2
@@ -276,9 +274,9 @@ module Lafcadio
 		end
 
 		def self.class_fields #:nodoc:
-			unless @@class_fields[self]
-				@@class_fields[self] = self.get_class_fields
-				@@class_fields[self].each do |class_field|
+			unless @@subclass_records[self].fields
+				@@subclass_records[self].fields = self.get_class_fields
+				@@subclass_records[self].fields.each do |class_field|
 					begin
 						undef_method class_field.name.to_sym
 					rescue NameError
@@ -286,23 +284,12 @@ module Lafcadio
 					end
 				end
 			end
-			@@class_fields[self]
+			@@subclass_records[self].fields
 		end
 
 		def self.create_field( field_class, *args )
-			if args.last.is_a? Hash
-				att_hash = args.last
-			else
-				att_hash = @@default_field_setup_hashes[self][field_class].clone
-			end
-			@@class_fields[self] = [ @@pk_fields[self] ] if @@class_fields[self].nil?
-			if field_class == DomainObjectField
-				att_hash['linked_type'] = args.first
-				att_hash['name'] = args[1] if args[1] and !args[1].is_a? Hash
-			else
-				name = args.first
-				att_hash['name'] = name.is_a?( String ) ? name : name.to_s
-			end
+			@@subclass_records[self].fields = [ @@pk_fields[self] ] if @@subclass_records[self].fields.nil?
+			att_hash = create_field_att_hash( field_class, *args )
 			field = field_class.create_with_args( self, att_hash )
 			unless class_fields.any? { |cf| cf.name == field.name }
 				att_hash.each { |field_name, value|
@@ -311,6 +298,21 @@ module Lafcadio
 				}
 				class_fields << field
 			end
+		end
+		
+		def self.create_field_att_hash( field_class, *args ) #:nodoc:
+			att_hash = args.last
+			unless att_hash.is_a? Hash
+				att_hash = @@default_field_setup_hashes[self][field_class].clone
+			end
+			if field_class == DomainObjectField
+				att_hash['linked_type'] = args.first
+				att_hash['name'] = args[1] if args[1] and !args[1].is_a? Hash
+			else
+				name = args.first
+				att_hash['name'] = name.is_a?( String ) ? name : name.to_s
+			end
+			att_hash
 		end
 		
 		def self.default_field_setup_hash( field_class, hash )
@@ -435,7 +437,7 @@ module Lafcadio
 		end
 		
 		def self.inherited(subclass) #:nodoc:
-			@@subclassHash[subclass] = true
+			@@subclass_records[subclass]
 		end
 		
 		def self.is_based_on? #:nodoc:
@@ -517,7 +519,7 @@ module Lafcadio
 				begin
 					get_field( 'pk_id' ).db_field_name = self.send( symbol )
 				rescue NameError
-					@@sql_primary_keys[self] = self.send( symbol )
+					@@subclass_records[self].sql_primary_key = self.send( symbol )
 				end
 			end
 		end
@@ -532,7 +534,7 @@ module Lafcadio
 		end
 
 		def self.subclasses #:nodoc:
-			@@subclassHash.keys
+			@@subclass_records.keys
 		end
 
 		# Returns the table name, which is assumed to be the domain class name 
@@ -730,6 +732,15 @@ module Lafcadio
 		
 		class OriginalValuesHash < DelegateClass( Hash )
 			def []=( key, val ); raise NoMethodError; end
+		end
+		
+		class SubclassRecord
+			attr_accessor :fields, :sql_primary_key
+			
+			def initialize( subclass )
+				@subclass = subclass
+				@sql_primary_key = 'pk_id'
+			end
 		end
 	end
 
