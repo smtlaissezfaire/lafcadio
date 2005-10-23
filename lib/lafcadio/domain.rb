@@ -137,9 +137,7 @@ module Lafcadio
 			end
 		end
 		
-		def eql?(otherObj)
-			self == otherObj
-		end
+		def eql?( otherObj ); self == otherObj; end
 
 		def hash; "#{ self.class.name } #{ pk_id }".hash; end
 	end
@@ -264,7 +262,6 @@ module Lafcadio
 		def self.[]( pk_id ); get( pk_id ); end
 		
 		def self.abstract_subclasses #:nodoc:
-			require 'lafcadio/domain'
 			[ MapObject ]
 		end
 		
@@ -273,19 +270,15 @@ module Lafcadio
 		# Returns an array of all fields defined for this class and all concrete
 		# superclasses.
 		def self.all_fields
-			all_fields = []
-			self_and_concrete_superclasses.each { |aClass|
-				aClass.class_fields.each { |field| all_fields << field }
-			}
-			all_fields
+			self_and_concrete_superclasses.map { |a_class|
+				a_class.class_fields
+			}.flatten
 		end
 
 		def self.class_fields #:nodoc:
-			class_fields = @@class_fields[self]
-			unless class_fields
+			unless @@class_fields[self]
 				@@class_fields[self] = self.get_class_fields
-				class_fields = @@class_fields[self]
-				class_fields.each do |class_field|
+				@@class_fields[self].each do |class_field|
 					begin
 						undef_method class_field.name.to_sym
 					rescue NameError
@@ -293,28 +286,24 @@ module Lafcadio
 					end
 				end
 			end
-			class_fields
+			@@class_fields[self]
 		end
 
 		def self.create_field( field_class, *args )
-			class_fields = @@class_fields[self]
 			if args.last.is_a? Hash
 				att_hash = args.last
 			else
 				att_hash = @@default_field_setup_hashes[self][field_class].clone
 			end
-			if class_fields.nil?
-				class_fields = [ @@pk_fields[self] ]
-				@@class_fields[self] = class_fields
-			end
+			@@class_fields[self] = [ @@pk_fields[self] ] if @@class_fields[self].nil?
 			if field_class == DomainObjectField
 				att_hash['linked_type'] = args.first
 				att_hash['name'] = args[1] if args[1] and !args[1].is_a? Hash
 			else
 				name = args.first
-				att_hash['name'] = name == String ? name : name.to_s
+				att_hash['name'] = name.is_a?( String ) ? name : name.to_s
 			end
-			field = field_class.instantiate_with_parameters( self, att_hash )
+			field = field_class.create_with_args( self, att_hash )
 			unless class_fields.any? { |cf| cf.name == field.name }
 				att_hash.each { |field_name, value|
 					setter = field_name + '='

@@ -12,10 +12,10 @@ module Lafcadio
 
 		def self.instantiate_from_xml( domain_class, fieldElt ) #:nodoc:
 			parameters = instantiation_parameters( fieldElt )
-			instantiate_with_parameters( domain_class, parameters )
+			create_with_args( domain_class, parameters )
 		end
 
-		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
+		def self.create_with_args( domain_class, parameters ) #:nodoc:
 			instance = self.new( domain_class, parameters['name'] )
 			if ( db_field_name = parameters['db_field_name'] )
 				instance.db_field_name = db_field_name
@@ -277,7 +277,7 @@ module Lafcadio
 			( $' || linked_type.name ).camel_case_to_underscore
 		end
 
-		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
+		def self.create_with_args( domain_class, parameters ) #:nodoc:
 			linked_type = parameters['linked_type']
 			instance = self.new(
 				domain_class, linked_type,
@@ -395,7 +395,7 @@ module Lafcadio
 	# enums as the +enums+ argument.
 	#
 	class EnumField < StringField
-		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
+		def self.create_with_args( domain_class, parameters ) #:nodoc:
 			self.new( domain_class, parameters['name'], parameters['enums'] )
 		end
 
@@ -457,7 +457,7 @@ module Lafcadio
 
 	# FloatField represents a decimal value.
 	class FloatField < ObjectField
-		def self.instantiate_with_parameters( domain_class, parameters ) #:nodoc:
+		def self.create_with_args( domain_class, parameters ) #:nodoc:
 			self.new( domain_class, parameters['name'] )
 		end
 
@@ -504,7 +504,7 @@ module Lafcadio
 	end
 
 	class SubsetDomainObjectField < DomainObjectField #:nodoc:
-		def self.instantiate_with_parameters( domain_class, parameters )
+		def self.create_with_args( domain_class, parameters )
 			self.new( domain_class, parameters['linked_type'],
 			          parameters['subset_field'], parameters['name'] )
 		end
