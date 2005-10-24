@@ -16,7 +16,7 @@
 # http://lafcadio.rubyforge.org/tutorial.html.
 
 module Lafcadio
-	Version = "0.8.0"
+	Version = "0.9.0"
 
 	require 'lafcadio/depend'
 	require 'lafcadio/domain'

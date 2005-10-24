@@ -1,5 +1,15 @@
 CHANGELOG
 
+0.9.0 -- October 23 2005
+* Added count queries
+* Fixed missing gem dependency to ContextualService
+* Multi-row order clauses in queries
+* LafcadioConfig doesn't need to be set if you're using the MockObjectStore.
+* Queries support & and |
+* Added DomainObject.default_mock and .custom_mock
+* Added transaction support
+* DomainObject.new takes either symbols or strings
+
 0.8.0 -- September 21 2005
 * Production release. See changelog entries below for 0.7.* releases for the
   full list.
