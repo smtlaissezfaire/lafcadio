@@ -264,6 +264,14 @@ module Lafcadio
 			}.flatten
 		end
 
+		def self.class_field(fieldName) #:nodoc:
+			field = nil
+			self.class_fields.each { |aField|
+				field = aField if aField.name == fieldName
+			}
+			field
+		end
+		
 		def self.class_fields #:nodoc:
 			unless subclass_record.fields
 				subclass_record.fields = self.get_class_fields
@@ -316,12 +324,9 @@ module Lafcadio
 			dependent_classes = {}
 			DomainObject.subclasses.each { |aClass|
 				unless DomainObject.abstract_subclasses.include?( aClass )
-					aClass.class_fields.each { |field|
-						if ( field.is_a?( DomainObjectField ) &&
-						     field.linked_type == self.domain_class )
-							dependent_classes[aClass] = field
-						end
-					}
+					if ( field = aClass.get_link_field( self ) )
+						dependent_classes[aClass] = field
+					end
 				end
 			}
 			dependent_classes
@@ -353,18 +358,6 @@ module Lafcadio
 			end
 		end
 
-		def self.get_class_field(fieldName) #:nodoc:
-			field = nil
-			self.class_fields.each { |aField|
-				field = aField if aField.name == fieldName
-			}
-			field
-		end
-		
-		def DomainObject.get_class_field_by_db_name( fieldName ) #:nodoc:
-			self.class_fields.find { |field| field.db_field_name == fieldName }
-		end
-
 		# Returns an Array of ObjectField instances for this domain class, parsing
 		# them from XML if necessary.
 		def self.get_class_fields
@@ -375,7 +368,7 @@ module Lafcadio
 			else
 				xmlParser = try_load_xml_parser
 				if xmlParser
-					xmlParser.get_class_fields
+					xmlParser.get_class_fields     
 				else
 					error_msg = "Couldn't find either an XML class description file " +
 											"or get_class_fields method for " + self.name
@@ -396,7 +389,7 @@ module Lafcadio
 			aDomainClass = self
 			field = nil
 			while aDomainClass < DomainObject && !field
-				field = aDomainClass.get_class_field( fieldName )
+				field = aDomainClass.class_field( fieldName )
 				aDomainClass = aDomainClass.superclass
 			end
 			if field

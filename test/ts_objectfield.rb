@@ -234,7 +234,7 @@ class TestDomainObjectField < LafcadioTestCase
 		client2 = client.clone
 		client2.pk_id = 2
 		@mockObjectStore.commit client2
-		domain_object_field = Invoice.get_class_field 'client'
+		domain_object_field = Invoice.class_field 'client'
 		begin
 			domain_object_field.verify(client2, 1)
 			fail 'should throw FieldValueError'

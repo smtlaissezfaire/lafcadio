@@ -9,7 +9,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 	end
 
 	def matchField( domain_class, fieldName, fieldClass, attributes = nil )
-		field = domain_class.get_class_field( fieldName )
+		field = domain_class.class_field fieldName
 		assert_not_nil( field )
 		assert_equal( fieldClass, field.class )
 		if attributes
@@ -101,7 +101,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def matchField( domain_class, fieldName, fieldClass, attributes = nil )
-		field = domain_class.get_class_field( fieldName )
+		field = domain_class.class_field fieldName
 		assert_not_nil( field )
 		assert_equal( fieldClass, field.class )
 		if attributes
@@ -429,7 +429,7 @@ end
 	end
 
 	def testGetField
-		name = Client.get_class_field 'name'
+		name = Client.class_field 'name'
 		assert_not_nil name
 		assert_equal( 'name', InternalClient.get_field( 'name' ).name )
 		assert_equal( 'billingType', InternalClient.get_field( 'billingType' ).name )
