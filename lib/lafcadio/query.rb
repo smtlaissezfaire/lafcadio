@@ -156,10 +156,10 @@ module Lafcadio
 			if @order_by
 				if @order_by.is_a? Array
 					field_str = @order_by.map { |f_name|
-						@domain_class.get_field( f_name.to_s ).db_field_name
+						@domain_class.field( f_name.to_s ).db_field_name
 					}.join( ', ' )
 				else
-					field_str = @domain_class.get_field( @order_by ).db_field_name
+					field_str = @domain_class.field( @order_by ).db_field_name
 				end
 				clause = "order by #{ field_str } "
 				clause += @order_by_order == ASC ? 'asc' : 'desc'
@@ -260,7 +260,7 @@ module Lafcadio
 				other_cond.is_a?( Condition ) and other_cond.to_sql == to_sql
 			end
 			
-			def get_field; @domain_class.get_field( @fieldName ); end
+			def get_field; @domain_class.field( @fieldName ); end
 			
 			def query; Query.new( @domain_class, self ); end
 			
@@ -387,7 +387,7 @@ module Lafcadio
 						def method_missing( methId, *args )
 							fieldName = methId.id2name
 							begin
-								classField = self.domain_class.get_field( fieldName )
+								classField = self.domain_class.field( fieldName )
 								ObjectFieldImpostor.new( self, classField )
 							rescue MissingError
 								super( methId, *args )
@@ -565,7 +565,7 @@ module Lafcadio
 			end
 		
 			def fields
-				"max(#{ @domain_class.get_field( @field_name ).db_field_name })"
+				"max(#{ @domain_class.field( @field_name ).db_field_name })"
 			end
 			
 			def result_row( row ); { :max => row.first }; end

@@ -293,11 +293,11 @@ class TestDomainObject < LafcadioTestCase
 	def test_default_field_setup_hash
 		assert_equal(
 			BooleanField::ENUMS_CAPITAL_YES_NO,
-			DomainObjChild1.get_field( 'bool1' ).enum_type
+			DomainObjChild1.field( 'bool1' ).enum_type
 		)
 		assert_equal(
 			BooleanField::ENUMS_ONE_ZERO,
-			DomainObjChild1.get_field( 'bool2' ).enum_type
+			DomainObjChild1.field( 'bool2' ).enum_type
 		)
 	end
 
@@ -431,11 +431,11 @@ end
 	def testGetField
 		name = Client.class_field 'name'
 		assert_not_nil name
-		assert_equal( 'name', InternalClient.get_field( 'name' ).name )
-		assert_equal( 'billingType', InternalClient.get_field( 'billingType' ).name )
+		assert_equal( 'name', InternalClient.field( 'name' ).name )
+		assert_equal( 'billingType', InternalClient.field( 'billingType' ).name )
 		begin
-			InternalClient.get_field( 'something' )
-			fail "DomainObject.get_field needs to raise an error if it can't find " +
+			InternalClient.field( 'something' )
+			fail "DomainObject.field needs to raise an error if it can't find " +
            "anything"
     rescue MissingError
     	# ok
@@ -539,7 +539,7 @@ end
 	def test_override_class_defaults
 		assert_equal( 'this_table', XmlSku3.table_name )
 		assert_equal( 'xml_sku3_id', XmlSku3.sql_primary_key_name )
-		assert_equal( 'xml_sku3_id', XmlSku3.get_field( 'pk_id' ).db_field_name )
+		assert_equal( 'xml_sku3_id', XmlSku3.field( 'pk_id' ).db_field_name )
 	end
 
 	def test_override_class_defaults_from_one_liners

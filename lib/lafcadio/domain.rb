@@ -332,6 +332,14 @@ module Lafcadio
 			dependent_classes
 		end
 		
+		def self.domain_dirs #:nodoc:
+			if ( domainDirStr = LafcadioConfig.new['domainDirs'] )
+				domainDirStr.split(',')
+			else
+				[]
+			end
+		end
+		
 		def self.exist?( search_term, field_name = :pk_id )
 			query = Query.infer( self ) { |dobj|
 				dobj.send( field_name ).equals( search_term )
@@ -339,6 +347,22 @@ module Lafcadio
 			!ObjectStore.get_object_store.get_subset( query ).empty?
 		end
 		
+		def self.field( fieldName ) #:nodoc:
+			aDomainClass = self
+			field = nil
+			while aDomainClass < DomainObject && !field
+				field = aDomainClass.class_field( fieldName )
+				aDomainClass = aDomainClass.superclass
+			end
+			if field
+				field
+			else
+				errStr = "Couldn't find field \"#{ fieldName }\" in " +
+								 "#{ self } domain class"
+				raise( MissingError, errStr, caller )
+			end
+		end
+
 		def self.first; all.first; end
 			
 		def self.get( *args )
@@ -374,30 +398,6 @@ module Lafcadio
 											"or get_class_fields method for " + self.name
 					raise MissingError, error_msg, caller
 				end
-			end
-		end
-
-		def self.get_domain_dirs #:nodoc:
-			if ( domainDirStr = LafcadioConfig.new['domainDirs'] )
-				domainDirStr.split(',')
-			else
-				[]
-			end
-		end
-		
-		def self.get_field( fieldName ) #:nodoc:
-			aDomainClass = self
-			field = nil
-			while aDomainClass < DomainObject && !field
-				field = aDomainClass.class_field( fieldName )
-				aDomainClass = aDomainClass.superclass
-			end
-			if field
-				field
-			else
-				errStr = "Couldn't find field \"#{ fieldName }\" in " +
-								 "#{ self } domain class"
-				raise( MissingError, errStr, caller )
 			end
 		end
 
@@ -477,7 +477,7 @@ module Lafcadio
 		def self.require_domain_file( typeString )
 			typeString =~ /([^\:]*)$/
 			fileName = $1
-			get_domain_dirs.each { |domainDir|
+			domain_dirs.each { |domainDir|
 				if Dir.entries(domainDir).index("#{fileName}.rb")
 					require "#{ domainDir }#{ fileName }"
 				end
@@ -502,7 +502,7 @@ module Lafcadio
 		def self.singleton_method_added( symbol )
 			if symbol.id2name == 'sql_primary_key_name' && self < DomainObject
 				begin
-					get_field( 'pk_id' ).db_field_name = self.send( symbol )
+					field( 'pk_id' ).db_field_name = self.send( symbol )
 				rescue NameError
 					subclass_record.sql_primary_key = self.send( symbol )
 				end
@@ -513,9 +513,9 @@ module Lafcadio
 		# the class definition XML if necessary.
 		def self.sql_primary_key_name( set_sql_primary_key_name = nil )
 			if set_sql_primary_key_name
-				get_field( 'pk_id' ).db_field_name = set_sql_primary_key_name
+				field( 'pk_id' ).db_field_name = set_sql_primary_key_name
 			end
-			get_field( 'pk_id' ).db_field_name
+			field( 'pk_id' ).db_field_name
 		end
 		
 		def self.subclass_record; @@subclass_records[self]; end
@@ -580,7 +580,7 @@ module Lafcadio
 				fieldHash.keys.each { |key|
 					key = key.to_s
 					begin
-						self.class.get_field( key )
+						self.class.field key
 					rescue MissingError
 						raise ArgumentError, "Invalid field name #{ key }"
 					end
@@ -636,7 +636,7 @@ module Lafcadio
 		
 		def get_getter_field( methId ) #:nodoc:
 			begin
-				self.class.get_field( methId.id2name )
+				self.class.field methId.id2name
 			rescue MissingError
 				nil
 			end
@@ -645,7 +645,7 @@ module Lafcadio
 		def get_setter_field( methId ) #:nodoc:
 			if methId.id2name =~ /(.*)=$/
 				begin
-					self.class.get_field( $1 )
+					self.class.field $1
 				rescue MissingError
 					nil
 				end

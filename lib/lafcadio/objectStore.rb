@@ -779,7 +779,7 @@ module Lafcadio
 
 		def []( key )
 			begin
-				field = @domain_class.get_field( key )
+				field = @domain_class.field key
 				val = field.value_from_sql( @row_hash[ field.db_field_name ] )
 				if field.instance_of?( PrimaryKeyField ) && val.nil?
 					raise FieldMatchError, error_msg, caller
