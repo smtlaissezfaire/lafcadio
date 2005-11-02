@@ -320,7 +320,7 @@ module Lafcadio
 		def insert_sql( domain_class )
 			fields = domain_class.class_fields
 			nameValuePairs = get_name_value_pairs( domain_class )
-			if domain_class.is_based_on?
+			if domain_class.is_child_domain_class?
 				nameValuePairs[domain_class.sql_primary_key_name] = 'LAST_INSERT_ID()'
 			end
 			fieldNameStr = nameValuePairs.keys.join ", "

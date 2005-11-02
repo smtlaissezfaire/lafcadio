@@ -302,25 +302,6 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def test_defers_field_copying
-if false
-		row_hash = OneTimeAccessHash.new( 'pk_id' => '1', 'hours' => '36.5',
-		                                  'xmlSku' => nil )
-		converter = SqlValueConverter.new( Invoice, row_hash )
-		inv = Invoice.new( converter )
-		assert_equal( 0, row_hash.key_lookups['pk_id'] )
-		assert_equal( 0, row_hash.key_lookups['hours'] )
-		assert_equal( 0, row_hash.key_lookups['xmlSku'] )
-		assert_equal( 36.5, inv.hours )
-		assert( row_hash.key_lookups['hours'] <= 1, row_hash.key_lookups['hours'] )
-		assert_nil( inv.xmlSku )
-		assert(
-			row_hash.key_lookups['xmlSku'] <= 1, row_hash.key_lookups['xmlSku']
-		)
-		assert_nil( inv.xmlSku )
-		assert(
-			row_hash.key_lookups['xmlSku'] <= 1, row_hash.key_lookups['xmlSku']
-		)
-end
 		xml_sku_row_hash = OneTimeAccessHash.new( 'some_other_id' => '345' )
 		xml_sku_converter = SqlValueConverter.new( XmlSku, xml_sku_row_hash )
 		xml_sku = XmlSku.new( xml_sku_converter )

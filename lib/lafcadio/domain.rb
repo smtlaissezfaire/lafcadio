@@ -312,6 +312,21 @@ module Lafcadio
 			end
 			att_hash
 		end
+
+		def self.create_fields( field_class, *args ) #:nodoc:
+			arg = args.shift
+			until args.empty?
+				next_arg = args.shift
+				if next_arg.is_a? String or next_arg.is_a? Symbol
+					create_field( field_class, arg )
+					arg = next_arg
+				else
+					create_field( field_class, arg, next_arg )
+					arg = args.shift
+				end
+			end
+			create_field( field_class, arg ) unless arg.nil?
+		end
 		
 		def self.default_field_setup_hash( field_class, hash )
 			subclass_record.default_field_setup_hash[field_class] = hash
@@ -320,10 +335,11 @@ module Lafcadio
 		def self.dependent_classes #:nodoc:
 			dependent_classes = {}
 			DomainObject.subclasses.each { |aClass|
-				unless DomainObject.abstract_subclass?( aClass )
-					if ( field = aClass.link_field( self ) )
-						dependent_classes[aClass] = field
-					end
+				if (
+					!abstract_subclass?( aClass ) and
+					( field = aClass.link_field( self ) )
+				)
+					dependent_classes[aClass] = field
 				end
 			}
 			dependent_classes
@@ -398,55 +414,51 @@ module Lafcadio
 			end
 		end
 
-		def self.is_based_on? #:nodoc:
-		  self.superclass.is_concrete?
+		def self.is_child_domain_class? #:nodoc:
+			superclass != DomainObject and !abstract_subclass?( superclass )
 		end
 
-		def self.is_concrete? #:nodoc:
-		  ( self != DomainObject && !abstract_subclass?( self ) )
-		end
-		
 		def self.last; all.last; end
 		
 		def self.link_field( linked_domain_class ) # :nodoc:
 			class_fields.find { |field|
-				field.is_a? DomainObjectField and field.linked_type == linked_domain_class
+				field.is_a? DomainObjectField and
+				field.linked_type == linked_domain_class
 			}
 		end
 		
 		def self.method_missing( methodId, *args ) #:nodoc:
+			dispatched = false
 			method_name = methodId.id2name
-			maybe_field_class_name = method_name.underscore_to_camel_case + 'Field'
 			begin
-				field_class = Lafcadio.const_get( maybe_field_class_name )
-				create_field( field_class, *args )
+				method_missing_try_create_field( method_name, *args )
+				dispatched = true
 			rescue NameError
-				singular = method_name.singular
-				if singular
-					maybe_field_class_name = singular.underscore_to_camel_case + 'Field'
-					begin
-						field_class = Lafcadio.const_get( maybe_field_class_name )
-						arg = args.shift
-						until args.empty?
-							next_arg = args.shift
-							if next_arg.is_a? String or next_arg.is_a? Symbol
-								create_field( field_class, arg )
-								arg = next_arg
-							else
-								create_field( field_class, arg, next_arg )
-								arg = args.shift
-							end
-						end
-						create_field( field_class, arg ) unless arg.nil?
-					rescue NameError
-						super
-					end
-				else
-					super
-				end
+				begin
+					method_missing_try_create_fields( method_name, *args )
+					dispatched = true
+				rescue NameError; end
 			end
+			super unless dispatched
 		end
 		
+		def self.method_missing_try_create_field( method_name, *args ) # :nodoc:
+			maybe_field_class_name = method_name.underscore_to_camel_case + 'Field'
+			field_class = Lafcadio.const_get( maybe_field_class_name )
+			create_field( field_class, *args )
+		end
+		
+		def self.method_missing_try_create_fields( method_name, *args ) # :nodoc:
+			singular = method_name.singular
+			if singular
+				maybe_field_class_name = singular.underscore_to_camel_case + 'Field'
+				field_class = Lafcadio.const_get( maybe_field_class_name )
+				create_fields( field_class, *args )
+			else
+				raise NameError
+			end
+		end
+
 		def self.only; all.only; end
 
 		def self.domain_class #:nodoc:
