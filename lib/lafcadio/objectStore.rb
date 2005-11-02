@@ -475,7 +475,7 @@ module Lafcadio
 		def get_filtered(domain_class_name, searchTerm, fieldName = nil) #:nodoc:
 			domain_class = Class.by_name domain_class_name
 			unless fieldName
-				fieldName = domain_class.get_link_field( searchTerm.domain_class ).name
+				fieldName = domain_class.link_field( searchTerm.domain_class ).name
 			end
 			get_subset( Query::Equals.new( fieldName, searchTerm, domain_class ) )
 		end

@@ -250,6 +250,10 @@ module Lafcadio
 		
 		def self.[]( pk_id ); get( pk_id ); end
 		
+		def self.abstract_subclass?( a_class ) #:nodoc:
+			abstract_subclasses.include? a_class
+		end
+		
 		def self.abstract_subclasses #:nodoc:
 			[ MapObject ]
 		end
@@ -265,11 +269,7 @@ module Lafcadio
 		end
 
 		def self.class_field(fieldName) #:nodoc:
-			field = nil
-			self.class_fields.each { |aField|
-				field = aField if aField.name == fieldName
-			}
-			field
+			self.class_fields.find { |field| field.name == fieldName }
 		end
 		
 		def self.class_fields #:nodoc:
@@ -290,7 +290,7 @@ module Lafcadio
 			subclass_record.maybe_init_fields
 			att_hash = create_field_att_hash( field_class, *args )
 			field = field_class.create_with_args( self, att_hash )
-			unless class_fields.any? { |cf| cf.name == field.name }
+			unless class_field( field.name )
 				att_hash.each { |field_name, value|
 					setter = field_name + '='
 					field.send( setter, value ) if field.respond_to?( setter )
@@ -302,16 +302,13 @@ module Lafcadio
 		def self.create_field_att_hash( field_class, *args ) #:nodoc:
 			att_hash = args.last
 			unless att_hash.is_a? Hash
-				att_hash = subclass_record.default_field_setup_hash[
-					field_class
-				].clone
+				att_hash = subclass_record.default_field_setup_hash[field_class].clone
 			end
 			if field_class == DomainObjectField
 				att_hash['linked_type'] = args.first
 				att_hash['name'] = args[1] if args[1] and !args[1].is_a? Hash
 			else
-				name = args.first
-				att_hash['name'] = name.is_a?( String ) ? name : name.to_s
+				att_hash['name'] = args.first.to_s
 			end
 			att_hash
 		end
@@ -323,8 +320,8 @@ module Lafcadio
 		def self.dependent_classes #:nodoc:
 			dependent_classes = {}
 			DomainObject.subclasses.each { |aClass|
-				unless DomainObject.abstract_subclasses.include?( aClass )
-					if ( field = aClass.get_link_field( self ) )
+				unless DomainObject.abstract_subclass?( aClass )
+					if ( field = aClass.link_field( self ) )
 						dependent_classes[aClass] = field
 					end
 				end
@@ -387,7 +384,7 @@ module Lafcadio
 		def self.get_class_fields
 			if self.methods( false ).include?( 'get_class_fields' )
 				[ subclass_record.pk_field ]
-			elsif abstract_subclasses.include?( self )
+			elsif abstract_subclass?( self )
 				[]
 			else
 				xmlParser = try_load_xml_parser
@@ -401,25 +398,21 @@ module Lafcadio
 			end
 		end
 
-		def self.get_link_field( linked_domain_class ) # :nodoc:
-			class_fields.find { |field|
-				field.is_a? DomainObjectField and field.linked_type == linked_domain_class
-			}
-		end
-		
-		def self.inherited(subclass) #:nodoc:
-			@@subclass_records[subclass]
-		end
-		
 		def self.is_based_on? #:nodoc:
 		  self.superclass.is_concrete?
 		end
 
 		def self.is_concrete? #:nodoc:
-		  (self != DomainObject && abstract_subclasses.index(self).nil?)
+		  ( self != DomainObject && !abstract_subclass?( self ) )
 		end
 		
 		def self.last; all.last; end
+		
+		def self.link_field( linked_domain_class ) # :nodoc:
+			class_fields.find { |field|
+				field.is_a? DomainObjectField and field.linked_type == linked_domain_class
+			}
+		end
 		
 		def self.method_missing( methodId, *args ) #:nodoc:
 			method_name = methodId.id2name
@@ -477,8 +470,9 @@ module Lafcadio
 		def self.self_and_concrete_superclasses # :nodoc:
 			classes = [ ]
 			a_domain_class = self
-			until( a_domain_class == DomainObject ||
-					   abstract_subclasses.index( a_domain_class ) != nil )
+			until(
+				a_domain_class == DomainObject || abstract_subclass?( a_domain_class )
+			)
 				classes << a_domain_class
 				a_domain_class = a_domain_class.superclass
 			end
