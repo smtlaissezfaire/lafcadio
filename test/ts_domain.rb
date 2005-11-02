@@ -403,31 +403,6 @@ end
 		}
 	end
 
-	def test_get_domain_class_from_string
-		assert_equal(
-			Class, DomainObject.get_domain_class_from_string( 'Invoice' ).class
-		)
-		assert_equal Class,(
-				(DomainObject.get_domain_class_from_string('Domain::LineItem')).class)
-		begin
-			assert_equal(
-				nil, ( DomainObject.get_domain_class_from_string( 'notADomainClass' ) )
-			)
-			fail "Should throw an error when matching fails"
-		rescue CouldntMatchDomainClassError
-			# ok
-		end
-		attributeClass = DomainObject.get_domain_class_from_string( 'Attribute' )
-		assert_equal( Class, attributeClass.class )
-		assert_equal( 'Attribute', attributeClass.to_s )
-	end
-	
-	def test_get_domain_class_from_string_without_domain_file
-		LafcadioConfig.set_filename '../test/testData/config_no_domain_file.dat'
-		assert_equal( 'Invoice',
-		              DomainObject.get_domain_class_from_string( 'Invoice' ).name )
-	end
-
 	def testGetField
 		name = Client.class_field 'name'
 		assert_not_nil name

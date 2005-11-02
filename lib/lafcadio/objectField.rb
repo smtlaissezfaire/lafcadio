@@ -293,7 +293,7 @@ module Lafcadio
 		def self.instantiation_parameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			linked_typeStr = fieldElt.attributes['linked_type']
-			linked_type = DomainObject.get_domain_class_from_string( linked_typeStr )
+			linked_type = Class.by_name linked_typeStr
 			parameters['linked_type'] = linked_type
 			parameters['delete_cascade'] = fieldElt.attributes['delete_cascade'] == 'y'
 			parameters

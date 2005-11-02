@@ -473,9 +473,7 @@ module Lafcadio
 		end
 
 		def get_filtered(domain_class_name, searchTerm, fieldName = nil) #:nodoc:
-			domain_class = DomainObject.get_domain_class_from_string(
-				domain_class_name
-			)
+			domain_class = Class.by_name domain_class_name
 			unless fieldName
 				fieldName = domain_class.get_link_field( searchTerm.domain_class ).name
 			end
@@ -498,7 +496,7 @@ module Lafcadio
 		end
 
 		def get_mapped(searchTerm, resultTypeName) #:nodoc:
-			resultType = DomainObject.get_domain_class_from_string resultTypeName
+			resultType = Module.by_name resultTypeName
 			firstTypeName = searchTerm.class.basename
 			secondTypeName = resultType.basename
 			mapTypeName = firstTypeName + secondTypeName
@@ -731,30 +729,30 @@ module Lafcadio
 			end
 			
 			def dispatch_get_method
-				begin
-					dispatch_get_singular
-				rescue CouldntMatchDomainClassError
+				unless ( dispatch_get_singular )
 					domain_class_name = camel_case_method_name_after_get.singular
 					begin
-						@domain_class =
-								DomainObject.get_domain_class_from_string( domain_class_name )
+						@domain_class = Module.by_name domain_class_name
 						dispatch_get_plural
-					rescue CouldntMatchDomainClassError
+					rescue NameError
 						raise_no_method_error
 					end
 				end
 			end
 			
 			def dispatch_get_singular
-				domain_class = DomainObject.get_domain_class_from_string(
-					camel_case_method_name_after_get
-				)
-				if @orig_args[0].class <= Integer
-					@symbol = :get
-					@args = [ domain_class, @orig_args[0] ]
-				elsif @orig_args[0].class <= DomainObject
-					@symbol = :get_map_object
-					@args = [ domain_class, @orig_args[0], @orig_args[1] ]
+				begin
+					domain_class = Module.by_name camel_case_method_name_after_get
+					if @orig_args[0].class <= Integer
+						@symbol = :get
+						@args = [ domain_class, @orig_args[0] ]
+					elsif @orig_args[0].class <= DomainObject
+						@symbol = :get_map_object
+						@args = [ domain_class, @orig_args[0], @orig_args[1] ]
+					end
+					true
+				rescue NameError
+					false
 				end
 			end
 			

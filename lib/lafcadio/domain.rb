@@ -401,20 +401,6 @@ module Lafcadio
 			end
 		end
 
-		def self.get_domain_class_from_string(typeString) #:nodoc:
-			domain_class = nil
-			require_domain_file( typeString )
-			subclasses.each { |subclass|
-				domain_class = subclass if subclass.to_s == typeString
-			}
-			if domain_class
-				domain_class
-			else
-				raise CouldntMatchDomainClassError,
-						"couldn't match domain_class #{typeString}", caller
-			end
-		end
-		
 		def self.get_link_field( linked_domain_class ) # :nodoc:
 			class_fields.find { |field|
 				field.is_a? DomainObjectField and field.linked_type == linked_domain_class
