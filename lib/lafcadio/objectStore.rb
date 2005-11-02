@@ -102,6 +102,13 @@ module Lafcadio
 			"dbh:#{dbDump}"
 		end
 		
+		def collection_by_query(query)
+			domain_class = query.domain_class
+			execute_select( query.to_sql ).collect { |row_hash|
+				domain_class.new( SqlValueConverter.new( domain_class, row_hash ) )
+			}
+		end
+		
 		def commit(db_object)
 			sqlMaker = DomainObjectSqlMaker.new(db_object)
 			sqlMaker.sql_statements.each { |sql, binds| execute_commit( sql, binds ) }
@@ -121,13 +128,6 @@ module Lafcadio
 			rescue DBI::DatabaseError => e
 				raise $!.to_s + ": #{ e.errstr }"
 			end	
-		end
-		
-		def get_collection_by_query(query)
-			domain_class = query.domain_class
-			execute_select( query.to_sql ).collect { |row_hash|
-				domain_class.new( SqlValueConverter.new( domain_class, row_hash ) )
-			}
 		end
 		
 		def group_query( query )
@@ -617,7 +617,7 @@ module Lafcadio
 							dobj.pk_id
 						}
 					elsif @collections_by_query.values
-						newObjects = @dbBridge.get_collection_by_query(query)
+						newObjects = @dbBridge.collection_by_query(query)
 						newObjects.each { |dbObj| save dbObj }
 						@collections_by_query[query] = newObjects.collect { |dobj|
 							dobj.pk_id

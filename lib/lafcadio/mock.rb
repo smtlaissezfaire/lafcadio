@@ -3,39 +3,23 @@ require 'lafcadio/util'
 
 module Lafcadio
 	class MockDbBridge #:nodoc:
-		attr_reader :last_pk_id_inserted, :retrievals_by_type, :query_count
+		attr_reader :last_pk_id_inserted
 
 		def initialize
 			@objects = {}
-			@retrievals_by_type = Hash.new 0
-			@query_count = Hash.new( 0 )
 			@next_pk_ids = {}
+			@queries = []
 		end
 
-		def commit(db_object)
-			if db_object.pk_id and !db_object.pk_id.is_a?( Integer )
-				raise ArgumentError
-			end
-			objects_by_domain_class = get_objects_by_domain_class(
-				db_object.domain_class
-			)
-			if db_object.delete
-				objects_by_domain_class.delete( db_object.pk_id )
-			else
-				object_pk_id = get_pk_id_before_committing( db_object )
-				objects_by_domain_class[object_pk_id] = db_object
-			end
-		end
-		
-		def _get_all( domain_class )
-			@retrievals_by_type[domain_class] = @retrievals_by_type[domain_class] + 1
+		def all( domain_class )
 			@objects[domain_class] ? @objects[domain_class].values : []
 		end
 		
-		def get_collection_by_query(query)
-			@query_count[query.to_sql] += 1
+		def collection_by_query(query)
+			@queries << query
+			domain_class = query.domain_class
 			objects = []
-			_get_all( query.domain_class ).each { |dbObj|
+			all( domain_class ).each { |dbObj|
 				if query.condition
 					objects << dbObj if query.condition.object_meets(dbObj)
 				else
@@ -59,7 +43,22 @@ module Lafcadio
 			end
 			objects
 		end
-		
+
+		def commit(db_object)
+			if db_object.pk_id and !db_object.pk_id.is_a?( Integer )
+				raise ArgumentError
+			end
+			objects_by_domain_class = get_objects_by_domain_class(
+				db_object.domain_class
+			)
+			if db_object.delete
+				objects_by_domain_class.delete( db_object.pk_id )
+			else
+				object_pk_id = get_pk_id_before_committing( db_object )
+				objects_by_domain_class[object_pk_id] = db_object
+			end
+		end
+				
 		def get_pk_id_before_committing( db_object )
 			if db_object.pk_id
 				db_object.pk_id
@@ -91,6 +90,18 @@ module Lafcadio
 
 		def group_query( query )
 			query.collect( get_objects_by_domain_class( query.domain_class ).values )
+		end
+		
+		def queries( domain_class = nil )
+			if domain_class
+				@queries.select { |qry| qry.domain_class == domain_class }
+			else
+				@queries
+			end
+		end
+		
+		def query_count( sql )
+			@queries.select { |qry| qry.to_sql == sql }.size
 		end
 		
 		def set_next_pk_id( domain_class, npi )

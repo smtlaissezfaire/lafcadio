@@ -79,7 +79,7 @@ class TestDBBridge < Test::Unit::TestCase
 
 	def testGetAll
 		query = Query.new Domain::LineItem
-		coll = @dbb.get_collection_by_query query
+		coll = @dbb.collection_by_query query
 		assert_equal Array, coll.class
 	end
 
@@ -129,7 +129,7 @@ class TestDBBridge < Test::Unit::TestCase
 	
 	def test_passes_sql_value_converter_to_domain_class_init
 		query = Query.new( XmlSku )
-		xml_sku = @dbb.get_collection_by_query( query ).only
+		xml_sku = @dbb.collection_by_query( query ).only
 		assert_equal( 'foobar', xml_sku.text1 )
 		assert_equal( 'foobar', xml_sku.text1 )
 		assert_nil( xml_sku.date1 )
@@ -316,7 +316,7 @@ class TestDbObjectCommitter < LafcadioTestCase
 	
 	def getFromDbBridge(object_type, pk_id)
 		query = Query.new object_type, pk_id
-		@mockDBBridge.get_collection_by_query(query)[0]
+		@mockDBBridge.collection_by_query(query)[0]
 	end
 
 	def testAssignsPkIdOnNewCommit
@@ -648,13 +648,13 @@ class TestObjectStore < LafcadioTestCase
 
 	def testCaching
 		@testObjectStore.get_all Invoice
-		assert_equal 0, @mockDbBridge.retrievals_by_type[Client]
-		assert_equal 1, @mockDbBridge.retrievals_by_type[Invoice]
+		assert_equal( 0, @mockDbBridge.queries( Client ).size )
+		assert_equal( 1, @mockDbBridge.queries( Invoice ).size )
 		@testObjectStore.get_all Invoice
-		assert_equal 0, @mockDbBridge.retrievals_by_type[Client]
-		assert_equal 1, @mockDbBridge.retrievals_by_type[Invoice]
+		assert_equal( 0, @mockDbBridge.queries( Client ).size )
+		assert_equal( 1, @mockDbBridge.queries( Invoice ).size )
 		@testObjectStore.get_all Client
-		assert_equal 1, @mockDbBridge.retrievals_by_type[Client]
+		assert_equal( 1, @mockDbBridge.queries( Client ).size )
 	end
 	
 	def test_commit_notifies_proxies_to_update_before_triggers
@@ -702,8 +702,8 @@ class TestObjectStore < LafcadioTestCase
 
 	def testDefersLoading
 		@testObjectStore.get_all Invoice
-		assert_equal 0, @mockDbBridge.retrievals_by_type[Client]
-		assert_equal 1, @mockDbBridge.retrievals_by_type[Invoice]
+		assert_equal( 0, @mockDbBridge.queries( Client ).size )
+		assert_equal( 1, @mockDbBridge.queries( Invoice ).size )
 	end
 
 	def testDeleteClearsCachedValue
@@ -811,13 +811,13 @@ class TestObjectStore < LafcadioTestCase
 		client = Client.getTestClient
 		client.commit
 		assert_equal( 1, @testObjectStore.get_all( Client ).size )
-		assert_equal( 1, @mockDbBridge.query_count[ 'select * from clients' ])
+		assert_equal( 1, @mockDbBridge.query_count( 'select * from clients' ) )
 		assert_equal( client, @testObjectStore.get_client( 1 ) )
 		assert_equal(
 			0,
-			@mockDbBridge.query_count[
+			@mockDbBridge.query_count(
 				'select * from clients where clients.pk_id = 1'
-			]
+			)
 		)
 	end
 	
@@ -893,19 +893,22 @@ class TestObjectStore < LafcadioTestCase
 		condition = Query::Equals.new 'name', 'clientName1', Client
 		query = Query.new Client, condition
 		assert_equal @client, @testObjectStore.get_subset(condition)[0]
-		assert_equal( 1, @mockDbBridge.query_count[query.to_sql])
+		assert_equal(
+			1, @mockDbBridge.queries.select { |q| q.to_sql == query.to_sql }.size
+		)
+		assert_equal( 1, @mockDbBridge.query_count( query.to_sql ) )
 		assert_equal @client, @testObjectStore.get_subset(query)[0]
-		assert_equal( 1, @mockDbBridge.query_count[query.to_sql])
+		assert_equal( 1, @mockDbBridge.query_count( query.to_sql ) )
 		query2 = Query.new( Client, Query::Equals.new( 'name', 'foobar', Client ) )
 		assert_equal( 0, @testObjectStore.get_subset( query2 ).size )
-		assert_equal( 1, @mockDbBridge.query_count[query2.to_sql])
+		assert_equal( 1, @mockDbBridge.query_count( query2.to_sql ) )
 		assert_equal( 0, @testObjectStore.get_subset( query2 ).size )
-		assert_equal( 1, @mockDbBridge.query_count[query2.to_sql])
+		assert_equal( 1, @mockDbBridge.query_count( query2.to_sql ) )
 		query2_prime = Query.new(
 			Client, Query::Equals.new( 'name', 'foobar', Client )
 		)
 		assert_equal( 0, @testObjectStore.get_subset( query2_prime ).size )
-		assert_equal( 1, @mockDbBridge.query_count[query2_prime.to_sql])
+		assert_equal( 1, @mockDbBridge.query_count( query2_prime.to_sql ) )
 	end
 
 	def testGetWithaNonLinkingField	
