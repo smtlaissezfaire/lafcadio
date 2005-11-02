@@ -684,7 +684,7 @@ module Lafcadio
 		end
 		
 		def verify
-			if ObjectStore.get_object_store.mock?
+			if ObjectStore.mock?
 				self.class.get_class_fields.each { |field|
 					field.verify( self.send( field.name ), self.pk_id )
 				}
@@ -724,12 +724,9 @@ module Lafcadio
 	# the domain classes that the map object maps between.
 	class MapObject < DomainObject
 		def self.other_mapped_type(firstType) #:nodoc:
-			types = mappedTypes
-			if types.index(firstType) == 0
-				types[1]
-			else
-				types[0]
-			end
+			mt = mappedTypes.clone
+			mt.delete firstType
+			mt.only
 		end
 
 		def self.subsidiary_map #:nodoc:

@@ -429,6 +429,8 @@ module Lafcadio
 	# Since these triggers are executed in Ruby, they're easy to test. See
 	# DomainObject#pre_commit_trigger and DomainObject#post_commit_trigger for more.
 	class ObjectStore < ContextualService::Service
+		def self.mock?; get_object_store.mock?; end
+		
 		def self.set_db_name(dbName) #:nodoc:
 			DbConnection.set_db_name dbName
 		end
