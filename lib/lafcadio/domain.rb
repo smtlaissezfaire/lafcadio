@@ -345,6 +345,10 @@ module Lafcadio
 			dependent_classes
 		end
 		
+		def self.domain_class #:nodoc:
+			self
+		end
+
 		def self.domain_dirs #:nodoc:
 			if ( domainDirStr = LafcadioConfig.new['domainDirs'] )
 				domainDirStr.split(',')
@@ -461,10 +465,6 @@ module Lafcadio
 
 		def self.only; all.only; end
 
-		def self.domain_class #:nodoc:
-			self
-		end
-
 		def self.require_domain_file( typeString )
 			typeString =~ /([^\:]*)$/
 			fileName = $1
@@ -503,10 +503,8 @@ module Lafcadio
 		
 		# Returns the name of the primary key in the database, retrieving it from
 		# the class definition XML if necessary.
-		def self.sql_primary_key_name( set_sql_primary_key_name = nil )
-			if set_sql_primary_key_name
-				field( 'pk_id' ).db_field_name = set_sql_primary_key_name
-			end
+		def self.sql_primary_key_name( set_db_field_name = nil )
+			field( 'pk_id' ).db_field_name = set_db_field_name if set_db_field_name
 			field( 'pk_id' ).db_field_name
 		end
 		
@@ -540,18 +538,17 @@ module Lafcadio
 			dirName = LafcadioConfig.new['classDefinitionDir']
 			xmlFileName = self.basename + '.xml'
 			xmlPath = File.join( dirName, xmlFileName )
-			xml = ''
 			begin
-				File.open( xmlPath ) { |file| xml = file.readlines.join }
+				xml = File.open( xmlPath ) do |f| f.gets( nil ); end
 				ClassDefinitionXmlParser.new( self, xml )
 			rescue Errno::ENOENT
 				# no xml file, so no @xmlParser
 			end
 		end
 		
-		attr_accessor :error_messages, :last_commit, :fields, :fields_set
+		attr_accessor :fields_set, :field_values, :last_commit_type
 		attr_reader :delete
-		protected :fields, :fields_set
+		protected :fields_set, :field_values
 
 		# fieldHash should contain key-value associations for the different
 		# fields of this domain class. For example, instantiating a User class 
@@ -584,8 +581,7 @@ module Lafcadio
 			else
 				@fieldHash = fieldHash
 			end
-			@error_messages = []
-			@fields = {}
+			@field_values = {}
 			@fields_set = []
 			@original_values = OriginalValuesHash.new( @fieldHash )
 			check_fields = LafcadioConfig.new()['checkFields']
@@ -595,7 +591,7 @@ module Lafcadio
 		# Returns a clone, with all of the fields copied.
 		def clone
 			copy = super
-			copy.fields = @fields.clone
+			copy.field_values = @field_values.clone
 			copy.fields_set = @fields_set.clone
 			copy
 		end
@@ -623,7 +619,7 @@ module Lafcadio
 			unless @fields_set.include?( field )
 				set_field( field, @fieldHash[field.name] )
 			end
-			@fields[field.name]
+			@field_values[field.name]
 		end
 		
 		def get_getter_field( methId ) #:nodoc:
@@ -692,7 +688,7 @@ module Lafcadio
 			     !field.instance_of?( PrimaryKeyField ) )
 				field.verify( value, pk_id )
 			end
-			@fields[field.name] = value
+			@field_values[field.name] = value
 			@fields_set << field
 		end
 		

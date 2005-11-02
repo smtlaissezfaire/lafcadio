@@ -23,7 +23,7 @@ module Lafcadio
 		def execute
 			@db_object.verify if LafcadioConfig.new()['checkFields'] == 'onCommit'
 			set_commit_type
-			@db_object.last_commit = get_last_commit
+			@db_object.last_commit_type = get_last_commit
 			@db_object.pre_commit_trigger
 			update_dependent_domain_objects if @db_object.delete
 			@dbBridge.commit @db_object
@@ -331,9 +331,6 @@ module Lafcadio
 
 		def sql_statements
 			statements = []
-			if @obj.error_messages.size > 0
-				raise DomainObjectInitError, @obj.error_messages, caller
-			end
 			@obj.class.self_and_concrete_superclasses.each { |domain_class|
 				statements << statement_bind_value_pair( domain_class )
  			}

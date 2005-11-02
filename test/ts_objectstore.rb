@@ -450,18 +450,6 @@ class TestDomainObjectProxy < LafcadioTestCase
 end
 
 class TestDomainObjectSqlMaker < LafcadioTestCase
-  def testCantCommitInvalidObj
-    client = Client.new( {} )
-    client.error_messages << "Please enter a first name."
-    caught = false
-    begin
-      DomainObjectSqlMaker.new(client).sql_statements[0]
-    rescue DomainObjectInitError
-      caught = true
-    end
-    assert caught
-  end
-
   def testCommitSQLWithApostrophe
     client = Client.new( { "name" => "T'est name" } )
     assert_equal("T'est name", client.name)
