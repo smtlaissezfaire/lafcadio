@@ -260,7 +260,15 @@ module Lafcadio
 				other_cond.is_a?( Condition ) and other_cond.to_sql == to_sql
 			end
 			
-			def get_field; @domain_class.field( @fieldName ); end
+			def get_field
+				f = @domain_class.field( @fieldName )
+				f or raise(
+					MissingError,
+					"Couldn't find field \"#{ @fieldName }\" in " + @domain_class.name +
+							" domain class",
+					caller
+				)
+			end
 			
 			def query; Query.new( @domain_class, self ); end
 			

@@ -371,13 +371,7 @@ module Lafcadio
 				field = aDomainClass.class_field( fieldName )
 				aDomainClass = aDomainClass.superclass
 			end
-			if field
-				field
-			else
-				errStr = "Couldn't find field \"#{ fieldName }\" in " +
-								 "#{ self } domain class"
-				raise( MissingError, errStr, caller )
-			end
+			field
 		end
 
 		def self.first; all.first; end
@@ -600,24 +594,27 @@ module Lafcadio
 			commit
 		end
 
+		# Returns the subclass of DomainObject that this instance represents.
+		# Because of the way that proxying works, clients should call this method
+		# instead of Object.class.
+		def domain_class
+			self.class.domain_class
+		end
+
 		def field_value( field ) #:nodoc:
 			unless @fields_set.include?( field )
-				set_field( field, @fieldHash[field.name] )
+				set_field_value( field, @fieldHash[field.name] )
 			end
 			@field_values[field.name]
 		end
 		
 		def getter_field( methId ) #:nodoc:
-			begin
-				self.class.field methId.id2name
-			rescue MissingError
-				nil
-			end
+			self.class.field methId.id2name
 		end
 
 		def method_missing( methId, *args ) #:nodoc:
 			if ( field = setter_field( methId ) )
-				set_field( field, args.first )
+				set_field_value( field, args.first )
 			elsif ( field = getter_field( methId ) )
 				field_value( field )
 			else
@@ -632,37 +629,19 @@ module Lafcadio
 			end
 		end
 
-		# Returns the subclass of DomainObject that this instance represents.
-		# Because of the way that proxying works, clients should call this method
-		# instead of Object.class.
-		def domain_class
-			self.class.domain_class
-		end
-
 		# This template method is called before every commit. Subclasses can 
 		# override it to ensure code is executed before a commit.
 		def pre_commit_trigger
 			nil
 		end
 
-		# This template method is called after every commit. Subclasses can 
-		# override it to ensure code is executed after a commit.
-		def post_commit_trigger
-			nil
-		end
-
 		def preprocess_field_hash( fieldHash )
-			if fieldHash.respond_to? :keys
+			if fieldHash.is_a? Hash
 				fieldHash.keys.each { |key|
-					key = key.to_s
-					begin
-						self.class.field key
-					rescue MissingError
-						raise ArgumentError, "Invalid field name #{ key }"
+					if self.class.field( key.to_s ).nil?
+						raise ArgumentError, "Invalid field name #{ key.to_s }"
 					end
 				}
-			end
-			if fieldHash.is_a? Hash
 				@fieldHash = {}
 				fieldHash.each do |k, v| @fieldHash[k.to_s] = v; end
 			else
@@ -670,11 +649,18 @@ module Lafcadio
 			end
 		end
 		
-		def set_field( field, value ) #:nodoc:
-			if field.class <= DomainObjectField
-				if value.class != DomainObjectProxy && value
-					value = DomainObjectProxy.new(value)
-				end
+		# This template method is called after every commit. Subclasses can 
+		# override it to ensure code is executed after a commit.
+		def post_commit_trigger
+			nil
+		end
+
+		def set_field_value( field, value ) #:nodoc:
+			if (
+				field.is_a?( DomainObjectField ) and
+				!value.is_a?( DomainObjectProxy ) and value
+			)
+				value = DomainObjectProxy.new(value)
 			end
 			if ( LafcadioConfig.new()['checkFields'] == 'onAllStates' &&
 			     !field.instance_of?( PrimaryKeyField ) )
@@ -686,11 +672,7 @@ module Lafcadio
 		
 		def setter_field( methId ) #:nodoc:
 			if methId.id2name =~ /(.*)=$/
-				begin
-					self.class.field $1
-				rescue MissingError
-					nil
-				end
+				self.class.field $1
 			else
 				nil
 			end

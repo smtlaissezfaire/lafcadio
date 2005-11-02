@@ -389,13 +389,7 @@ class TestDomainObject < LafcadioTestCase
 		assert_not_nil name
 		assert_equal( 'name', InternalClient.field( 'name' ).name )
 		assert_equal( 'billingType', InternalClient.field( 'billingType' ).name )
-		begin
-			InternalClient.field( 'something' )
-			fail "DomainObject.field needs to raise an error if it can't find " +
-           "anything"
-    rescue MissingError
-    	# ok
-    end
+		assert_nil InternalClient.field( 'something' )
 	end
 	
 	def test_global_methods_dont_interfere_with_method_missing
