@@ -565,25 +565,10 @@ module Lafcadio
 		# If you're creating mock objects for unit tests, you can explicitly set 
 		# the +pk_id+ to represent objects that already exist in the database.
 		def initialize(fieldHash)
-			if fieldHash.respond_to? :keys
-				fieldHash.keys.each { |key|
-					key = key.to_s
-					begin
-						self.class.field key
-					rescue MissingError
-						raise ArgumentError, "Invalid field name #{ key }"
-					end
-				}
-			end
-			if fieldHash.is_a? Hash
-				@fieldHash = {}
-				fieldHash.each do |k, v| @fieldHash[k.to_s] = v; end
-			else
-				@fieldHash = fieldHash
-			end
+			fieldHash = preprocess_field_hash fieldHash
 			@field_values = {}
 			@fields_set = []
-			@original_values = OriginalValuesHash.new( @fieldHash )
+			@original_values = ReadOnlyHash.new @fieldHash
 			check_fields = LafcadioConfig.new()['checkFields']
 			verify if %w( onInstantiate onAllStates ).include?( check_fields )
 		end
@@ -615,14 +600,14 @@ module Lafcadio
 			commit
 		end
 
-		def get_field( field ) #:nodoc:
+		def field_value( field ) #:nodoc:
 			unless @fields_set.include?( field )
 				set_field( field, @fieldHash[field.name] )
 			end
 			@field_values[field.name]
 		end
 		
-		def get_getter_field( methId ) #:nodoc:
+		def getter_field( methId ) #:nodoc:
 			begin
 				self.class.field methId.id2name
 			rescue MissingError
@@ -630,23 +615,11 @@ module Lafcadio
 			end
 		end
 
-		def get_setter_field( methId ) #:nodoc:
-			if methId.id2name =~ /(.*)=$/
-				begin
-					self.class.field $1
-				rescue MissingError
-					nil
-				end
-			else
-				nil
-			end
-		end
-		
 		def method_missing( methId, *args ) #:nodoc:
-			if ( field = get_setter_field( methId ) )
+			if ( field = setter_field( methId ) )
 				set_field( field, args.first )
-			elsif ( field = get_getter_field( methId ) )
-				get_field( field )
+			elsif ( field = getter_field( methId ) )
+				field_value( field )
 			else
 				new_symbol = ( 'get_' + methId.id2name ).to_sym
 				object_store = ObjectStore.get_object_store
@@ -678,6 +651,25 @@ module Lafcadio
 			nil
 		end
 
+		def preprocess_field_hash( fieldHash )
+			if fieldHash.respond_to? :keys
+				fieldHash.keys.each { |key|
+					key = key.to_s
+					begin
+						self.class.field key
+					rescue MissingError
+						raise ArgumentError, "Invalid field name #{ key }"
+					end
+				}
+			end
+			if fieldHash.is_a? Hash
+				@fieldHash = {}
+				fieldHash.each do |k, v| @fieldHash[k.to_s] = v; end
+			else
+				@fieldHash = fieldHash
+			end
+		end
+		
 		def set_field( field, value ) #:nodoc:
 			if field.class <= DomainObjectField
 				if value.class != DomainObjectProxy && value
@@ -690,6 +682,18 @@ module Lafcadio
 			end
 			@field_values[field.name] = value
 			@fields_set << field
+		end
+		
+		def setter_field( methId ) #:nodoc:
+			if methId.id2name =~ /(.*)=$/
+				begin
+					self.class.field $1
+				rescue MissingError
+					nil
+				end
+			else
+				nil
+			end
 		end
 		
 		def update!( changes )
@@ -705,7 +709,7 @@ module Lafcadio
 			end
 		end
 		
-		class OriginalValuesHash < DelegateClass( Hash )
+		class ReadOnlyHash < DelegateClass( Hash )
 			def []=( key, val ); raise NoMethodError; end
 		end
 		
