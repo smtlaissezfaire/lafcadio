@@ -219,7 +219,7 @@ module Lafcadio
 		end
 		
 		def next_pk_id( domain_class )
-			dobjs = get_objects_by_domain_class( domain_class ).values
+			dobjs = objects_by_domain_class( domain_class ).values
 			dobjs.inject( 0 ) { |memo, obj| memo > obj.pk_id ? memo : obj.pk_id } + 1
 		end
 

@@ -31,9 +31,7 @@ module Lafcadio
 			if db_object.pk_id and !db_object.pk_id.is_a?( Integer )
 				raise ArgumentError
 			end
-			objects_by_domain_class = get_objects_by_domain_class(
-				db_object.domain_class
-			)
+			objects_by_domain_class = objects_by_domain_class db_object.domain_class
 			if db_object.delete
 				objects_by_domain_class.delete( db_object.pk_id )
 			else
@@ -42,33 +40,27 @@ module Lafcadio
 			end
 		end
 				
-		def get_objects_by_domain_class( domain_class )
-			objects_by_domain_class = @objects[domain_class]
-			unless objects_by_domain_class
-				objects_by_domain_class = {}
-				@objects[domain_class] = objects_by_domain_class
-			end
-			objects_by_domain_class
-		end
-
 		def group_query( query )
-			query.collect( get_objects_by_domain_class( query.domain_class ).values )
+			query.collect objects_by_domain_class( query.domain_class ).values
 		end
 		
+		def objects_by_domain_class( domain_class )
+			@objects[domain_class] = {} unless @objects[domain_class]
+			@objects[domain_class]
+		end
+
 		def order_collection( objects, query )
-			if ( order_by = query.order_by )
-				objects = objects.sort_by { |dobj|
-					if order_by.is_a?( Array )
-						order_by.map { |field_name| dobj.send( field_name ) }
-					else
-						dobj.send( order_by )
-					end
-				}
-				objects.reverse! if query.order_by_order == Query::DESC
-				objects
-			else
-				objects.sort_by { |dobj| dobj.pk_id }
-			end
+			objects = objects.sort_by { |dobj|
+				if ( order_by = query.order_by ).nil?
+					dobj.pk_id
+				elsif order_by.is_a?( Array )
+					order_by.map { |field_name| dobj.send( field_name ) }
+				else
+					dobj.send order_by
+				end
+			}
+			objects.reverse! if query.order_by_order == Query::DESC
+			objects
 		end
 		
 		def pre_commit_pk_id( db_object )
@@ -80,18 +72,16 @@ module Lafcadio
 					@next_pk_ids[db_object.domain_class] = nil
 					next_pk_id
 				else
-					pk_ids = get_objects_by_domain_class( db_object.domain_class ).keys
+					pk_ids = objects_by_domain_class( db_object.domain_class ).keys
 					@last_pk_id_inserted = pk_ids.max ? pk_ids.max + 1 : 1
 				end
 			end
 		end
 		
 		def queries( domain_class = nil )
-			if domain_class
-				@queries.select { |qry| qry.domain_class == domain_class }
-			else
-				@queries
-			end
+			@queries.select { |qry|
+				domain_class ? qry.domain_class == domain_class : true
+			}
 		end
 		
 		def query_count( sql )
