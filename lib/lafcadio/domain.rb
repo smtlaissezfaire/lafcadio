@@ -17,7 +17,7 @@ module Lafcadio
 			if className != ''
 				fieldClass = Class.by_name( 'Lafcadio::' + className )
 				register_name( name )
-				field = fieldClass.instantiate_from_xml( @domain_class, fieldElt )
+				field = fieldClass.create_from_xml( @domain_class, fieldElt )
 				set_field_attributes( field, fieldElt )
 			else
 				msg = "Couldn't find field class '#{ className }' for field " +

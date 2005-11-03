@@ -256,7 +256,7 @@ module Lafcadio
 				)
 			end
 			
-			def db_field_name; get_field.db_table_and_field_name; end
+			def db_field_name; get_field.db_column; end
 			
 			def eql?( other_cond )
 				other_cond.is_a?( Condition ) and other_cond.to_sql == to_sql
@@ -423,7 +423,7 @@ module Lafcadio
 			def r_val_string
 				field = get_field
 				if @searchTerm.class <= ObjectField
-					@searchTerm.db_table_and_field_name
+					@searchTerm.db_column
 				else
 					begin
 						field.value_for_sql( @searchTerm ).to_s

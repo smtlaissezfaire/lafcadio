@@ -5,13 +5,8 @@ require 'lafcadio/util'
 module Lafcadio
 	# ObjectField is the abstract base class of any field for domain objects.
 	class ObjectField
-		include Comparable
-
-		attr_reader :name, :domain_class
-		attr_accessor :not_null, :db_field_name
-
-		def self.instantiate_from_xml( domain_class, fieldElt ) #:nodoc:
-			parameters = instantiation_parameters( fieldElt )
+		def self.create_from_xml( domain_class, fieldElt ) #:nodoc:
+			parameters = creation_parameters( fieldElt )
 			create_with_args( domain_class, parameters )
 		end
 
@@ -23,7 +18,7 @@ module Lafcadio
 			instance
 		end
 
-		def self.instantiation_parameters( fieldElt ) #:nodoc:
+		def self.creation_parameters( fieldElt ) #:nodoc:
 			parameters = {}
 			parameters['name'] = fieldElt.attributes['name']
 			parameters['db_field_name'] = fieldElt.attributes['db_field_name']
@@ -33,6 +28,11 @@ module Lafcadio
 		def self.value_type #:nodoc:
 			Object
 		end
+
+		include Comparable
+
+		attr_reader :domain_class, :name
+		attr_accessor :db_field_name, :not_null
 
 		# [domain_class]  The domain class that this object field belongs to.
 		# [name]          The name of this field.
@@ -53,19 +53,12 @@ module Lafcadio
 
 		def bind_write?; false; end #:nodoc:
 		
-		def db_table_and_field_name
+		def db_column
 			"#{ domain_class.table_name }.#{ db_field_name }"
 		end
 
-		def db_will_automatically_write #:nodoc:
+		def db_will_automatically_write? #:nodoc:
 			false
-		end
-
-		# Returns the name that this field is referenced by in the MySQL table. By 
-		# default this is the same as the name; to override it, set 
-		# ObjectField#db_field_name.
-		def name_for_sql
-			db_field_name
 		end
 
 		def prev_value(pk_id) #:nodoc:
@@ -290,7 +283,7 @@ module Lafcadio
 			instance
 		end
 
-		def self.instantiation_parameters( fieldElt ) #:nodoc:
+		def self.creation_parameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			linked_typeStr = fieldElt.attributes['linked_type']
 			linked_type = Class.by_name linked_typeStr
@@ -408,7 +401,7 @@ module Lafcadio
 			QueueHash.new( *enumValues )
 		end
 
-		def self.instantiation_parameters( fieldElt ) #:nodoc:
+		def self.creation_parameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			if fieldElt.elements['enums'][1].attributes['key']
 				parameters['enums'] = enum_queue_hash( fieldElt )
@@ -509,7 +502,7 @@ module Lafcadio
 			          parameters['subset_field'], parameters['name'] )
 		end
 
-		def self.instantiation_parameters( fieldElt )
+		def self.creation_parameters( fieldElt )
 			parameters = super( fieldElt )
 			parameters['subset_field'] = fieldElt.attributes['subset_field']
 			parameters
@@ -557,7 +550,7 @@ module Lafcadio
 			@not_null = false
 		end
 
-		def db_will_automatically_write
+		def db_will_automatically_write?
 			true
 		end
 	end

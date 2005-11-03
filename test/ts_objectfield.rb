@@ -214,10 +214,6 @@ class TestDomainObjectField < LafcadioTestCase
     @fieldWithListener = DomainObjectField.new(nil, Client, "client", "Client")
   end
 
-  def testNameForSQL
-    assert_equal("client", @olf.name_for_sql)
-  end
-
   def testNames
     assert_equal("client", @olf.name)
 		caDomainObjectField = DomainObjectField.new nil, InternalClient
@@ -310,12 +306,6 @@ class TestObjectField < LafcadioTestCase
 		assert_equal field1, field2
 		field3 = ObjectField.new User, "lastName"
 		assert field1 != field3
-	end
-
-	def testNameForSQL
-		field = ObjectField.new User, "id"
-		field.db_field_name = "pk_id"
-		assert_equal "pk_id", field.name_for_sql
 	end
 
 	def testValueForSQL

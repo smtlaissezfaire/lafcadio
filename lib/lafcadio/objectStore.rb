@@ -305,8 +305,8 @@ module Lafcadio
 			domain_class.class_fields.each { |field|
 				unless field.instance_of?( PrimaryKeyField )
 					value = @obj.send(field.name)
-					unless field.db_will_automatically_write
-						nameValues << field.name_for_sql
+					unless field.db_will_automatically_write?
+						nameValues << field.db_field_name
 						nameValues <<(field.value_for_sql(value))
 					end
 					if field.bind_write?
