@@ -20,27 +20,10 @@ module Lafcadio
 			domain_class = query.domain_class
 			objects = []
 			all( domain_class ).each { |dbObj|
-				if query.condition
-					objects << dbObj if query.condition.object_meets(dbObj)
-				else
-					objects << dbObj
-				end
+				objects << dbObj if query.object_meets( dbObj )
 			}
-			if ( order_by = query.order_by )
-				objects = objects.sort_by { |dobj|
-					if order_by.is_a?( Array )
-						order_by.map { |field_name| dobj.send( field_name ) }
-					else
-						dobj.send( order_by )
-					end
-				}
-				objects.reverse! if query.order_by_order == Query::DESC
-			else
-				objects = objects.sort_by { |dobj| dobj.pk_id }
-			end
-			if (range = query.limit)
-				objects = objects[range]
-			end
+			objects = order_collection( objects, query )
+			if (range = query.limit); objects = objects[range]; end
 			objects
 		end
 
@@ -54,31 +37,11 @@ module Lafcadio
 			if db_object.delete
 				objects_by_domain_class.delete( db_object.pk_id )
 			else
-				object_pk_id = get_pk_id_before_committing( db_object )
+				object_pk_id = pre_commit_pk_id( db_object )
 				objects_by_domain_class[object_pk_id] = db_object
 			end
 		end
 				
-		def get_pk_id_before_committing( db_object )
-			if db_object.pk_id
-				db_object.pk_id
-			else
-				if ( next_pk_id = @next_pk_ids[db_object.domain_class] )
-					@last_pk_id_inserted = next_pk_id
-					@next_pk_ids[db_object.domain_class] = nil
-					next_pk_id
-				else
-					maxpk_id = 0
-					pk_ids = get_objects_by_domain_class( db_object.domain_class ).keys
-					pk_ids.each { |pk_id|
-						maxpk_id = pk_id if pk_id > maxpk_id
-					}
-					@last_pk_id_inserted = maxpk_id + 1
-					@last_pk_id_inserted
-				end
-			end
-		end
-		
 		def get_objects_by_domain_class( domain_class )
 			objects_by_domain_class = @objects[domain_class]
 			unless objects_by_domain_class
@@ -90,6 +53,37 @@ module Lafcadio
 
 		def group_query( query )
 			query.collect( get_objects_by_domain_class( query.domain_class ).values )
+		end
+		
+		def order_collection( objects, query )
+			if ( order_by = query.order_by )
+				objects = objects.sort_by { |dobj|
+					if order_by.is_a?( Array )
+						order_by.map { |field_name| dobj.send( field_name ) }
+					else
+						dobj.send( order_by )
+					end
+				}
+				objects.reverse! if query.order_by_order == Query::DESC
+				objects
+			else
+				objects.sort_by { |dobj| dobj.pk_id }
+			end
+		end
+		
+		def pre_commit_pk_id( db_object )
+			if db_object.pk_id
+				db_object.pk_id
+			else
+				if ( next_pk_id = @next_pk_ids[db_object.domain_class] )
+					@last_pk_id_inserted = next_pk_id
+					@next_pk_ids[db_object.domain_class] = nil
+					next_pk_id
+				else
+					pk_ids = get_objects_by_domain_class( db_object.domain_class ).keys
+					@last_pk_id_inserted = pk_ids.max ? pk_ids.max + 1 : 1
+				end
+			end
 		end
 		
 		def queries( domain_class = nil )

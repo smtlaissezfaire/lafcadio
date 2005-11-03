@@ -161,18 +161,18 @@ class TestMockDBBridge < LafcadioTestCase
 	def test_set_next_pk_id
 		client = Client.new( 'name' => 'client 1' )
 		2.times do
-			assert_equal( 1, @mockDbBridge.get_pk_id_before_committing( client ) )
+			assert_equal( 1, @mockDbBridge.pre_commit_pk_id( client ) )
 		end
 		@mockDbBridge.commit client
 		client.pk_id = 1
 		client3 = Client.new( 'name' => 'client 3' )
 		@mockDbBridge.set_next_pk_id( Client, 3 )
-		assert_equal( 3, @mockDbBridge.get_pk_id_before_committing( client3 ) )
+		assert_equal( 3, @mockDbBridge.pre_commit_pk_id( client3 ) )
 		@mockDbBridge.set_next_pk_id( Client, 3 )
 		@mockDbBridge.commit client3
 		client3.pk_id = 3
 		client4 = Client.new( 'name' => 'client 4' )
-		assert_equal( 4, @mockDbBridge.get_pk_id_before_committing( client4 ) )
+		assert_equal( 4, @mockDbBridge.pre_commit_pk_id( client4 ) )
 	end
 	
 	def testUpdate

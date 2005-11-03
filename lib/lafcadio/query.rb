@@ -148,7 +148,9 @@ module Lafcadio
 			"limit #{ @limit.begin }, #{ @limit.end - @limit.begin + 1 }" if @limit
 		end
 		
-		def object_meets( dobj ); @condition.object_meets( dobj ); end
+		def object_meets( dobj )
+			@condition.nil? or @condition.object_meets( dobj )
+		end
 
 		def or( &action ); compound( CompoundCondition::OR, action ); end
 		

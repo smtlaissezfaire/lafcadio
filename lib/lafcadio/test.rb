@@ -200,14 +200,14 @@ module Lafcadio
 	def IntegerField.mock_value; 1; end
 
 	class MockDbBridge
-		unless instance_methods.include?( 'orig_get_pk_id_before_committing' )
+		unless instance_methods.include?( 'orig_pre_commit_pk_id' )
 			alias_method(
-				:orig_get_pk_id_before_committing, :get_pk_id_before_committing
+				:orig_pre_commit_pk_id, :pre_commit_pk_id
 			)
 			
-			def get_pk_id_before_committing( domain_object )
+			def pre_commit_pk_id( domain_object )
 				@next_pk_ids = {} unless @next_pk_ids
-				orig_pk_id = orig_get_pk_id_before_committing domain_object
+				orig_pk_id = orig_pre_commit_pk_id domain_object
 				if (next_pk_id = @next_pk_ids[domain_object.domain_class])
 					@last_pk_id_inserted = next_pk_id
 					@next_pk_ids[domain_object.domain_class] = nil
