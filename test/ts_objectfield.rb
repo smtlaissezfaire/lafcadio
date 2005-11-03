@@ -14,7 +14,7 @@ class TestBooleanField < LafcadioTestCase
 	def test_raise_error_if_no_enums_available
 		@bf.enum_type = 999
 		begin
-			@bf.get_enums
+			@bf.enums
 			fail "should raise MissingError"
 		rescue MissingError
 			# ok
@@ -103,7 +103,7 @@ class TestDateTimeField < LafcadioTestCase
 
 	def testValueFromSQL
 		ts1 = DBI::Timestamp.new( 2002, 8, 24, 13, 8, 22 )
-		value = @dateTimeField.value_from_sql ts1, false
+		value = @dateTimeField.value_from_sql ts1
 		assert_equal Time, value.class
 		assert_equal @aug24, value
 		assert_nil(@dateTimeField.value_from_sql(nil))

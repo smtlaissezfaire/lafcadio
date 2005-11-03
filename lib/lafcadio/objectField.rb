@@ -85,10 +85,10 @@ module Lafcadio
 					caller
 				)
 			end
-			verify_non_nil( value, pk_id ) if value
+			verify_non_nil_value( value, pk_id ) if value
 		end
 
-		def verify_non_nil( value, pk_id )
+		def verify_non_nil_value( value, pk_id )
 			value_type = self.class.value_type
 			unless value.class <= value_type
 				raise(
@@ -130,8 +130,6 @@ module Lafcadio
 	# BlobField stores a string value and expects to store its value in a BLOB
 	# field in the database.
 	class BlobField < ObjectField
-		attr_accessor :size
-		
 		def self.value_type; String; end
 
 		def bind_write?; true; end #:nodoc:
@@ -169,7 +167,8 @@ module Lafcadio
 		ENUMS_ONE_ZERO = 0
 		ENUMS_CAPITAL_YES_NO = 1
 
-		attr_accessor :enum_type, :enums
+		attr_accessor :enum_type
+		attr_writer   :enums
 
 		def initialize( domain_class, name )
 			super( domain_class, name )
@@ -177,15 +176,11 @@ module Lafcadio
 			@enums = nil
 		end
 
-		def false_enum # :nodoc:
-			get_enums[false]
-		end
-
-		def get_enums( value = nil ) # :nodoc:
+		def enums( value = nil ) # :nodoc:
 			if @enums
 				@enums
 			elsif @enum_type == ENUMS_ONE_ZERO
-				if value.class == String
+				if value.is_a?( String )
 					{ true => '1', false => '0' }
 				else
 					{ true => 1, false => 0 }
@@ -197,24 +192,24 @@ module Lafcadio
 			end
 		end
 
-		def text_enum_type # :nodoc:
+		def false_enum # :nodoc:
+			enums[false]
+		end
+
+		def text_enum_type? # :nodoc:
 			@enums ? @enums[true].class == String : @enum_type == ENUMS_CAPITAL_YES_NO
 		end
 
 		def true_enum( value = nil ) # :nodoc:
-			get_enums( value )[true]
+			enums( value )[true]
 		end
 
 		def value_for_sql(value) # :nodoc:
-			if value
-				vfs = true_enum
-			else
-				vfs = false_enum
-			end
-			text_enum_type ? "'#{vfs}'" : vfs
+			vfs = value ? true_enum : false_enum
+			text_enum_type? ? "'#{ vfs }'" : vfs
 		end
 
-		def value_from_sql(value, lookupLink = true) # :nodoc:
+		def value_from_sql( value ) # :nodoc:
 			value == true_enum( value )
 		end
 	end
@@ -233,7 +228,7 @@ module Lafcadio
 			value ? "'#{value.to_s}'" : 'null'
 		end
 
-		def value_from_sql(dbiDate, lookupLink = true) # :nodoc:
+		def value_from_sql( dbiDate ) # :nodoc:
 			begin
 				dbiDate ? dbiDate.to_date : nil
 			rescue ArgumentError
@@ -258,7 +253,7 @@ module Lafcadio
 			end
 		end
 
-		def value_from_sql(dbi_value, lookupLink = true) # :nodoc:
+		def value_from_sql( dbi_value ) # :nodoc:
 			dbi_value ? dbi_value.to_time : nil
 		end
 	end
@@ -323,7 +318,7 @@ module Lafcadio
 			end
 		end
 
-		def verify_non_nil(value, pk_id) #:nodoc:
+		def verify_non_nil_value(value, pk_id) #:nodoc:
 			super
 			if @linked_type != @domain_class && pk_id
 				subsetDomainObjectField = @linked_type.class_fields.find { |field|
@@ -362,7 +357,7 @@ module Lafcadio
 			super( domain_class, name )
 		end
 
-		def verify_non_nil(value, pk_id) #:nodoc:
+		def verify_non_nil_value(value, pk_id) #:nodoc:
 			super(value, pk_id)
 			if !EmailField.valid_address(value)
 				raise(
@@ -433,7 +428,7 @@ module Lafcadio
 			value != '' ?(super(value)) : 'null'
 		end
 		
-		def verify_non_nil( value, pk_id ) #:nodoc:
+		def verify_non_nil_value( value, pk_id ) #:nodoc:
 			super
 			if @enums[value].nil?
 				key_str = '[ ' +
