@@ -261,8 +261,7 @@ module Lafcadio
 	# A DomainObjectField is used to link from one domain class to another.
 	class DomainObjectField < ObjectField
 		def self.auto_name( linked_type )
-			linked_type.name =~ /::/
-			( $' || linked_type.name ).camel_case_to_underscore
+			linked_type.basename.camel_case_to_underscore
 		end
 
 		def self.create_with_args( domain_class, parameters ) #:nodoc:
@@ -281,9 +280,9 @@ module Lafcadio
 		def self.creation_parameters( fieldElt ) #:nodoc:
 			parameters = super( fieldElt )
 			linked_typeStr = fieldElt.attributes['linked_type']
-			linked_type = Class.by_name linked_typeStr
-			parameters['linked_type'] = linked_type
-			parameters['delete_cascade'] = fieldElt.attributes['delete_cascade'] == 'y'
+			parameters['linked_type'] = Class.by_name linked_typeStr
+			parameters['delete_cascade'] = 
+					( fieldElt.attributes['delete_cascade'] == 'y' )
 			parameters
 		end
 
@@ -303,26 +302,27 @@ module Lafcadio
 			( @linked_type, @delete_cascade ) = linked_type, delete_cascade
 		end
 
-		def value_from_sql(string) #:nodoc:
-			string != nil ? DomainObjectProxy.new(@linked_type, string.to_i) : nil
-		end
-
 		def value_for_sql(value) #:nodoc:
-			if !value
+			if value.nil?
 				"null"
 			elsif value.pk_id
 				value.pk_id
 			else
-				raise( DomainObjectInitError, "Can't commit #{name} without pk_id", 
-				       caller )
+				raise(
+					DomainObjectInitError, "Can't commit #{name} without pk_id", caller
+				)
 			end
+		end
+
+		def value_from_sql(string) #:nodoc:
+			string ? DomainObjectProxy.new(@linked_type, string.to_i) : nil
 		end
 
 		def verify_non_nil_value(value, pk_id) #:nodoc:
 			super
 			if @linked_type != @domain_class && pk_id
 				subsetDomainObjectField = @linked_type.class_fields.find { |field|
-					field.class == SubsetDomainObjectField && field.subset_field == @name
+					field.is_a?( SubsetDomainObjectField ) && field.subset_field == @name
 				}
 				if subsetDomainObjectField
 					verify_subset_link_field( subsetDomainObjectField, pk_id )
@@ -332,9 +332,8 @@ module Lafcadio
 
 		def verify_subset_link_field( subsetDomainObjectField, pk_id )
 			begin
-				prevObj = ObjectStore.get_object_store.get( domain_class, pk_id )
-				prevObjLinkedTo = prevObj.send(name)
-				possiblyMyObj = prevObjLinkedTo.send(subsetDomainObjectField.name)
+				prevObjLinkedTo = domain_class[pk_id].send(name)
+				possiblyMyObj = prevObjLinkedTo.send subsetDomainObjectField.name
 				if possiblyMyObj && possiblyMyObj.pk_id == pk_id
 					cantChangeMsg = "You can't change that."
 					raise FieldValueError, cantChangeMsg, caller
@@ -425,7 +424,7 @@ module Lafcadio
 		end
 		
 		def value_for_sql(value) #:nodoc:
-			value != '' ?(super(value)) : 'null'
+			value != '' ? (super(value)) : 'null'
 		end
 		
 		def verify_non_nil_value( value, pk_id ) #:nodoc:
@@ -445,10 +444,6 @@ module Lafcadio
 
 	# FloatField represents a decimal value.
 	class FloatField < ObjectField
-		def self.create_with_args( domain_class, parameters ) #:nodoc:
-			self.new( domain_class, parameters['name'] )
-		end
-
 		def self.value_type #:nodoc:
 			Numeric
 		end
