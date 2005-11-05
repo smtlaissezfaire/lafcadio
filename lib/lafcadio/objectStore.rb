@@ -25,7 +25,6 @@ module Lafcadio
 			set_commit_type
 			@db_object.last_commit_type = get_last_commit
 			@db_object.pre_commit_trigger
-			update_dependent_domain_objects if @db_object.delete
 		end
 
 		def get_last_commit
@@ -46,23 +45,6 @@ module Lafcadio
 			else
 				@commit_type = INSERT
 			end
-		end
-
-		def update_dependent_domain_objects
-			dependent_classes = @db_object.domain_class.dependent_classes
-			dependent_classes.keys.each { |aClass|
-				field = dependent_classes[aClass]
-				collection = @objectStore.get_filtered( aClass.name, @db_object,
-																							 field.name )
-				collection.each { |dependentObject|
-					if field.delete_cascade
-						dependentObject.delete = true
-					else
-						dependentObject.send( field.name + '=', nil )
-					end
-					@objectStore.commit(dependentObject)
-				}
-			}
 		end
 	end
 
@@ -570,6 +552,7 @@ module Lafcadio
 			def commit( db_object )
 				committer = Committer.new db_object, @dbBridge, self
 				committer.execute
+				update_dependent_domain_objects( db_object ) if db_object.delete
 				@dbBridge.commit db_object
 				db_object.pk_id = @dbBridge.last_pk_id_inserted unless db_object.pk_id
 				update_after_commit committer
@@ -670,6 +653,25 @@ module Lafcadio
 					flush( committer.db_object )
 				end
 				set_commit_time( committer.db_object )
+			end
+
+			def update_dependent_domain_objects( db_object )
+				dependent_classes = db_object.domain_class.dependent_classes
+				object_store = ObjectStore.get_object_store
+				dependent_classes.keys.each { |aClass|
+					field = dependent_classes[aClass]
+					collection = object_store.get_filtered(
+						aClass.name, db_object, field.name
+					)
+					collection.each { |dependentObject|
+						if field.delete_cascade
+							dependentObject.delete = true
+						else
+							dependentObject.send( field.name + '=', nil )
+						end
+						object_store.commit dependentObject
+					}
+				}
 			end
 		end
 

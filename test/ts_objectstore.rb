@@ -34,6 +34,17 @@ class TestObjectStoreCache < LafcadioTestCase
 		}
 	end
 	
+	def test_delete_cascade
+		user = User.new( {} )
+		user.commit
+		assert( XmlSku.field( 'link1' ).delete_cascade )
+		xml_sku = XmlSku.new( 'link1' => user )
+		xml_sku.commit
+		user.delete = true
+		@cache.commit user
+		assert_equal( 0, @mockObjectStore.get_xml_skus.size )
+	end
+
   def testDeleteSetsDomainObjectFieldsToNil
 		client = Client.new( 'pk_id' => 1, 'name' => 'client name' )
 		invoice = Invoice.new(
@@ -364,20 +375,6 @@ class TestDbObjectCommitter < LafcadioTestCase
 		)
 		committer3.execute
 		assert_equal Committer::DELETE, committer3.commit_type
-	end
-	
-	def test_delete_cascade
-		user = User.new( {} )
-		user.commit
-		assert( XmlSku.field( 'link1' ).delete_cascade )
-		xml_sku = XmlSku.new( 'link1' => user )
-		xml_sku.commit
-		user.delete = true
-		committer = Committer.new(
-			user, @mockDBBridge, ObjectStore::Cache.new( @mockDBBridge )
-		)
-		committer.execute
-		assert_equal( 0, @testObjectStore.get_xml_skus.size )
 	end
 end
 
