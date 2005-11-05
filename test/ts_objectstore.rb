@@ -188,7 +188,7 @@ class TestDBBridge < Test::Unit::TestCase
 		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
     @mockDbh = MockDbh.new
 		DbConnection.set_dbh( @mockDbh )
-		@dbb = DbBridge.new
+		@dbb = ObjectStore::DbBridge.new
     @client = Client.new( {"pk_id" => 1, "name" => "clientName1"} )
   end
 
@@ -245,7 +245,7 @@ class TestDBBridge < Test::Unit::TestCase
     assert_equal 12, @dbb.last_pk_id_inserted
     DbConnection.flush
     DbConnection.set_dbh( @mockDbh )
-		dbb2 = DbBridge.new
+		dbb2 = ObjectStore::DbBridge.new
     assert_equal 12, dbb2.last_pk_id_inserted
   end
 	
@@ -369,7 +369,7 @@ class TestDbConnection < Test::Unit::TestCase
   	DbConnection.flush
 		MockDbi.flushInstanceCount
 		ObjectStore.set_db_name 'some_other_db'
-		db = DbBridge.new
+		db = ObjectStore::DbBridge.new
 		assert_equal 'some_other_db', MockDbi.dbName
     DbConnection.set_connection_class( DBI )
 	end

@@ -5,80 +5,6 @@ require 'lafcadio/query'
 require 'lafcadio/util'
 
 module Lafcadio
-	class CommitSqlStatementsAndBinds < Array #:nodoc:
-		attr_reader :bind_values
-
-		def initialize( obj )
-			@obj = obj
-			reversed = []
-			@obj.class.self_and_concrete_superclasses.each { |domain_class|
-				reversed << statement_bind_value_pair( domain_class )
- 			}
-			reversed.reverse.each do |statement, binds|
-				self << [ statement, binds ]
-			end
-		end
-
-		def delete_sql( domain_class )
-			"delete from #{ domain_class.table_name} " +
-					"where #{ domain_class.sql_primary_key_name }=#{ @obj.pk_id }"
-		end
-
-		def get_name_value_pairs( domain_class )
-			nameValues = []
-			domain_class.class_fields.each { |field|
-				unless field.instance_of?( PrimaryKeyField )
-					value = @obj.send(field.name)
-					unless field.db_will_automatically_write?
-						nameValues << field.db_field_name
-						nameValues << field.value_for_sql( value )
-					end
-					if field.bind_write?
-						@bind_values << value
-					end
-				end
-			}
-			QueueHash.new( *nameValues )
-		end
-
-		def insert_sql( domain_class )
-			fields = domain_class.class_fields
-			nameValuePairs = get_name_value_pairs( domain_class )
-			if domain_class.is_child_domain_class?
-				nameValuePairs[domain_class.sql_primary_key_name] = 'LAST_INSERT_ID()'
-			end
-			fieldNameStr = nameValuePairs.keys.join ", "
-			fieldValueStr = nameValuePairs.values.join ", "
-			"insert into #{ domain_class.table_name}(#{fieldNameStr}) " +
-					"values(#{fieldValueStr})"
-		end
-
-		def statement_bind_value_pair( domain_class )
-			@bind_values = []
-			if @obj.pk_id == nil
-				statement = insert_sql( domain_class )
-			else
-				if @obj.delete
-					statement = delete_sql( domain_class )
-				else
-					statement = update_sql( domain_class)
-				end
-			end
-			[statement, @bind_values]
-		end
-
-		def update_sql( domain_class )
-			nameValueStrings = []
-			nameValuePairs = get_name_value_pairs( domain_class )
-			nameValuePairs.each { |key, value|
-				nameValueStrings << "#{key}=#{ value }"
-			}
-			allNameValues = nameValueStrings.join ', '
-			"update #{ domain_class.table_name} set #{allNameValues} " +
-					"where #{ domain_class.sql_primary_key_name}=#{@obj.pk_id}"
-		end
-	end
-
 	class CouldntMatchDomainClassError < RuntimeError #:nodoc:
 	end
 
@@ -117,7 +43,9 @@ module Lafcadio
 		end
 		
 		def commit(db_object)
-			statements_and_binds = CommitSqlStatementsAndBinds.new db_object
+			statements_and_binds = ObjectStore::CommitSqlStatementsAndBinds.new(
+				db_object
+			)
 			statements_and_binds.each { |sql, binds| execute_commit( sql, binds ) }
 			if statements_and_binds[0].first =~ /insert/
 				sql = 'select last_insert_id()'
@@ -642,6 +570,80 @@ module Lafcadio
 						object_store.commit dependentObject
 					}
 				}
+			end
+		end
+
+		class CommitSqlStatementsAndBinds < Array #:nodoc:
+			attr_reader :bind_values
+	
+			def initialize( obj )
+				@obj = obj
+				reversed = []
+				@obj.class.self_and_concrete_superclasses.each { |domain_class|
+					reversed << statement_bind_value_pair( domain_class )
+				}
+				reversed.reverse.each do |statement, binds|
+					self << [ statement, binds ]
+				end
+			end
+	
+			def delete_sql( domain_class )
+				"delete from #{ domain_class.table_name} " +
+						"where #{ domain_class.sql_primary_key_name }=#{ @obj.pk_id }"
+			end
+	
+			def get_name_value_pairs( domain_class )
+				nameValues = []
+				domain_class.class_fields.each { |field|
+					unless field.instance_of?( PrimaryKeyField )
+						value = @obj.send(field.name)
+						unless field.db_will_automatically_write?
+							nameValues << field.db_field_name
+							nameValues << field.value_for_sql( value )
+						end
+						if field.bind_write?
+							@bind_values << value
+						end
+					end
+				}
+				QueueHash.new( *nameValues )
+			end
+	
+			def insert_sql( domain_class )
+				fields = domain_class.class_fields
+				nameValuePairs = get_name_value_pairs( domain_class )
+				if domain_class.is_child_domain_class?
+					nameValuePairs[domain_class.sql_primary_key_name] = 'LAST_INSERT_ID()'
+				end
+				fieldNameStr = nameValuePairs.keys.join ", "
+				fieldValueStr = nameValuePairs.values.join ", "
+				"insert into #{ domain_class.table_name}(#{fieldNameStr}) " +
+						"values(#{fieldValueStr})"
+			end
+	
+			def statement_bind_value_pair( domain_class )
+				@bind_values = []
+				if @obj.pk_id == nil
+					statement = insert_sql( domain_class )
+				else
+					if @obj.delete
+						statement = delete_sql( domain_class )
+					else
+						statement = update_sql( domain_class)
+					end
+				end
+				[statement, @bind_values]
+			end
+	
+			def update_sql( domain_class )
+				nameValueStrings = []
+				nameValuePairs = get_name_value_pairs( domain_class )
+				nameValuePairs.each { |key, value|
+					nameValueStrings << "#{key}=#{ value }"
+				}
+				allNameValues = nameValueStrings.join ', '
+				"update #{ domain_class.table_name} set #{allNameValues} " +
+						"where #{ domain_class.sql_primary_key_name}=#{@obj.pk_id}"
 			end
 		end
 
