@@ -5,49 +5,6 @@ require 'lafcadio/query'
 require 'lafcadio/util'
 
 module Lafcadio
-	class DbConnection < ContextualService::Service
-		@@connectionClass = DBI
-		@@db_name = nil
-		@@dbh = nil
-
-		def self.flush
-			DbConnection.set_db_connection( nil )
-			@@dbh = nil
-		end
-
-		def self.set_connection_class( aClass ); @@connectionClass = aClass; end
-
-		def self.set_db_name( db_name ); @@db_name = db_name; end
-
-		def self.set_dbh( dbh ); @@dbh = dbh; end
-		
-		def initialize
-			@@dbh = load_new_dbh if @@dbh.nil?
-			@dbh = @@dbh
-		end
-	
-		def disconnect; @dbh.disconnect if @dbh; end
-		
-		def load_new_dbh
-			config = LafcadioConfig.new
-			dbName = @@db_name || config['dbname']
-			dbAndHost = nil
-			if dbName && config['dbhost']
-				dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"
-			else
-				dbAndHost = "dbi:#{config['dbconn']}"
-			end
-			@@dbh = @@connectionClass.connect( dbAndHost, config['dbuser'],
-																				 config['dbpassword'] )
-			@@dbh['AutoCommit'] = false
-			@@dbh
-		end
-		
-		def method_missing( symbol, *args )
-			@dbh.send( symbol, *args )
-		end
-	end
-
 	class DomainObjectInitError < RuntimeError #:nodoc:
 		attr_reader :messages
 
@@ -644,6 +601,49 @@ module Lafcadio
 			class RollbackError < StandardError; end
 		end
 
+		class DbConnection < ContextualService::Service
+			@@connectionClass = DBI
+			@@db_name = nil
+			@@dbh = nil
+	
+			def self.flush
+				DbConnection.set_db_connection( nil )
+				@@dbh = nil
+			end
+	
+			def self.set_connection_class( aClass ); @@connectionClass = aClass; end
+	
+			def self.set_db_name( db_name ); @@db_name = db_name; end
+	
+			def self.set_dbh( dbh ); @@dbh = dbh; end
+			
+			def initialize
+				@@dbh = load_new_dbh if @@dbh.nil?
+				@dbh = @@dbh
+			end
+		
+			def disconnect; @dbh.disconnect if @dbh; end
+			
+			def load_new_dbh
+				config = LafcadioConfig.new
+				dbName = @@db_name || config['dbname']
+				dbAndHost = nil
+				if dbName && config['dbhost']
+					dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"
+				else
+					dbAndHost = "dbi:#{config['dbconn']}"
+				end
+				@@dbh = @@connectionClass.connect( dbAndHost, config['dbuser'],
+																					 config['dbpassword'] )
+				@@dbh['AutoCommit'] = false
+				@@dbh
+			end
+			
+			def method_missing( symbol, *args )
+				@dbh.send( symbol, *args )
+			end
+		end
+	
 		class MethodDispatch #:nodoc:
 			attr_reader :symbol, :args
 		

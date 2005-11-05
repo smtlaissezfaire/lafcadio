@@ -187,15 +187,15 @@ class TestDBBridge < Test::Unit::TestCase
   def setup
 		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
     @mockDbh = MockDbh.new
-		DbConnection.set_dbh( @mockDbh )
+		ObjectStore::DbConnection.set_dbh( @mockDbh )
 		@dbb = ObjectStore::DbBridge.new
     @client = Client.new( {"pk_id" => 1, "name" => "clientName1"} )
   end
 
   def teardown
 		@dbb = nil
- 		DbConnection.flush
-		DbConnection.set_db_name nil
+ 		ObjectStore::DbConnection.flush
+		ObjectStore::DbConnection.set_db_name nil
 	end
 
   def test_commits_delete
@@ -243,8 +243,8 @@ class TestDBBridge < Test::Unit::TestCase
     client = Client.new( { "name" => "clientName1" } )
     @dbb.commit client
     assert_equal 12, @dbb.last_pk_id_inserted
-    DbConnection.flush
-    DbConnection.set_dbh( @mockDbh )
+    ObjectStore::DbConnection.flush
+    ObjectStore::DbConnection.set_dbh( @mockDbh )
 		dbb2 = ObjectStore::DbBridge.new
     assert_equal 12, dbb2.last_pk_id_inserted
   end
@@ -354,28 +354,28 @@ class TestDbConnection < Test::Unit::TestCase
   def setup
 		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
     @mockDbh = MockDbh.new
-    DbConnection.set_dbh( @mockDbh )
+    ObjectStore::DbConnection.set_dbh( @mockDbh )
   end
 
   def testConnectionPooling
-  	DbConnection.set_connection_class( MockDbi )
-    100.times { DbConnection.get_db_connection }
-    DbConnection.flush
-    DbConnection.set_connection_class( DBI )
+  	ObjectStore::DbConnection.set_connection_class( MockDbi )
+    100.times { ObjectStore::DbConnection.get_db_connection }
+    ObjectStore::DbConnection.flush
+    ObjectStore::DbConnection.set_connection_class( DBI )
   end
 
 	def testDbName
-  	DbConnection.set_connection_class( MockDbi )
-  	DbConnection.flush
+  	ObjectStore::DbConnection.set_connection_class( MockDbi )
+  	ObjectStore::DbConnection.flush
 		MockDbi.flushInstanceCount
 		ObjectStore.set_db_name 'some_other_db'
 		db = ObjectStore::DbBridge.new
 		assert_equal 'some_other_db', MockDbi.dbName
-    DbConnection.set_connection_class( DBI )
+    ObjectStore::DbConnection.set_connection_class( DBI )
 	end
 	
 	def testDisconnect
-		DbConnection.get_db_connection.disconnect
+		ObjectStore::DbConnection.get_db_connection.disconnect
 		assert !@mockDbh.connected?
 	end
 
