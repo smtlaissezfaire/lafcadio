@@ -10,7 +10,7 @@ module Lafcadio
 		UPDATE 	= 2
 		DELETE  = 3
 
-		attr_reader :commit_type, :db_object
+		attr_reader :db_object
 
 		def initialize(db_object, dbBridge, cache)
 			@db_object = db_object
@@ -22,29 +22,6 @@ module Lafcadio
 		
 		def execute
 			@db_object.verify if LafcadioConfig.new()['checkFields'] == 'onCommit'
-			set_commit_type
-			@db_object.last_commit_type = get_last_commit
-			@db_object.pre_commit_trigger
-		end
-
-		def get_last_commit
-			if @db_object.delete
-				DomainObject::COMMIT_DELETE
-			elsif @db_object.pk_id
-				DomainObject::COMMIT_EDIT
-			else
-				DomainObject::COMMIT_ADD
-			end
-		end
-		
-		def set_commit_type
-			if @db_object.delete
-				@commit_type = DELETE
-			elsif @db_object.pk_id
-				@commit_type = UPDATE
-			else
-				@commit_type = INSERT
-			end
 		end
 	end
 
@@ -283,7 +260,7 @@ module Lafcadio
 					value = @obj.send(field.name)
 					unless field.db_will_automatically_write?
 						nameValues << field.db_field_name
-						nameValues <<(field.value_for_sql(value))
+						nameValues << field.value_for_sql( value )
 					end
 					if field.bind_write?
 						@bind_values << value
@@ -552,6 +529,8 @@ module Lafcadio
 			def commit( db_object )
 				committer = Committer.new db_object, @dbBridge, self
 				committer.execute
+				db_object.last_commit_type = get_last_commit db_object
+				db_object.pre_commit_trigger
 				update_dependent_domain_objects( db_object ) if db_object.delete
 				@dbBridge.commit db_object
 				db_object.pk_id = @dbBridge.last_pk_id_inserted unless db_object.pk_id
@@ -617,6 +596,16 @@ module Lafcadio
 				collection
 			end
 
+			def get_last_commit( db_object )
+				if db_object.delete
+					DomainObject::COMMIT_DELETE
+				elsif db_object.pk_id
+					DomainObject::COMMIT_EDIT
+				else
+					DomainObject::COMMIT_ADD
+				end
+			end
+
 			def hash_by_domain_class( domain_class )
 				unless @objects[domain_class]
 					@objects[domain_class] = {}
@@ -646,11 +635,13 @@ module Lafcadio
 			end
 			
 			def update_after_commit( committer ) #:nodoc:
-				if committer.commit_type == Committer::UPDATE ||
-					committer.commit_type == Committer::INSERT
-					save( committer.db_object )
-				elsif committer.commit_type == Committer::DELETE
-					flush( committer.db_object )
+				db_object = committer.db_object
+				if [ DomainObject::COMMIT_EDIT, DomainObject::COMMIT_ADD ].include?(
+					db_object.last_commit_type
+				)
+					save db_object
+				elsif db_object.last_commit_type == DomainObject::COMMIT_DELETE
+					flush db_object
 				end
 				set_commit_time( committer.db_object )
 			end

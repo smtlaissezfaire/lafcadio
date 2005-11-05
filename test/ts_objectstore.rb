@@ -72,6 +72,18 @@ class TestObjectStoreCache < LafcadioTestCase
 		@cache.flush(user)
 		assert_equal 0, @cache.get_all(User).size
 	end
+
+	def test_last_commit_type
+		client = Client.new({ 'name' => 'client name' })
+		@cache.commit client
+		assert_equal( DomainObject::COMMIT_ADD, client.last_commit_type )
+		client2 = Client.new({ 'pk_id' => 25, 'name' => 'client 25' })
+		@cache.commit client2
+		assert_equal( DomainObject::COMMIT_EDIT, client2.last_commit_type )
+		client2.delete = true
+		@cache.commit client2
+		assert_equal(	DomainObject::COMMIT_DELETE, client2.last_commit_type )
+	end
 end
 
 class TestDBBridge < Test::Unit::TestCase
@@ -339,43 +351,6 @@ class TestDbConnection < Test::Unit::TestCase
 			@@dbName
 		end
   end
-end
-
-class TestDbObjectCommitter < LafcadioTestCase
-	def setup
-		super
-		context = ContextualService::Context.instance
-		context.flush
-		@mockDBBridge = MockDbBridge.new
-		@testObjectStore = ObjectStore.new( @mockDBBridge )
-    ObjectStore.set_object_store @testObjectStore
-	end
-	
-	def getFromDbBridge(object_type, pk_id)
-		query = Query.new object_type, pk_id
-		@mockDBBridge.collection_by_query(query)[0]
-	end
-
-	def testCommitType
-		client = Client.new({ 'name' => 'client name' })
-    committer = Committer.new(
-			client, @mockDBBridge, ObjectStore::Cache.new( @mockDBBridge )
-		)
-    committer.execute
-		assert_equal Committer::INSERT, committer.commit_type
-		client2 = Client.new({ 'pk_id' => 25, 'name' => 'client 25' })
-		committer2 = Committer.new(
-			client2, @mockDBBridge, ObjectStore::Cache.new( @mockDBBridge )
-		)
-		committer2.execute
-		assert_equal Committer::UPDATE, committer2.commit_type
-		client2.delete = true
-		committer3 = Committer.new(
-			client2, @mockDBBridge, ObjectStore::Cache.new( @mockDBBridge )
-		)
-		committer3.execute
-		assert_equal Committer::DELETE, committer3.commit_type
-	end
 end
 
 class TestDomainComparable < LafcadioTestCase
