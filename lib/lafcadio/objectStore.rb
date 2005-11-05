@@ -26,12 +26,6 @@ module Lafcadio
 			@db_object.last_commit_type = get_last_commit
 			@db_object.pre_commit_trigger
 			update_dependent_domain_objects if @db_object.delete
-			@dbBridge.commit @db_object
-			unless @db_object.pk_id
-				@db_object.pk_id = @dbBridge.last_pk_id_inserted
-			end
-			@cache.update_after_commit self
-			@db_object.post_commit_trigger
 		end
 
 		def get_last_commit
@@ -576,6 +570,10 @@ module Lafcadio
 			def commit( db_object )
 				committer = Committer.new db_object, @dbBridge, self
 				committer.execute
+				@dbBridge.commit db_object
+				db_object.pk_id = @dbBridge.last_pk_id_inserted unless db_object.pk_id
+				update_after_commit committer
+				db_object.post_commit_trigger
 			end
 
 			# Flushes a domain object.
@@ -594,7 +592,11 @@ module Lafcadio
 
 			# Returns a cached domain object, or nil if none is found.
 			def get( domain_class, pk_id )
-				hash_by_domain_class( domain_class )[pk_id].clone
+				if ( dobj = hash_by_domain_class( domain_class )[pk_id] )
+					dobj.clone
+				else
+					nil
+				end
 			end
 
 			# Returns an array of all domain objects of a given type.

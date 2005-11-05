@@ -7,10 +7,21 @@ require 'lafcadio/test'
 require 'runit/testcase'
 require '../test/mock/domain'
 
+class Lafcadio::ObjectStore
+	attr_reader :cache
+end
+
 class TestObjectStoreCache < LafcadioTestCase
 	def setup
 		super
-		@cache = ObjectStore::Cache.new( MockDbBridge.new )
+		@cache = @mockObjectStore.cache
+	end
+
+	def testAssignsPkIdOnNewCommit
+		client = Client.new({ 'name' => 'client name' })
+		assert_nil client.pk_id
+		@cache.commit client
+		assert_not_nil client.pk_id
 	end
 
 	def test_clones
@@ -23,6 +34,21 @@ class TestObjectStoreCache < LafcadioTestCase
 		}
 	end
 	
+  def testDeleteSetsDomainObjectFieldsToNil
+		client = Client.new( 'pk_id' => 1, 'name' => 'client name' )
+		invoice = Invoice.new(
+			'pk_id' => 1, 'client' => DomainObjectProxy.new( client ),
+			'date' => Date.new( 2000, 1, 17 ), 'rate' => 45, 'hours' => 20
+		)
+		@cache.commit client
+		@cache.commit invoice
+    client.delete = true
+		@cache.commit client
+		assert_nil @cache.get( Client, 1 )
+		assert_not_nil @cache.get( Invoice, 1 )
+		assert_nil @cache.get(Invoice, 1).client
+  end
+
 	def test_dumpable
 		cache_prime = Marshal.load( Marshal.dump( @cache ) )
 		assert_equal( ObjectStore::Cache, cache_prime.class )
@@ -319,16 +345,6 @@ class TestDbObjectCommitter < LafcadioTestCase
 		@mockDBBridge.collection_by_query(query)[0]
 	end
 
-	def testAssignsPkIdOnNewCommit
-		client = Client.new({ 'name' => 'client name' })
-		assert_nil client.pk_id
-    committer = Committer.new(
-			client, @mockDBBridge, ObjectStore::Cache.new( @mockDBBridge )
-		)
-    committer.execute
-		assert_not_nil client.pk_id
-	end
-
 	def testCommitType
 		client = Client.new({ 'name' => 'client name' })
     committer = Committer.new(
@@ -363,23 +379,6 @@ class TestDbObjectCommitter < LafcadioTestCase
 		committer.execute
 		assert_equal( 0, @testObjectStore.get_xml_skus.size )
 	end
-
-  def testDeleteSetsDomainObjectFieldsToNil
-		client = Client.new({ 'pk_id' => 1, 'name' => 'client name' })
-		invoice = Invoice.new({ 'pk_id' => 1,
-				'client' => DomainObjectProxy.new(client), 'date' => Date.new(2000, 1, 17),
-				'rate' => 45, 'hours' => 20 })
-    @mockDBBridge.commit client
-    @mockDBBridge.commit invoice
-    client.delete = true
-    committer = Committer.new(
-			client, @mockDBBridge, ObjectStore::Cache.new( @mockDBBridge )
-		)
-    committer.execute
-		assert_nil getFromDbBridge(Client, 1)
-		assert_not_nil getFromDbBridge(Invoice, 1)
-		assert_nil @testObjectStore.get(Invoice, 1).client
-  end
 end
 
 class TestDomainComparable < LafcadioTestCase
