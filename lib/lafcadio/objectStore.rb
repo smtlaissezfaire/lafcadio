@@ -5,113 +5,6 @@ require 'lafcadio/query'
 require 'lafcadio/util'
 
 module Lafcadio
-	class CouldntMatchDomainClassError < RuntimeError #:nodoc:
-	end
-
-	class DbBridge #:nodoc:
-		@@last_pk_id_inserted = nil
-		
-		def self._load(aString)
-			aString =~ /db_conn:/
-			db_conn_str = $'
-			begin
-				db_conn = Marshal.load db_conn_str
-			rescue TypeError
-				db_conn = nil
-			end
-			DbConnection.set_db_connection db_conn
-			new
-		end
-		
-		def initialize
-			@db_conn = DbConnection.get_db_connection
-			ObjectSpace.define_finalizer( self, proc { |id|
-				DbConnection.get_db_connection.disconnect
-			} )
-		end
-
-		def _dump(aDepth)
-			dbDump = @dbh.respond_to?( '_dump' ) ? @dbh._dump : @dbh.class.to_s
-			"dbh:#{dbDump}"
-		end
-		
-		def collection_by_query(query)
-			domain_class = query.domain_class
-			execute_select( query.to_sql ).collect { |row_hash|
-				domain_class.new( SqlValueConverter.new( domain_class, row_hash ) )
-			}
-		end
-		
-		def commit(db_object)
-			statements_and_binds = ObjectStore::CommitSqlStatementsAndBinds.new(
-				db_object
-			)
-			statements_and_binds.each { |sql, binds| execute_commit( sql, binds ) }
-			if statements_and_binds[0].first =~ /insert/
-				sql = 'select last_insert_id()'
-				result = execute_select( sql )
-				@@last_pk_id_inserted = result[0]['last_insert_id()'].to_i
-			end
-		end
-		
-		def execute_commit( sql, binds ); @db_conn.do( sql, *binds ); end
-		
-		def execute_select(sql)
-			maybe_log sql
-			begin
-				@db_conn.select_all( sql )
-			rescue DBI::DatabaseError => e
-				raise $!.to_s + ": #{ e.errstr }"
-			end	
-		end
-		
-		def group_query( query )
-			execute_select( query.to_sql ).map { |row| query.result_row( row ) }
-		end
-
-		def last_pk_id_inserted; @@last_pk_id_inserted; end
-		
-		def maybe_log(sql)
-			config = LafcadioConfig.new
-			if config['logSql'] == 'y'
-				sqllog = Log4r::Logger['sql'] || Log4r::Logger.new( 'sql' )
-				filename = File.join( config['logdir'], config['sqlLogFile'] || 'sql' )
-				outputter = Log4r::FileOutputter.new( 'outputter',
-																							{ :filename => filename } )
-				sqllog.outputters = outputter
-				sqllog.info sql
-			end
-		end
-		
-		def transaction( action )
-			tr = Transaction.new @db_conn
-			tr.commit
-			begin
-				action.call tr
-				tr.commit
-			rescue RollbackError
-				# rollback handled by Transaction
-			rescue
-				err_to_raise = $!
-				tr.rollback false
-				raise err_to_raise
-			end
-		end
-		
-		class Transaction
-			def initialize( db_conn ); @db_conn = db_conn; end
-			
-			def commit; @db_conn.commit; end
-				
-			def rollback( raise_error = true )
-				@db_conn.rollback
-				raise RollbackError if raise_error
-			end
-		end
-		
-		class RollbackError < StandardError; end
-	end
-
 	class DbConnection < ContextualService::Service
 		@@connectionClass = DBI
 		@@db_name = nil
@@ -645,6 +538,110 @@ module Lafcadio
 				"update #{ domain_class.table_name} set #{allNameValues} " +
 						"where #{ domain_class.sql_primary_key_name}=#{@obj.pk_id}"
 			end
+		end
+
+		class DbBridge #:nodoc:
+			@@last_pk_id_inserted = nil
+			
+			def self._load(aString)
+				aString =~ /db_conn:/
+				db_conn_str = $'
+				begin
+					db_conn = Marshal.load db_conn_str
+				rescue TypeError
+					db_conn = nil
+				end
+				DbConnection.set_db_connection db_conn
+				new
+			end
+			
+			def initialize
+				@db_conn = DbConnection.get_db_connection
+				ObjectSpace.define_finalizer( self, proc { |id|
+					DbConnection.get_db_connection.disconnect
+				} )
+			end
+	
+			def _dump(aDepth)
+				dbDump = @dbh.respond_to?( '_dump' ) ? @dbh._dump : @dbh.class.to_s
+				"dbh:#{dbDump}"
+			end
+			
+			def collection_by_query(query)
+				domain_class = query.domain_class
+				execute_select( query.to_sql ).collect { |row_hash|
+					domain_class.new( SqlValueConverter.new( domain_class, row_hash ) )
+				}
+			end
+			
+			def commit(db_object)
+				statements_and_binds = ObjectStore::CommitSqlStatementsAndBinds.new(
+					db_object
+				)
+				statements_and_binds.each { |sql, binds| execute_commit( sql, binds ) }
+				if statements_and_binds[0].first =~ /insert/
+					sql = 'select last_insert_id()'
+					result = execute_select( sql )
+					@@last_pk_id_inserted = result[0]['last_insert_id()'].to_i
+				end
+			end
+			
+			def execute_commit( sql, binds ); @db_conn.do( sql, *binds ); end
+			
+			def execute_select(sql)
+				maybe_log sql
+				begin
+					@db_conn.select_all( sql )
+				rescue DBI::DatabaseError => e
+					raise $!.to_s + ": #{ e.errstr }"
+				end	
+			end
+			
+			def group_query( query )
+				execute_select( query.to_sql ).map { |row| query.result_row( row ) }
+			end
+	
+			def last_pk_id_inserted; @@last_pk_id_inserted; end
+			
+			def maybe_log(sql)
+				config = LafcadioConfig.new
+				if config['logSql'] == 'y'
+					sqllog = Log4r::Logger['sql'] || Log4r::Logger.new( 'sql' )
+					filename = File.join( config['logdir'], config['sqlLogFile'] || 'sql' )
+					outputter = Log4r::FileOutputter.new( 'outputter',
+																								{ :filename => filename } )
+					sqllog.outputters = outputter
+					sqllog.info sql
+				end
+			end
+			
+			def transaction( action )
+				tr = Transaction.new @db_conn
+				tr.commit
+				begin
+					action.call tr
+					tr.commit
+				rescue RollbackError
+					# rollback handled by Transaction
+				rescue
+					err_to_raise = $!
+					tr.rollback false
+					raise err_to_raise
+				end
+			end
+			
+			class Transaction
+				def initialize( db_conn ); @db_conn = db_conn; end
+				
+				def commit; @db_conn.commit; end
+					
+				def rollback( raise_error = true )
+					@db_conn.rollback
+					raise RollbackError if raise_error
+				end
+			end
+			
+			class RollbackError < StandardError; end
 		end
 
 		class MethodDispatch #:nodoc:
