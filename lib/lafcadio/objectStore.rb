@@ -5,23 +5,77 @@ require 'lafcadio/query'
 require 'lafcadio/util'
 
 module Lafcadio
-	class Committer #:nodoc:
-		INSERT 	= 1
-		UPDATE 	= 2
-		DELETE  = 3
+	class CommitSqlStatementsAndBinds < Array #:nodoc:
+		attr_reader :bind_values
 
-		attr_reader :db_object
-
-		def initialize(db_object, dbBridge, cache)
-			@db_object = db_object
-			@dbBridge = dbBridge
-			@cache = cache
-			@objectStore = ObjectStore.get_object_store
-			@commit_type = nil
+		def initialize( obj )
+			@obj = obj
+			reversed = []
+			@obj.class.self_and_concrete_superclasses.each { |domain_class|
+				reversed << statement_bind_value_pair( domain_class )
+ 			}
+			reversed.reverse.each do |statement, binds|
+				self << [ statement, binds ]
+			end
 		end
-		
-		def execute
-			@db_object.verify if LafcadioConfig.new()['checkFields'] == 'onCommit'
+
+		def delete_sql( domain_class )
+			"delete from #{ domain_class.table_name} " +
+					"where #{ domain_class.sql_primary_key_name }=#{ @obj.pk_id }"
+		end
+
+		def get_name_value_pairs( domain_class )
+			nameValues = []
+			domain_class.class_fields.each { |field|
+				unless field.instance_of?( PrimaryKeyField )
+					value = @obj.send(field.name)
+					unless field.db_will_automatically_write?
+						nameValues << field.db_field_name
+						nameValues << field.value_for_sql( value )
+					end
+					if field.bind_write?
+						@bind_values << value
+					end
+				end
+			}
+			QueueHash.new( *nameValues )
+		end
+
+		def insert_sql( domain_class )
+			fields = domain_class.class_fields
+			nameValuePairs = get_name_value_pairs( domain_class )
+			if domain_class.is_child_domain_class?
+				nameValuePairs[domain_class.sql_primary_key_name] = 'LAST_INSERT_ID()'
+			end
+			fieldNameStr = nameValuePairs.keys.join ", "
+			fieldValueStr = nameValuePairs.values.join ", "
+			"insert into #{ domain_class.table_name}(#{fieldNameStr}) " +
+					"values(#{fieldValueStr})"
+		end
+
+		def statement_bind_value_pair( domain_class )
+			@bind_values = []
+			if @obj.pk_id == nil
+				statement = insert_sql( domain_class )
+			else
+				if @obj.delete
+					statement = delete_sql( domain_class )
+				else
+					statement = update_sql( domain_class)
+				end
+			end
+			[statement, @bind_values]
+		end
+
+		def update_sql( domain_class )
+			nameValueStrings = []
+			nameValuePairs = get_name_value_pairs( domain_class )
+			nameValuePairs.each { |key, value|
+				nameValueStrings << "#{key}=#{ value }"
+			}
+			allNameValues = nameValueStrings.join ', '
+			"update #{ domain_class.table_name} set #{allNameValues} " +
+					"where #{ domain_class.sql_primary_key_name}=#{@obj.pk_id}"
 		end
 	end
 
@@ -63,9 +117,9 @@ module Lafcadio
 		end
 		
 		def commit(db_object)
-			sqlMaker = DomainObjectSqlMaker.new(db_object)
-			sqlMaker.sql_statements.each { |sql, binds| execute_commit( sql, binds ) }
-			if sqlMaker.sql_statements[0].first =~ /insert/
+			statements_and_binds = CommitSqlStatementsAndBinds.new db_object
+			statements_and_binds.each { |sql, binds| execute_commit( sql, binds ) }
+			if statements_and_binds[0].first =~ /insert/
 				sql = 'select last_insert_id()'
 				result = execute_select( sql )
 				@@last_pk_id_inserted = result[0]['last_insert_id()'].to_i
@@ -240,79 +294,6 @@ module Lafcadio
 		
 		def to_s
 			get_db_object.to_s
-		end
-	end
-
-	class DomainObjectSqlMaker #:nodoc:
-		attr_reader :bind_values
-
-		def initialize(obj); @obj = obj; end
-
-		def delete_sql( domain_class )
-			"delete from #{ domain_class.table_name} " +
-					"where #{ domain_class.sql_primary_key_name }=#{ @obj.pk_id }"
-		end
-
-		def get_name_value_pairs( domain_class )
-			nameValues = []
-			domain_class.class_fields.each { |field|
-				unless field.instance_of?( PrimaryKeyField )
-					value = @obj.send(field.name)
-					unless field.db_will_automatically_write?
-						nameValues << field.db_field_name
-						nameValues << field.value_for_sql( value )
-					end
-					if field.bind_write?
-						@bind_values << value
-					end
-				end
-			}
-			QueueHash.new( *nameValues )
-		end
-
-		def insert_sql( domain_class )
-			fields = domain_class.class_fields
-			nameValuePairs = get_name_value_pairs( domain_class )
-			if domain_class.is_child_domain_class?
-				nameValuePairs[domain_class.sql_primary_key_name] = 'LAST_INSERT_ID()'
-			end
-			fieldNameStr = nameValuePairs.keys.join ", "
-			fieldValueStr = nameValuePairs.values.join ", "
-			"insert into #{ domain_class.table_name}(#{fieldNameStr}) " +
-					"values(#{fieldValueStr})"
-		end
-
-		def sql_statements
-			statements = []
-			@obj.class.self_and_concrete_superclasses.each { |domain_class|
-				statements << statement_bind_value_pair( domain_class )
- 			}
-			statements.reverse
-		end
-
-		def statement_bind_value_pair( domain_class )
-			@bind_values = []
-			if @obj.pk_id == nil
-				statement = insert_sql( domain_class )
-			else
-				if @obj.delete
-					statement = delete_sql( domain_class )
-				else
-					statement = update_sql( domain_class)
-				end
-			end
-			[statement, @bind_values]
-		end
-
-		def update_sql( domain_class )
-			nameValueStrings = []
-			nameValuePairs = get_name_value_pairs( domain_class )
-			nameValuePairs.each { |key, value|
-				nameValueStrings << "#{key}=#{ value }"
-			}
-			allNameValues = nameValueStrings.join ', '
-			"update #{ domain_class.table_name} set #{allNameValues} " +
-					"where #{ domain_class.sql_primary_key_name}=#{@obj.pk_id}"
 		end
 	end
 
@@ -527,14 +508,13 @@ module Lafcadio
 			end
 
 			def commit( db_object )
-				committer = Committer.new db_object, @dbBridge, self
-				committer.execute
+				db_object.verify if LafcadioConfig.new()['checkFields'] == 'onCommit'
 				db_object.last_commit_type = get_last_commit db_object
 				db_object.pre_commit_trigger
 				update_dependent_domain_objects( db_object ) if db_object.delete
 				@dbBridge.commit db_object
 				db_object.pk_id = @dbBridge.last_pk_id_inserted unless db_object.pk_id
-				update_after_commit committer
+				update_after_commit db_object
 				db_object.post_commit_trigger
 			end
 
@@ -634,8 +614,7 @@ module Lafcadio
 				flush_collection_cache( db_object.domain_class )
 			end
 			
-			def update_after_commit( committer ) #:nodoc:
-				db_object = committer.db_object
+			def update_after_commit( db_object ) #:nodoc:
 				if [ DomainObject::COMMIT_EDIT, DomainObject::COMMIT_ADD ].include?(
 					db_object.last_commit_type
 				)
@@ -643,7 +622,7 @@ module Lafcadio
 				elsif db_object.last_commit_type == DomainObject::COMMIT_DELETE
 					flush db_object
 				end
-				set_commit_time( committer.db_object )
+				set_commit_time db_object
 			end
 
 			def update_dependent_domain_objects( db_object )

@@ -86,6 +86,101 @@ class TestObjectStoreCache < LafcadioTestCase
 	end
 end
 
+class TestCommitSqlStatementsAndBinds < LafcadioTestCase
+  def testCommitSQLWithApostrophe
+    client = Client.new( { "name" => "T'est name" } )
+    assert_equal("T'est name", client.name)
+    sql = CommitSqlStatementsAndBinds.new(client)[0][0]
+    assert_equal("T'est name", client.name)
+    assert_not_nil sql.index("'T''est name'"), sql
+  end
+
+  def testCommitSQLWithInvoice
+    invoice = Invoice.new(
+    	"client" => Client.getTestClient, "rate" => 70,
+			"date" => Date.new(2001, 4, 5), "hours" => 36.5, "pk_id" => 1
+		)
+    update_sql = CommitSqlStatementsAndBinds.new(invoice)[0]
+    assert_not_nil(update_sql =~ /update invoices/, update_sql)
+    assert_not_nil(update_sql =~ /pk_id=1/, update_sql)
+    invoice.delete = true
+    deleteSQL = CommitSqlStatementsAndBinds.new(invoice)[0]
+    assert_not_nil(deleteSQL =~ /delete from invoices where pk_id=1/)
+  end
+
+  def testFieldNamesForSQL
+    sqlMaker = CommitSqlStatementsAndBinds.new Invoice.getTestInvoice
+    assert_equal( 6, sqlMaker.get_name_value_pairs( Invoice ).size )
+  end
+	
+	def testInheritanceCommit
+		ic = InternalClient.new({ 'pk_id' => 1, 'name' => 'client name',
+				'billingType' => 'trade' })
+		statements = CommitSqlStatementsAndBinds.new ic
+		assert_equal 2, statements.size
+		sql1 = statements[0]
+		assert_not_nil sql1 =~ /update internalClients set/, sql1
+		sql2 = statements[1]
+		assert_not_nil sql2 =~ /update clients set/, sql2
+	end
+
+	def test_inheritance_insert
+		cdo = ChildDomainObject.new(
+			'parent_string' => 'parent string', 'child_string' => 'child string'
+		)
+		statements = CommitSqlStatementsAndBinds.new( cdo )
+		assert_equal( 2, statements.size )
+		sql1 = statements[0].first
+		assert_match( /insert into parent_domain_objects/, sql1 )
+		bind1 = statements[0].last
+		assert_equal( 1, bind1.size )
+		sql2 = statements[1].first
+		assert_match( /insert into table_name.*primary_key/, sql2 )
+		assert_match( /values.*LAST_INSERT_ID\(\)/, sql2 )
+		bind2 = statements[1].last
+		assert_equal( 0, bind2.size )
+	end
+
+  def testInsertUpdateAndDelete
+    values = { "name" => "ClientName1" }
+    client1a = Client.new values
+    insertSql = CommitSqlStatementsAndBinds.new(client1a)[0]
+    values["pk_id"] = 1
+    client1b = Client.new values
+    updateSql = CommitSqlStatementsAndBinds.new(client1b)[0][0]
+		assert_match( /update/, updateSql )
+    assert_not_nil updateSql.index("pk_id")
+    client1b.delete = true
+    delete_sql = CommitSqlStatementsAndBinds.new(client1b)[0][0]
+    assert_not_nil delete_sql.index("delete")
+    assert_not_nil delete_sql.index("pk_id")
+		binds = CommitSqlStatementsAndBinds.new(client1b)[0][1]
+		assert_not_nil( binds )
+		assert_equal( 0, binds.size )
+  end
+
+	def testSetsNulls
+		client = Client.new({ 'pk_id' => 1, 'name' => 'client name',
+				'referringClient' => nil, 'priorityInvoice' => nil })
+		sql = CommitSqlStatementsAndBinds.new( client )[0]
+		assert_not_nil sql =~ /referringClient=null/, sql
+		assert_not_nil sql =~ /priorityInvoice=null/, sql
+	end
+
+	class ParentDomainObject < Lafcadio::DomainObject
+		string 'parent_string'
+		blob   'blob'
+	end
+	
+	class ChildDomainObject < ParentDomainObject
+		string 'child_string'
+				
+		def self.sql_primary_key_name; 'primary_key'; end
+		
+		def self.table_name; 'table_name'; end
+	end
+end
+
 class TestDBBridge < Test::Unit::TestCase
 	include Lafcadio
 
@@ -417,104 +512,6 @@ class TestDomainObjectProxy < LafcadioTestCase
 	def testMemberMethods
 		assert_equal @client.name, @clientProxy.name
 		assert_equal @invoice.name, @invoiceProxy.name
-	end
-end
-
-class TestDomainObjectSqlMaker < LafcadioTestCase
-  def testCommitSQLWithApostrophe
-    client = Client.new( { "name" => "T'est name" } )
-    assert_equal("T'est name", client.name)
-    sql = DomainObjectSqlMaker.new(client).sql_statements[0][0]
-    assert_equal("T'est name", client.name)
-    assert_not_nil sql.index("'T''est name'"), sql
-  end
-
-  def testCommitSQLWithInvoice
-    invoice = Invoice.new(
-    	"client" => Client.getTestClient, "rate" => 70,
-			"date" => Date.new(2001, 4, 5), "hours" => 36.5, "pk_id" => 1
-		)
-    update_sql = DomainObjectSqlMaker.new(invoice).sql_statements[0]
-    assert_not_nil(update_sql =~ /update invoices/, update_sql)
-    assert_not_nil(update_sql =~ /pk_id=1/, update_sql)
-    invoice.delete = true
-    deleteSQL = DomainObjectSqlMaker.new(invoice).sql_statements[0]
-    assert_not_nil(deleteSQL =~ /delete from invoices where pk_id=1/)
-  end
-
-  def testFieldNamesForSQL
-    sqlMaker = DomainObjectSqlMaker.new Invoice.getTestInvoice
-    assert_equal( 6, sqlMaker.get_name_value_pairs( Invoice ).size )
-  end
-	
-	def testInheritanceCommit
-		ic = InternalClient.new({ 'pk_id' => 1, 'name' => 'client name',
-				'billingType' => 'trade' })
-		sqlMaker = DomainObjectSqlMaker.new ic
-		statements = sqlMaker.sql_statements
-		assert_equal 2, statements.size
-		sql1 = statements[0]
-		assert_not_nil sql1 =~ /update internalClients set/, sql1
-		sql2 = statements[1]
-		assert_not_nil sql2 =~ /update clients set/, sql2
-	end
-
-	def test_inheritance_insert
-		cdo = ChildDomainObject.new(
-			'parent_string' => 'parent string', 'child_string' => 'child string'
-		)
-		sql_maker = DomainObjectSqlMaker.new( cdo )
-		statements = sql_maker.sql_statements
-		assert_equal( 2, statements.size )
-		sql1 = statements[0].first
-		assert_match( /insert into parent_domain_objects/, sql1 )
-		bind1 = statements[0].last
-		assert_equal( 1, bind1.size )
-		sql2 = statements[1].first
-		assert_match( /insert into table_name.*primary_key/, sql2 )
-		assert_match( /values.*LAST_INSERT_ID\(\)/, sql2 )
-		bind2 = statements[1].last
-		assert_equal( 0, bind2.size )
-	end
-
-  def testInsertUpdateAndDelete
-    values = { "name" => "ClientName1" }
-    client1a = Client.new values
-    insertSql = DomainObjectSqlMaker.new(client1a).sql_statements[0]
-    values["pk_id"] = 1
-    client1b = Client.new values
-    updateSql = DomainObjectSqlMaker.new(client1b).sql_statements[0][0]
-		assert_match( /update/, updateSql )
-    assert_not_nil updateSql.index("pk_id")
-    client1b.delete = true
-    delete_sql = DomainObjectSqlMaker.new(client1b).sql_statements[0][0]
-    assert_not_nil delete_sql.index("delete")
-    assert_not_nil delete_sql.index("pk_id")
-		binds = DomainObjectSqlMaker.new(client1b).sql_statements[0][1]
-		assert_not_nil( binds )
-		assert_equal( 0, binds.size )
-  end
-
-	def testSetsNulls
-		client = Client.new({ 'pk_id' => 1, 'name' => 'client name',
-				'referringClient' => nil, 'priorityInvoice' => nil })
-		sqlMaker = DomainObjectSqlMaker.new client
-		sql = sqlMaker.sql_statements[0]
-		assert_not_nil sql =~ /referringClient=null/, sql
-		assert_not_nil sql =~ /priorityInvoice=null/, sql
-	end
-
-	class ParentDomainObject < Lafcadio::DomainObject
-		string 'parent_string'
-		blob   'blob'
-	end
-	
-	class ChildDomainObject < ParentDomainObject
-		string 'child_string'
-				
-		def self.sql_primary_key_name; 'primary_key'; end
-		
-		def self.table_name; 'table_name'; end
 	end
 end
 
