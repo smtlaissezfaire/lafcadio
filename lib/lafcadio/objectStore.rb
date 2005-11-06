@@ -169,7 +169,7 @@ module Lafcadio
 
 		# Returns the DbBridge; this is useful in case you need to use raw SQL for a
 		# specific query.
-		def get_db_bridge; @dbBridge; end
+		def get_db_bridge; @cache.db_bridge; end
 		
 		def get_field_name( domain_object )
 			domain_object.domain_class.basename.camel_case_to_underscore
@@ -215,7 +215,7 @@ module Lafcadio
 		# will return the highest rate for all invoices.
 		def get_max( domain_class, field_name = 'pk_id' )
 			qry = Query::Max.new( domain_class, field_name )
-			@dbBridge.group_query( qry ).only[:max]
+			@cache.group_query( qry ).only[:max]
 		end
 
 		# Retrieves a collection of domain objects by +pk_id+.
@@ -257,7 +257,7 @@ module Lafcadio
 			false
 		end
 		
-		def query( query ); @dbBridge.group_query( query ); end
+		def query( query ); @cache.group_query( query ); end
 
 		def respond_to?( symbol, include_private = false )
 			begin
@@ -267,11 +267,13 @@ module Lafcadio
 			end
 		end
 		
-		def transaction( &action ); @dbBridge.transaction( action ); end
+		def transaction( &action ); @cache.transaction( action ); end
 		
 		class Cache #:nodoc:
+			attr_reader :db_bridge
+			
 			def initialize( dbBridge )
-				@dbBridge = dbBridge
+				@db_bridge = dbBridge
 				@objects = {}
 				@collections_by_query = {}
 				@commit_times = {}
@@ -282,8 +284,8 @@ module Lafcadio
 				db_object.last_commit_type = get_last_commit db_object
 				db_object.pre_commit_trigger
 				update_dependent_domain_objects( db_object ) if db_object.delete
-				@dbBridge.commit db_object
-				db_object.pk_id = @dbBridge.last_pk_id_inserted unless db_object.pk_id
+				@db_bridge.commit db_object
+				db_object.pk_id = @db_bridge.last_pk_id_inserted unless db_object.pk_id
 				update_after_commit db_object
 				db_object.post_commit_trigger
 			end
@@ -331,7 +333,7 @@ module Lafcadio
 							dobj.pk_id
 						}
 					elsif @collections_by_query.values
-						newObjects = @dbBridge.collection_by_query(query)
+						newObjects = @db_bridge.collection_by_query(query)
 						newObjects.each { |dbObj| save dbObj }
 						@collections_by_query[query] = newObjects.collect { |dobj|
 							dobj.pk_id
@@ -367,6 +369,8 @@ module Lafcadio
 				by_domain_class = @commit_times[domain_class]
 				by_domain_class ? by_domain_class[pk_id] : nil
 			end
+			
+			def method_missing( meth, *args ); @db_bridge.send( meth, *args ); end
 			
 			def set_commit_time( d_obj )
 				by_domain_class = @commit_times[d_obj.domain_class]
