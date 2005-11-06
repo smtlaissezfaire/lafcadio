@@ -368,7 +368,7 @@ class TestDbConnection < Test::Unit::TestCase
   	ObjectStore::DbConnection.set_connection_class( MockDbi )
   	ObjectStore::DbConnection.flush
 		MockDbi.flushInstanceCount
-		ObjectStore.set_db_name 'some_other_db'
+		ObjectStore.db_name = 'some_other_db'
 		db = ObjectStore::DbBridge.new
 		assert_equal 'some_other_db', MockDbi.dbName
     ObjectStore::DbConnection.set_connection_class( DBI )
@@ -490,14 +490,14 @@ class TestDomainObjectProxy < LafcadioTestCase
 	
 	def testFieldSettable
 		@clientProxy.name = 'new client name'
-		client = @clientProxy.get_db_object
+		client = @clientProxy.db_object
 		assert_equal( 'new client name', client.name )
 	end
 
 	def testGetDbObject
-		assert_equal @client, @clientProxy.get_db_object
+		assert_equal @client, @clientProxy.db_object
 		begin
-			@clientProxy2.get_db_object
+			@clientProxy2.db_object
 			fail "should throw DomainObjectNotFoundError"
 		rescue DomainObjectNotFoundError
 			# ok

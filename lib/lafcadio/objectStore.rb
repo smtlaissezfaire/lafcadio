@@ -27,46 +27,43 @@ module Lafcadio
 
 		attr_accessor :domain_class, :pk_id
 
-		def initialize(domain_classOrDbObject, pk_id = nil)
-			if pk_id
-				@domain_class = domain_classOrDbObject
-				@pk_id = pk_id
-			elsif domain_classOrDbObject.class < DomainObject
-				@db_object = domain_classOrDbObject
+		def initialize( *args )
+			if args.size == 2
+				@domain_class = args.first
+				@pk_id = args.last
+			elsif args.first.is_a?( DomainObject )
 				@d_obj_retrieve_time = Time.now
-				@domain_class = @db_object.class
-				@pk_id = @db_object.pk_id
+				@domain_class = args.first.class
+				@pk_id = args.first.pk_id
 			else
 				raise ArgumentError
 			end
-			@db_object = nil
 		end
 
-		def get_db_object
-			object_store = ObjectStore.get_object_store
+		def db_object
 			if @db_object.nil? || needs_refresh?
-				@db_object = object_store.get( @domain_class, @pk_id )
+				@db_object = ObjectStore.get_object_store.get( @domain_class, @pk_id )
 				@d_obj_retrieve_time = Time.now
 			end
 			@db_object
 		end
 
 		def hash
-			get_db_object.hash
+			db_object.hash
 		end
 
-		def method_missing(methodId, *args)
-			get_db_object.send(methodId.id2name, *args)
+		def method_missing( methodId, *args )
+			db_object.send( methodId, *args )
 		end
 
 		def needs_refresh?
 			object_store = ObjectStore.get_object_store
 			last_commit_time = object_store.last_commit_time( @domain_class, @pk_id )
-			!last_commit_time.nil? && last_commit_time > @d_obj_retrieve_time
+			last_commit_time && last_commit_time > @d_obj_retrieve_time
 		end
 		
 		def to_s
-			get_db_object.to_s
+			db_object.to_s
 		end
 	end
 
@@ -138,7 +135,7 @@ module Lafcadio
 	class ObjectStore < ContextualService::Service
 		def self.mock?; get_object_store.mock?; end
 		
-		def self.set_db_name(dbName) #:nodoc:
+		def self.db_name= (dbName) #:nodoc:
 			DbConnection.set_db_name dbName
 		end
 		

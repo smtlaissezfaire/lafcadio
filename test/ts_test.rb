@@ -15,7 +15,7 @@ class DobjA < DomainObject
 	mock_value :text_field, Proc.new { 'foobar' }
 	
 	def post_commit_trigger
-		dobj_b.get_db_object if dobj_b.is_a? DomainObjectProxy
+		dobj_b.db_object if dobj_b.is_a? DomainObjectProxy
 	end
 end
 
@@ -126,7 +126,7 @@ class TestDomainMock < Test::Unit::TestCase
 		assert_equal( 'test text', dobj_g.child_text )
 		assert_equal( 'some other string', dobj_g.overridden_in_child )
 		assert_equal( 1, dobj_g.dobj_a.pk_id )
-		dobj_g.dobj_a.get_db_object
+		dobj_g.dobj_a.db_object
 		assert_equal(
 			'string just for DobjH', DobjH.default_mock.overridden_in_child
 		)
