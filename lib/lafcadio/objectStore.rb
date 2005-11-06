@@ -6,11 +6,6 @@ require 'lafcadio/util'
 
 module Lafcadio
 	class DomainObjectInitError < RuntimeError #:nodoc:
-		attr_reader :messages
-
-		def initialize(messages)
-			@messages = messages
-		end
 	end
 
 	class DomainObjectNotFoundError < RuntimeError #:nodoc:
@@ -527,7 +522,7 @@ module Lafcadio
 			def collection_by_query(query)
 				domain_class = query.domain_class
 				execute_select( query.to_sql ).collect { |row_hash|
-					domain_class.new( SqlValueConverter.new( domain_class, row_hash ) )
+					domain_class.new( SqlToRubyValues.new( domain_class, row_hash ) )
 				}
 			end
 			
@@ -737,33 +732,33 @@ module Lafcadio
 				raise( NoMethodError, "undefined method '#{ @methodName }'", caller )
 			end
 		end
-	end
 
-	class SqlValueConverter #:nodoc:
-		attr_reader :domain_class, :row_hash
-
-		def initialize( domain_class, row_hash )
-			@domain_class = domain_class
-			@row_hash = row_hash
-		end
-
-		def []( key )
-			if ( field = @domain_class.field key )
-				val = field.value_from_sql( @row_hash[ field.db_field_name ] )
-				if field.instance_of?( PrimaryKeyField ) && val.nil?
-					raise FieldMatchError, error_msg, caller
-				else
-					val
-				end
-			else
-				nil
+		class SqlToRubyValues #:nodoc:
+			attr_reader :domain_class, :row_hash
+	
+			def initialize( domain_class, row_hash )
+				@domain_class = domain_class
+				@row_hash = row_hash
 			end
-		end
-
-		def error_msg
-			"The field \"" + @domain_class.sql_primary_key_name +
-					"\" can\'t be found in the table \"" + 
-					@domain_class.table_name + "\"."
+	
+			def []( key )
+				if ( field = @domain_class.field key )
+					val = field.value_from_sql( @row_hash[ field.db_field_name ] )
+					if field.instance_of?( PrimaryKeyField ) && val.nil?
+						raise FieldMatchError, error_msg, caller
+					else
+						val
+					end
+				else
+					nil
+				end
+			end
+	
+			def error_msg
+				"The field \"" + @domain_class.sql_primary_key_name +
+						"\" can\'t be found in the table \"" + 
+						@domain_class.table_name + "\"."
+			end
 		end
 	end
 end

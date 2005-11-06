@@ -1007,24 +1007,24 @@ class TestObjectStore < LafcadioTestCase
 	end
 end
 
-class TestSqlValueConverter < LafcadioTestCase
+class TestSqlToRubyValues < LafcadioTestCase
   def testConvertsPkId
     row_hash = { "pk_id" => "1", "name" => "clientName1",
 		"standard_rate" => "70" }
-    converter = SqlValueConverter.new(Client, row_hash)
+    converter = ObjectStore::SqlToRubyValues.new(Client, row_hash)
     assert_equal(Fixnum, converter["pk_id"].class)
   end
 
 	def test_different_db_field_name
 		string = "Jane says I'm done with Sergio"
-		svc = SqlValueConverter.new( XmlSku, { 'text_one' => string } )
+		svc = ObjectStore::SqlToRubyValues.new( XmlSku, { 'text_one' => string } )
 		assert_equal( string, svc['text1'] )
 	end
 
   def testExecute
     row_hash = { "id" => "1", "name" => "clientName1",
 		"standard_rate" => "70" }
-    converter = SqlValueConverter.new(Client, row_hash)
+    converter = ObjectStore::SqlToRubyValues.new(Client, row_hash)
     assert_equal("clientName1", converter["name"])
     assert_equal(70, converter["standard_rate"])
   end
@@ -1032,7 +1032,7 @@ class TestSqlValueConverter < LafcadioTestCase
 	def testInheritanceConstruction
 		row_hash = { 'pk_id' => '1', 'name' => 'clientName1',
 				'billingType' => 'trade' }
-		objectHash = SqlValueConverter.new(InternalClient, row_hash)
+		objectHash = ObjectStore::SqlToRubyValues.new(InternalClient, row_hash)
 		assert_equal 'clientName1', objectHash['name']
 		assert_equal 'trade', objectHash['billingType']
 	end
@@ -1040,7 +1040,7 @@ class TestSqlValueConverter < LafcadioTestCase
 	def test_raises_if_bad_primary_key_match
 		row_hash = { 'objId' => '1', 'name' => 'client name',
 		             'standard_rate' => '70' }
-		object_hash = SqlValueConverter.new( Client, row_hash )
+		object_hash = ObjectStore::SqlToRubyValues.new( Client, row_hash )
 		error_msg = 'The field "pk_id" can\'t be found in the table "clients".'
 		assert_raise( FieldMatchError, error_msg ) { object_hash['pk_id'] }
 	end
@@ -1049,7 +1049,7 @@ class TestSqlValueConverter < LafcadioTestCase
     row_hash = { "client" => "1", "date" => DBI::Date.new( 2001, 1, 1 ),
                 "rate" => "70", "hours" => "40",
                 "paid" => DBI::Date.new( 0, 0, 0 ) }
-    converter = SqlValueConverter.new(Invoice, row_hash)
+    converter = ObjectStore::SqlToRubyValues.new(Invoice, row_hash)
 		assert_nil converter['clientId']
 		assert_equal DomainObjectProxy, converter['client'].class
 		proxy = converter['client']

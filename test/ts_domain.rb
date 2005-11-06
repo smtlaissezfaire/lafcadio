@@ -303,7 +303,9 @@ class TestDomainObject < LafcadioTestCase
 
 	def test_defers_field_copying
 		xml_sku_row_hash = OneTimeAccessHash.new( 'some_other_id' => '345' )
-		xml_sku_converter = SqlValueConverter.new( XmlSku, xml_sku_row_hash )
+		xml_sku_converter = ObjectStore::SqlToRubyValues.new(
+			XmlSku, xml_sku_row_hash
+		)
 		xml_sku = XmlSku.new( xml_sku_converter )
 		assert_equal( 345, xml_sku.pk_id )
 	end
