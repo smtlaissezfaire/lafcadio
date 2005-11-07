@@ -98,12 +98,10 @@ module Lafcadio
 	# testing, and in fact LafcadioTestCase#setup creates a new instance of
 	# MockObjectStore for each test case.
 	class MockObjectStore < ObjectStore
+		def self.db_bridge; MockDbBridge.new; end
+		
 		public_class_method :new
 
-		def initialize # :nodoc:
-			super( MockDbBridge.new )
-		end
-		
 		def mock? # :nodoc:
 			true
 		end

@@ -135,33 +135,26 @@ module Lafcadio
 	class ObjectStore < ContextualService::Service
 		def self.mock?; get_object_store.mock?; end
 		
+		@@db_bridge = nil
+			
+		def self.db_bridge; @@db_bridge ||= DbBridge.new; end
+			
 		def self.db_name= (dbName) #:nodoc:
 			DbConnection.set_db_name dbName
 		end
 		
-		def initialize( dbBridge = nil ) #:nodoc:
-			@dbBridge = dbBridge == nil ? DbBridge.new : dbBridge
-			@cache = ObjectStore::Cache.new( @dbBridge )
-		end
-
-		# Commits a domain object to the database. You can also simply call
-		#   myDomainObject.commit
-		def commit(db_object)
-			@cache.commit( db_object )
-			db_object
-		end
-		
-		# Flushes one domain object from its cache.
-		def flush(db_object)
-			@cache.flush db_object
+		def initialize #:nodoc:
+			@cache = ObjectStore::Cache.new self.class.db_bridge
 		end
 
 		# Returns the domain object corresponding to the domain class and pk_id.
 		def get( domain_class, pk_id )
-			query = Query.new domain_class, pk_id
-			@cache.get_by_query( query )[0] ||
-			    ( raise( DomainObjectNotFoundError,
-					         "Can't find #{domain_class} #{pk_id}", caller ) )
+			@cache.get_by_query( Query.new( domain_class, pk_id ) ).first or (
+				raise(
+					DomainObjectNotFoundError, "Can't find #{domain_class} #{pk_id}",
+					caller
+				)
+			)
 		end
 
 		# Returns all domain objects for the given domain class.
@@ -248,9 +241,13 @@ module Lafcadio
 		end
 
 		def method_missing(methodId, *args) #:nodoc:
-			proc = block_given? ? ( proc { |obj| yield( obj ) } ) : nil
-			dispatch = MethodDispatch.new( methodId, proc, *args )
-			self.send( dispatch.symbol, *dispatch.args )
+			if [ :commit, :flush ].include?( methodId )
+				@cache.send( methodId, *args )
+			else
+				proc = block_given? ? ( proc { |obj| yield( obj ) } ) : nil
+				dispatch = MethodDispatch.new( methodId, proc, *args )
+				self.send( dispatch.symbol, *dispatch.args )
+			end
 		end
 		
 		def mock? #:nodoc:
@@ -272,8 +269,8 @@ module Lafcadio
 		class Cache #:nodoc:
 			attr_reader :db_bridge
 			
-			def initialize( dbBridge )
-				@db_bridge = dbBridge
+			def initialize( db_bridge = DbBridge.new )
+				@db_bridge = db_bridge
 				@objects = {}
 				@collections_by_query = {}
 				@commit_times = {}
@@ -288,6 +285,7 @@ module Lafcadio
 				db_object.pk_id = @db_bridge.last_pk_id_inserted unless db_object.pk_id
 				update_after_commit db_object
 				db_object.post_commit_trigger
+				db_object
 			end
 
 			# Flushes a domain object.

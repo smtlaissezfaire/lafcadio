@@ -604,8 +604,8 @@ class TestObjectStore < LafcadioTestCase
 		super
 		context = ContextualService::Context.instance
 		context.flush
-		@mockDbBridge = MockDbBridge.new
-		@testObjectStore = ObjectStore.new( @mockDbBridge )
+		@testObjectStore = MockObjectStore.new
+		@mockDbBridge = @testObjectStore.get_db_bridge
 		ObjectStore.set_object_store @testObjectStore
 	end
 	
@@ -692,7 +692,7 @@ class TestObjectStore < LafcadioTestCase
 	
   def testDumpable
 		newOs = Marshal.load(Marshal.dump(@testObjectStore))
-    assert_equal ObjectStore, newOs.class
+    assert_equal MockObjectStore, newOs.class
   end
 
 	def testDynamicMethodNameDispatchingRaisesNoMethodError
