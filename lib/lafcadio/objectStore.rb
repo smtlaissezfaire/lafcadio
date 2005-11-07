@@ -158,16 +158,14 @@ module Lafcadio
 		end
 
 		# Returns all domain objects for the given domain class.
-		def get_all(domain_class); @cache.get_by_query( Query.new( domain_class ) ); end
+		def get_all(domain_class)
+			@cache.get_by_query( Query.new( domain_class ) )
+		end
 
 		# Returns the DbBridge; this is useful in case you need to use raw SQL for a
 		# specific query.
 		def get_db_bridge; @cache.db_bridge; end
 		
-		def get_field_name( domain_object )
-			domain_object.domain_class.basename.camel_case_to_underscore
-		end
-
 		def get_filtered(domain_class_name, searchTerm, fieldName = nil) #:nodoc:
 			domain_class = Class.by_name domain_class_name
 			unless fieldName
@@ -176,31 +174,22 @@ module Lafcadio
 			get_subset( Query::Equals.new( fieldName, searchTerm, domain_class ) )
 		end
 
-		def get_map_match( domain_class, mapped ) #:nodoc:
-			Query::Equals.new( get_field_name( mapped ), mapped, domain_class )
-		end
-
 		def get_map_object( domain_class, map1, map2 ) #:nodoc:
 			unless map1 && map2
 				raise ArgumentError,
 						"ObjectStore#get_map_object needs two non-nil keys", caller
 			end
-			mapMatch1 = get_map_match domain_class, map1
-			mapMatch2 = get_map_match domain_class, map2
-			condition = Query::CompoundCondition.new mapMatch1, mapMatch2
-			get_subset(condition)[0]
+			query = Query.infer( domain_class ) { |dobj|
+				dobj.send(
+					map1.domain_class.basename.camel_case_to_underscore
+				).equals( map1 ) &
+				dobj.send(
+					map2.domain_class.basename.camel_case_to_underscore
+				).equals( map2 )
+			}
+			get_subset( query ).first
 		end
 
-		def get_mapped(searchTerm, resultTypeName) #:nodoc:
-			resultType = Module.by_name resultTypeName
-			firstTypeName = searchTerm.class.basename
-			secondTypeName = resultType.basename
-			mapTypeName = firstTypeName + secondTypeName
-			get_filtered( mapTypeName, searchTerm ).collect { |mapObj|
-				mapObj.send( resultType.name.decapitalize )
-			}
-		end
-		
 		# Retrieves the maximum value across all instances of one domain class.
 		#   ObjectStore#get_max( Client )
 		# returns the highest +pk_id+ in the +clients+ table.

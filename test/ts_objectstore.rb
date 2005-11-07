@@ -824,17 +824,6 @@ class TestObjectStore < LafcadioTestCase
 		end 
 	end
 	
-	def test_get_mapped
-		ili = TestInventoryLineItem.storedTestInventoryLineItem
-		option = TestOption.storedTestOption
-		iliOption = TestInventoryLineItemOption.storedTestInventoryLineItemOption
-		collection = @testObjectStore.get_mapped( ili, 'Option' )
-		assert_equal( 1, collection.size )
-		option_prime = collection.first
-		assert_equal( Option, option_prime.domain_class )
-		assert_equal( option, option_prime )
-	end
-
 	def testGetObjects
 		@testObjectStore.commit Client.new( { "pk_id" => 1, "name" => "clientName1" } )
 		@testObjectStore.commit Client.new( { "pk_id" => 2, "name" => "clientName2" } )
