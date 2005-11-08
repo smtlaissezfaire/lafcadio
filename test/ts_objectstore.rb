@@ -17,6 +17,11 @@ class TestObjectStoreCache < LafcadioTestCase
 		@cache = @mockObjectStore.cache
 	end
 
+	def all( domain_class )
+		q = Query.new domain_class
+		@cache.get_by_query q
+	end
+	
 	def testAssignsPkIdOnNewCommit
 		client = Client.new({ 'name' => 'client name' })
 		assert_nil client.pk_id
@@ -29,9 +34,9 @@ class TestObjectStoreCache < LafcadioTestCase
 		user.pk_id = 1
 		@cache.save( user )
 		assert( user.object_id != @cache.get( User, 1 ).object_id )
-		@cache.get_all( User ).each { |a_user|
+		all( User ).each do |a_user|
 			assert( user.object_id != a_user.object_id )
-		}
+		end
 	end
 	
 	def test_delete_cascade
@@ -67,10 +72,11 @@ class TestObjectStoreCache < LafcadioTestCase
 
 	def testFlush
 		user = User.getTestUser
-		@cache.save(user)
-		assert_equal 1, @cache.get_all(User).size
-		@cache.flush(user)
-		assert_equal 0, @cache.get_all(User).size
+		user.commit
+		assert_equal( 1, all( User ).size )
+		user.delete = true
+		user.commit
+		assert_equal( 0, all( User ).size )
 	end
 
 	def test_last_commit_type

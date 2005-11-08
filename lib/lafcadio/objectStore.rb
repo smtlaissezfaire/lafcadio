@@ -261,7 +261,6 @@ module Lafcadio
 			def initialize( db_bridge = DbBridge.new )
 				@db_bridge = db_bridge
 				@domain_class_caches = {}
-				@queries = {}
 			end
 
 			def commit( db_object )
@@ -282,19 +281,28 @@ module Lafcadio
 				end
 				@domain_class_caches[domain_class]
 			end
+			
+			def find_superset_pk_ids( query )
+				queries = domain_class_cache( query.domain_class ).queries
+				superset_query, pk_ids =
+					queries( query.domain_class ).find { |other_query, pk_ids|
+						query.implies?( other_query )
+					}
+				pk_ids
+			end
 
 			# Flushes a domain object.
 			def flush(db_object)
-				domain_class_cache( db_object.domain_class ).delete db_object.pk_id
-				flush_queries( db_object.domain_class )
+				domain_class_cache( db_object.domain_class ).delete( db_object.pk_id )
+				flush_queries db_object.domain_class
 			end
 			
 			def flush_queries( domain_class )
-				@queries.keys.each { |query|
+				queries( domain_class ).keys.each do |query|
 					if query.domain_class == domain_class
-						@queries.delete( query )
+						queries( domain_class ).delete( query )
 					end
-				}
+				end
 			end
 
 			# Returns a cached domain object, or nil if none is found.
@@ -306,35 +314,24 @@ module Lafcadio
 				end
 			end
 
-			# Returns an array of all domain objects of a given type.
-			def get_all( domain_class )
-				domain_class_cache( domain_class ).collect { |d_obj|
-					d_obj.clone
-				}
-			end
-
 			def get_by_query( query )
-				unless @queries[query]
-					superset_query, pk_ids =
-						@queries.find { |other_query, pk_ids|
-							query.implies?( other_query )
-						}
-					if pk_ids
-						@queries[query] = ( pk_ids.collect { |pk_id|
+				unless queries( query.domain_class )[query]
+					if ( pk_ids = find_superset_pk_ids( query ) )
+						queries( query.domain_class )[query] = ( pk_ids.collect { |pk_id|
 							get( query.domain_class, pk_id )
 						} ).select { |dobj| query.object_meets( dobj ) }.collect { |dobj|
 							dobj.pk_id
 						}
-					elsif @queries.values
+					elsif queries( query.domain_class ).values
 						newObjects = @db_bridge.collection_by_query(query)
 						newObjects.each { |dbObj| save dbObj }
-						@queries[query] = newObjects.collect { |dobj|
+						queries( query.domain_class )[query] = newObjects.collect { |dobj|
 							dobj.pk_id
 						}
 					end
 				end
 				collection = []
-				@queries[query].each { |pk_id|
+				queries( query.domain_class )[query].each { |pk_id|
 					dobj = get( query.domain_class, pk_id )
 					collection << dobj if dobj
 				}
@@ -357,6 +354,10 @@ module Lafcadio
 			end
 			
 			def method_missing( meth, *args ); @db_bridge.send( meth, *args ); end
+				
+			def queries( domain_class )
+				domain_class_cache( domain_class ).queries
+			end
 			
 			def set_commit_time( d_obj )
 				unless @domain_class_caches[d_obj.domain_class]
@@ -404,11 +405,12 @@ module Lafcadio
 			end
 			
 			class DomainClassCache < Hash
-				attr_reader :commit_times
+				attr_reader :commit_times, :queries
 				
 				def initialize
 					super()
 					@commit_times = {}
+					@queries = {}
 				end
 			end
 		end
