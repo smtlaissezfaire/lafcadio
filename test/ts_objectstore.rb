@@ -700,13 +700,13 @@ class TestObjectStore < LafcadioTestCase
 			@testObjectStore.notAMethod
 			raise "Should raise NoMethodError"
 		rescue NoMethodError
-			assert_match( /undefined method 'notAMethod'/, $!.to_s )
+			assert_match( /undefined method `notAMethod'/, $!.to_s )
 		end
 		begin
 			@testObjectStore.get_foo_bar
 			raise "Should raise NoMethodError"
 		rescue NoMethodError
-			assert_match( /undefined method 'get_foo_bar'/, $!.to_s )
+			assert_match( /undefined method `get_foo_bar'/, $!.to_s )
 			# ok
 		end
 	end
@@ -960,7 +960,7 @@ class TestObjectStore < LafcadioTestCase
 	
 	def test_respond_to?
 		[ :get_client, :get_clients ].each { |meth_id|
-			assert( @testObjectStore.respond_to?( meth_id ) )
+			assert( @testObjectStore.respond_to?( meth_id ), meth_id )
 		}
 		[ :get_foo_bar, :foo_bar ].each { |meth_id|
 			assert( !@testObjectStore.respond_to?( meth_id ) )

@@ -225,17 +225,17 @@ module Lafcadio
 			@cache.get_by_query( query )
 		end
 		
-		def last_commit_time( domain_class, pk_id ) #:nodoc:
-			@cache.last_commit_time( domain_class, pk_id )
-		end
-
 		def method_missing(methodId, *args) #:nodoc:
-			if [ :commit, :flush ].include?( methodId )
+			if [ :commit, :flush, :last_commit_time ].include?( methodId )
 				@cache.send( methodId, *args )
 			else
 				proc = block_given? ? ( proc { |obj| yield( obj ) } ) : nil
 				dispatch = MethodDispatch.new( methodId, proc, *args )
-				self.send( dispatch.symbol, *dispatch.args )
+				if dispatch.symbol
+					self.send( dispatch.symbol, *dispatch.args )
+				else
+					super
+				end
 			end
 		end
 		
@@ -246,9 +246,9 @@ module Lafcadio
 		def query( query ); @cache.group_query( query ); end
 
 		def respond_to?( symbol, include_private = false )
-			begin
-				dispatch = MethodDispatch.new( symbol )
-			rescue NoMethodError
+			if MethodDispatch.new( symbol ).symbol
+				true
+			else
 				super
 			end
 		end
@@ -260,7 +260,7 @@ module Lafcadio
 			
 			def initialize( db_bridge = DbBridge.new )
 				@db_bridge = db_bridge
-				@objects = {}
+				@domain_class_caches = {}
 				@collections_by_query = {}
 				@commit_times = {}
 			end
@@ -346,10 +346,10 @@ module Lafcadio
 			end
 
 			def hash_by_domain_class( domain_class )
-				unless @objects[domain_class]
-					@objects[domain_class] = {}
+				unless @domain_class_caches[domain_class]
+					@domain_class_caches[domain_class] = DomainClassCache.new
 				end
-				@objects[domain_class]
+				@domain_class_caches[domain_class].domain_objects
 			end
 
 			def last_commit_time( domain_class, pk_id )
@@ -403,6 +403,14 @@ module Lafcadio
 						object_store.commit dependentObject
 					}
 				}
+			end
+			
+			class DomainClassCache
+				attr_reader :domain_objects
+				
+				def initialize
+					@domain_objects = {}
+				end
 			end
 		end
 
@@ -639,8 +647,6 @@ module Lafcadio
 				@methodName = orig_method.id2name
 				if @methodName =~ /^get(.*)$/
 					dispatch_get_method
-				else
-					raise_no_method_error
 				end
 			end
 			
@@ -690,7 +696,7 @@ module Lafcadio
 						@domain_class = Module.by_name domain_class_name
 						dispatch_get_plural
 					rescue NameError
-						raise_no_method_error
+						# skip it
 					end
 				end
 			end
@@ -704,6 +710,8 @@ module Lafcadio
 					elsif @orig_args[0].class <= DomainObject
 						@symbol = :get_map_object
 						@args = [ domain_class, @orig_args[0], @orig_args[1] ]
+					elsif @orig_args.empty?
+						@symbol = :get
 					end
 					true
 				rescue NameError
@@ -714,10 +722,6 @@ module Lafcadio
 			def camel_case_method_name_after_get
 				@orig_method.id2name =~ /^get(.*)$/
 				$1.underscore_to_camel_case
-			end
-			
-			def raise_no_method_error
-				raise( NoMethodError, "undefined method '#{ @methodName }'", caller )
 			end
 		end
 
