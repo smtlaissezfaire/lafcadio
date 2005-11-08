@@ -261,8 +261,7 @@ module Lafcadio
 			def initialize( db_bridge = DbBridge.new )
 				@db_bridge = db_bridge
 				@domain_class_caches = {}
-				@collections_by_query = {}
-				@commit_times = {}
+				@queries = {}
 			end
 
 			def commit( db_object )
@@ -276,24 +275,31 @@ module Lafcadio
 				db_object.post_commit_trigger
 				db_object
 			end
+			
+			def domain_class_cache( domain_class )
+				unless @domain_class_caches[domain_class]
+					@domain_class_caches[domain_class] = DomainClassCache.new
+				end
+				@domain_class_caches[domain_class]
+			end
 
 			# Flushes a domain object.
 			def flush(db_object)
-				hash_by_domain_class( db_object.domain_class ).delete db_object.pk_id
-				flush_collection_cache( db_object.domain_class )
+				domain_class_cache( db_object.domain_class ).delete db_object.pk_id
+				flush_queries( db_object.domain_class )
 			end
 			
-			def flush_collection_cache( domain_class )
-				@collections_by_query.keys.each { |query|
+			def flush_queries( domain_class )
+				@queries.keys.each { |query|
 					if query.domain_class == domain_class
-						@collections_by_query.delete( query )
+						@queries.delete( query )
 					end
 				}
 			end
 
 			# Returns a cached domain object, or nil if none is found.
 			def get( domain_class, pk_id )
-				if ( dobj = hash_by_domain_class( domain_class )[pk_id] )
+				if ( dobj = domain_class_cache( domain_class )[pk_id] )
 					dobj.clone
 				else
 					nil
@@ -302,33 +308,33 @@ module Lafcadio
 
 			# Returns an array of all domain objects of a given type.
 			def get_all( domain_class )
-				hash_by_domain_class( domain_class ).values.collect { |d_obj|
+				domain_class_cache( domain_class ).collect { |d_obj|
 					d_obj.clone
 				}
 			end
 
 			def get_by_query( query )
-				unless @collections_by_query[query]
+				unless @queries[query]
 					superset_query, pk_ids =
-						@collections_by_query.find { |other_query, pk_ids|
+						@queries.find { |other_query, pk_ids|
 							query.implies?( other_query )
 						}
 					if pk_ids
-						@collections_by_query[query] = ( pk_ids.collect { |pk_id|
+						@queries[query] = ( pk_ids.collect { |pk_id|
 							get( query.domain_class, pk_id )
 						} ).select { |dobj| query.object_meets( dobj ) }.collect { |dobj|
 							dobj.pk_id
 						}
-					elsif @collections_by_query.values
+					elsif @queries.values
 						newObjects = @db_bridge.collection_by_query(query)
 						newObjects.each { |dbObj| save dbObj }
-						@collections_by_query[query] = newObjects.collect { |dobj|
+						@queries[query] = newObjects.collect { |dobj|
 							dobj.pk_id
 						}
 					end
 				end
 				collection = []
-				@collections_by_query[query].each { |pk_id|
+				@queries[query].each { |pk_id|
 					dobj = get( query.domain_class, pk_id )
 					collection << dobj if dobj
 				}
@@ -345,34 +351,26 @@ module Lafcadio
 				end
 			end
 
-			def hash_by_domain_class( domain_class )
-				unless @domain_class_caches[domain_class]
-					@domain_class_caches[domain_class] = DomainClassCache.new
-				end
-				@domain_class_caches[domain_class].domain_objects
-			end
-
 			def last_commit_time( domain_class, pk_id )
-				by_domain_class = @commit_times[domain_class]
-				by_domain_class ? by_domain_class[pk_id] : nil
+				dcc = @domain_class_caches[domain_class]
+				dcc ? dcc.commit_times[pk_id] : nil
 			end
 			
 			def method_missing( meth, *args ); @db_bridge.send( meth, *args ); end
 			
 			def set_commit_time( d_obj )
-				by_domain_class = @commit_times[d_obj.domain_class]
-				if by_domain_class.nil?
-					by_domain_class = {}
-					@commit_times[d_obj.domain_class] = by_domain_class
+				unless @domain_class_caches[d_obj.domain_class]
+					@domain_class_caches[d_obj.domain_class] = DomainClassCache.new
 				end
-				by_domain_class[d_obj.pk_id] = Time.now
+				commit_times = @domain_class_caches[d_obj.domain_class].commit_times
+				commit_times[d_obj.pk_id] = Time.now
 			end
 
 			# Saves a domain object.
 			def save(db_object)
-				hash = hash_by_domain_class( db_object.domain_class )
-				hash[db_object.pk_id] = db_object
-				flush_collection_cache( db_object.domain_class )
+				dcc = domain_class_cache( db_object.domain_class )
+				dcc[db_object.pk_id] = db_object
+				flush_queries db_object.domain_class
 			end
 			
 			def update_after_commit( db_object ) #:nodoc:
@@ -405,11 +403,12 @@ module Lafcadio
 				}
 			end
 			
-			class DomainClassCache
-				attr_reader :domain_objects
+			class DomainClassCache < Hash
+				attr_reader :commit_times
 				
 				def initialize
-					@domain_objects = {}
+					super()
+					@commit_times = {}
 				end
 			end
 		end
