@@ -275,32 +275,21 @@ module Lafcadio
 				db_object
 			end
 			
-			def domain_class_cache( domain_class )
+			def cache( domain_class )
 				unless @domain_class_caches[domain_class]
-					@domain_class_caches[domain_class] = DomainClassCache.new domain_class
+					@domain_class_caches[domain_class] = DomainClassCache.new(
+						domain_class, @db_bridge
+					)
 				end
 				@domain_class_caches[domain_class]
 			end
 			
-			def flush( dobj )
-				domain_class_cache( dobj.domain_class ).flush( dobj )
-			end
-			
-			# Returns a cached domain object, or nil if none is found.
-			def get( domain_class, pk_id )
-				if ( dobj = domain_class_cache( domain_class )[pk_id] )
-					dobj.clone
-				else
-					nil
-				end
-			end
-
 			def get_by_query( query )
 				unless queries( query.domain_class )[query]
-					dcc = domain_class_cache query.domain_class
+					dcc = cache query.domain_class
 					if ( pk_ids = dcc.find_superset_pk_ids( query ) )
 						queries( query.domain_class )[query] = ( pk_ids.collect { |pk_id|
-							get( query.domain_class, pk_id )
+							self[ query.domain_class, pk_id ]
 						} ).select { |dobj| query.object_meets( dobj ) }.collect { |dobj|
 							dobj.pk_id
 						}
@@ -314,7 +303,7 @@ module Lafcadio
 				end
 				collection = []
 				queries( query.domain_class )[query].each { |pk_id|
-					dobj = get( query.domain_class, pk_id )
+					dobj = self[ query.domain_class, pk_id ]
 					collection << dobj if dobj
 				}
 				collection
@@ -335,11 +324,17 @@ module Lafcadio
 				dcc ? dcc.commit_times[pk_id] : nil
 			end
 			
-			def method_missing( meth, *args ); @db_bridge.send( meth, *args ); end
-				
-			def queries( domain_class )
-				domain_class_cache( domain_class ).queries
+			def method_missing( meth, *args )
+				if false
+					cache( args.first.domain_class ).send( meth, *args )
+				elsif [ :[] ].include?( meth )
+					cache( args.first ).send( meth, *args[1..-1] )
+				elsif [ :group_query, :transaction ].include?( meth )
+					@db_bridge.send( meth, *args )
+				end
 			end
+				
+			def queries( domain_class ); cache( domain_class ).queries; end
 			
 			def set_commit_time( d_obj )
 				unless @domain_class_caches[d_obj.domain_class]
@@ -351,7 +346,7 @@ module Lafcadio
 
 			# Saves a domain object.
 			def save(db_object)
-				dcc = domain_class_cache( db_object.domain_class )
+				dcc = cache( db_object.domain_class )
 				dcc[db_object.pk_id] = db_object
 				dcc.flush_queries
 			end
@@ -362,7 +357,7 @@ module Lafcadio
 				)
 					save db_object
 				elsif db_object.last_commit_type == DomainObject::COMMIT_DELETE
-					domain_class_cache( db_object.domain_class ).flush db_object
+					cache( db_object.domain_class ).flush db_object
 				end
 				set_commit_time db_object
 			end
@@ -389,9 +384,9 @@ module Lafcadio
 			class DomainClassCache < Hash
 				attr_reader :commit_times, :domain_class, :queries
 				
-				def initialize( domain_class )
+				def initialize( domain_class, db_bridge )
 					super()
-					@domain_class = domain_class
+					@domain_class, @db_bridge = domain_class, db_bridge
 					@commit_times = {}
 					@queries = {}
 				end
@@ -414,6 +409,11 @@ module Lafcadio
 					queries.keys.each do |query|
 						queries.delete( query ) if query.domain_class == domain_class
 					end
+				end
+
+				def []( pk_id )
+					dobj = super
+					dobj ? dobj.clone : nil
 				end
 			end
 		end

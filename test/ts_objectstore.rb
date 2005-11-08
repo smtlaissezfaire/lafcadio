@@ -60,9 +60,9 @@ class TestObjectStoreCache < LafcadioTestCase
 		@cache.commit invoice
     client.delete = true
 		@cache.commit client
-		assert_nil @cache.get( Client, 1 )
-		assert_not_nil @cache.get( Invoice, 1 )
-		assert_nil @cache.get(Invoice, 1).client
+		assert_nil @cache[Client, 1]
+		assert_not_nil @cache[Invoice, 1]
+		assert_nil @cache[Invoice, 1].client
   end
 
 	def test_dumpable
