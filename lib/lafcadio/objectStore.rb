@@ -285,28 +285,7 @@ module Lafcadio
 			end
 			
 			def get_by_query( query )
-				unless queries( query.domain_class )[query]
-					dcc = cache query.domain_class
-					if ( pk_ids = dcc.find_superset_pk_ids( query ) )
-						queries( query.domain_class )[query] = ( pk_ids.collect { |pk_id|
-							self[ query.domain_class, pk_id ]
-						} ).select { |dobj| query.object_meets( dobj ) }.collect { |dobj|
-							dobj.pk_id
-						}
-					elsif queries( query.domain_class ).values
-						newObjects = @db_bridge.collection_by_query(query)
-						newObjects.each { |dbObj| save dbObj }
-						queries( query.domain_class )[query] = newObjects.collect { |dobj|
-							dobj.pk_id
-						}
-					end
-				end
-				collection = []
-				queries( query.domain_class )[query].each { |pk_id|
-					dobj = self[ query.domain_class, pk_id ]
-					collection << dobj if dobj
-				}
-				collection
+				cache( query.domain_class ).get_by_query( query )
 			end
 
 			def get_last_commit( db_object )
@@ -325,7 +304,7 @@ module Lafcadio
 			end
 			
 			def method_missing( meth, *args )
-				if false
+				if [ :save ].include?( meth )
 					cache( args.first.domain_class ).send( meth, *args )
 				elsif [ :[] ].include?( meth )
 					cache( args.first ).send( meth, *args[1..-1] )
@@ -344,13 +323,6 @@ module Lafcadio
 				commit_times[d_obj.pk_id] = Time.now
 			end
 
-			# Saves a domain object.
-			def save(db_object)
-				dcc = cache( db_object.domain_class )
-				dcc[db_object.pk_id] = db_object
-				dcc.flush_queries
-			end
-			
 			def update_after_commit( db_object ) #:nodoc:
 				if [ DomainObject::COMMIT_EDIT, DomainObject::COMMIT_ADD ].include?(
 					db_object.last_commit_type
@@ -390,6 +362,11 @@ module Lafcadio
 					@commit_times = {}
 					@queries = {}
 				end
+
+				def []( pk_id )
+					dobj = super
+					dobj ? dobj.clone : nil
+				end
 				
 				def find_superset_pk_ids( query )
 					superset_query, pk_ids =
@@ -411,9 +388,32 @@ module Lafcadio
 					end
 				end
 
-				def []( pk_id )
-					dobj = super
-					dobj ? dobj.clone : nil
+				def get_by_query( query )
+					unless queries[query]
+						if ( pk_ids = find_superset_pk_ids( query ) )
+							queries[query] = ( pk_ids.collect { |pk_id|
+								self[ pk_id ]
+							} ).select { |dobj| query.object_meets( dobj ) }.collect { |dobj|
+								dobj.pk_id
+							}
+						elsif queries.values
+							newObjects = @db_bridge.collection_by_query(query)
+							newObjects.each { |dbObj| save dbObj }
+							queries[query] = newObjects.collect { |dobj| dobj.pk_id }
+						end
+					end
+					collection = []
+					queries[query].each { |pk_id|
+						dobj = self[ pk_id ]
+						collection << dobj if dobj
+					}
+					collection
+				end
+
+				# Saves a domain object.
+				def save(db_object)
+					self[db_object.pk_id] = db_object
+					flush_queries
 				end
 			end
 		end
