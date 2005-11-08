@@ -277,34 +277,15 @@ module Lafcadio
 			
 			def domain_class_cache( domain_class )
 				unless @domain_class_caches[domain_class]
-					@domain_class_caches[domain_class] = DomainClassCache.new
+					@domain_class_caches[domain_class] = DomainClassCache.new domain_class
 				end
 				@domain_class_caches[domain_class]
 			end
 			
-			def find_superset_pk_ids( query )
-				queries = domain_class_cache( query.domain_class ).queries
-				superset_query, pk_ids =
-					queries( query.domain_class ).find { |other_query, pk_ids|
-						query.implies?( other_query )
-					}
-				pk_ids
-			end
-
-			# Flushes a domain object.
-			def flush(db_object)
-				domain_class_cache( db_object.domain_class ).delete( db_object.pk_id )
-				flush_queries db_object.domain_class
+			def flush( dobj )
+				domain_class_cache( dobj.domain_class ).flush( dobj )
 			end
 			
-			def flush_queries( domain_class )
-				queries( domain_class ).keys.each do |query|
-					if query.domain_class == domain_class
-						queries( domain_class ).delete( query )
-					end
-				end
-			end
-
 			# Returns a cached domain object, or nil if none is found.
 			def get( domain_class, pk_id )
 				if ( dobj = domain_class_cache( domain_class )[pk_id] )
@@ -316,7 +297,8 @@ module Lafcadio
 
 			def get_by_query( query )
 				unless queries( query.domain_class )[query]
-					if ( pk_ids = find_superset_pk_ids( query ) )
+					dcc = domain_class_cache query.domain_class
+					if ( pk_ids = dcc.find_superset_pk_ids( query ) )
 						queries( query.domain_class )[query] = ( pk_ids.collect { |pk_id|
 							get( query.domain_class, pk_id )
 						} ).select { |dobj| query.object_meets( dobj ) }.collect { |dobj|
@@ -371,7 +353,7 @@ module Lafcadio
 			def save(db_object)
 				dcc = domain_class_cache( db_object.domain_class )
 				dcc[db_object.pk_id] = db_object
-				flush_queries db_object.domain_class
+				dcc.flush_queries
 			end
 			
 			def update_after_commit( db_object ) #:nodoc:
@@ -380,7 +362,7 @@ module Lafcadio
 				)
 					save db_object
 				elsif db_object.last_commit_type == DomainObject::COMMIT_DELETE
-					flush db_object
+					domain_class_cache( db_object.domain_class ).flush db_object
 				end
 				set_commit_time db_object
 			end
@@ -405,12 +387,33 @@ module Lafcadio
 			end
 			
 			class DomainClassCache < Hash
-				attr_reader :commit_times, :queries
+				attr_reader :commit_times, :domain_class, :queries
 				
-				def initialize
+				def initialize( domain_class )
 					super()
+					@domain_class = domain_class
 					@commit_times = {}
 					@queries = {}
+				end
+				
+				def find_superset_pk_ids( query )
+					superset_query, pk_ids =
+						queries.find { |other_query, pk_ids|
+							query.implies?( other_query )
+						}
+					pk_ids
+				end
+				
+				# Flushes a domain object.
+				def flush( db_object )
+					delete db_object.pk_id
+					flush_queries
+				end
+				
+				def flush_queries
+					queries.keys.each do |query|
+						queries.delete( query ) if query.domain_class == domain_class
+					end
 				end
 			end
 		end
