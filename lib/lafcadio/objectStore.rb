@@ -539,6 +539,27 @@ module Lafcadio
 				end
 			end
 			
+			def group_query( query )
+				select_all( query.to_sql ).map { |row| query.result_row( row ) }
+			end
+	
+			def last_pk_id_inserted; @@last_pk_id_inserted; end
+			
+			def maybe_log(sql)
+				config = LafcadioConfig.new
+				if config['logSql'] == 'y'
+					sqllog = Log4r::Logger['sql'] || Log4r::Logger.new( 'sql' )
+					filename = File.join(
+						config['logdir'], config['sqlLogFile'] || 'sql'
+					)
+					outputter = Log4r::FileOutputter.new(
+						'outputter', { :filename => filename }
+					)
+					sqllog.outputters = outputter
+					sqllog.info sql
+				end
+			end
+			
 			def select_all(sql)
 				maybe_log sql
 				begin
@@ -553,24 +574,6 @@ module Lafcadio
 				select_all( query.to_sql ).collect { |row_hash|
 					domain_class.new( SqlToRubyValues.new( domain_class, row_hash ) )
 				}
-			end
-			
-			def group_query( query )
-				select_all( query.to_sql ).map { |row| query.result_row( row ) }
-			end
-	
-			def last_pk_id_inserted; @@last_pk_id_inserted; end
-			
-			def maybe_log(sql)
-				config = LafcadioConfig.new
-				if config['logSql'] == 'y'
-					sqllog = Log4r::Logger['sql'] || Log4r::Logger.new( 'sql' )
-					filename = File.join( config['logdir'], config['sqlLogFile'] || 'sql' )
-					outputter = Log4r::FileOutputter.new( 'outputter',
-																								{ :filename => filename } )
-					sqllog.outputters = outputter
-					sqllog.info sql
-				end
 			end
 			
 			def transaction( action )
@@ -603,7 +606,7 @@ module Lafcadio
 		end
 
 		class DbConnection < ContextualService::Service
-			@@connectionClass = DBI
+			@@conn_class = DBI
 			@@db_name = nil
 			@@dbh = nil
 	
@@ -612,7 +615,7 @@ module Lafcadio
 				@@dbh = nil
 			end
 	
-			def self.set_connection_class( aClass ); @@connectionClass = aClass; end
+			def self.connection_class=( aClass ); @@conn_class = aClass; end
 	
 			def self.set_db_name( db_name ); @@db_name = db_name; end
 	
@@ -634,8 +637,9 @@ module Lafcadio
 				else
 					dbAndHost = "dbi:#{config['dbconn']}"
 				end
-				@@dbh = @@connectionClass.connect( dbAndHost, config['dbuser'],
-																					 config['dbpassword'] )
+				@@dbh = @@conn_class.connect(
+					dbAndHost, config['dbuser'], config['dbpassword']
+				)
 				@@dbh['AutoCommit'] = false
 				@@dbh
 			end

@@ -364,20 +364,20 @@ class TestDbConnection < Test::Unit::TestCase
   end
 
   def testConnectionPooling
-  	ObjectStore::DbConnection.set_connection_class( MockDbi )
+  	ObjectStore::DbConnection.connection_class = MockDbi
     100.times { ObjectStore::DbConnection.get_db_connection }
     ObjectStore::DbConnection.flush
-    ObjectStore::DbConnection.set_connection_class( DBI )
+    ObjectStore::DbConnection.connection_class = DBI
   end
 
 	def testDbName
-  	ObjectStore::DbConnection.set_connection_class( MockDbi )
+  	ObjectStore::DbConnection.connection_class = MockDbi
   	ObjectStore::DbConnection.flush
 		MockDbi.flushInstanceCount
 		ObjectStore.db_name = 'some_other_db'
 		db = ObjectStore::DbBridge.new
 		assert_equal 'some_other_db', MockDbi.dbName
-    ObjectStore::DbConnection.set_connection_class( DBI )
+    ObjectStore::DbConnection.connection_class = DBI
 	end
 	
 	def testDisconnect
