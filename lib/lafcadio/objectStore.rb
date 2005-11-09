@@ -284,10 +284,6 @@ module Lafcadio
 				@domain_class_caches[domain_class]
 			end
 			
-			def get_by_query( query )
-				cache( query.domain_class ).get_by_query( query )
-			end
-
 			def get_last_commit( db_object )
 				if db_object.delete
 					DomainObject::COMMIT_DELETE
@@ -298,40 +294,18 @@ module Lafcadio
 				end
 			end
 
-			def last_commit_time( domain_class, pk_id )
-				dcc = @domain_class_caches[domain_class]
-				dcc ? dcc.commit_times[pk_id] : nil
-			end
-			
 			def method_missing( meth, *args )
-				if [ :save ].include?( meth )
+				simple_dispatch = [
+					:get_by_query, :queries, :save, :set_commit_time,
+					:update_after_commit
+				]
+				if simple_dispatch.include?( meth )
 					cache( args.first.domain_class ).send( meth, *args )
-				elsif [ :[] ].include?( meth )
+				elsif [ :[], :last_commit_time ].include?( meth )
 					cache( args.first ).send( meth, *args[1..-1] )
 				elsif [ :group_query, :transaction ].include?( meth )
 					@db_bridge.send( meth, *args )
 				end
-			end
-				
-			def queries( domain_class ); cache( domain_class ).queries; end
-			
-			def set_commit_time( d_obj )
-				unless @domain_class_caches[d_obj.domain_class]
-					@domain_class_caches[d_obj.domain_class] = DomainClassCache.new
-				end
-				commit_times = @domain_class_caches[d_obj.domain_class].commit_times
-				commit_times[d_obj.pk_id] = Time.now
-			end
-
-			def update_after_commit( db_object ) #:nodoc:
-				if [ DomainObject::COMMIT_EDIT, DomainObject::COMMIT_ADD ].include?(
-					db_object.last_commit_type
-				)
-					save db_object
-				elsif db_object.last_commit_type == DomainObject::COMMIT_DELETE
-					cache( db_object.domain_class ).flush db_object
-				end
-				set_commit_time db_object
 			end
 
 			def update_dependent_domain_objects( db_object )
@@ -410,10 +384,25 @@ module Lafcadio
 					collection
 				end
 
+				def last_commit_time( pk_id ); commit_times[pk_id]; end
+				
 				# Saves a domain object.
 				def save(db_object)
 					self[db_object.pk_id] = db_object
 					flush_queries
+				end
+			
+				def set_commit_time( d_obj ); commit_times[d_obj.pk_id] = Time.now; end
+
+				def update_after_commit( db_object ) #:nodoc:
+					if [ DomainObject::COMMIT_EDIT, DomainObject::COMMIT_ADD ].include?(
+						db_object.last_commit_type
+					)
+						save db_object
+					elsif db_object.last_commit_type == DomainObject::COMMIT_DELETE
+						flush db_object
+					end
+					set_commit_time db_object
 				end
 			end
 		end
