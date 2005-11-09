@@ -308,22 +308,27 @@ module Lafcadio
 				end
 			end
 
+			def update_dependent_domain_class( db_object, aClass, field )
+				object_store = ObjectStore.get_object_store
+				collection = object_store.get_filtered(
+					aClass.name, db_object, field.name
+				)
+				collection.each { |dependentObject|
+					if field.delete_cascade
+						dependentObject.delete = true
+					else
+						dependentObject.send( field.name + '=', nil )
+					end
+					object_store.commit dependentObject
+				}
+			end
+
 			def update_dependent_domain_objects( db_object )
 				dependent_classes = db_object.domain_class.dependent_classes
-				object_store = ObjectStore.get_object_store
 				dependent_classes.keys.each { |aClass|
-					field = dependent_classes[aClass]
-					collection = object_store.get_filtered(
-						aClass.name, db_object, field.name
+					update_dependent_domain_class(
+						db_object, aClass, dependent_classes[aClass]
 					)
-					collection.each { |dependentObject|
-						if field.delete_cascade
-							dependentObject.delete = true
-						else
-							dependentObject.send( field.name + '=', nil )
-						end
-						object_store.commit dependentObject
-					}
 				}
 			end
 			
@@ -340,6 +345,19 @@ module Lafcadio
 				def []( pk_id )
 					dobj = super
 					dobj ? dobj.clone : nil
+				end
+				
+				def collect_from_superset( query )
+					if ( pk_ids = find_superset_pk_ids( query ) )
+						queries[query] = ( pk_ids.collect { |pk_id|
+							self[ pk_id ]
+						} ).select { |dobj| query.object_meets( dobj ) }.collect { |dobj|
+							dobj.pk_id
+						}
+						true
+					else
+						false
+					end
 				end
 				
 				def find_superset_pk_ids( query )
@@ -364,16 +382,9 @@ module Lafcadio
 
 				def get_by_query( query )
 					unless queries[query]
-						if ( pk_ids = find_superset_pk_ids( query ) )
-							queries[query] = ( pk_ids.collect { |pk_id|
-								self[ pk_id ]
-							} ).select { |dobj| query.object_meets( dobj ) }.collect { |dobj|
-								dobj.pk_id
-							}
-						elsif queries.values
-							newObjects = @db_bridge.collection_by_query(query)
-							newObjects.each { |dbObj| save dbObj }
-							queries[query] = newObjects.collect { |dobj| dobj.pk_id }
+						collected = collect_from_superset query
+						if !collected and queries.values
+							query_db query
 						end
 					end
 					collection = []
@@ -386,6 +397,12 @@ module Lafcadio
 
 				def last_commit_time( pk_id ); commit_times[pk_id]; end
 				
+				def query_db( query )
+					newObjects = @db_bridge.collection_by_query(query)
+					newObjects.each { |dbObj| save dbObj }
+					queries[query] = newObjects.collect { |dobj| dobj.pk_id }
+				end
+							
 				# Saves a domain object.
 				def save(db_object)
 					self[db_object.pk_id] = db_object
