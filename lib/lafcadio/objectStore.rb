@@ -140,7 +140,7 @@ module Lafcadio
 		def self.db_bridge; @@db_bridge ||= DbBridge.new; end
 			
 		def self.db_name= (dbName) #:nodoc:
-			DbConnection.set_db_name dbName
+			DbConnection.db_name= dbName
 		end
 		
 		def initialize #:nodoc:
@@ -617,12 +617,12 @@ module Lafcadio
 	
 			def self.connection_class=( aClass ); @@conn_class = aClass; end
 	
-			def self.set_db_name( db_name ); @@db_name = db_name; end
+			def self.db_name=( db_name ); @@db_name = db_name; end
 	
-			def self.set_dbh( dbh ); @@dbh = dbh; end
+			def self.dbh=( dbh ); @@dbh = dbh; end
 			
 			def initialize
-				@@dbh = load_new_dbh if @@dbh.nil?
+				@@dbh ||= load_new_dbh
 				@dbh = @@dbh
 			end
 		

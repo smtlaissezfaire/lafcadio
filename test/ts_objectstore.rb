@@ -193,7 +193,7 @@ class TestDBBridge < Test::Unit::TestCase
   def setup
 		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
     @mockDbh = MockDbh.new
-		ObjectStore::DbConnection.set_dbh( @mockDbh )
+		ObjectStore::DbConnection.dbh = @mockDbh
 		@dbb = ObjectStore::DbBridge.new
     @client = Client.new( {"pk_id" => 1, "name" => "clientName1"} )
   end
@@ -201,7 +201,7 @@ class TestDBBridge < Test::Unit::TestCase
   def teardown
 		@dbb = nil
  		ObjectStore::DbConnection.flush
-		ObjectStore::DbConnection.set_db_name nil
+		ObjectStore::DbConnection.db_name = nil
 	end
 
   def test_commits_delete
@@ -250,7 +250,7 @@ class TestDBBridge < Test::Unit::TestCase
     @dbb.commit client
     assert_equal 12, @dbb.last_pk_id_inserted
     ObjectStore::DbConnection.flush
-    ObjectStore::DbConnection.set_dbh( @mockDbh )
+    ObjectStore::DbConnection.dbh = @mockDbh
 		dbb2 = ObjectStore::DbBridge.new
     assert_equal 12, dbb2.last_pk_id_inserted
   end
@@ -360,7 +360,7 @@ class TestDbConnection < Test::Unit::TestCase
   def setup
 		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
     @mockDbh = MockDbh.new
-    ObjectStore::DbConnection.set_dbh( @mockDbh )
+    ObjectStore::DbConnection.dbh = @mockDbh
   end
 
   def testConnectionPooling
