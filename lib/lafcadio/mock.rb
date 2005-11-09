@@ -15,7 +15,7 @@ module Lafcadio
 			@objects[domain_class] ? @objects[domain_class].values : []
 		end
 		
-		def collection_by_query(query)
+		def select_dobjs(query)
 			@queries << query
 			domain_class = query.domain_class
 			objects = []

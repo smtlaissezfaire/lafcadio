@@ -398,7 +398,7 @@ module Lafcadio
 				def last_commit_time( pk_id ); commit_times[pk_id]; end
 				
 				def query_db( query )
-					newObjects = @db_bridge.collection_by_query(query)
+					newObjects = @db_bridge.select_dobjs query
 					newObjects.each { |dbObj| save dbObj }
 					queries[query] = newObjects.collect { |dobj| dobj.pk_id }
 				end
@@ -525,28 +525,21 @@ module Lafcadio
 				"dbh:#{dbDump}"
 			end
 			
-			def collection_by_query(query)
-				domain_class = query.domain_class
-				execute_select( query.to_sql ).collect { |row_hash|
-					domain_class.new( SqlToRubyValues.new( domain_class, row_hash ) )
-				}
-			end
-			
 			def commit(db_object)
 				statements_and_binds = ObjectStore::CommitSqlStatementsAndBinds.new(
 					db_object
 				)
-				statements_and_binds.each { |sql, binds| execute_commit( sql, binds ) }
+				statements_and_binds.each do |sql, binds|
+					@db_conn.do( sql, *binds )
+				end
 				if statements_and_binds[0].first =~ /insert/
 					sql = 'select last_insert_id()'
-					result = execute_select( sql )
+					result = select_all( sql )
 					@@last_pk_id_inserted = result[0]['last_insert_id()'].to_i
 				end
 			end
 			
-			def execute_commit( sql, binds ); @db_conn.do( sql, *binds ); end
-			
-			def execute_select(sql)
+			def select_all(sql)
 				maybe_log sql
 				begin
 					@db_conn.select_all( sql )
@@ -555,8 +548,15 @@ module Lafcadio
 				end	
 			end
 			
+			def select_dobjs(query)
+				domain_class = query.domain_class
+				select_all( query.to_sql ).collect { |row_hash|
+					domain_class.new( SqlToRubyValues.new( domain_class, row_hash ) )
+				}
+			end
+			
 			def group_query( query )
-				execute_select( query.to_sql ).map { |row| query.result_row( row ) }
+				select_all( query.to_sql ).map { |row| query.result_row( row ) }
 			end
 	
 			def last_pk_id_inserted; @@last_pk_id_inserted; end

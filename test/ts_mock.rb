@@ -12,12 +12,12 @@ class TestMockDBBridge < LafcadioTestCase
 
 	def get(object_type, pk_id)
 		query = Query.new object_type, pk_id
-		@mockDbBridge.collection_by_query(query)[0]
+		@mockDbBridge.select_dobjs(query)[0]
 	end
 
 	def get_all(object_type)
 		query = Query.new object_type
-		@mockDbBridge.collection_by_query query
+		@mockDbBridge.select_dobjs query
 	end
 	
 	def test_commit
@@ -34,7 +34,7 @@ class TestMockDBBridge < LafcadioTestCase
 		@mockDbBridge.commit @client
 		assert_equal 1, get_all(Client).size
 		query = Query.new Client, 1
-		clientPrime = @mockDbBridge.collection_by_query(query)[0]
+		clientPrime = @mockDbBridge.select_dobjs(query)[0]
 		assert_nil clientPrime
 	end
 
@@ -58,7 +58,7 @@ class TestMockDBBridge < LafcadioTestCase
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client2' })
 		@mockDbBridge.commit client2
 		query = Query.new Client, 2
-		coll = @mockDbBridge.collection_by_query(query)
+		coll = @mockDbBridge.select_dobjs(query)
 		assert_equal 1, coll.size
 		assert_equal client2, coll[0]
 	end
@@ -100,19 +100,19 @@ class TestMockDBBridge < LafcadioTestCase
 		}
 		query1 = Query.new( Client )
 		query1.limit = 0..2
-		coll1 = @mockDbBridge.collection_by_query query1
+		coll1 = @mockDbBridge.select_dobjs query1
 		assert_equal( 3, coll1.size )
 		( 1..3 ).each { |i| assert_equal( i, coll1[i-1].pk_id ) }
 		query2 = Query.new( Client )
 		query2.limit = 3..4
-		coll2 = @mockDbBridge.collection_by_query query2
+		coll2 = @mockDbBridge.select_dobjs query2
 		assert_equal( 2, coll2.size )
 		[ 4, 5 ].each { |i| assert_equal( i, coll2[i-4].pk_id ) }
 		query3 = Query.new( Client )
 		query3.limit = 3..4
 		query3.order_by = 'pk_id'
 		query3.order_by_order = Query::DESC
-		coll3 = @mockDbBridge.collection_by_query query3
+		coll3 = @mockDbBridge.select_dobjs query3
 		assert_equal( 2, coll3.size )
 		assert_equal( 2, coll3[0].pk_id )
 		assert_equal( 1, coll3[1].pk_id )
@@ -129,7 +129,7 @@ class TestMockDBBridge < LafcadioTestCase
 		query.order_by = 'date'
 		query.order_by_order = Query::DESC
 		query.limit = 0..4
-		invoices = @mockDbBridge.collection_by_query query
+		invoices = @mockDbBridge.select_dobjs query
 		assert_equal( 5, invoices.size )
 		( 6..10 ).each { |day|
 			date = Date.new( 2005, 1, day )
@@ -141,7 +141,7 @@ class TestMockDBBridge < LafcadioTestCase
 		query2 = Query.new( Invoice )
 		query2.order_by = [ :rate, :date ]
 		query2.order_by_order = Query::DESC
-		invoices2 = @mockDbBridge.collection_by_query query2
+		invoices2 = @mockDbBridge.select_dobjs query2
 		rates_and_days = [
 			[ 50, 5 ], [ 50, 4 ], [ 50, 3 ], [ 50, 2 ], [ 50, 1 ], [ 40, 10 ],
 		  [ 40, 9 ], [ 40, 8 ], [ 40, 7 ], [ 40, 6 ]

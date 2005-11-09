@@ -229,7 +229,7 @@ class TestDBBridge < Test::Unit::TestCase
 
 	def testGetAll
 		query = Query.new Domain::LineItem
-		coll = @dbb.collection_by_query query
+		coll = @dbb.select_dobjs query
 		assert_equal Array, coll.class
 	end
 
@@ -257,7 +257,7 @@ class TestDBBridge < Test::Unit::TestCase
 	
 	def testLogsSql
 		logFilePath = '../test/testOutput/sql'
-		@dbb.execute_select( 'select * from users' )
+		@dbb.select_all 'select * from users'
 		if FileTest.exist?( logFilePath )
 			fail if Time.now - File.ctime( logFilePath ) < 5
 		end
@@ -265,7 +265,7 @@ class TestDBBridge < Test::Unit::TestCase
 			'../test/testData/config_with_sql_logging.dat'
 		)
 		LafcadioConfig.set_values( nil )
-		@dbb.execute_select( 'select * from clients' )
+		@dbb.select_all 'select * from clients'
 		fail if Time.now - File.ctime( logFilePath ) > 5
 	end
 	
@@ -273,13 +273,13 @@ class TestDBBridge < Test::Unit::TestCase
 		LafcadioConfig.set_filename( '../test/testData/config_with_log_path.dat' )
 		LafcadioConfig.set_values( nil )
 		logFilePath = '../test/testOutput/another.sql'
-		@dbb.execute_select( 'select * from users' )
+		@dbb.select_all 'select * from users'
 		fail if Time.now - File.ctime( logFilePath ) > 5
 	end
 	
 	def test_passes_sql_value_converter_to_domain_class_init
 		query = Query.new( XmlSku )
-		xml_sku = @dbb.collection_by_query( query ).only
+		xml_sku = @dbb.select_dobjs( query ).only
 		assert_equal( 'foobar', xml_sku.text1 )
 		assert_equal( 'foobar', xml_sku.text1 )
 		assert_nil( xml_sku.date1 )
