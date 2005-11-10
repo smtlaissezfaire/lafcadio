@@ -138,36 +138,15 @@ module Lafcadio
 			).query
 		end
 		
-		def eql?( other ); other.class <= Query && other.to_sql == to_sql; end
-
-		def fields; @opts[:group_functions] == [:count] ? 'count(*)' : '*'; end
-
-		def hash; to_sql.hash; end
-		
-		def limit_clause
-			"limit #{ @limit.begin }, #{ @limit.end - @limit.begin + 1 }" if @limit
-		end
-		
 		def dobj_satisfies?( dobj )
 			@condition.nil? or @condition.dobj_satisfies?( dobj )
 		end
 
-		def or( &action ); compound( CompoundCondition::OR, action ); end
-		
-		def order_clause
-			if @order_by
-				if @order_by.is_a? Array
-					field_str = @order_by.map { |f_name|
-						@domain_class.field( f_name.to_s ).db_field_name
-					}.join( ', ' )
-				else
-					field_str = @domain_class.field( @order_by ).db_field_name
-				end
-				clause = "order by #{ field_str } "
-				clause += @order_by_order == ASC ? 'asc' : 'desc'
-				clause
-			end
-		end
+		def eql?( other ); other.is_a?( Query ) && other.to_sql == to_sql; end
+
+		def fields; @opts[:group_functions] == [:count] ? 'count(*)' : '*'; end
+
+		def hash; to_sql.hash; end
 		
 		def implies?( other_query )
 			if other_query == self
@@ -178,6 +157,23 @@ module Lafcadio
 				else
 					self.condition and self.condition.implies?( other_query.condition )
 				end
+			end
+		end
+		
+		def limit_clause
+			"limit #{ @limit.begin }, #{ @limit.end - @limit.begin + 1 }" if @limit
+		end
+		
+		def or( &action ); compound( CompoundCondition::OR, action ); end
+		
+		def order_clause
+			if @order_by
+				field_str = @order_by.map { |f_name|
+					@domain_class.field( f_name.to_s ).db_field_name
+				}.join( ', ' )
+				clause = "order by #{ field_str } "
+				clause += @order_by_order == ASC ? 'asc' : 'desc'
+				clause
 			end
 		end
 		
@@ -221,7 +217,7 @@ module Lafcadio
 					where_clauses << @condition.to_sql if @condition
 				end
 			}
-			where_clauses.size > 0 ? 'where ' + where_clauses.join( ' and ' ) : nil
+			!where_clauses.empty? ? 'where ' + where_clauses.join( ' and ' ) : nil
 		end
 
 		class Condition #:nodoc:
@@ -232,16 +228,13 @@ module Lafcadio
 			attr_reader :domain_class
 
 			def initialize(fieldName, searchTerm, domain_class)
-				@fieldName = fieldName
-				@searchTerm = searchTerm
-				unless @searchTerm.class <= self.class.search_term_type
+				@fieldName, @searchTerm, @domain_class =
+						fieldName, searchTerm, domain_class
+				unless @searchTerm.is_a?( self.class.search_term_type )
 					raise "Incorrect searchTerm type #{ searchTerm.class }"
 				end
-				@domain_class = domain_class
-				if @domain_class
-					unless @domain_class <= DomainObject
-						raise "Incorrect object type #{ @domain_class.to_s }"
-					end
+				if @domain_class and !( @domain_class < DomainObject )
+					raise "Incorrect object type #{ @domain_class.to_s }"
 				end
 			end
 			
@@ -256,13 +249,13 @@ module Lafcadio
 				)
 			end
 			
-			def db_field_name; get_field.db_column; end
+			def db_field_name; field.db_column; end
 			
 			def eql?( other_cond )
 				other_cond.is_a?( Condition ) and other_cond.to_sql == to_sql
 			end
 			
-			def get_field
+			def field
 				f = @domain_class.field @fieldName.to_s
 				f or raise(
 					MissingError,
@@ -309,11 +302,11 @@ module Lafcadio
 			end
 
 			def to_sql
-				if ( get_field.kind_of?( DomainObjectField ) &&
+				if ( field.kind_of?( DomainObjectField ) &&
 				     !@searchTerm.respond_to?( :pk_id ) )
 					search_val = @searchTerm.to_s
 				else
-					search_val = get_field.value_for_sql( @searchTerm ).to_s
+					search_val = field.value_for_sql( @searchTerm ).to_s
 				end
 				"#{ db_field_name } #{ @@comparators[@compareType] } " + search_val
 			end
@@ -421,7 +414,6 @@ module Lafcadio
 		
 		class Equals < Condition #:nodoc:
 			def r_val_string
-				field = get_field
 				if @searchTerm.class <= ObjectField
 					@searchTerm.db_column
 				else
@@ -469,7 +461,7 @@ module Lafcadio
 			end
 
 			def to_sql
-				if get_field.is_a?( StringField )
+				if field.is_a?( StringField )
 					quoted = @searchTerm.map do |str| "'#{ str }'"; end
 					end_clause = quoted.join ', '
 				else
