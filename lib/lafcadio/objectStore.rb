@@ -608,25 +608,14 @@ module Lafcadio
 		class DbConnection < ContextualService::Service
 			@@conn_class = DBI
 			@@db_name = nil
-			@@dbh = nil
-	
-			def self.flush
-				DbConnection.set_db_connection( nil )
-				@@dbh = nil
-			end
 	
 			def self.connection_class=( aClass ); @@conn_class = aClass; end
 	
 			def self.db_name=( db_name ); @@db_name = db_name; end
 	
-			def self.dbh=( dbh ); @@dbh = dbh; end
-			
-			def initialize
-				@@dbh ||= load_new_dbh
-				@dbh = @@dbh
-			end
+			def initialize; @dbh = load_new_dbh; end
 		
-			def disconnect; @dbh.disconnect if @dbh; end
+			def disconnect; @dbh.disconnect; end
 			
 			def load_new_dbh
 				config = LafcadioConfig.new
@@ -637,11 +626,11 @@ module Lafcadio
 				else
 					dbAndHost = "dbi:#{config['dbconn']}"
 				end
-				@@dbh = @@conn_class.connect(
+				dbh = @@conn_class.connect(
 					dbAndHost, config['dbuser'], config['dbpassword']
 				)
-				@@dbh['AutoCommit'] = false
-				@@dbh
+				dbh['AutoCommit'] = false
+				dbh
 			end
 			
 			def method_missing( symbol, *args )

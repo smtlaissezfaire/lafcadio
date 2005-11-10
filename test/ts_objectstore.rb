@@ -11,6 +11,94 @@ class Lafcadio::ObjectStore
 	attr_reader :cache
 end
 
+class MockDbi
+	def MockDbi.connect( dbAndHost, user, password )
+		@@dbName = dbAndHost.split(':')[2]
+		@@instances += 1
+		raise "initialize me just once, please" if @@instances > 1
+		@@mock_dbh = MockDbh.new
+	end
+
+	def MockDbi.flushInstanceCount
+		@@instances = 0
+	end
+
+	def MockDbi.dbName
+		@@dbName
+	end
+	
+	def self.mock_dbh; @@mock_dbh; end
+	
+	def self.reset
+		@@instances = 0
+		@@dbName = nil
+	end
+	
+	reset
+	
+	class MockDbh
+  	@@connected = false
+
+		attr_reader :sql_statements
+		
+		def initialize
+			@sql_statements = []
+			@@connected = true
+		end
+
+		def []= ( key, val ); end
+
+    def connected?
+    	@@connected
+    end
+
+		def do( sql, *binds )
+			logSql( sql )
+		end
+
+    def disconnect
+    	@@connected = false
+    end
+    
+		def logSql( sql ); @sql_statements << sql; end
+
+		def select_all(str)
+			logSql( str )
+      if str == "select last_insert_id()"
+				[ { 'last_insert_id()' => '12' } ]
+			elsif str == 'select max(pk_id) from clients'
+				[ [ 1 ] ]
+			elsif str == 'select max(date) from invoices'
+				[ [ DBI::Date.new( 2001, 4, 5 ) ] ]
+			elsif str == 'select * from some_other_table'
+				[ OneTimeAccessHash.new( 'some_other_id' => '16',
+				                         'text_one' => 'foobar', 'link1' => '1' ) ]
+			elsif str == 'select max(some_other_id) from some_other_table'
+				[ [ 5 ] ]
+			elsif str == 'select max(pk_id) from attributes'
+				[ [ nil ] ]
+			else
+				[]
+      end
+    end
+	end
+
+	class OneTimeAccessHash < DelegateClass( Hash )
+		attr_reader :key_lookups
+	
+		def initialize( hash )
+			super( hash )
+			@key_lookups = Hash.new( 0 )
+		end
+		
+		def []( key )
+			@key_lookups[key] += 1
+			raise "Should only access #{ key } once" if @key_lookups[key] > 1
+			super( key )
+		end
+	end
+end
+
 class TestObjectStoreCache < LafcadioTestCase
 	def setup
 		super
@@ -192,9 +280,10 @@ class TestDBBridge < Test::Unit::TestCase
 
   def setup
 		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
-    @mockDbh = MockDbh.new
-		ObjectStore::DbConnection.dbh = @mockDbh
+		ObjectStore::DbConnection.connection_class = MockDbi
+		MockDbi.reset
 		@dbb = ObjectStore::DbBridge.new
+		@mockDbh = MockDbi.mock_dbh
     @client = Client.new( {"pk_id" => 1, "name" => "clientName1"} )
   end
 
@@ -207,12 +296,14 @@ class TestDBBridge < Test::Unit::TestCase
   def test_commits_delete
     @client.delete = true
     @dbb.commit(@client)
-    assert_equal("delete from clients where pk_id=1", @mockDbh.lastSQL)
+    assert_equal(
+			"delete from clients where pk_id=1", @mockDbh.sql_statements.last
+		)
   end
 
   def testCommitsEdit
     @dbb.commit(@client)
-    sql = @mockDbh.lastSQL
+    sql = @mockDbh.sql_statements.last
     assert(sql.index("update clients set name='clientName1'") != nil, sql)
   end
 
@@ -249,8 +340,6 @@ class TestDBBridge < Test::Unit::TestCase
     client = Client.new( { "name" => "clientName1" } )
     @dbb.commit client
     assert_equal 12, @dbb.last_pk_id_inserted
-    ObjectStore::DbConnection.flush
-    ObjectStore::DbConnection.dbh = @mockDbh
 		dbb2 = ObjectStore::DbBridge.new
     assert_equal 12, dbb2.last_pk_id_inserted
   end
@@ -287,71 +376,6 @@ class TestDBBridge < Test::Unit::TestCase
 		assert_equal( DomainObjectProxy, xml_sku.link1.class )
 		assert_equal( 1, xml_sku.link1.pk_id )
 	end
-
-  class MockDbh
-  	@@connected = false
-  
-    attr_reader :lastSQL, :sql_statements
-    
-		def initialize
-			@sql_statements = []
-			@@connected = true
-		end
-		
-		def do( sql, *binds )
-			logSql( sql )
-		end
-		
-		def logSql( sql )
-      @lastSQL = sql
-			@sql_statements << sql
-		end
-
-    def select_all(str)
-			logSql( str )
-      if str == "select last_insert_id()"
-				[ { 'last_insert_id()' => '12' } ]
-			elsif str == 'select max(pk_id) from clients'
-				[ [ 1 ] ]
-			elsif str == 'select max(date) from invoices'
-				[ [ DBI::Date.new( 2001, 4, 5 ) ] ]
-			elsif str == 'select * from some_other_table'
-				[ OneTimeAccessHash.new( 'some_other_id' => '16',
-				                         'text_one' => 'foobar', 'link1' => '1' ) ]
-			elsif str == 'select max(some_other_id) from some_other_table'
-				[ [ 5 ] ]
-			elsif str == 'select max(pk_id) from attributes'
-				[ [ nil ] ]
-			else
-				[]
-      end
-    end
-
-    def get_all(object_type); []; end
-    
-    def disconnect
-    	@@connected = false
-    end
-    
-    def connected?
-    	@@connected
-    end
-  end
-
-	class OneTimeAccessHash < DelegateClass( Hash )
-		attr_reader :key_lookups
-	
-		def initialize( hash )
-			super( hash )
-			@key_lookups = Hash.new( 0 )
-		end
-		
-		def []( key )
-			@key_lookups[key] += 1
-			raise "Should only access #{ key } once" if @key_lookups[key] > 1
-			super( key )
-		end
-	end
 end
 
 class TestDbConnection < Test::Unit::TestCase
@@ -359,9 +383,9 @@ class TestDbConnection < Test::Unit::TestCase
 
   def setup
 		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
-    @mockDbh = MockDbh.new
-    ObjectStore::DbConnection.dbh = @mockDbh
-  end
+    ObjectStore::DbConnection.connection_class = MockDbi
+		MockDbi.reset
+	end
 
   def testConnectionPooling
   	ObjectStore::DbConnection.connection_class = MockDbi
@@ -382,76 +406,9 @@ class TestDbConnection < Test::Unit::TestCase
 	
 	def testDisconnect
 		ObjectStore::DbConnection.get_db_connection.disconnect
+		@mockDbh = MockDbi.mock_dbh
 		assert !@mockDbh.connected?
 	end
-
-  class MockDbh
-  	@@connected = false
-  
-    attr_reader :lastSQL, :sql_statements
-    
-		def initialize
-			@sql_statements = []
-			@@connected = true
-		end
-		
-		def[]= ( key, val ); end
-		
-		def do( sql, *binds )
-			logSql( sql )
-		end
-		
-		def logSql( sql )
-      @lastSQL = sql
-			@sql_statements << sql
-		end
-
-    def select_all(str)
-			logSql( str )
-      if str == "select last_insert_id()"
-				[ { 'last_insert_id()' => '12' } ]
-			elsif str == 'select max(pk_id) from clients'
-				[ [ '1' ] ]
-			elsif str == 'select max(date) from invoices'
-				[ [ DBI::Date.new( 2001, 4, 5 ) ] ]
-			elsif str == 'select * from some_other_table'
-				[ OneTimeAccessHash.new( 'some_other_id' => '16', 'text1' => 'foobar',
-				                         'link1' => '1' ) ]
-      else
-				[]
-      end
-    end
-
-    def get_all(object_type); []; end
-    
-    def disconnect
-    	@@connected = false
-    end
-    
-    def connected?
-    	@@connected
-    end
-  end
-
-	class MockDbi
-    @@instances = 0
-    @@dbName = nil
-
-		def MockDbi.connect( dbAndHost, user, password )
-			@@dbName = dbAndHost.split(':')[2]
-      @@instances += 1
-      raise "initialize me just once, please" if @@instances > 1
-      return MockDbh.new
-		end
-
-		def MockDbi.flushInstanceCount
-			@@instances = 0
-		end
-
-		def MockDbi.dbName
-			@@dbName
-		end
-  end
 end
 
 class TestDomainComparable < LafcadioTestCase
