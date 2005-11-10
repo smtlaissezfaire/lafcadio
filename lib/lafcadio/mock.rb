@@ -20,7 +20,7 @@ module Lafcadio
 			domain_class = query.domain_class
 			objects = []
 			all( domain_class ).each { |dbObj|
-				objects << dbObj if query.object_meets( dbObj )
+				objects << dbObj if query.dobj_satisfies?( dbObj )
 			}
 			objects = order_collection( objects, query )
 			if (range = query.limit); objects = objects[range]; end

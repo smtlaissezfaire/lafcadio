@@ -351,7 +351,7 @@ module Lafcadio
 					if ( pk_ids = find_superset_pk_ids( query ) )
 						queries[query] = ( pk_ids.collect { |pk_id|
 							self[ pk_id ]
-						} ).select { |dobj| query.object_meets( dobj ) }.collect { |dobj|
+						} ).select { |dobj| query.dobj_satisfies?( dobj ) }.collect { |dobj|
 							dobj.pk_id
 						}
 						true

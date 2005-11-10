@@ -54,7 +54,7 @@ class TestCompare < LafcadioTestCase
 		invoice.date = nil
 		dc = Query::Compare.new(
 				'date', Date.today, Invoice, Query::Compare::LESS_THAN)
-		assert !dc.object_meets(invoice)
+		assert !dc.dobj_satisfies?(invoice)
 	end
 
 	def testMockComparators
@@ -70,27 +70,27 @@ class TestCompare < LafcadioTestCase
 		invoice3.date = date3
 		dc1 = Query::Compare.new(
 				'date', date2, Invoice, Query::Compare::LESS_THAN)
-		assert dc1.object_meets(invoice1)
-		assert !dc1.object_meets(invoice2)
-		assert !dc1.object_meets(invoice3)
+		assert dc1.dobj_satisfies?(invoice1)
+		assert !dc1.dobj_satisfies?(invoice2)
+		assert !dc1.dobj_satisfies?(invoice3)
 		dc2 = Query::Compare.new(
 				'date', date2, Invoice,
 				Query::Compare::LESS_THAN_OR_EQUAL)
-		assert dc2.object_meets(invoice1)
-		assert dc2.object_meets(invoice2)
-		assert !dc2.object_meets(invoice3)
+		assert dc2.dobj_satisfies?(invoice1)
+		assert dc2.dobj_satisfies?(invoice2)
+		assert !dc2.dobj_satisfies?(invoice3)
 		dc3 = Query::Compare.new(
 				'date', date2, Invoice,
 				Query::Compare::GREATER_THAN)
-		assert !dc3.object_meets(invoice1)
-		assert !dc3.object_meets(invoice2)
-		assert dc3.object_meets(invoice3)
+		assert !dc3.dobj_satisfies?(invoice1)
+		assert !dc3.dobj_satisfies?(invoice2)
+		assert dc3.dobj_satisfies?(invoice3)
 		dc4 = Query::Compare.new(
 				'date', date2, Invoice,
 				Query::Compare::GREATER_THAN_OR_EQUAL)
-		assert !dc4.object_meets(invoice1)
-		assert dc4.object_meets(invoice2)
-		assert dc4.object_meets(invoice3)
+		assert !dc4.dobj_satisfies?(invoice1)
+		assert dc4.dobj_satisfies?(invoice2)
+		assert dc4.dobj_satisfies?(invoice3)
 	end
 
 	def testNumericalSearchingOfaDomainObjectField
@@ -126,23 +126,23 @@ class TestCompoundCondition < LafcadioTestCase
 		              condition.to_sql )
 		invoice = Invoice.new({ 'pk_id' => 1, 'date' => Date.new(2003, 1, 1),
 				'rate' => 10, 'hours' => 10 })
-		assert condition.object_meets(invoice)
+		assert condition.dobj_satisfies?(invoice)
 		invoice.hours = 10.5
-		assert !condition.object_meets(invoice)
+		assert !condition.dobj_satisfies?(invoice)
 	end
 
 	def testOr
 		email = Query::Equals.new('email', 'test@test.com', User)
 		fname = Query::Equals.new('firstNames', 'John', User)
 		user = User.getTestUser
-		assert email.object_meets(user)
-		assert !fname.object_meets(user)
+		assert email.dobj_satisfies?(user)
+		assert !fname.dobj_satisfies?(user)
 		compound = Query::CompoundCondition.new(email, fname,
 				Query::CompoundCondition::OR)
 		assert_equal( "(users.email = 'test@test.com' or " +
 		              "users.firstNames = 'John')",
 		              compound.to_sql )
-		assert compound.object_meets(user)
+		assert compound.dobj_satisfies?(user)
 	end
 end
 
@@ -208,7 +208,7 @@ class TestEquals < LafcadioTestCase
 		equals = Query::Equals.new( 'firstNames', email_field, User )
 		assert_equal( 'users.firstNames = users.email', equals.to_sql )
 		odd_user = User.new( 'email' => 'foobar', 'firstNames' => 'foobar' )
-		assert( equals.object_meets( odd_user ) )
+		assert( equals.dobj_satisfies?( odd_user ) )
 	end
 
 	def testDbFieldName
@@ -492,9 +492,9 @@ class TestLike < LafcadioTestCase
 
 	def test_case_insensitive
 		like = Query::Like.new( 'name', 'foobar', Client )
-		assert like.object_meets( Client.new( 'name' => 'barfoobarfoo' ) )
-		assert like.object_meets( Client.new( 'name' => 'foobar' ) )
-		assert like.object_meets( Client.new( 'name' => 'FOobAR' ) )
+		assert like.dobj_satisfies?( Client.new( 'name' => 'barfoobarfoo' ) )
+		assert like.dobj_satisfies?( Client.new( 'name' => 'foobar' ) )
+		assert like.dobj_satisfies?( Client.new( 'name' => 'FOobAR' ) )
 	end
 
 	def testDbFieldName
@@ -511,10 +511,10 @@ class TestLike < LafcadioTestCase
 		like4 = Query::Like.new('client', '1', Invoice)
 		client212 = Client.new({ 'pk_id' => 212 })
 		invoiceWith212 = Invoice.new({ 'client' => client212 })
-		assert like4.object_meets(invoiceWith212)
+		assert like4.dobj_satisfies?(invoiceWith212)
 		client234 = Client.new({ 'pk_id' => 234 })
 		invoiceWith234 = Invoice.new({ 'client' => client234 })
-		assert !like4.object_meets(invoiceWith234)
+		assert !like4.dobj_satisfies?(invoiceWith234)
 	end
 
 	def testToSql
@@ -590,9 +590,9 @@ class TestNot < LafcadioTestCase
 
 	def testObjectsMeets
 		user = User.getTestUser
-		assert !@not.object_meets(user)
+		assert !@not.dobj_satisfies?(user)
 		user2 = User.new({ 'email' => 'jane.doe@email.com' })
-		assert @not.object_meets(user2)
+		assert @not.dobj_satisfies?(user2)
 	end
 
 	def testToSql

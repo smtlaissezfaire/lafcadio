@@ -110,11 +110,11 @@ module Lafcadio
 			@domain_class, @opts = domain_class, opts
 			( @condition, @order_by, @limit ) = [ nil, nil, nil ]
 			if pk_id_or_condition
-				if pk_id_or_condition.class <= Condition
+				if pk_id_or_condition.is_a?( Condition )
 					@condition = pk_id_or_condition
 				else
 					@condition = Query::Equals.new(
-						'pk_id', pk_id_or_condition, domain_class
+						:pk_id, pk_id_or_condition, domain_class
 					)
 				end
 			end
@@ -133,9 +133,9 @@ module Lafcadio
 			
 		def compound( comp_type, action )
 			rquery = Query.infer( @domain_class ) { |dobj| action.call( dobj ) }
-			comp_cond = Query::CompoundCondition.new( @condition, rquery.condition,
-			                                          comp_type )
-			comp_cond.query
+			Query::CompoundCondition.new(
+				@condition, rquery.condition, comp_type
+			).query
 		end
 		
 		def eql?( other ); other.class <= Query && other.to_sql == to_sql; end
@@ -148,8 +148,8 @@ module Lafcadio
 			"limit #{ @limit.begin }, #{ @limit.end - @limit.begin + 1 }" if @limit
 		end
 		
-		def object_meets( dobj )
-			@condition.nil? or @condition.object_meets( dobj )
+		def dobj_satisfies?( dobj )
+			@condition.nil? or @condition.dobj_satisfies?( dobj )
 		end
 
 		def or( &action ); compound( CompoundCondition::OR, action ); end
@@ -263,7 +263,7 @@ module Lafcadio
 			end
 			
 			def get_field
-				f = @domain_class.field( @fieldName )
+				f = @domain_class.field @fieldName.to_s
 				f or raise(
 					MissingError,
 					"Couldn't find field \"#{ @fieldName }\" in " + @domain_class.name +
@@ -318,7 +318,7 @@ module Lafcadio
 				"#{ db_field_name } #{ @@comparators[@compareType] } " + search_val
 			end
 
-			def object_meets(anObj)
+			def dobj_satisfies?(anObj)
 				value = anObj.send @fieldName
 				value = value.pk_id if value.class <= DomainObject
 				if value
@@ -364,14 +364,14 @@ module Lafcadio
 				)
 			end
 
-			def object_meets(anObj)
+			def dobj_satisfies?(anObj)
 				if @compound_type == AND
 					@conditions.inject( true ) { |result, cond|
-						result && cond.object_meets( anObj )
+						result && cond.dobj_satisfies?( anObj )
 					}
 				else
 					@conditions.inject( false ) { |result, cond|
-						result || cond.object_meets( anObj )
+						result || cond.dobj_satisfies?( anObj )
 					}
 				end
 			end
@@ -438,7 +438,7 @@ module Lafcadio
 				end
 			end
 
-			def object_meets(anObj)
+			def dobj_satisfies?(anObj)
 				if @searchTerm.class <= ObjectField
 					compare_value = anObj.send( @searchTerm.name )
 				else
@@ -463,7 +463,7 @@ module Lafcadio
 				Array
 			end
 
-			def object_meets(anObj)
+			def dobj_satisfies?(anObj)
 				value = anObj.send @fieldName
 				@searchTerm.index(value) != nil
 			end
@@ -533,7 +533,7 @@ module Lafcadio
 				end
 			end
 
-			def object_meets(anObj)
+			def dobj_satisfies?(anObj)
 				value = anObj.send @fieldName
 				if value.class <= DomainObject || value.class == DomainObjectProxy
 					value = value.pk_id.to_s
@@ -586,8 +586,8 @@ module Lafcadio
 				@unCondition = unCondition
 			end
 
-			def object_meets(obj)
-				!@unCondition.object_meets(obj)
+			def dobj_satisfies?(obj)
+				!@unCondition.dobj_satisfies?(obj)
 			end
 			
 			def domain_class; @unCondition.domain_class; end
