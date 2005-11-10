@@ -265,13 +265,11 @@ module Lafcadio
 				)
 			end
 			
-			def query; Query.new( @domain_class, self ); end
-			
-			def not
-				Query::Not.new( self )
-			end
+			def not; Query::Not.new( self ); end
 
 			def primary_key_field?; 'pk_id' == @fieldName; end
+			
+			def query; Query.new( @domain_class, self ); end
 			
 			def to_condition; self; end
 		end
@@ -301,16 +299,6 @@ module Lafcadio
 				@compareType = compareType
 			end
 
-			def to_sql
-				if ( field.kind_of?( DomainObjectField ) &&
-				     !@searchTerm.respond_to?( :pk_id ) )
-					search_val = @searchTerm.to_s
-				else
-					search_val = field.value_for_sql( @searchTerm ).to_s
-				end
-				"#{ db_field_name } #{ @@comparators[@compareType] } " + search_val
-			end
-
 			def dobj_satisfies?(anObj)
 				value = anObj.send @fieldName
 				value = value.pk_id if value.class <= DomainObject
@@ -320,6 +308,16 @@ module Lafcadio
 					false
 				end
 			end
+
+			def to_sql
+				if ( field.kind_of?( DomainObjectField ) &&
+				     !@searchTerm.respond_to?( :pk_id ) )
+					search_val = @searchTerm.to_s
+				else
+					search_val = field.value_for_sql( @searchTerm ).to_s
+				end
+				"#{ db_field_name } #{ @@comparators[@compareType] } #{ search_val }"
+			end
 		end
 
 		class CompoundCondition < Condition #:nodoc:
@@ -327,7 +325,7 @@ module Lafcadio
 			OR  = 2
 			
 			def initialize( *args )
-				if( [ AND, OR ].index( args.last) )
+				if( [ AND, OR ].include?( args.last ) )
 					@compound_type = args.last
 					args.pop
 				else
@@ -337,24 +335,6 @@ module Lafcadio
 					arg.respond_to?( :to_condition ) ? arg.to_condition : arg
 				}
 				@domain_class = @conditions[0].domain_class
-			end
-
-			def implied_by?( other_condition )
-				@compound_type == OR && @conditions.any? { |cond|
-					cond.implies?( other_condition )
-				}
-			end
-			
-			def implies?( other_condition )
-				super( other_condition ) or (
-					@compound_type == AND and @conditions.any? { |cond|
-						cond.implies?( other_condition )
-					}
-				) or (
-					@compound_type == OR and @conditions.all? { |cond|
-						cond.implies?( other_condition )
-					}
-				)
 			end
 
 			def dobj_satisfies?(anObj)
@@ -367,6 +347,24 @@ module Lafcadio
 						result || cond.dobj_satisfies?( anObj )
 					}
 				end
+			end
+
+			def implied_by?( other_condition )
+				@compound_type == OR && @conditions.any? { |cond|
+					cond.implies?( other_condition )
+				}
+			end
+			
+			def implies?( other_condition )
+				super( other_condition ) or (
+					@compound_type == AND and @conditions.any? { |cond|
+						cond.implies? other_condition
+					}
+				) or (
+					@compound_type == OR and @conditions.all? { |cond|
+						cond.implies? other_condition
+					}
+				)
 			end
 
 			def to_sql
@@ -389,10 +387,9 @@ module Lafcadio
 						
 						def method_missing( methId, *args )
 							fieldName = methId.id2name
-							begin
-								classField = self.domain_class.field( fieldName )
+							if ( classField = self.domain_class.field( fieldName ) )
 								ObjectFieldImpostor.new( self, classField )
-							rescue MissingError
+							else
 								super( methId, *args )
 							end
 						end
@@ -413,8 +410,17 @@ module Lafcadio
 		end
 		
 		class Equals < Condition #:nodoc:
+			def dobj_satisfies?(anObj)
+				if @searchTerm.is_a?( ObjectField )
+					compare_value = anObj.send @searchTerm.name
+				else
+					compare_value = @searchTerm
+				end
+				compare_value == anObj.send( @fieldName )
+			end
+
 			def r_val_string
-				if @searchTerm.class <= ObjectField
+				if @searchTerm.is_a?( ObjectField )
 					@searchTerm.db_column
 				else
 					begin
@@ -430,22 +436,9 @@ module Lafcadio
 				end
 			end
 
-			def dobj_satisfies?(anObj)
-				if @searchTerm.class <= ObjectField
-					compare_value = anObj.send( @searchTerm.name )
-				else
-					compare_value = @searchTerm
-				end
-				compare_value == anObj.send( @fieldName )
-			end
-
 			def to_sql
 				sql = "#{ db_field_name } "
-				unless @searchTerm.nil?
-					sql += "= " + r_val_string
-				else
-					sql += "is null"
-				end
+				sql += ( !@searchTerm.nil? ? "= #{ r_val_string }" : "is null" )
 				sql
 			end
 		end
