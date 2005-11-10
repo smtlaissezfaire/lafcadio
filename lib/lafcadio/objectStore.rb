@@ -649,6 +649,11 @@ module Lafcadio
 				dispatch_get_method if @methodName =~ /^get(.*)$/
 			end
 			
+			def camel_case_method_name_after_get
+				@orig_method.id2name =~ /^get(.*)$/
+				$1.underscore_to_camel_case
+			end
+			
 			def dispatch_get_all
 				@symbol = :get_all
 				@args = [ @domain_class ]
@@ -657,6 +662,11 @@ module Lafcadio
 			def dispatch_get_filtered( searchTerm, fieldName )
 				@symbol = :get_filtered
 				@args = [ @domain_class.name, searchTerm, fieldName ]
+			end
+
+			def dispatch_get_map_object( domain_class )
+				@symbol = :get_map_object
+				@args = [ domain_class, @orig_args[0], @orig_args[1] ]
 			end
 
 			def dispatch_get_method
@@ -703,8 +713,7 @@ module Lafcadio
 						@symbol = :get
 						@args = [ domain_class, @orig_args[0] ]
 					elsif @orig_args[0].class <= DomainObject
-						@symbol = :get_map_object
-						@args = [ domain_class, @orig_args[0], @orig_args[1] ]
+						dispatch_get_map_object domain_class
 					elsif @orig_args.empty?
 						@symbol = :get
 					end
@@ -712,11 +721,6 @@ module Lafcadio
 				rescue NameError
 					false
 				end
-			end
-			
-			def camel_case_method_name_after_get
-				@orig_method.id2name =~ /^get(.*)$/
-				$1.underscore_to_camel_case
 			end
 			
 			def raise_get_plural_needs_field_arg_if_first_arg_nil
