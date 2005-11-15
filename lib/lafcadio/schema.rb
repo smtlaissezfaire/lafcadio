@@ -3,8 +3,11 @@ require 'lafcadio/objectField'
 module Lafcadio
 	class CreateTableStatement #:nodoc:
 		@@simple_field_clauses = {
-			FloatField => 'float', DateField => 'date', BooleanField => 'bool',
-			TimeStampField => 'timestamp', DateTimeField => 'datetime'
+			BooleanField => 'bool', BlobField => 'blob', DateField => 'date', 
+			DomainObjectField => 'int', FloatField => 'float',
+			DateTimeField => 'datetime', IntegerField => 'int',
+			StringField => 'varchar(255)', TextListField => 'varchar(255)',
+			TimeStampField => 'timestamp'
 		}
 	
 		def initialize( domain_class )
@@ -21,9 +24,10 @@ module Lafcadio
 
 		def to_sql
 			createDefinitions = []
-			createDefinitions << "#{ @domain_class.sql_primary_key_name } " +
-													 "int not null auto_increment"
-			createDefinitions << "primary key (#{ @domain_class.sql_primary_key_name })"
+			createDefinitions <<
+				"#{ @domain_class.sql_primary_key_name } int not null auto_increment"
+			createDefinitions <<
+					"primary key (#{ @domain_class.sql_primary_key_name })"
 			@domain_class.class_fields.each { |field|
 				createDefinitions << definition_terms( field )
 			}
@@ -42,14 +46,6 @@ module Lafcadio
 					"'#{ enumValue }'"
 				}
 				"enum( #{ singleQuotedValues.join( ', ' ) } )"
-			elsif ( field.class <= StringField || field.class <= TextListField )
-				'varchar(255)'
-			elsif ( field.class <= DomainObjectField || field.class <= IntegerField )
-				'int'
-			elsif ( field.class <= FloatField )
-				'float(10, 2)'
-			elsif ( field.class <= BlobField )
-				'blob'
 			end
 		end
 	end

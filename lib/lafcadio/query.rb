@@ -676,8 +676,7 @@ module Lafcadio
 			
 			def to_condition
 				if @class_field.instance_of?( BooleanField )
-					Query::Equals.new( @field_name, true,
-					                   @domainObjectImpostor.domain_class )
+					Query::Equals.new( @field_name, true, domain_class )
 				else
 					raise
 				end
