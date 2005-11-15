@@ -35,14 +35,6 @@ module Lafcadio
 		Version = '0.1.0'
 		
 		def self.included( includer )
-			def includer.setup_procs
-				unless defined? @@all_setup_procs
-					@@all_setup_procs = Hash.new { |hash, domain_class|
-						hash[domain_class] = []
-					}
-				end
-				@@all_setup_procs[self]
-			end
 			def includer.setup_mock_dobjs( *domain_classes_or_symbol_names )
 				domain_classes = DomainClassSymbolMapper.new
 				domain_classes_or_symbol_names.each { |domain_class_or_symbol_name|
@@ -57,6 +49,15 @@ module Lafcadio
 					}
 					setup_procs << proc
 				}
+			end
+
+			def includer.setup_procs
+				unless defined? @@all_setup_procs
+					@@all_setup_procs = Hash.new { |hash, domain_class|
+						hash[domain_class] = []
+					}
+				end
+				@@all_setup_procs[self]
 			end
 		end
 	
@@ -124,21 +125,22 @@ module Lafcadio
 			link_fields = all_fields.select { |field| field.is_a? DomainObjectField }
 			link_fields.each do |field|
 				val = dobj.send( field.name )
-				if val and val.pk_id == 1
-					linked_type = field.linked_type
-					begin
-						ObjectStore.get_object_store.get( linked_type, 1 )
-					rescue DomainObjectNotFoundError
-						unless linked_type == caller
-							linked_type.send( 'default_mock', self )
-						end
-					end
-				end
+				maybe_call_default_mock( field, caller ) if ( val and val.pk_id == 1 )
 			end
 			dobj.commit
 			dobj
 		end
 	
+		def self.custom_mock( custom_args = nil )
+			dobj_args = default_args
+			object_store = ObjectStore.get_object_store
+			dbb = object_store.get_db_bridge
+			dbb.set_next_pk_id( self, 2 ) if dbb.next_pk_id( self ) == 1
+			dobj_args['pk_id'] = nil
+			dobj_args = dobj_args.merge( custom_args ) if custom_args.is_a?( Hash )
+			commit_mock( dobj_args )
+		end
+		
 		def self.default_args
 			default_args = {}
 			@@default_arg_directives[self].each do |name, value_or_proc|
@@ -149,16 +151,6 @@ module Lafcadio
 				end
 			end
 			default_args
-		end
-		
-		def self.custom_mock( custom_args = nil )
-			dobj_args = default_args
-			object_store = ObjectStore.get_object_store
-			dbb = object_store.get_db_bridge
-			dbb.set_next_pk_id( self, 2 ) if dbb.next_pk_id( self ) == 1
-			dobj_args['pk_id'] = nil
-			dobj_args = dobj_args.merge( custom_args ) if custom_args.is_a?( Hash )
-			commit_mock( dobj_args )
 		end
 		
 		def self.default_mock( calling_class = nil )
@@ -178,6 +170,17 @@ module Lafcadio
 
 		def self.default_mock_available( is_avail )
 			@@default_mock_available[self] = is_avail
+		end
+		
+		def self.maybe_call_default_mock( field, caller )
+			linked_type = field.linked_type
+			begin
+				ObjectStore.get_object_store.get( linked_type, 1 )
+			rescue DomainObjectNotFoundError
+				unless linked_type == caller
+					linked_type.send( 'default_mock', self )
+				end
+			end
 		end
 
 		def self.mock_value( field_sym, value )
@@ -200,24 +203,6 @@ module Lafcadio
 	def IntegerField.mock_value; 1; end
 
 	class MockDbBridge
-		unless instance_methods.include?( 'orig_pre_commit_pk_id' )
-			alias_method(
-				:orig_pre_commit_pk_id, :pre_commit_pk_id
-			)
-			
-			def pre_commit_pk_id( domain_object )
-				@next_pk_ids = {} unless @next_pk_ids
-				orig_pk_id = orig_pre_commit_pk_id domain_object
-				if (next_pk_id = @next_pk_ids[domain_object.domain_class])
-					@last_pk_id_inserted = next_pk_id
-					@next_pk_ids[domain_object.domain_class] = nil
-					next_pk_id
-				else
-					orig_pk_id
-				end
-			end
-		end
-		
 		def next_pk_id( domain_class )
 			dobjs = objects_by_domain_class( domain_class ).values
 			dobjs.inject( 0 ) { |memo, obj| memo > obj.pk_id ? memo : obj.pk_id } + 1

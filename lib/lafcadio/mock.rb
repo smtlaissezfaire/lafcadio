@@ -63,21 +63,26 @@ module Lafcadio
 			objects
 		end
 		
-		def pre_commit_pk_id( db_object )
-			if db_object.pk_id
-				db_object.pk_id
+		def pre_commit_pk_id( domain_object )
+			@next_pk_ids = {} unless @next_pk_ids
+			if (next_pk_id = @next_pk_ids[domain_object.domain_class])
+				@last_pk_id_inserted = next_pk_id
+				@next_pk_ids[domain_object.domain_class] = nil
+				next_pk_id
+			elsif domain_object.pk_id
+				domain_object.pk_id
 			else
-				if ( next_pk_id = @next_pk_ids[db_object.domain_class] )
+				if ( next_pk_id = @next_pk_ids[domain_object.domain_class] )
 					@last_pk_id_inserted = next_pk_id
-					@next_pk_ids[db_object.domain_class] = nil
+					@next_pk_ids[domain_object.domain_class] = nil
 					next_pk_id
 				else
-					pk_ids = objects_by_domain_class( db_object.domain_class ).keys
+					pk_ids = objects_by_domain_class( domain_object.domain_class ).keys
 					@last_pk_id_inserted = pk_ids.max ? pk_ids.max + 1 : 1
 				end
 			end
 		end
-		
+
 		def queries( domain_class = nil )
 			@queries.select { |qry|
 				domain_class ? qry.domain_class == domain_class : true
