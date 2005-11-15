@@ -25,13 +25,13 @@ class TestConfig < Test::Unit::TestCase
 		LafcadioConfig.set_filename( nil )
 		LafcadioConfig.set_values(
 			'dbuser' => 'test', 'dbhost' => 'localhost',
-		  'domainDirs' => [ 'lafcadio/domain/', '../test/mock/domain/' ]
+		  'domainDirs' => [ 'lafcadio/domain/', '../test/mock_domain/' ]
 		)
 		config = LafcadioConfig.new
 		assert_equal( 'test', config['dbuser'] )
 		assert_equal( 'localhost', config['dbhost'] )
 		assert( config['domainDirs'].include?( 'lafcadio/domain/' ) )
-		LafcadioConfig.set_values( 'domainFiles' => %w( ../test/mock/domain ) )
+		LafcadioConfig.set_values( 'domainFiles' => %w( ../test/mock_domain ) )
 		DomainObject.require_domain_file( 'User' )
 	end
 end

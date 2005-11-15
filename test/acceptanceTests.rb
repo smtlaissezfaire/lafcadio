@@ -12,14 +12,13 @@ include Lafcadio
 def connect_to_dbh
 	LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
 	config = LafcadioConfig.new
-	dbName = config['dbname']
-	dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"
+	dbAndHost = "dbi:Mysql:#{ config['dbname'] }:#{ config['dbhost'] }"
 	DBI.connect( dbAndHost, config['dbuser'], config['dbpassword'] )
 end
 
 class AcceptanceTestCase < Test::Unit::TestCase
 	def self.domain_classes
-		[ TestBadRow, TestRow, TestChildRow, TestDiffPkRow, TestInnoDBRow ]
+		[ TestBadRow, TestChildRow, TestDiffPkRow, TestInnoDBRow, TestRow ]
 	end
 	
 	def setup
@@ -32,11 +31,11 @@ class AcceptanceTestCase < Test::Unit::TestCase
 	end
 	
 	def teardown
-		LafcadioConfig.set_values( nil )
+		LafcadioConfig.set_values nil
 		self.class.domain_classes.each do |domain_class|
-			domain_class.drop_table( @dbh )
+			domain_class.drop_table @dbh
 		end
-		ObjectStore.set_object_store( nil )
+		ObjectStore.set_object_store nil
 	end
 	
 	def default_test; end

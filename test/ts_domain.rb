@@ -1,7 +1,7 @@
 require 'lafcadio/test'
 require 'lafcadio/depend'
 require 'lafcadio/domain'
-require '../test/mock/domain'
+require '../test/mock_domain'
 
 class TestClassDefinitionXmlParser < LafcadioTestCase
 	def get_class_fields( domain_class, xml )
@@ -465,7 +465,7 @@ class TestDomainObject < LafcadioTestCase
 	
 	def test_one_liners_only_create_fields_once
 		assert_equal( 19, XmlSku2.class_fields.size )
-		require '../test/../test/mock/domain'
+		require '../test/../test/mock_domain'
 		assert_equal( 19, XmlSku2.class_fields.size )
 	end
 	

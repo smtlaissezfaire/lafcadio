@@ -3,7 +3,7 @@ require 'lafcadio/depend'
 require 'lafcadio/test'
 require 'lafcadio/objectField'
 require 'lafcadio/objectStore'
-require '../test/mock/domain'
+require '../test/mock_domain'
 
 class TestBooleanField < LafcadioTestCase
   def setup

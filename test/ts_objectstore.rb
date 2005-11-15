@@ -5,7 +5,7 @@ require 'lafcadio/objectStore'
 require 'lafcadio/query'
 require 'lafcadio/test'
 require 'runit/testcase'
-require '../test/mock/domain'
+require '../test/mock_domain'
 
 class Lafcadio::ObjectStore
 	attr_reader :cache
