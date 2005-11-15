@@ -505,8 +505,12 @@ module Lafcadio
 			def initialize(
 				fieldName, searchTerm, domain_class, matchType = PRE_AND_POST
 			)
+				if searchTerm.is_a? Regexp
+					searchTerm = process_regexp searchTerm
+				else
+					@matchType = matchType
+				end
 				super fieldName, searchTerm, domain_class
-				@matchType = matchType
 			end
 			
 			def dobj_satisfies?(anObj)
@@ -516,6 +520,19 @@ module Lafcadio
 					value.include? @searchTerm
 				else
 					!regexp.match( value ).nil?
+				end
+			end
+			
+			def process_regexp( searchTerm )
+				if searchTerm.source =~ /^\^(.*)/
+					@matchType = Query::Like::POST_ONLY
+					$1
+				elsif searchTerm.source =~ /(.*)\$$/
+					@matchType = Query::Like::PRE_ONLY
+					$1
+				else
+					@matchType = Query::Like::PRE_AND_POST
+					searchTerm.source
 				end
 			end
 
@@ -598,32 +615,34 @@ module Lafcadio
 				@field_name = class_field.name
 			end
 			
+			def &( condition ); Query.And( to_condition, condition ); end
+
+			def |( condition ); Query.Or( to_condition, condition ); end
+			
 			def method_missing( methId, *args )
 				methodName = methId.id2name
 				if self.class.comparators.keys.include?( methodName )
-					register_compare_condition( methodName, *args )
+					compare_condition( methodName, *args )
 				else
 					super
 				end
 			end
 			
-			def |( condition ); Query.Or( to_condition, condition ); end
-			
-			def &( condition ); Query.And( to_condition, condition ); end
-
-			def register_compare_condition( compareStr, searchTerm)
+			def compare_condition( compareStr, searchTerm)
 				compareVal = ObjectFieldImpostor.comparators[compareStr]
-				Compare.new( @field_name, searchTerm,
-				             @domainObjectImpostor.domain_class, compareVal )
+				Compare.new( @field_name, searchTerm, domain_class, compareVal )
 			end
 			
+			def domain_class; @domainObjectImpostor.domain_class; end
+			
 			def equals( searchTerm )
-				Equals.new( @field_name, field_or_field_name( searchTerm ),
-					          @domainObjectImpostor.domain_class )
+				Equals.new(
+					@field_name, field_or_field_name( searchTerm ), domain_class
+				)
 			end
 			
 			def field_or_field_name( search_term )
-				if search_term.class == ObjectFieldImpostor
+				if search_term.is_a? ObjectFieldImpostor
 					search_term.class_field
 				else
 					search_term
@@ -631,9 +650,8 @@ module Lafcadio
 			end
 			
 			def include?( search_term )
-				if @class_field.instance_of?( TextListField )
-					Include.new( @field_name, search_term,
-					             @domainObjectImpostor.domain_class )
+				if @class_field.is_a?( TextListField )
+					Include.new( @field_name, search_term, domain_class )
 				else
 					raise ArgumentError
 				end
@@ -641,18 +659,7 @@ module Lafcadio
 			
 			def like( regexp )
 				if regexp.is_a?( Regexp )
-					if regexp.source =~ /^\^(.*)/
-						searchTerm = $1
-						matchType = Query::Like::POST_ONLY
-					elsif regexp.source =~ /(.*)\$$/
-						searchTerm = $1
-						matchType = Query::Like::PRE_ONLY
-					else
-						searchTerm = regexp.source
-						matchType = Query::Like::PRE_AND_POST
-					end
-					Query::Like.new( @field_name, searchTerm,
-													 @domainObjectImpostor.domain_class, matchType )
+					Query::Like.new( @field_name, regexp, domain_class )
 				else
 					raise(
 						ArgumentError, "#{ @field_name }#like needs to receive a Regexp",
@@ -662,8 +669,7 @@ module Lafcadio
 			end
 			
 			def in( *searchTerms )
-				Query::In.new( @field_name, searchTerms,
-											 @domainObjectImpostor.domain_class )
+				Query::In.new( @field_name, searchTerms, domain_class )
 			end
 			
 			def nil?; equals( nil ); end
