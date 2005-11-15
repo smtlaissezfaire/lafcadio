@@ -202,18 +202,6 @@ module Lafcadio
 
 	def IntegerField.mock_value; 1; end
 
-	class MockDbBridge
-		def next_pk_id( domain_class )
-			dobjs = objects_by_domain_class( domain_class ).values
-			dobjs.inject( 0 ) { |memo, obj| memo > obj.pk_id ? memo : obj.pk_id } + 1
-		end
-
-		def set_next_pk_id( domain_class, npi )
-			@next_pk_ids = {} unless @next_pk_ids
-			@next_pk_ids[ domain_class ] = npi
-		end
-	end
-	
 	class ObjectField
 		attr_writer :mock_value
 	

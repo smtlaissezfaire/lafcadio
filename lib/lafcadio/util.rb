@@ -33,8 +33,7 @@ module Lafcadio
 		end
 	end
 
-	class MissingError < RuntimeError
-	end
+	class MissingError < RuntimeError; end
 end
 
 class String
@@ -45,36 +44,6 @@ class String
 			( gsub( /(.)([A-Z])/ ) { $1 + '_' + $2.downcase } ).downcase
 		end
 		
-	end
-
-	# Returns the number of times that <tt>regexp</tt> occurs in the string.
-	def count_occurrences(regexp)
-		count = 0
-		str = self.clone
-		while str =~ regexp
-			count += 1
-			str = $'
-		end
-		count
-	end
-	
-	# Decapitalizes the first letter of the string, or decapitalizes the 
-	# entire string if it's all capitals.
-	#
-	#   'InternalClient'.decapitalize -> "internalClient"
-	#   'SKU'.decapitalize            -> "sku"
-	def decapitalize
-		string = clone
-		firstLetter = string[0..0].downcase
-		string = firstLetter + string[1..string.length]
-		newString = ""
-		while string =~ /([A-Z])([^a-z]|$)/
-			newString += $`
-			newString += $1.downcase
-			string = $2 + $'
-		end
-		newString += string
-		newString
 	end
 
 	# Left-pads a string with +fillChar+ up to +size+ size.

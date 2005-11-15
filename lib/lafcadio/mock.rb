@@ -44,6 +44,11 @@ module Lafcadio
 			query.collect objects_by_domain_class( query.domain_class ).values
 		end
 		
+		def next_pk_id( domain_class )
+			dobjs = objects_by_domain_class( domain_class ).values
+			dobjs.inject( 0 ) { |memo, obj| memo > obj.pk_id ? memo : obj.pk_id } + 1
+		end
+
 		def objects_by_domain_class( domain_class )
 			@objects[domain_class] = {} unless @objects[domain_class]
 			@objects[domain_class]
@@ -66,20 +71,17 @@ module Lafcadio
 		def pre_commit_pk_id( domain_object )
 			@next_pk_ids = {} unless @next_pk_ids
 			if (next_pk_id = @next_pk_ids[domain_object.domain_class])
+				@next_pk_ids[domain_object.domain_class] = nil
+				@last_pk_id_inserted = next_pk_id
+			elsif domain_object.pk_id
+				domain_object.pk_id
+			elsif ( next_pk_id = @next_pk_ids[domain_object.domain_class] )
 				@last_pk_id_inserted = next_pk_id
 				@next_pk_ids[domain_object.domain_class] = nil
 				next_pk_id
-			elsif domain_object.pk_id
-				domain_object.pk_id
 			else
-				if ( next_pk_id = @next_pk_ids[domain_object.domain_class] )
-					@last_pk_id_inserted = next_pk_id
-					@next_pk_ids[domain_object.domain_class] = nil
-					next_pk_id
-				else
-					pk_ids = objects_by_domain_class( domain_object.domain_class ).keys
-					@last_pk_id_inserted = pk_ids.max ? pk_ids.max + 1 : 1
-				end
+				pk_ids = objects_by_domain_class( domain_object.domain_class ).keys
+				@last_pk_id_inserted = pk_ids.max ? pk_ids.max + 1 : 1
 			end
 		end
 
@@ -94,6 +96,7 @@ module Lafcadio
 		end
 		
 		def set_next_pk_id( domain_class, npi )
+			@next_pk_ids = {} unless @next_pk_ids
 			@next_pk_ids[ domain_class ] = npi
 		end
 	end
