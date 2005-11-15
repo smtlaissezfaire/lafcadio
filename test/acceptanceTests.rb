@@ -41,74 +41,64 @@ class AcceptanceTestCase < Test::Unit::TestCase
 	def default_test; end
 end
 
-class TestBadRow < DomainObject
+class DomainObject
 	def self.create_table( dbh )
-		dbh.do( 'drop table if exists test_bad_rows' )
-		createSql = <<-CREATE
+		drop_table dbh
+		dbh.do create_sql
+	end
+	
+	def self.drop_table( dbh )
+		dbh.do "drop table if exists #{ self.table_name }"
+	end
+end
+
+class TestBadRow < DomainObject
+	def self.create_sql
+		<<-CREATE
 create table test_bad_rows (
 	objId int not null auto_increment,
 	primary key (objId),
 	text_field text
 )
 		CREATE
-		dbh.do( createSql )
 	end
-	
-	def self.drop_table( dbh ); dbh.do( 'drop table test_bad_rows' ); end
 
-	def self.get_class_fields
-		fields = super
-		fields << StringField.new( self, 'text_field' )
-		fields
-	end
+	string :text_field
 end
 
 class TestDiffPkRow < DomainObject
-	def self.create_table( dbh )
-		dbh.do( 'drop table if exists test_diff_pk_rows' )
-		createSql = <<-CREATE
+	def self.create_sql
+		<<-CREATE
 create table test_diff_pk_rows (
 	objId int not null auto_increment,
 	primary key (objId),
 	text_field text
 )
 		CREATE
-		dbh.do( createSql )
 	end
-	
-	def self.drop_table( dbh ); dbh.do( 'drop table test_diff_pk_rows' ); end
 
-	def self.get_class_fields
-		super.concat( [ StringField.new( self, 'text_field' ) ] )
-	end
-	
+	string :text_field
 	sql_primary_key_name 'objId'
 end
 
 class TestInnoDBRow < DomainObject
-	def self.create_table( dbh )
-		dbh.do( 'drop table if exists test_inno_db_rows' )
-		createSql = <<-CREATE
+	def self.create_sql
+		<<-CREATE
 create table test_inno_db_rows (
 	pk_id int not null auto_increment,
 	primary key (pk_id),
 	string varchar(15)
 ) type=innodb
 		CREATE
-		dbh.do( createSql )
 	end
-	
-	def self.drop_table( dbh ); dbh.do( 'drop table test_inno_db_rows' ); end
 
 	string 'string'
-	
 	table_name 'test_inno_db_rows'
 end
 
 class TestRow < DomainObject
-	def self.create_table( dbh )
-		dbh.do( 'drop table if exists test_rows' )
-		createSql = <<-CREATE
+	def self.create_sql
+		<<-CREATE
 create table test_rows (
 	pk_id int not null auto_increment,
 	primary key (pk_id),
@@ -120,15 +110,12 @@ create table test_rows (
 	test_diff_pk_row int
 )
 		CREATE
-		dbh.do( createSql )
 	end
 	
-	def self.drop_table( dbh ); dbh.do( 'drop table test_rows' ); end
-
-	string        'text_field'
-	date_time     'date_time'
 	boolean       'bool_field'
 	blob          'blob_field'
+	date_time     'date_time'
+	string        'text_field'
 	string        'text2', { 'db_field_name' => 'text_field2' }
 	domain_object TestDiffPkRow
 
@@ -138,20 +125,16 @@ create table test_rows (
 end
 
 class TestChildRow < TestRow
-	def self.create_table( dbh )
-		dbh.do( 'drop table if exists test_child_rows' )
-		createSql = <<-CREATE
+	def self.create_sql
+		<<-CREATE
 create table test_child_rows (
 	pk_id int not null auto_increment,
 	primary key (pk_id),
 	child_text_field text
 )
 		CREATE
-		dbh.do( createSql )
 	end
 	
-	def self.drop_table( dbh ); dbh.do( 'drop table test_child_rows' ); end
-
 	def self.get_class_fields
 		fields = []
 		fields << StringField.new( self, 'child_text_field' )
@@ -229,8 +212,10 @@ class AccTestDomainObject < AcceptanceTestCase
 	end
 
 	def test_sql_primary_key_name
-		assert_equal( TestDiffPkRow.sql_primary_key_name,
-		              TestDiffPkRow.get_class_fields.first.db_field_name )
+		assert_equal(
+			TestDiffPkRow.sql_primary_key_name,
+			TestDiffPkRow.class_fields.first.db_field_name
+		)
 	end
 
 	def test_one_liners
