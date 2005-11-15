@@ -444,13 +444,10 @@ module Lafcadio
 		end
 
 		class In < Condition #:nodoc:
-			def self.search_term_type
-				Array
-			end
+			def self.search_term_type; Array; end
 
 			def dobj_satisfies?(anObj)
-				value = anObj.send @fieldName
-				@searchTerm.index(value) != nil
+				@searchTerm.include?( anObj.send( @fieldName ) )
 			end
 
 			def to_sql
@@ -466,12 +463,15 @@ module Lafcadio
 		
 		class Include < CompoundCondition
 			def initialize( field_name, search_term, domain_class )
-				begin_cond = Like.new( field_name, search_term + ',', domain_class,
-				                       Like::POST_ONLY )
-				mid_cond = Like.new( field_name, ',' + search_term + ',',
-				                     domain_class )
-				end_cond = Like.new( field_name, ',' + search_term, domain_class,
-				                     Like::PRE_ONLY )
+				begin_cond = Like.new(
+					field_name, search_term + ',', domain_class, Like::POST_ONLY
+				)
+				mid_cond = Like.new(
+					field_name, ',' + search_term + ',', domain_class
+				)
+				end_cond = Like.new(
+					field_name, ',' + search_term, domain_class, Like::PRE_ONLY
+				)
 				only_cond = Equals.new( field_name, search_term, domain_class )
 				super( begin_cond, mid_cond, end_cond, only_cond, OR )
 			end
@@ -488,7 +488,7 @@ module Lafcadio
 			end
 			
 			def execute
-				impostor = DomainObjectImpostor.impostor( @domain_class )
+				impostor = DomainObjectImpostor.impostor @domain_class
 				condition = @action.call( impostor ).to_condition
 				query = Query.new( @domain_class, condition )
 				query.order_by = @order_by
@@ -503,30 +503,29 @@ module Lafcadio
 			POST_ONLY			= 3
 
 			def initialize(
-					fieldName, searchTerm, domain_class, matchType = PRE_AND_POST)
+				fieldName, searchTerm, domain_class, matchType = PRE_AND_POST
+			)
 				super fieldName, searchTerm, domain_class
 				@matchType = matchType
 			end
 			
-			def get_regexp
+			def dobj_satisfies?(anObj)
+				value = anObj.send @fieldName
+				value = value.pk_id.to_s if value.respond_to?( :pk_id )
+				if value.is_a?( Array )
+					value.include? @searchTerm
+				else
+					!regexp.match( value ).nil?
+				end
+			end
+
+			def regexp
 				if @matchType == PRE_AND_POST
 					Regexp.new( @searchTerm, Regexp::IGNORECASE )
 				elsif @matchType == PRE_ONLY
 					Regexp.new( @searchTerm.to_s + "$", Regexp::IGNORECASE )
 				elsif @matchType == POST_ONLY
 					Regexp.new( "^" + @searchTerm, Regexp::IGNORECASE )
-				end
-			end
-
-			def dobj_satisfies?(anObj)
-				value = anObj.send @fieldName
-				if value.class <= DomainObject || value.class == DomainObjectProxy
-					value = value.pk_id.to_s
-				end
-				if value.class <= Array
-					(value.index(@searchTerm) != nil)
-				else
-					get_regexp.match(value) != nil
 				end
 			end
 
@@ -553,7 +552,7 @@ module Lafcadio
 		
 			def collect( coll )
 				max = coll.inject( nil ) { |max, d_obj|
-					a_value = d_obj.send( @field_name )
+					a_value = d_obj.send @field_name
 					( max.nil? || a_value > max ) ? a_value : max
 				}
 				[ result_row( [max] ) ]
@@ -593,22 +592,18 @@ module Lafcadio
 			
 			attr_reader :class_field
 		
-			def initialize( domainObjectImpostor, class_field_or_name )
+			def initialize( domainObjectImpostor, class_field )
 				@domainObjectImpostor = domainObjectImpostor
-				if class_field_or_name == 'pk_id'
-					@field_name = 'pk_id'
-				else
-					@class_field = class_field_or_name
-					@field_name = class_field_or_name.name
-				end
+				@class_field = class_field
+				@field_name = class_field.name
 			end
 			
 			def method_missing( methId, *args )
 				methodName = methId.id2name
-				if !ObjectFieldImpostor.comparators.keys.index( methodName ).nil?
+				if self.class.comparators.keys.include?( methodName )
 					register_compare_condition( methodName, *args )
 				else
-					super( methId, *args )
+					super
 				end
 			end
 			
