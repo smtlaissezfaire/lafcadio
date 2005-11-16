@@ -114,95 +114,6 @@ class TestDateTimeField < LafcadioTestCase
 	end
 end
 
-class TestFloatField < LafcadioTestCase
-  def setup
-  	super
-    @odf = FloatField.new( Invoice, "hours" )
-  end
-
-  def testNeedsNumeric
-    caught = false
-    begin
-      @odf.verify("36.5", nil)
-    rescue
-      caught = true
-    end
-    assert(caught)
-    @odf.verify(36.5, nil)
-  end
-  
-  def testGetvalue_from_sql
-    obj = @odf.value_from_sql "1.1"
-    assert_equal(1.1, obj)    
-  end
-
-	def testValueForSQL
-		assert_equal 'null', @odf.value_for_sql(nil)
-	end
-end
-
-class TestEmailField < LafcadioTestCase
-	def testValidAddress
-		assert !EmailField.valid_address('a@a')
-		assert !EmailField.valid_address('a.a@a')
-		assert !EmailField.valid_address('a.a.a')
-		assert !EmailField.valid_address('a')
-		assert EmailField.valid_address('a@a.a')
-		assert EmailField.valid_address('a,a@a.a')
-		assert !EmailField.valid_address('a@a.a, my_friend_too@a.a')
-		assert !EmailField.valid_address('cant have spaces @ this. that')
-  end
-
-  def testVerify
-    field = EmailField.new User
-		begin
-			field.verify('a@a', nil)
-			fail "didn't catch 'a@'"
-		rescue FieldValueError
-			# ok
-		end
-		field.not_null = false
-		field.verify( nil, 1 )
-	end
-end
-
-class TestEnumField < LafcadioTestCase
-	def TestEnumField.getTestEnumField
-		cardTypes = QueueHash.new( 'AX', 'American Express', 'MC', 'MasterCard',
-				'VI', 'Visa', 'DS', 'Discover' )
-		EnumField.new( User, "cardType", cardTypes )
-	end
-
-	def testSimpleEnumsArray
-		field = EnumField.new User, "salutation", [ 'Mr', 'Mrs', 'Miss', 'Ms' ]
-		enums = field.enums
-		assert_equal 'Mr', enums['Mr']
-	end
-	
-	def testValueForSql
-		field = EnumField.new User, "salutation", [ 'Mr', 'Mrs', 'Miss', 'Ms' ]
-		field.not_null = true
-		assert_equal 'null', field.value_for_sql('')
-	end
-	
-	def test_verify
-		field = TestEnumField.getTestEnumField
-		field.verify( 'AX', 1 )
-		assert_raise( FieldValueError ) { field.verify( 'IOU', 1 ) }
-		field.not_null = false
-		field.verify( nil, 1 )
-	end
-end
-
-class TestIntegerField < LafcadioTestCase
-	def testValueFromSQL
-		field = IntegerField.new nil, "number"
-		assert_equal Fixnum, field.value_from_sql("1").class
-		field.not_null = false
-		assert_equal nil, field.value_from_sql(nil)
-	end
-end
-
 class TestDomainObjectField < LafcadioTestCase
   def setup
 		super
@@ -265,6 +176,95 @@ class TestDomainObjectField < LafcadioTestCase
 		assert_equal client.name, clientFromDomainObjectField.name
 		assert_nil @olf.value_from_sql(nil)
   end
+end
+
+class TestEmailField < LafcadioTestCase
+	def testValidAddress
+		assert !EmailField.valid_address('a@a')
+		assert !EmailField.valid_address('a.a@a')
+		assert !EmailField.valid_address('a.a.a')
+		assert !EmailField.valid_address('a')
+		assert EmailField.valid_address('a@a.a')
+		assert EmailField.valid_address('a,a@a.a')
+		assert !EmailField.valid_address('a@a.a, my_friend_too@a.a')
+		assert !EmailField.valid_address('cant have spaces @ this. that')
+  end
+
+  def testVerify
+    field = EmailField.new User
+		begin
+			field.verify('a@a', nil)
+			fail "didn't catch 'a@'"
+		rescue FieldValueError
+			# ok
+		end
+		field.not_null = false
+		field.verify( nil, 1 )
+	end
+end
+
+class TestEnumField < LafcadioTestCase
+	def TestEnumField.getTestEnumField
+		cardTypes = QueueHash.new( 'AX', 'American Express', 'MC', 'MasterCard',
+				'VI', 'Visa', 'DS', 'Discover' )
+		EnumField.new( User, "cardType", cardTypes )
+	end
+
+	def testSimpleEnumsArray
+		field = EnumField.new User, "salutation", [ 'Mr', 'Mrs', 'Miss', 'Ms' ]
+		enums = field.enums
+		assert_equal 'Mr', enums['Mr']
+	end
+	
+	def testValueForSql
+		field = EnumField.new User, "salutation", [ 'Mr', 'Mrs', 'Miss', 'Ms' ]
+		field.not_null = true
+		assert_equal 'null', field.value_for_sql('')
+	end
+	
+	def test_verify
+		field = TestEnumField.getTestEnumField
+		field.verify( 'AX', 1 )
+		assert_raise( FieldValueError ) { field.verify( 'IOU', 1 ) }
+		field.not_null = false
+		field.verify( nil, 1 )
+	end
+end
+
+class TestFloatField < LafcadioTestCase
+  def setup
+  	super
+    @odf = FloatField.new( Invoice, "hours" )
+  end
+
+  def testNeedsNumeric
+    caught = false
+    begin
+      @odf.verify("36.5", nil)
+    rescue
+      caught = true
+    end
+    assert(caught)
+    @odf.verify(36.5, nil)
+  end
+  
+  def testGetvalue_from_sql
+    obj = @odf.value_from_sql "1.1"
+    assert_equal(1.1, obj)    
+  end
+
+	def testValueForSQL
+		assert_equal 'null', @odf.value_for_sql(nil)
+	end
+end
+
+class TestIntegerField < LafcadioTestCase
+	def testValueFromSQL
+		field = IntegerField.new nil, "number"
+		assert_equal Fixnum, field.value_from_sql("1").class
+		field.not_null = false
+		assert_equal nil, field.value_from_sql(nil)
+	end
 end
 
 class TestMonthField < LafcadioTestCase
