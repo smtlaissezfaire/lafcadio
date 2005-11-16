@@ -203,7 +203,7 @@ class TestCommitSqlStatementsAndBinds < LafcadioTestCase
   end
 
   def testFieldNamesForSQL
-    sqlMaker = ObjectStore::CommitSqlStatementsAndBinds.new Invoice.getTestInvoice
+    sqlMaker = ObjectStore::CommitSqlStatementsAndBinds.new Invoice.uncommitted_mock
     assert_equal( 6, sqlMaker.get_name_value_pairs( Invoice ).size )
   end
 	
@@ -413,7 +413,7 @@ end
 
 class TestDomainComparable < LafcadioTestCase
 	def testComparableToNil
-		client = Client.storedTestClient
+		client = Client.committed_mock
 		assert( !( client == nil ) )
 	end
 end
@@ -421,7 +421,7 @@ end
 class TestDomainObjectProxy < LafcadioTestCase
 	def setup
 		super
-		@client = Client.storedTestClient
+		@client = Client.committed_mock
 		@clientProxy = DomainObjectProxy.new(Client, 1)
 		@clientProxy2 = DomainObjectProxy.new(Client, 2)
 		@invoice = Invoice.storedTestInvoice
@@ -677,7 +677,7 @@ class TestObjectStore < LafcadioTestCase
 	def testDynamicMethodNameDispatchesToCollectorMapObjectFunction
 		option = TestOption.getTestOption
 		@testObjectStore.commit option
-		ili = InventoryLineItem.getTestInventoryLineItem
+		ili = InventoryLineItem.uncommitted_mock
 		@testObjectStore.commit ili
 		ilio = TestInventoryLineItemOption.getTestInventoryLineItemOption
 		@testObjectStore.commit ilio
@@ -772,7 +772,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testGetMapObject
-		ili = InventoryLineItem.storedTestInventoryLineItem
+		ili = InventoryLineItem.committed_mock
 		option = TestOption.storedTestOption
 		iliOption = TestInventoryLineItemOption.storedTestInventoryLineItemOption
 		assert_equal 1, @testObjectStore.get_all(InventoryLineItemOption).size

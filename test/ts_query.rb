@@ -50,7 +50,7 @@ class TestCompare < LafcadioTestCase
 	end
 
 	def testMockComparatorAndNilValue
-		invoice = Invoice.getTestInvoice
+		invoice = Invoice.uncommitted_mock
 		invoice.date = nil
 		dc = Query::Compare.new(
 				'date', Date.today, Invoice, Query::Compare::LESS_THAN)
@@ -61,7 +61,7 @@ class TestCompare < LafcadioTestCase
 		date1 = Date.new(2001, 1, 1)
 		date2 = Date.new(2002, 1, 1)
 		date3 = Date.new(2003, 1, 1)
-		invoice = Invoice.getTestInvoice
+		invoice = Invoice.uncommitted_mock
 		invoice1 = invoice.clone
 		invoice1.date = date1
 		invoice2 = invoice.clone
@@ -426,7 +426,7 @@ class TestQueryInferrer < LafcadioTestCase
 	end
 
 	def testLink
-		aClient = Client.storedTestClient
+		aClient = Client.committed_mock
 		desiredSql = "select * from invoices where invoices.client = 1"
 		assert_infer_match( desiredSql, Invoice ) { |inv|
 			inv.client.equals( aClient )

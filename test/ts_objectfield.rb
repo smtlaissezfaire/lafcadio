@@ -224,7 +224,7 @@ class TestDomainObjectField < LafcadioTestCase
 
 	def testRespectsOtherSubsetLinks
 		invoice = Invoice.storedTestInvoice
-		client = Client.storedTestClient
+		client = Client.committed_mock
 		client.priorityInvoice = invoice
 		@mockObjectStore.commit client
 		client2 = client.clone
@@ -293,7 +293,7 @@ end
 class TestObjectField < LafcadioTestCase
 	def setup
 		super
-		@client = Client.storedTestClient
+		@client = Client.committed_mock
 		@user = User.new(
 			"firstNames" => "Francis", "email" => "test@test.com", "pk_id" => 1
 		)

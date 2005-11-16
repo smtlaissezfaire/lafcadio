@@ -280,7 +280,7 @@ class TestDomainObject < LafcadioTestCase
 
 	def testCyclicalMarshal
 		client = Client.uncommitted_mock
-		invoice = Invoice.getTestInvoice
+		invoice = Invoice.uncommitted_mock
 		client.priorityInvoice = invoice
 		invoice.client = client
 		@mockObjectStore.commit client
@@ -326,7 +326,7 @@ class TestDomainObject < LafcadioTestCase
 
 	def test_dispatch_to_object_store
 		invoice = Invoice.storedTestInvoice
-		client = Client.storedTestClient
+		client = Client.committed_mock
 		assert_equal( invoice, client.invoices.only )
 		assert_equal( 0, client.clients( 'referringClient' ).size )
 		client2 = Client.new( 'pk_id' => 2, 'referringClient' => client )
@@ -374,7 +374,7 @@ class TestDomainObject < LafcadioTestCase
 		clientPrime = Client.uncommitted_mock
 		assert_equal client, clientPrime
 		assert( client.eql?( clientPrime ) )
-		invoice = Invoice.getTestInvoice
+		invoice = Invoice.uncommitted_mock
 		assert_equal 1, invoice.pk_id
 		assert_equal 1, client.pk_id
 		assert invoice != client
@@ -455,7 +455,7 @@ class TestDomainObject < LafcadioTestCase
 	
 	def testObjectLinksUpdateLive
 		invoice = Invoice.storedTestInvoice
-		client = Client.storedTestClient
+		client = Client.committed_mock
 		assert_equal client, invoice.client
 		assert_equal client.name, invoice.client.name
 		client.name = 'new name'

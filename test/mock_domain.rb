@@ -10,9 +10,7 @@ class Attribute < Lafcadio::DomainObject
 		att
 	end
 
-	def Attribute.table_name
-		"attributes"
-	end
+	def self.table_name; "attributes"; end
 
 	def self.uncommitted_mock
 		Attribute.new( { "pk_id" => 1, "name" => "attribute name" })
@@ -22,13 +20,13 @@ end
 class Client < Lafcadio::DomainObject
 	include Lafcadio
 	
-	def Client.storedTestClient
-		client = Client.uncommitted_mock
+	def self.committed_mock
+		client = uncommitted_mock
 		ObjectStore.get_object_store.commit client
 		client
 	end
 	
-  def Client.uncommitted_mock
+  def self.uncommitted_mock
     Client.new( "name" => "clientName1", 'pk_id' => 1 )
   end
 
@@ -55,41 +53,39 @@ module Domain; class LineItem < Lafcadio::DomainObject; end; end
 class InternalClient < Client; end
 
 class InventoryLineItem < Lafcadio::DomainObject
-	def self.getTestInventoryLineItem
-		InventoryLineItem.new({ 'pk_id' => 1, 'sku' => TestSKU.getTestSKU })
-	end
-
-	def self.storedTestInventoryLineItem
-		ili = getTestInventoryLineItem
+	def self.committed_mock
+		ili = uncommitted_mock
 		ili.sku = TestSKU.storedTestSKU
 		Lafcadio::ObjectStore.get_object_store.commit ili
 		ili
 	end
+
+	def self.uncommitted_mock
+		InventoryLineItem.new({ 'pk_id' => 1, 'sku' => TestSKU.getTestSKU })
+	end
 end
 
 class InventoryLineItemOption < Lafcadio::MapObject
-	def InventoryLineItemOption.mappedTypes
-		[ InventoryLineItem, Option ]
-	end
+	def self.mappedTypes; [ InventoryLineItem, Option ]; end
 end
 
 class Invoice < Lafcadio::DomainObject
 	include Lafcadio
 
-  def Invoice.getTestInvoice
+	def Invoice.storedTestInvoice
+		inv = Invoice.uncommitted_mock
+		inv.client = Client.committed_mock
+		ObjectStore.get_object_store.commit inv
+		inv
+	end
+	
+  def self.uncommitted_mock
     Invoice.new(
 			"client" => Client.uncommitted_mock, "rate" => 70,
 			"date" => Date.new(2001, 4, 5), "hours" => 36.5, "pk_id" => 1
 		)
   end
 
-	def Invoice.storedTestInvoice
-		inv = Invoice.getTestInvoice
-		inv.client = Client.storedTestClient
-		ObjectStore.get_object_store.commit inv
-		inv
-	end
-	
 	def name; pk_id.to_s; end
 end
 
@@ -119,14 +115,14 @@ class TestInventoryLineItemOption < LafcadioTestCase
 	def TestInventoryLineItemOption.getTestInventoryLineItemOption
 		InventoryLineItemOption.new(
 			'pk_id' => 1,
-			'inventory_line_item' => InventoryLineItem.getTestInventoryLineItem,
+			'inventory_line_item' => InventoryLineItem.uncommitted_mock,
 			'option' => TestOption.getTestOption
 		)
 	end
 
 	def TestInventoryLineItemOption.storedTestInventoryLineItemOption
 		ilio = TestInventoryLineItemOption.getTestInventoryLineItemOption
-		ilio.inventory_line_item = InventoryLineItem.storedTestInventoryLineItem
+		ilio.inventory_line_item = InventoryLineItem.committed_mock
 		ilio.option = TestOption.storedTestOption
 		ObjectStore.get_object_store.commit ilio
 		ilio
