@@ -677,7 +677,7 @@ class TestObjectStore < LafcadioTestCase
 	def testDynamicMethodNameDispatchesToCollectorMapObjectFunction
 		option = TestOption.getTestOption
 		@testObjectStore.commit option
-		ili = TestInventoryLineItem.getTestInventoryLineItem
+		ili = InventoryLineItem.getTestInventoryLineItem
 		@testObjectStore.commit ili
 		ilio = TestInventoryLineItemOption.getTestInventoryLineItemOption
 		@testObjectStore.commit ilio

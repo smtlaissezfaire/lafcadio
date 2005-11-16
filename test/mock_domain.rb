@@ -4,20 +4,18 @@ require 'lafcadio/domain'
 require 'lafcadio/test'
 
 class Attribute < Lafcadio::DomainObject
+	def self.getTestAttribute
+		Attribute.new( { "pk_id" => 1, "name" => "attribute name" })
+	end
+
+	def self.storedTestAttribute
+		att = getTestAttribute
+		ObjectStore.get_object_store.commit att
+		att
+	end
+
 	def Attribute.table_name
 		"attributes"
-	end
-
-	def Attribute.additionalHeaderFieldNames
-		[ "Options" ]
-	end
-
-	def Attribute.otherTypesToDisplay
-		[ Option ]
-	end
-
-	def Attribute.addEditHomepage
-		"admin/attributes.rhtml"
 	end
 end
 
@@ -42,18 +40,6 @@ class Client < Lafcadio::DomainObject
 			raise
 		end
 	end
-
-  def testPkId
-    client = Client.new( { "name" => "clientName1", "pk_id" => 1 } )
-    assert_equal(1, client.pk_id)
-  end
-
-  def testEquality
-    dbd = "clientName1"
-    client1 = Client.new( { "name" => dbd, "pk_id" => 1 } )
-    client2 = Client.new( { "name" => dbd, "pk_id" => 1 } )
-    assert_equal(client1, client2)
-  end
 end
 
 class DiffSqlPrimaryKey < Lafcadio::DomainObject
@@ -64,17 +50,15 @@ class DiffSqlPrimaryKey < Lafcadio::DomainObject
 	sql_primary_key_name 'objId'
 end
 
-module Domain
-	class LineItem < Lafcadio::DomainObject
-		def subtotal
-			@quantity * @price
-		end
-	end
-end
+module Domain; class LineItem < Lafcadio::DomainObject; end; end
 
 class InternalClient < Client; end
 
-class InventoryLineItem < Lafcadio::DomainObject; end
+class InventoryLineItem < Lafcadio::DomainObject
+	def self.getTestInventoryLineItem
+		InventoryLineItem.new({ 'pk_id' => 1, 'sku' => TestSKU.getTestSKU })
+	end
+end
 
 class InventoryLineItemOption < Lafcadio::MapObject
 	def InventoryLineItemOption.mappedTypes
@@ -98,8 +82,8 @@ class Invoice < Lafcadio::DomainObject
 		ObjectStore.get_object_store.commit inv
 		inv
 	end
-
-  def name; pk_id.to_s; end
+	
+	def name; pk_id.to_s; end
 end
 
 class NoXml < Lafcadio::DomainObject
@@ -122,51 +106,11 @@ class SKU < Lafcadio::DomainObject
   def SKU.english_name
 		"SKU"
 	end
-
-	def productNamePlusDescription
-		productNamePlusDescription = product.name
-		if description != nil
-			productNamePlusDescription += " - #{description}"
-		end
-		productNamePlusDescription
-	end
-
-	def onSale
-		salePrice != nil && onSaleUntil != nil && Date.today <= onSaleUntil
-	end
-
-	def price
-		if onSale
-			salePrice
-		else
-			standardPrice
-		end
-	end
-
-	def name
-		sku
-	end
-end
-
-class TestAttribute < LafcadioTestCase
-	def TestAttribute.getTestAttribute
-		Attribute.new( { "pk_id" => 1, "name" => "attribute name" })
-	end
-
-	def TestAttribute.storedTestAttribute
-		att = getTestAttribute
-		ObjectStore.get_object_store.commit att
-		att
-	end
 end
 
 class TestInventoryLineItem
-	def TestInventoryLineItem.getTestInventoryLineItem
-		InventoryLineItem.new({ 'pk_id' => 1, 'sku' => TestSKU.getTestSKU })
-	end
-
 	def TestInventoryLineItem.storedTestInventoryLineItem
-		ili = TestInventoryLineItem.getTestInventoryLineItem
+		ili = InventoryLineItem.getTestInventoryLineItem
 		ili.sku = TestSKU.storedTestSKU
 		Lafcadio::ObjectStore.get_object_store.commit ili
 		ili
@@ -177,7 +121,7 @@ class TestInventoryLineItemOption < LafcadioTestCase
 	def TestInventoryLineItemOption.getTestInventoryLineItemOption
 		InventoryLineItemOption.new(
 			'pk_id' => 1,
-			'inventory_line_item' => TestInventoryLineItem.getTestInventoryLineItem,
+			'inventory_line_item' => InventoryLineItem.getTestInventoryLineItem,
 			'option' => TestOption.getTestOption
 		)
 	end
@@ -194,13 +138,13 @@ end
 
 class TestOption < LafcadioTestCase
 	def TestOption.getTestOption
-		Option.new( { "attribute" => TestAttribute.getTestAttribute,
+		Option.new( { "attribute" => Attribute.getTestAttribute,
 				"name" => "option name", "pk_id" => 1 } )
 	end
 
 	def TestOption.storedTestOption
 		opt = getTestOption
-		opt.attribute = TestAttribute.storedTestAttribute
+		opt.attribute = Attribute.storedTestAttribute
 		ObjectStore.get_object_store.commit opt
 		opt
 	end
