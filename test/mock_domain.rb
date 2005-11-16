@@ -50,6 +50,20 @@ end
 
 module Domain; class LineItem < Lafcadio::DomainObject; end; end
 
+class DomainObjChild1 < Lafcadio::DomainObject
+	default_field_setup_hash Lafcadio::BooleanField,
+	                         {
+													   'enum_type' =>   Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO
+													 }
+
+	boolean  'bool1'
+	boolean  'bool2', { 'enum_type' => Lafcadio::BooleanField::ENUMS_ONE_ZERO }
+	booleans 'bool3',
+           'bool4', { 'enum_type' => Lafcadio::BooleanField::ENUMS_ONE_ZERO },
+	         'bool5'
+	strings  'text1', 'text2'
+end
+
 class InternalClient < Client; end
 
 class InventoryLineItem < Lafcadio::DomainObject
@@ -204,19 +218,4 @@ class XmlSku3 < Lafcadio::DomainObject
 	
 	def self.table_name; 'this_table'; end
 end
-
-class DomainObjChild1 < Lafcadio::DomainObject
-	default_field_setup_hash Lafcadio::BooleanField,
-	                         {
-													   'enum_type' =>   Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO
-													 }
-
-	boolean  'bool1'
-	boolean  'bool2', { 'enum_type' => Lafcadio::BooleanField::ENUMS_ONE_ZERO }
-	booleans 'bool3',
-           'bool4', { 'enum_type' => Lafcadio::BooleanField::ENUMS_ONE_ZERO },
-	         'bool5'
-	strings  'text1', 'text2'
-end
-
 
