@@ -262,20 +262,36 @@ end
 
 class AccTestEquals < AcceptanceTestCase
 	def test_db_field_name
-		row = TestRow.new( 'text2' => 'some text' )
-		row.commit
+		row = TestRow.new( 'text2' => 'some text' ).commit
 		cond = Query::Equals.new( 'text2', 'some text', TestRow )
 		assert_equal( 1, @object_store.get_subset( cond ).size )
-		@object_store.flush( row )
-		row_prime = @object_store.get_test_row( 1 )
+		@object_store.flush row
+		row_prime = @object_store.get_test_row 1
 		assert_equal( 'some text', row_prime.text2 )
 	end
 end
 
 class AccTestObjectStore < AcceptanceTestCase
 	include MonitorMixin
+	
+	def insert_1000_rows
+		date_time_field = TestRow.field 'date_time'
+		big_str = <<-BIG_STR
+'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+		BIG_STR
+		1.upto( 1000 ) { |i|
+			text = "'row #{ i }'"
+			date_time_str = date_time_field.value_for_sql( Time.now )
+			bool_val = ( i % 2 == 0 ) ? "'1'" : "'0'"
+			sql = <<-SQL
+insert into test_rows( text_field, date_time, bool_field, blob_field )
+values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
+			SQL
+			@dbh.do sql
+		}
+	end
 
-	def test_atomic_pk_retrievals_after_insert
+	def insert_rows_in_threads
 		rows = {}
 		threads = []
 		10.times do
@@ -288,6 +304,11 @@ class AccTestObjectStore < AcceptanceTestCase
 			}
 		end
 		threads.each do |th| th.join; end
+		rows
+	end
+
+	def test_atomic_pk_retrievals_after_insert
+		rows = insert_rows_in_threads
 		rows.keys.map { |key| key.to_i }.sort.each do |pk_id|
 			text = rows[pk_id.to_s]
 			assert_equal( text, TestRow[pk_id].text_field )
@@ -297,15 +318,16 @@ class AccTestObjectStore < AcceptanceTestCase
 	def test_diff_pk
 		mock = TestDiffPkRow.new( 'pk_id' => 1, 'text_field' => 'sample text' )
 		mock_object_store = MockObjectStore.new
-		mock_object_store.commit( mock )
-		testdiffpkrow1_prime = mock_object_store.get_test_diff_pk_rows( 1,
-		                                                            'pk_id' ).first
+		mock_object_store.commit mock
+		testdiffpkrow1_prime = mock_object_store.get_test_diff_pk_rows(
+			1, 'pk_id'
+		).first
 		assert_equal( 'sample text', testdiffpkrow1_prime.text_field )
 		sql = <<-SQL
 insert into test_diff_pk_rows( objId, text_field )
 values( 1, 'sample text' )
 		SQL
-		@dbh.do( sql )
+		@dbh.do sql
 		assert_equal( 1, @object_store.get_max( TestDiffPkRow ) )
 	end
 	
@@ -314,34 +336,19 @@ values( 1, 'sample text' )
 	end
 
 	def test_get_by_domain_class
-		diff_pk_row = TestDiffPkRow.new( 'text_field' => 'sample text' )
-		diff_pk_row.commit
-		test_row = TestRow.new( 'test_diff_pk_row' => diff_pk_row )
-		test_row.commit
+		diff_pk_row = TestDiffPkRow.new( 'text_field' => 'sample text' ).commit
+		test_row = TestRow.new( 'test_diff_pk_row' => diff_pk_row ).commit
 		assert_equal( 1, @object_store.get_test_rows( diff_pk_row ).size )
 	end
 
 	def test_get_max
-		assert_equal( nil, @object_store.get_max( TestRow ) )
-		assert_equal( nil, @object_store.get_max( TestDiffPkRow ) )
+		assert_nil @object_store.get_max( TestRow )
+		assert_nil @object_store.get_max( TestDiffPkRow )
 	end
 
 	def test_large_result_set
 		num_rows = 1000
-		date_time_field = TestRow.field 'date_time'
-		big_str = <<-BIG_STR
-'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-		BIG_STR
-		1.upto( num_rows ) { |i|
-			text = "'row #{ i }'"
-			date_time_str = date_time_field.value_for_sql( Time.now )
-			bool_val = ( i % 2 == 0 ) ? "'1'" : "'0'"
-			sql = <<-SQL
-insert into test_rows( text_field, date_time, bool_field, blob_field )
-values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
-			SQL
-			@dbh.do( sql )
-		}
+		insert_1000_rows
 		rows = @object_store.get_test_rows
 		assert_equal( num_rows, rows.size )
 		1.upto( num_rows ) { |i|
@@ -349,17 +356,15 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 			assert_equal( i, row.pk_id )
 			assert_equal( "row #{ i }", row.text_field )
 		}
-		result = @dbh.select_all( 'select * from test_rows' )
+		result = @dbh.select_all 'select * from test_rows'
 		assert_equal( num_rows, result.size )
 		result.each { |row_hash| value = row_hash['text_field'] }
 	end
 
 	def test_max
 		y2k = Time.utc( 2000, 1, 1 )
-		row1 = TestRow.new( 'date_time' => y2k )
-		row1.commit
-		row2 = TestRow.new( 'date_time' => Time.utc( 1999, 1, 1 ) )
-		row2.commit
+		row1 = TestRow.new( 'date_time' => y2k ).commit
+		row2 = TestRow.new( 'date_time' => Time.utc( 1999, 1, 1 ) ).commit
 		assert_equal( y2k, @object_store.get_max( TestRow, 'date_time' ).to_time )
 	end
 	
