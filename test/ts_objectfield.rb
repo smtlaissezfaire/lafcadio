@@ -27,18 +27,18 @@ class TestBooleanField < LafcadioTestCase
 		assert_equal( "'0'", @bf.value_for_sql( false ) )
 	end
 
-  def testValueForSQL
+  def test_value_for_sql
     assert_equal(0, @bf.value_for_sql(false))
   end
 
-	def testValueFromSQL
+	def test_value_from_sql
 		assert_equal true, @bf.value_from_sql(1)
 		assert_equal true, @bf.value_from_sql('1')
 		assert_equal false, @bf.value_from_sql(0)
 		assert_equal false, @bf.value_from_sql('0')
 	end
 
-	def testWithDifferentEnums
+	def test_with_different_enums
 		bf2 = BooleanField.new nil, 'whatever'
 		bf2.enum_type = BooleanField::ENUMS_CAPITAL_YES_NO
 		assert_equal("'N'", bf2.value_for_sql(false))
@@ -57,7 +57,7 @@ class TestDateField < LafcadioTestCase
     @odf = DateField.new Invoice
   end
 
-  def testCatchesBadFormat
+  def test_catches_bad_format
     begin
       @odf.verify("2001-04-05", nil)
       fail "Should raise an error with a bad value"
@@ -67,19 +67,19 @@ class TestDateField < LafcadioTestCase
     @odf.verify(Date.new(2001, 4, 5), nil)
   end
 
-  def testNotNull
+  def test_not_null
     odf1 = DateField.new nil
     assert(odf1.not_null)
     odf1.not_null = false
     assert(!odf1.not_null)
   end
 
-  def testValueForSQL
+  def test_value_for_sql
     assert_equal("'2001-04-05'", @odf.value_for_sql(Date.new(2001, 4, 5)))
 		assert_equal 'null', @odf.value_for_sql(nil)
   end
 
-  def testValueFromSQL
+  def test_value_from_sql
 		obj = @odf.value_from_sql( DBI::Date.new( 2001, 4, 5 ) )
     assert_equal(Date, obj.class)
 		obj2 = @odf.value_from_sql( DBI::Date.new( 0, 0, 0 ) )
@@ -96,12 +96,12 @@ class TestDateTimeField < LafcadioTestCase
 		@aug24 = Time.local(2002, "aug", 24, 13, 8, 22)
 	end
 
-	def testValueForSQL
+	def test_value_for_sql
 		assert_equal "'2002-08-24 13:08:22'",(@dateTimeField.value_for_sql(@aug24))
 		assert_equal "null", @dateTimeField.value_for_sql(nil)
 	end
 
-	def testValueFromSQL
+	def test_value_from_sql
 		ts1 = DBI::Timestamp.new( 2002, 8, 24, 13, 8, 22 )
 		value = @dateTimeField.value_from_sql ts1
 		assert_equal Time, value.class
@@ -125,7 +125,7 @@ class TestDomainObjectField < LafcadioTestCase
     @fieldWithListener = DomainObjectField.new(nil, Client, "client", "Client")
   end
 
-  def testNames
+  def test_names
     assert_equal("client", @olf.name)
 		caDomainObjectField = DomainObjectField.new nil, InternalClient
 		assert_equal "internal_client", caDomainObjectField.name
@@ -133,7 +133,7 @@ class TestDomainObjectField < LafcadioTestCase
 		assert_equal "line_item", liDomainObjectField.name
   end
 
-	def testRespectsOtherSubsetLinks
+	def test_respects_other_subset_links
 		invoice = Invoice.committed_mock
 		client = Client.committed_mock
 		client.priorityInvoice = invoice
@@ -150,7 +150,7 @@ class TestDomainObjectField < LafcadioTestCase
 		end
 	end
 
-  def testValueForSQL
+  def test_value_for_sql
     client = Client.new( { "name" => "my name", "pk_id" => 10 } )
     assert_equal(10, @olf.value_for_sql(client))
 		badClient = Client.new({ 'name' => 'Bad client' })
@@ -163,12 +163,12 @@ class TestDomainObjectField < LafcadioTestCase
 		assert_equal("null", @olf.value_for_sql(nil))
   end
 
-	def testValueForSqlForProxies
+	def test_value_for_sql_for_proxies
 		clientProxy = DomainObjectProxy.new(Client, 45)
 		assert_equal 45, @olf.value_for_sql(clientProxy)
 	end
 
-  def testValueFromSQL
+  def test_value_from_sql
 		client = Client.uncommitted_mock
 		@mockObjectStore.commit client
 		clientFromDomainObjectField = @olf.value_from_sql("1")
@@ -179,7 +179,7 @@ class TestDomainObjectField < LafcadioTestCase
 end
 
 class TestEmailField < LafcadioTestCase
-	def testValidAddress
+	def test_valid_address
 		assert !EmailField.valid_address('a@a')
 		assert !EmailField.valid_address('a.a@a')
 		assert !EmailField.valid_address('a.a.a')
@@ -190,7 +190,7 @@ class TestEmailField < LafcadioTestCase
 		assert !EmailField.valid_address('cant have spaces @ this. that')
   end
 
-  def testVerify
+  def test_verify
     field = EmailField.new User
 		begin
 			field.verify('a@a', nil)
@@ -204,26 +204,22 @@ class TestEmailField < LafcadioTestCase
 end
 
 class TestEnumField < LafcadioTestCase
-	def TestEnumField.getTestEnumField
-		cardTypes = QueueHash.new( 'AX', 'American Express', 'MC', 'MasterCard',
-				'VI', 'Visa', 'DS', 'Discover' )
-		EnumField.new( User, "cardType", cardTypes )
-	end
-
-	def testSimpleEnumsArray
+	def test_simple_enums_array
 		field = EnumField.new User, "salutation", [ 'Mr', 'Mrs', 'Miss', 'Ms' ]
 		enums = field.enums
 		assert_equal 'Mr', enums['Mr']
 	end
 	
-	def testValueForSql
+	def test_value_for_sql
 		field = EnumField.new User, "salutation", [ 'Mr', 'Mrs', 'Miss', 'Ms' ]
 		field.not_null = true
 		assert_equal 'null', field.value_for_sql('')
 	end
 	
 	def test_verify
-		field = TestEnumField.getTestEnumField
+		cardTypes = QueueHash.new( 'AX', 'American Express', 'MC', 'MasterCard',
+				'VI', 'Visa', 'DS', 'Discover' )
+		field = EnumField.new( User, "cardType", cardTypes )
 		field.verify( 'AX', 1 )
 		assert_raise( FieldValueError ) { field.verify( 'IOU', 1 ) }
 		field.not_null = false
@@ -237,7 +233,12 @@ class TestFloatField < LafcadioTestCase
     @odf = FloatField.new( Invoice, "hours" )
   end
 
-  def testNeedsNumeric
+  def test_get_value_from_sql
+    obj = @odf.value_from_sql "1.1"
+    assert_equal(1.1, obj)    
+  end
+
+  def test_needs_numeric
     caught = false
     begin
       @odf.verify("36.5", nil)
@@ -248,12 +249,7 @@ class TestFloatField < LafcadioTestCase
     @odf.verify(36.5, nil)
   end
   
-  def testGetvalue_from_sql
-    obj = @odf.value_from_sql "1.1"
-    assert_equal(1.1, obj)    
-  end
-
-	def testValueForSQL
+	def test_value_for_sql
 		assert_equal 'null', @odf.value_for_sql(nil)
 	end
 end

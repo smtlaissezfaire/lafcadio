@@ -25,7 +25,7 @@ class TestMockDBBridge < LafcadioTestCase
 		assert_raise( ArgumentError ) { @mockDbBridge.commit( bad_client ) }
 	end
 	
-	def testDelete
+	def test_delete
 		@mockDbBridge.commit @client
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client2' })
 		@mockDbBridge.commit client2
@@ -38,11 +38,11 @@ class TestMockDBBridge < LafcadioTestCase
 		assert_nil clientPrime
 	end
 
-  def testDumpable
+  def test_dumpable
 		assert_equal MockDbBridge, Marshal.load(Marshal.dump(@mockDbBridge)).class
   end
 
-	def testGetAll
+	def test_get_all
 		@mockDbBridge.commit @client
 		assert_equal @client, get_all(Client)[0]
 		(2..10).each { |pk_id|
@@ -51,16 +51,6 @@ class TestMockDBBridge < LafcadioTestCase
 		all = get_all( Client )
 		assert_equal( 10, all.size )
 		( 1..10 ).each { |i| assert_equal( i, all[i-1].pk_id ) }
-	end
-
-	def testGetCollectionByQuery
-		@mockDbBridge.commit @client
-		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client2' })
-		@mockDbBridge.commit client2
-		query = Query.new Client, 2
-		coll = @mockDbBridge.select_dobjs(query)
-		assert_equal 1, coll.size
-		assert_equal client2, coll[0]
 	end
 
 	def test_group_query
@@ -78,7 +68,7 @@ class TestMockDBBridge < LafcadioTestCase
 		)
 	end
 
-  def testLastPkIdInserted
+  def test_last_pk_id_inserted
 		assert_equal nil, @mockDbBridge.last_pk_id_inserted
     client = Client.new( { "name" => "clientName1" } )
     @mockDbBridge.commit client
@@ -154,10 +144,20 @@ class TestMockDBBridge < LafcadioTestCase
 		end
 	end
 
-  def test_returnsCollection
+  def test_returns_collection
     assert_equal(Array, get_all(Client).class)
   end
 	
+	def test_select_dobjs
+		@mockDbBridge.commit @client
+		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client2' })
+		@mockDbBridge.commit client2
+		query = Query.new Client, 2
+		coll = @mockDbBridge.select_dobjs(query)
+		assert_equal 1, coll.size
+		assert_equal client2, coll[0]
+	end
+
 	def test_set_next_pk_id
 		client = Client.new( 'name' => 'client 1' )
 		2.times do
@@ -175,7 +175,7 @@ class TestMockDBBridge < LafcadioTestCase
 		assert_equal( 4, @mockDbBridge.pre_commit_pk_id( client4 ) )
 	end
 	
-	def testUpdate
+	def test_update
 		client100 = Client.new( { 'pk_id' => 100, 'name' => 'client 100' } )
 		@mockDbBridge.commit client100
 		assert_equal 'client 100', get(Client, 100).name

@@ -21,6 +21,12 @@ class LafcadioTestCase < Test::Unit::TestCase
 		)
   end
 	
+	def assert_attributes( object, att_values )
+		att_values.each { |method, expected|
+			assert_equal( expected, object.send( method ), method.to_s )
+		}
+	end
+	
 	def default_test; end
 end
 

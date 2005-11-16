@@ -265,9 +265,10 @@ class TestDomainObject < LafcadioTestCase
 			'hours' => 36.5, 'pk_id' => 1
 		)
 		proxyPrime = invoice.client
-		assert_equal DomainObjectProxy, proxyPrime.class
-		assert_equal Client, proxyPrime.domain_class
-		assert_equal 99, proxyPrime.pk_id
+		assert_attributes(
+			proxyPrime,
+			{ :class => DomainObjectProxy, :domain_class => Client, :pk_id => 99 }
+		)
 		assert_raise( DomainObjectNotFoundError ) { proxyPrime.name }
 		client = Client.uncommitted_mock
     client.pk_id = 99
@@ -351,8 +352,7 @@ class TestDomainObject < LafcadioTestCase
     client = new_test_client_without_pk_id
     data = Marshal.dump client
     newClient = Marshal.load data
-    assert_equal Client, newClient.class
-		assert_nil newClient.pk_id
+		assert_attributes( newClient, { :class => Client, :pk_id => nil } )
 		client2 = Client.uncommitted_mock
 		assert_equal 1, client2.pk_id
 		@mockObjectStore.commit client2
