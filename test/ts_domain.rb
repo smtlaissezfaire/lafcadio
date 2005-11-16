@@ -20,7 +20,6 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 	end
 
 	def test_class_fields_from_xml
-		require 'lafcadio/objectField'
 		XmlSku.class_fields
 		match_field( XmlSku, 'boolean1', BooleanField,
 		            { 'enum_type' => BooleanField::ENUMS_CAPITAL_YES_NO } )
@@ -111,9 +110,9 @@ class TestDomainObject < LafcadioTestCase
 		end
 	end
 	
-	def newTestClientWithoutPkId; Client.new( "name" => "clientName" ); end
+	def new_test_client_without_pk_id; Client.new( "name" => "clientName" ); end
 
-	def testAssignProxies
+	def test_assigns_proxies
 		invoice = Invoice.committed_mock
 		assert_equal 1, invoice.client.pk_id
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client 2' })
@@ -125,7 +124,7 @@ class TestDomainObject < LafcadioTestCase
 		assert_nil invoice.client
 	end
 
-	def testCachesClassFields
+	def test_caches_class_fields
 		2.times { MockDomainObject.class_fields }
 	end
 	
@@ -148,14 +147,17 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def test_checks_fields_on_instantiation
-		LafcadioConfig.set_values( 'checkFields' => 'onInstantiate',
-		                           'classDefinitionDir' => '../test/testData' )
-		first_client = Client.new( 'name' => 'first client' )
-		first_client.commit
+		LafcadioConfig.set_values(
+			'checkFields' => 'onInstantiate',
+			'classDefinitionDir' => '../test/testData'
+		)
+		first_client = Client.new( 'name' => 'first client' ).commit
 		assert_raise( FieldValueError ) { Client.new( {} ) }
 		assert_raise( FieldValueError ) {
-			Client.new( 'name' => 'client name', 'referringClient' => first_client,
-			            'notes' => 123 )
+			Client.new(
+				'name' => 'client name', 'referringClient' => first_client,
+				'notes' => 123
+			)
 		}
 		assert_raise( FieldValueError ) {
 			Client.new( 'name' => 'client name', 'referringClient' => first_client,
@@ -220,16 +222,16 @@ class TestDomainObject < LafcadioTestCase
 		match_field( DomainObjChild1, 'text2', StringField )
 	end
 	
-	def testClone
-		client1 = newTestClientWithoutPkId
+	def test_clone
+		client1 = new_test_client_without_pk_id
 		client2 = client1.clone
 		client2.name = 'client 2 name'
 		assert_equal 'clientName', client1.name
 	end
 	
-	def testCommit
+	def test_commit
 		assert_equal 0, @mockObjectStore.get_all(Client).size
-		client = newTestClientWithoutPkId
+		client = new_test_client_without_pk_id
 		something = client.commit
 		assert_equal 1, @mockObjectStore.get_all(Client).size
 		assert_equal( Client, something.class )
@@ -256,7 +258,7 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal( 3, Client.get( :group => :count ).only[:count] )
 	end
 	
-	def testCreateWithLinkedProxies
+	def test_create_with_linked_proxies
 		clientProxy = DomainObjectProxy.new Client, 99
 		invoice = Invoice.new(
 			'client' => clientProxy, 'rate' => 70, 'date' => Date.new(2001, 4, 5),
@@ -266,19 +268,14 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal DomainObjectProxy, proxyPrime.class
 		assert_equal Client, proxyPrime.domain_class
 		assert_equal 99, proxyPrime.pk_id
-		begin
-			proxyPrime.name
-			fail "should throw DomainObjectNotFoundError"
-		rescue DomainObjectNotFoundError
-			# ok
-		end
+		assert_raise( DomainObjectNotFoundError ) { proxyPrime.name }
 		client = Client.uncommitted_mock
     client.pk_id = 99
     @mockObjectStore.commit client
 		assert_equal client.name, proxyPrime.name
 	end
 
-	def testCyclicalMarshal
+	def test_cyclical_marshal
 		client = Client.uncommitted_mock
 		invoice = Invoice.uncommitted_mock
 		client.priorityInvoice = invoice
@@ -310,6 +307,13 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal( 345, xml_sku.pk_id )
 	end
 	
+  def test_defines_setters
+    client = new_test_client_without_pk_id
+    assert_equal("clientName", client.name)
+    client.name = "newClientName"
+    assert_equal("newClientName", client.name)
+  end
+
 	def test_delete!
 		client = Client.new( {} ).commit
 		assert_equal( 1, Client.all.size )
@@ -317,13 +321,6 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal( 0, Client.all.size )
 	end
 	
-  def testDefinesSetters
-    client = newTestClientWithoutPkId
-    assert_equal("clientName", client.name)
-    client.name = "newClientName"
-    assert_equal("newClientName", client.name)
-  end
-
 	def test_dispatch_to_object_store
 		invoice = Invoice.committed_mock
 		client = Client.committed_mock
@@ -340,7 +337,7 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal( client2, Client.get( client, 'referringClient').only )
 	end
 	
-	def testDontSetDeleteWithoutPkId
+	def test_dont_set_delete_without_pk_id
 		foo = Client.new( { "name" => "clientName1" } )
 		begin
 			foo.delete = 1
@@ -350,8 +347,8 @@ class TestDomainObject < LafcadioTestCase
 		end
 	end
 
-  def testDumpable
-    client = newTestClientWithoutPkId
+  def test_dumpable
+    client = new_test_client_without_pk_id
     data = Marshal.dump client
     newClient = Marshal.load data
     assert_equal Client, newClient.class
@@ -369,7 +366,7 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal 1, collPrime[1].pk_id
   end
 
-	def testEquality
+	def test_equality
 		client = Client.uncommitted_mock
 		clientPrime = Client.uncommitted_mock
 		assert_equal client, clientPrime
@@ -386,7 +383,7 @@ class TestDomainObject < LafcadioTestCase
 		}
 	end
 
-	def testGetField
+	def test_get_field
 		name = Client.class_field 'name'
 		assert_not_nil name
 		assert_equal( 'name', InternalClient.field( 'name' ).name )
@@ -400,7 +397,7 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal( 'client name', c.send( :name ) )
 	end
 	
-	def testHandlesClassWithoutXml
+	def test_handles_class_without_xml
 		assert_equal( 'no_xml_id', NoXml.sql_primary_key_name )
 		assert_equal( 'no_xmls', NoXml.table_name )
 	end
@@ -426,7 +423,7 @@ class TestDomainObject < LafcadioTestCase
 		end
 	end
 
-	def testInheritance
+	def test_inheritance
 		ic = InternalClient.new({ 'name' => 'clientName1',
 				'billingType' => 'trade' })
 		assert_equal 'clientName1', ic.name
@@ -453,7 +450,7 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal( 'client 2', client2.name )
 	end
 	
-	def testObjectLinksUpdateLive
+	def test_object_links_update_live
 		invoice = Invoice.committed_mock
 		client = Client.committed_mock
 		assert_equal client, invoice.client
@@ -499,7 +496,7 @@ class TestDomainObject < LafcadioTestCase
 		assert_equal( 'xml_sku2_id', XmlSku2.sql_primary_key_name )
 	end
 	
-	def testPkIdNeedsFixnum
+	def test_pk_id_needs_fixnum
 		assert_equal Fixnum, Client.uncommitted_mock.pk_id.class
 	end
 
@@ -508,13 +505,13 @@ class TestDomainObject < LafcadioTestCase
 		              DiffSqlPrimaryKey.get_class_fields.first.db_field_name )
 	end
 
-	def testTableName
+	def test_table_name
 		assert_equal( "users", User.table_name )
 		assert_equal( "line_items", Domain::LineItem.table_name )
 	end
 	
 	def test_to_s
-		assert_match( /Client/, newTestClientWithoutPkId.to_s )
+		assert_match( /Client/, new_test_client_without_pk_id.to_s )
 	end
 
 	def test_update!
