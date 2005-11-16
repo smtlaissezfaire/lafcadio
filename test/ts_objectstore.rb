@@ -118,7 +118,7 @@ class TestObjectStoreCache < LafcadioTestCase
 	end
 
 	def test_clones
-		user = User.getTestUser
+		user = User.uncommitted_mock
 		user.pk_id = 1
 		@cache.save( user )
 		assert( user.object_id != @cache.get( User, 1 ).object_id )
@@ -159,7 +159,7 @@ class TestObjectStoreCache < LafcadioTestCase
 	end
 
 	def testFlush
-		user = User.getTestUser
+		user = User.uncommitted_mock
 		user.commit
 		assert_equal( 1, all( User ).size )
 		user.delete = true
@@ -480,7 +480,7 @@ end
 
 class TestGMockObjectStore < LafcadioTestCase
 	def testAddsPkId
-		@mockObjectStore.commit User.getTestUser
+		@mockObjectStore.commit User.uncommitted_mock
 		assert_equal 1, @mockObjectStore.get(User, 1).pk_id
 		@mockObjectStore.commit Client.new( { 'pk_id' => 10,
 				'name' => 'client 10' } )
@@ -491,7 +491,7 @@ class TestGMockObjectStore < LafcadioTestCase
 	end
 
 	def testDelete
-		user = User.getTestUser
+		user = User.uncommitted_mock
 		@mockObjectStore.commit user
 		assert_equal 1, @mockObjectStore.get_all(User).size
 		user.delete = true
@@ -500,7 +500,7 @@ class TestGMockObjectStore < LafcadioTestCase
 	end
 
 	def testDontChangeFieldsUntilCommit
-		user = User.getTestUser
+		user = User.uncommitted_mock
 		user.commit
 		user_prime = @mockObjectStore.get_user( 1 )
 		assert( user.object_id != user_prime.object_id )
@@ -512,7 +512,7 @@ class TestGMockObjectStore < LafcadioTestCase
 	end
 
 	def testObjectsRetrievable
-		@mockObjectStore.commit User.getTestUser
+		@mockObjectStore.commit User.uncommitted_mock
 		assert_equal 1, @mockObjectStore.get(User, 1).pk_id
 	end
 
@@ -675,7 +675,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testDynamicMethodNameDispatchesToCollectorMapObjectFunction
-		option = TestOption.getTestOption
+		option = Option.uncommitted_mock
 		@testObjectStore.commit option
 		ili = InventoryLineItem.uncommitted_mock
 		@testObjectStore.commit ili
@@ -705,7 +705,7 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal( invoice1, coll.only )
 		xml_sku = XmlSku.new( 'pk_id' => 1 )
 		xml_sku.commit
-		user = User.getTestUserWithPkId
+		user = User.committed_mock
 		xml_sku2 = XmlSku2.new( 'xml_sku' => xml_sku, 'link1' => user )
 		xml_sku2.commit
 		coll2 = @testObjectStore.get_xml_sku2s( xml_sku )
@@ -773,7 +773,7 @@ class TestObjectStore < LafcadioTestCase
 
 	def testGetMapObject
 		ili = InventoryLineItem.committed_mock
-		option = TestOption.storedTestOption
+		option = Option.committed_mock
 		iliOption = InventoryLineItemOption.committed_mock
 		assert_equal 1, @testObjectStore.get_all(InventoryLineItemOption).size
 		assert_equal iliOption, @testObjectStore.get_map_object(InventoryLineItemOption,

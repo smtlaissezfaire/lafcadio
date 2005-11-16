@@ -1,7 +1,7 @@
 require 'test/unit'
 
 class Test_lafcadio_schema < Test::Unit::TestCase
-	def testGenerateSchema
+	def test_generate_schame
 		domain_classFile = "../test/mock_domain.rb"
 		configFile = 'lafcadio/test/testconfig.dat'
 		cmd = "../bin/lafcadio_schema -c #{ configFile } -C Client " +

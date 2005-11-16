@@ -55,13 +55,13 @@ class InternalClient < Client; end
 class InventoryLineItem < Lafcadio::DomainObject
 	def self.committed_mock
 		ili = uncommitted_mock
-		ili.sku = TestSKU.storedTestSKU
+		ili.sku = SKU.committed_mock
 		Lafcadio::ObjectStore.get_object_store.commit ili
 		ili
 	end
 
 	def self.uncommitted_mock
-		InventoryLineItem.new({ 'pk_id' => 1, 'sku' => TestSKU.getTestSKU })
+		InventoryLineItem.new({ 'pk_id' => 1, 'sku' => SKU.uncommitted_mock })
 	end
 end
 
@@ -69,7 +69,7 @@ class InventoryLineItemOption < Lafcadio::MapObject
 	def self.committed_mock
 		ilio = uncommitted_mock
 		ilio.inventory_line_item = InventoryLineItem.committed_mock
-		ilio.option = TestOption.storedTestOption
+		ilio.option = Option.committed_mock
 		ObjectStore.get_object_store.commit ilio
 		ilio
 	end
@@ -78,7 +78,7 @@ class InventoryLineItemOption < Lafcadio::MapObject
 		InventoryLineItemOption.new(
 			'pk_id' => 1,
 			'inventory_line_item' => InventoryLineItem.uncommitted_mock,
-			'option' => TestOption.getTestOption
+			'option' => Option.uncommitted_mock
 		)
 	end
 
@@ -111,57 +111,49 @@ class NoXml < Lafcadio::DomainObject
 	sql_primary_key_name 'no_xml_id'
 end
 
-class Option < Lafcadio::DomainObject; end
+class Option < Lafcadio::DomainObject
+	def self.committed_mock
+		opt = uncommitted_mock
+		opt.attribute = Attribute.committed_mock
+		ObjectStore.get_object_store.commit opt
+		opt
+	end
 
-class SKU < Lafcadio::DomainObject
-  def self.table_name; "skus"; end
-
-  def self.english_name; "SKU"; end
-end
-
-class TestOption < LafcadioTestCase
-	def TestOption.getTestOption
+	def self.uncommitted_mock
 		Option.new(
 			"attribute" => Attribute.uncommitted_mock, "name" => "option name",
 			"pk_id" => 1
 		)
 	end
-
-	def TestOption.storedTestOption
-		opt = getTestOption
-		opt.attribute = Attribute.committed_mock
-		ObjectStore.get_object_store.commit opt
-		opt
-	end
 end
 
-class TestSKU
-	def TestSKU.getTestSKU
-		SKU.new({ 'pk_id' => 1, 'sku' => 'sku0001', 'standardPrice' => 99.95 })
-	end
-
-	def TestSKU.storedTestSKU
-		sku = TestSKU.getTestSKU
+class SKU < Lafcadio::DomainObject
+	def self.committed_mock
+		sku = uncommitted_mock
 		Lafcadio::ObjectStore.get_object_store.commit sku
 		sku
+	end
+
+  def self.english_name; "SKU"; end
+
+	def self.table_name; "skus"; end
+
+	def self.uncommitted_mock
+		SKU.new({ 'pk_id' => 1, 'sku' => 'sku0001', 'standardPrice' => 99.95 })
 	end
 end
 
 class User < Lafcadio::DomainObject
-  def User.fieldHash
-    { "firstNames" => "Francis", "email" => "test@test.com" }
-  end
-
-  def User.getTestUser
-		User.new fieldHash
-  end
-
-  def User.getTestUserWithPkId
-    myHash = fieldHash
-    myHash["pk_id"] = 1
-    user = User.new myHash
+  def self.committed_mock
+		user = User.new(
+			"firstNames" => "Francis", "email" => "test@test.com", 'pk_id' => 1
+		)
 		user.commit
 		user
+  end
+
+  def self.uncommitted_mock
+		User.new( "firstNames" => "Francis", "email" => "test@test.com" )
   end
 end
 

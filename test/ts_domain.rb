@@ -8,7 +8,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		ClassDefinitionXmlParser.new( domain_class, xml ).get_class_fields
 	end
 
-	def matchField( domain_class, fieldName, fieldClass, attributes = nil )
+	def match_field( domain_class, fieldName, fieldClass, attributes = nil )
 		field = domain_class.class_field fieldName
 		assert_not_nil( field )
 		assert_equal( fieldClass, field.class )
@@ -19,38 +19,38 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		end
 	end
 
-	def testClassFieldsFromXml
+	def test_class_fields_from_xml
 		require 'lafcadio/objectField'
 		XmlSku.class_fields
-		matchField( XmlSku, 'boolean1', BooleanField,
+		match_field( XmlSku, 'boolean1', BooleanField,
 		            { 'enum_type' => BooleanField::ENUMS_CAPITAL_YES_NO } )
-		matchField( XmlSku, 'boolean2', BooleanField,
+		match_field( XmlSku, 'boolean2', BooleanField,
 		            { 'enums' => { true => 'yin', false => 'yang' } } )
-		matchField( XmlSku, 'date1', DateField, { 'not_null' => false } )
-		matchField( XmlSku, 'date2', DateField )
-		matchField( XmlSku, 'dateTime1', DateTimeField )
-		matchField( XmlSku, 'decimal1', FloatField )
-		matchField( XmlSku, 'email1', EmailField )
-		matchField( XmlSku, 'enum1', EnumField,
+		match_field( XmlSku, 'date1', DateField, { 'not_null' => false } )
+		match_field( XmlSku, 'date2', DateField )
+		match_field( XmlSku, 'dateTime1', DateTimeField )
+		match_field( XmlSku, 'decimal1', FloatField )
+		match_field( XmlSku, 'email1', EmailField )
+		match_field( XmlSku, 'enum1', EnumField,
 		            { 'enums' => QueueHash.new( 'a', 'a', 'b', 'b' ) } )
-		matchField( XmlSku, 'enum2', EnumField,
+		match_field( XmlSku, 'enum2', EnumField,
 		            { 'enums' => QueueHash.new( '1', '2', '3', '4' ) } )
-		matchField( XmlSku, 'integer1', IntegerField )
-		matchField( XmlSku, 'link1', DomainObjectField,
+		match_field( XmlSku, 'integer1', IntegerField )
+		match_field( XmlSku, 'link1', DomainObjectField,
 		            { 'linked_type' => User, 'delete_cascade' => true } )
-		matchField( XmlSku, 'link2', DomainObjectField,
+		match_field( XmlSku, 'link2', DomainObjectField,
 		            { 'linked_type' => Invoice, 'db_field_name' => 'an_invoice' } )
-		matchField( XmlSku, 'month1', MonthField )
-		matchField( XmlSku, 'subsetLink1', SubsetDomainObjectField,
+		match_field( XmlSku, 'month1', MonthField )
+		match_field( XmlSku, 'subsetLink1', SubsetDomainObjectField,
 		            { 'subset_field' => 'xmlSku' } )
-		matchField( XmlSku, 'text1', StringField )
-		matchField( XmlSku, 'text2', StringField )
-		matchField( XmlSku, 'textList1', TextListField,
+		match_field( XmlSku, 'text1', StringField )
+		match_field( XmlSku, 'text2', StringField )
+		match_field( XmlSku, 'textList1', TextListField,
 		            { 'db_field_name' => 'text_list1' } )
-		matchField( Invoice, 'timestamp1', TimeStampField )
+		match_field( Invoice, 'timestamp1', TimeStampField )
 	end
 	
-	def testFieldNamesNeedToBeUnique
+	def test_field_names_need_to_be_unique
 		begin
 			get_class_fields( XmlSku, <<-XML
 				<lafcadio_class_definition name="XmlSku">
@@ -65,14 +65,14 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		end
 	end
 
-	def testSetPkNameAndTableNameInXml
+	def test_set_pk_name_and_table_name_in_xml
 		assert_equal( 'some_other_id', XmlSku.sql_primary_key_name )
 		assert_equal( 'pk_id', Attribute.sql_primary_key_name )
 		assert_equal( 'some_other_table', XmlSku.table_name )
 		assert_equal( 'attributes', Attribute.table_name )
 	end
 
-	def testUsefulErrorMessages
+	def test_useful_error_messages
 		begin
 			get_class_fields( XmlSku, <<-XML
 				<lafcadio_class_definition name="XmlSku">
@@ -100,7 +100,7 @@ class TestDomainObject < LafcadioTestCase
 		def Attribute.post_commit_trigger( att ); end
 	end
 
-	def matchField( domain_class, fieldName, fieldClass, attributes = nil )
+	def match_field( domain_class, fieldName, fieldClass, attributes = nil )
 		field = domain_class.class_field fieldName
 		assert_not_nil( field )
 		assert_equal( fieldClass, field.class )
@@ -176,48 +176,48 @@ class TestDomainObject < LafcadioTestCase
 	
 	def test_class_fields_from_one_line_class_methods
 		XmlSku2.class_fields
-		matchField( XmlSku2, 'boolean1', BooleanField,
+		match_field( XmlSku2, 'boolean1', BooleanField,
 		            { 'enum_type' => BooleanField::ENUMS_CAPITAL_YES_NO } )
-		matchField( XmlSku2, 'boolean2', BooleanField,
+		match_field( XmlSku2, 'boolean2', BooleanField,
 		            { 'enums' => { true => 'yin', false => 'yang' } } )
-		matchField( XmlSku2, 'date1', DateField, { 'not_null' => false } )
-		matchField( XmlSku2, 'date2', DateField )
-		matchField( XmlSku2, 'dateTime1', DateTimeField )
-		matchField( XmlSku2, 'decimal1', FloatField )
-		matchField( XmlSku2, 'email1', EmailField )
-		matchField( XmlSku2, 'enum1', EnumField,
+		match_field( XmlSku2, 'date1', DateField, { 'not_null' => false } )
+		match_field( XmlSku2, 'date2', DateField )
+		match_field( XmlSku2, 'dateTime1', DateTimeField )
+		match_field( XmlSku2, 'decimal1', FloatField )
+		match_field( XmlSku2, 'email1', EmailField )
+		match_field( XmlSku2, 'enum1', EnumField,
 		            { 'enums' => QueueHash.new( 'a', 'a', 'b', 'b' ) } )
-		matchField( XmlSku2, 'enum2', EnumField,
+		match_field( XmlSku2, 'enum2', EnumField,
 		            { 'enums' => QueueHash.new( '1', '2', '3', '4' ) } )
-		matchField( XmlSku2, 'integer1', IntegerField )
-		matchField( XmlSku2, 'link1', DomainObjectField,
+		match_field( XmlSku2, 'integer1', IntegerField )
+		match_field( XmlSku2, 'link1', DomainObjectField,
 		            { 'linked_type' => User, 'delete_cascade' => true } )
-		matchField( XmlSku2, 'month1', MonthField )
-		matchField( XmlSku2, 'subsetLink1', SubsetDomainObjectField,
+		match_field( XmlSku2, 'month1', MonthField )
+		match_field( XmlSku2, 'subsetLink1', SubsetDomainObjectField,
 		            { 'subset_field' => 'xmlSku' } )
-		matchField( XmlSku2, 'text1', StringField )
-		matchField( XmlSku2, 'text2', StringField )
-		matchField( XmlSku2, 'textList1', TextListField,
+		match_field( XmlSku2, 'text1', StringField )
+		match_field( XmlSku2, 'text2', StringField )
+		match_field( XmlSku2, 'textList1', TextListField,
 		            { 'db_field_name' => 'text_list1' } )
-		matchField( XmlSku2, 'timestamp1', TimeStampField )
+		match_field( XmlSku2, 'timestamp1', TimeStampField )
 	end
 	
 	def test_class_fields_named_as_symbols
-		matchField(
+		match_field(
 			XmlSku3, 'boolean2', BooleanField,
 			{ 'enums' => { true => 'yin', false => 'yang' } }
 		)
 	end
 	
 	def test_class_fields_plural
-		matchField( DomainObjChild1, 'bool3', BooleanField )
-		matchField(
+		match_field( DomainObjChild1, 'bool3', BooleanField )
+		match_field(
 			DomainObjChild1, 'bool4', BooleanField,
 			{ 'enum_type' => BooleanField::ENUMS_ONE_ZERO }
 		)
-		matchField( DomainObjChild1, 'bool5', BooleanField )
-		matchField( DomainObjChild1, 'text1', StringField )
-		matchField( DomainObjChild1, 'text2', StringField )
+		match_field( DomainObjChild1, 'bool5', BooleanField )
+		match_field( DomainObjChild1, 'text1', StringField )
+		match_field( DomainObjChild1, 'text2', StringField )
 	end
 	
 	def testClone

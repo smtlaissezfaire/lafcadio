@@ -134,7 +134,7 @@ class TestCompoundCondition < LafcadioTestCase
 	def testOr
 		email = Query::Equals.new('email', 'test@test.com', User)
 		fname = Query::Equals.new('firstNames', 'John', User)
-		user = User.getTestUser
+		user = User.uncommitted_mock
 		assert email.dobj_satisfies?(user)
 		assert !fname.dobj_satisfies?(user)
 		compound = Query::CompoundCondition.new(email, fname,
@@ -337,7 +337,7 @@ class TestQueryInferrer < LafcadioTestCase
 			'select * from inventory_line_item_options where ' +
 			'inventory_line_item_options.optionId = 1'
 		assert_infer_match( desired_sql2, InventoryLineItemOption ) { |ilio|
-			ilio.option.equals( TestOption.storedTestOption )
+			ilio.option.equals( Option.committed_mock )
 		}
 	end
 
@@ -589,7 +589,7 @@ class TestNot < LafcadioTestCase
 	def test_domain_class; assert_equal( User, @not.domain_class ); end
 
 	def testObjectsMeets
-		user = User.getTestUser
+		user = User.uncommitted_mock
 		assert !@not.dobj_satisfies?(user)
 		user2 = User.new({ 'email' => 'jane.doe@email.com' })
 		assert @not.dobj_satisfies?(user2)
