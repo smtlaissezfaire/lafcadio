@@ -114,7 +114,7 @@ class TestDomainObject < LafcadioTestCase
 	def newTestClientWithoutPkId; Client.new( "name" => "clientName" ); end
 
 	def testAssignProxies
-		invoice = Invoice.storedTestInvoice
+		invoice = Invoice.committed_mock
 		assert_equal 1, invoice.client.pk_id
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client 2' })
 		invoice.client = client2
@@ -325,7 +325,7 @@ class TestDomainObject < LafcadioTestCase
   end
 
 	def test_dispatch_to_object_store
-		invoice = Invoice.storedTestInvoice
+		invoice = Invoice.committed_mock
 		client = Client.committed_mock
 		assert_equal( invoice, client.invoices.only )
 		assert_equal( 0, client.clients( 'referringClient' ).size )
@@ -454,7 +454,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 	
 	def testObjectLinksUpdateLive
-		invoice = Invoice.storedTestInvoice
+		invoice = Invoice.committed_mock
 		client = Client.committed_mock
 		assert_equal client, invoice.client
 		assert_equal client.name, invoice.client.name

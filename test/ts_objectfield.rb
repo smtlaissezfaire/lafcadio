@@ -223,7 +223,7 @@ class TestDomainObjectField < LafcadioTestCase
   end
 
 	def testRespectsOtherSubsetLinks
-		invoice = Invoice.storedTestInvoice
+		invoice = Invoice.committed_mock
 		client = Client.committed_mock
 		client.priorityInvoice = invoice
 		@mockObjectStore.commit client

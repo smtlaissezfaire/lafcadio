@@ -327,7 +327,7 @@ class TestDBBridge < Test::Unit::TestCase
 	def test_group_query
 		query = Query::Max.new( Client )
 		assert_equal( 1, @dbb.group_query( query ).only[:max] )
-		invoice = Invoice.storedTestInvoice
+		invoice = Invoice.committed_mock
 		query2 = Query::Max.new( Invoice, 'date' )
 		assert_equal( invoice.date, @dbb.group_query( query2 ).only[:max].to_date )
 		query3 = Query::Max.new( XmlSku )
@@ -424,7 +424,7 @@ class TestDomainObjectProxy < LafcadioTestCase
 		@client = Client.committed_mock
 		@clientProxy = DomainObjectProxy.new(Client, 1)
 		@clientProxy2 = DomainObjectProxy.new(Client, 2)
-		@invoice = Invoice.storedTestInvoice
+		@invoice = Invoice.committed_mock
 		@invoiceProxy = DomainObjectProxy.new(Invoice, 1)
 	end
 
@@ -679,7 +679,7 @@ class TestObjectStore < LafcadioTestCase
 		@testObjectStore.commit option
 		ili = InventoryLineItem.uncommitted_mock
 		@testObjectStore.commit ili
-		ilio = TestInventoryLineItemOption.getTestInventoryLineItemOption
+		ilio = InventoryLineItemOption.uncommitted_mock
 		@testObjectStore.commit ilio
 		assert_equal( ili, ilio.inventory_line_item )
 		assert_equal ilio, @testObjectStore.get_inventory_line_item_option(
@@ -774,7 +774,7 @@ class TestObjectStore < LafcadioTestCase
 	def testGetMapObject
 		ili = InventoryLineItem.committed_mock
 		option = TestOption.storedTestOption
-		iliOption = TestInventoryLineItemOption.storedTestInventoryLineItemOption
+		iliOption = InventoryLineItemOption.committed_mock
 		assert_equal 1, @testObjectStore.get_all(InventoryLineItemOption).size
 		assert_equal iliOption, @testObjectStore.get_map_object(InventoryLineItemOption,
 				ili, option)
@@ -840,7 +840,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testHandlesLinksThroughProxies
-		invoice = Invoice.storedTestInvoice
+		invoice = Invoice.committed_mock
 		origClient = @testObjectStore.get(Client, 1)
 		assert_equal Client, origClient.class
 		clientProxy = invoice.client
@@ -852,7 +852,7 @@ class TestObjectStore < LafcadioTestCase
 	def testMax
 		setTestClient
 		assert_equal 1, @testObjectStore.get_max(Client)
-		Invoice.storedTestInvoice
+		Invoice.committed_mock
 		assert_equal( 70, @testObjectStore.get_max( Invoice, 'rate' ) )
 		xml_sku = XmlSku.new( 'pk_id' => 25 )
 		xml_sku.commit

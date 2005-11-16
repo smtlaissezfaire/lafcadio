@@ -66,14 +66,30 @@ class InventoryLineItem < Lafcadio::DomainObject
 end
 
 class InventoryLineItemOption < Lafcadio::MapObject
+	def self.committed_mock
+		ilio = uncommitted_mock
+		ilio.inventory_line_item = InventoryLineItem.committed_mock
+		ilio.option = TestOption.storedTestOption
+		ObjectStore.get_object_store.commit ilio
+		ilio
+	end
+
+	def self.uncommitted_mock
+		InventoryLineItemOption.new(
+			'pk_id' => 1,
+			'inventory_line_item' => InventoryLineItem.uncommitted_mock,
+			'option' => TestOption.getTestOption
+		)
+	end
+
 	def self.mappedTypes; [ InventoryLineItem, Option ]; end
 end
 
 class Invoice < Lafcadio::DomainObject
 	include Lafcadio
 
-	def Invoice.storedTestInvoice
-		inv = Invoice.uncommitted_mock
+	def self.committed_mock
+		inv = uncommitted_mock
 		inv.client = Client.committed_mock
 		ObjectStore.get_object_store.commit inv
 		inv
@@ -95,38 +111,12 @@ class NoXml < Lafcadio::DomainObject
 	sql_primary_key_name 'no_xml_id'
 end
 
-class Option < Lafcadio::DomainObject
-	def addEditHomepage
-		"admin/ae.rhtml?objectType=Attribute&pk_id=#{attribute.pk_id}"
-	end
-end
+class Option < Lafcadio::DomainObject; end
 
 class SKU < Lafcadio::DomainObject
-  def SKU.table_name
-    "skus"
-  end
+  def self.table_name; "skus"; end
 
-  def SKU.english_name
-		"SKU"
-	end
-end
-
-class TestInventoryLineItemOption < LafcadioTestCase
-	def TestInventoryLineItemOption.getTestInventoryLineItemOption
-		InventoryLineItemOption.new(
-			'pk_id' => 1,
-			'inventory_line_item' => InventoryLineItem.uncommitted_mock,
-			'option' => TestOption.getTestOption
-		)
-	end
-
-	def TestInventoryLineItemOption.storedTestInventoryLineItemOption
-		ilio = TestInventoryLineItemOption.getTestInventoryLineItemOption
-		ilio.inventory_line_item = InventoryLineItem.committed_mock
-		ilio.option = TestOption.storedTestOption
-		ObjectStore.get_object_store.commit ilio
-		ilio
-	end
+  def self.english_name; "SKU"; end
 end
 
 class TestOption < LafcadioTestCase
