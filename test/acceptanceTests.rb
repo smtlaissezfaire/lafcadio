@@ -369,28 +369,25 @@ values( 1, 'sample text' )
 	end
 	
 	def test_query_field_comparison
-		row1 = TestRow.new( 'text_field' => 'a', 'text2' => 'b' )
-		row1.commit
-		row2 = TestRow.new( 'text_field' => 'c', 'text2' => 'c' )
-		row2.commit
+		TestRow.new( 'text_field' => 'a', 'text2' => 'b' ).commit
+		TestRow.new( 'text_field' => 'c', 'text2' => 'c' ).commit
 		matches = @object_store.get_test_rows { |test_row|
-			test_row.text_field.equals( test_row.text2 )
+			test_row.text_field.equals test_row.text2
 		}
 		assert_equal( 1, matches.size )
 		assert_equal( 'c', matches.only.text_field )
 		matches2 = @object_store.get_test_rows { |test_row|
-			test_row.text2.equals( test_row.text_field )
+			test_row.text2.equals test_row.text_field
 		}
 		assert_equal( 1, matches2.size )
 		assert_equal( 'c', matches2.only.text_field )
 	end
 	
 	def test_raise_if_bad_primary_key_map
-		br1 = TestBadRow.new( 'text_field' => 'a' )
-		br1.commit
+		TestBadRow.new( 'text_field' => 'a' ).commit
 		error_msg = 'The field "pk_id" can\'t be found in the table "testbadrows".'
 		assert_raise( FieldMatchError, error_msg ) {
-			@object_store.get_all( TestBadRow )
+			@object_store.get_all TestBadRow
 		}
 	end
 	
@@ -441,16 +438,14 @@ class AccTestQuery < AcceptanceTestCase
 	end
 
 	def test_order_by
-		r1 = TestRow.new( 'text2' => 'zzz' )
-		r1.commit
-		r2 = TestRow.new( 'text2' => 'aaa' )
-		r2.commit
+		r1 = TestRow.new( 'text2' => 'zzz' ).commit
+		r2 = TestRow.new( 'text2' => 'aaa' ).commit
 		query = Query.new( TestRow )
 		query.order_by = 'text2'
 		assert_equal(
 			'select * from test_rows order by text_field2 asc', query.to_sql
 		)
-		coll = @object_store.get_subset( query )
+		coll = @object_store.get_subset query
 		assert_equal( 2, coll.size )
 		assert_equal( r2, coll.first )
 	end
@@ -472,9 +467,8 @@ apostrophe's
 		assert_equal( text2, testrow2.text_field )
 		testrow2.commit
 		text3 = "\n'''the defense asked if two days of work"
-		test_row3 = TestRow.new( 'text_field' => text3 )
-		test_row3.commit
-		test_row3_prime = @object_store.get_test_row( 3 )
+		test_row3 = TestRow.new( 'text_field' => text3 ).commit
+		test_row3_prime = @object_store.get_test_row 3
 		assert_equal( text3, test_row3_prime.text_field )
 	end
 end
