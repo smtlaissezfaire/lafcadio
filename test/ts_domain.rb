@@ -272,14 +272,14 @@ class TestDomainObject < LafcadioTestCase
 		rescue DomainObjectNotFoundError
 			# ok
 		end
-		client = Client.getTestClient
+		client = Client.uncommitted_mock
     client.pk_id = 99
     @mockObjectStore.commit client
 		assert_equal client.name, proxyPrime.name
 	end
 
 	def testCyclicalMarshal
-		client = Client.getTestClient
+		client = Client.uncommitted_mock
 		invoice = Invoice.getTestInvoice
 		client.priorityInvoice = invoice
 		invoice.client = client
@@ -356,7 +356,7 @@ class TestDomainObject < LafcadioTestCase
     newClient = Marshal.load data
     assert_equal Client, newClient.class
 		assert_nil newClient.pk_id
-		client2 = Client.getTestClient
+		client2 = Client.uncommitted_mock
 		assert_equal 1, client2.pk_id
 		@mockObjectStore.commit client2
 		data2 = Marshal.dump client2
@@ -370,8 +370,8 @@ class TestDomainObject < LafcadioTestCase
   end
 
 	def testEquality
-		client = Client.getTestClient
-		clientPrime = Client.getTestClient
+		client = Client.uncommitted_mock
+		clientPrime = Client.uncommitted_mock
 		assert_equal client, clientPrime
 		assert( client.eql?( clientPrime ) )
 		invoice = Invoice.getTestInvoice
@@ -500,7 +500,7 @@ class TestDomainObject < LafcadioTestCase
 	end
 	
 	def testPkIdNeedsFixnum
-		assert_equal Fixnum, Client.getTestClient.pk_id.class
+		assert_equal Fixnum, Client.uncommitted_mock.pk_id.class
 	end
 
 	def test_sql_primary_key_name

@@ -4,12 +4,8 @@ require 'lafcadio/domain'
 require 'lafcadio/test'
 
 class Attribute < Lafcadio::DomainObject
-	def self.getTestAttribute
-		Attribute.new( { "pk_id" => 1, "name" => "attribute name" })
-	end
-
-	def self.storedTestAttribute
-		att = getTestAttribute
+	def self.committed_mock
+		att = uncommitted_mock
 		ObjectStore.get_object_store.commit att
 		att
 	end
@@ -17,21 +13,25 @@ class Attribute < Lafcadio::DomainObject
 	def Attribute.table_name
 		"attributes"
 	end
+
+	def self.uncommitted_mock
+		Attribute.new( { "pk_id" => 1, "name" => "attribute name" })
+	end
 end
 
 class Client < Lafcadio::DomainObject
 	include Lafcadio
 	
-  def Client.getTestClient
-    Client.new( "name" => "clientName1", 'pk_id' => 1 )
-  end
-
 	def Client.storedTestClient
-		client = Client.getTestClient
+		client = Client.uncommitted_mock
 		ObjectStore.get_object_store.commit client
 		client
 	end
 	
+  def Client.uncommitted_mock
+    Client.new( "name" => "clientName1", 'pk_id' => 1 )
+  end
+
 	def post_commit_trigger
 		if (
 			self.name == 'Cthulhu' and self.priorityInvoice and
@@ -58,6 +58,13 @@ class InventoryLineItem < Lafcadio::DomainObject
 	def self.getTestInventoryLineItem
 		InventoryLineItem.new({ 'pk_id' => 1, 'sku' => TestSKU.getTestSKU })
 	end
+
+	def self.storedTestInventoryLineItem
+		ili = getTestInventoryLineItem
+		ili.sku = TestSKU.storedTestSKU
+		Lafcadio::ObjectStore.get_object_store.commit ili
+		ili
+	end
 end
 
 class InventoryLineItemOption < Lafcadio::MapObject
@@ -71,7 +78,7 @@ class Invoice < Lafcadio::DomainObject
 
   def Invoice.getTestInvoice
     Invoice.new(
-			"client" => Client.getTestClient, "rate" => 70,
+			"client" => Client.uncommitted_mock, "rate" => 70,
 			"date" => Date.new(2001, 4, 5), "hours" => 36.5, "pk_id" => 1
 		)
   end
@@ -108,15 +115,6 @@ class SKU < Lafcadio::DomainObject
 	end
 end
 
-class TestInventoryLineItem
-	def TestInventoryLineItem.storedTestInventoryLineItem
-		ili = InventoryLineItem.getTestInventoryLineItem
-		ili.sku = TestSKU.storedTestSKU
-		Lafcadio::ObjectStore.get_object_store.commit ili
-		ili
-	end
-end
-
 class TestInventoryLineItemOption < LafcadioTestCase
 	def TestInventoryLineItemOption.getTestInventoryLineItemOption
 		InventoryLineItemOption.new(
@@ -128,8 +126,7 @@ class TestInventoryLineItemOption < LafcadioTestCase
 
 	def TestInventoryLineItemOption.storedTestInventoryLineItemOption
 		ilio = TestInventoryLineItemOption.getTestInventoryLineItemOption
-		ilio.inventory_line_item =
-				TestInventoryLineItem.storedTestInventoryLineItem
+		ilio.inventory_line_item = InventoryLineItem.storedTestInventoryLineItem
 		ilio.option = TestOption.storedTestOption
 		ObjectStore.get_object_store.commit ilio
 		ilio
@@ -138,13 +135,15 @@ end
 
 class TestOption < LafcadioTestCase
 	def TestOption.getTestOption
-		Option.new( { "attribute" => Attribute.getTestAttribute,
-				"name" => "option name", "pk_id" => 1 } )
+		Option.new(
+			"attribute" => Attribute.uncommitted_mock, "name" => "option name",
+			"pk_id" => 1
+		)
 	end
 
 	def TestOption.storedTestOption
 		opt = getTestOption
-		opt.attribute = Attribute.storedTestAttribute
+		opt.attribute = Attribute.committed_mock
 		ObjectStore.get_object_store.commit opt
 		opt
 	end

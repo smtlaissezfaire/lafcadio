@@ -191,7 +191,7 @@ class TestCommitSqlStatementsAndBinds < LafcadioTestCase
 
   def testCommitSQLWithInvoice
     invoice = Invoice.new(
-    	"client" => Client.getTestClient, "rate" => 70,
+    	"client" => Client.uncommitted_mock, "rate" => 70,
 			"date" => Date.new(2001, 4, 5), "hours" => 36.5, "pk_id" => 1
 		)
     update_sql = ObjectStore::CommitSqlStatementsAndBinds.new(invoice)[0]
@@ -573,7 +573,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 	
 	def setTestClient
-		@client = Client.getTestClient
+		@client = Client.uncommitted_mock
 		@mockDbBridge.commit @client
 	end
 
@@ -609,7 +609,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testConvertsFixnums
-		@mockDbBridge.commit Client.getTestClient
+		@mockDbBridge.commit Client.uncommitted_mock
 		@testObjectStore.get Client, 1
 		@testObjectStore.get Client, "1"
 		begin
@@ -621,7 +621,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testDeepLinking
-		client1 = Client.getTestClient
+		client1 = Client.uncommitted_mock
 		@mockDbBridge.commit client1
 		client1Proxy = DomainObjectProxy.new(Client, 1)
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client 2',
@@ -721,7 +721,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 	
 	def testFlush
-		client = Client.getTestClient
+		client = Client.uncommitted_mock
 		@mockDbBridge.commit client
 		assert_equal client.name, @testObjectStore.get(Client, 1).name
 		client.name = 'new client name'
@@ -739,7 +739,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 	
 	def test_get_all_caches_for_later_subset_gets
-		client = Client.getTestClient
+		client = Client.uncommitted_mock
 		client.commit
 		assert_equal( 1, @testObjectStore.get_all( Client ).size )
 		assert_equal( 1, @mockDbBridge.query_count( 'select * from clients' ) )
@@ -757,7 +757,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 	
 	def testGetInvoices
-		client = Client.getTestClient
+		client = Client.uncommitted_mock
 		client.commit
 		inv1 = Invoice.new(
 			'client' => client, 'date' => Date.today, 'rate' => 30, 'hours' => 40
@@ -772,7 +772,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testGetMapObject
-		ili = TestInventoryLineItem.storedTestInventoryLineItem
+		ili = InventoryLineItem.storedTestInventoryLineItem
 		option = TestOption.storedTestOption
 		iliOption = TestInventoryLineItemOption.storedTestInventoryLineItemOption
 		assert_equal 1, @testObjectStore.get_all(InventoryLineItemOption).size
@@ -832,7 +832,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testGetWithaNonLinkingField	
-		client = Client.getTestClient
+		client = Client.uncommitted_mock
 		@testObjectStore.commit client
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client 2' })
 		@testObjectStore.commit client2

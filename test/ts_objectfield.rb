@@ -258,7 +258,7 @@ class TestDomainObjectField < LafcadioTestCase
 	end
 
   def testValueFromSQL
-		client = Client.getTestClient
+		client = Client.uncommitted_mock
 		@mockObjectStore.commit client
 		clientFromDomainObjectField = @olf.value_from_sql("1")
 		assert_equal DomainObjectProxy, clientFromDomainObjectField.class
