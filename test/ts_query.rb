@@ -3,314 +3,8 @@ require 'lafcadio/query'
 require 'lafcadio/test'
 require '../test/mock_domain'
 
-class TestCompare < LafcadioTestCase
-	def testComparators
-		comparators = {
-			Query::Compare::LESS_THAN => '<',
-			Query::Compare::LESS_THAN_OR_EQUAL => '<=',
-			Query::Compare::GREATER_THAN_OR_EQUAL => '>=',
-			Query::Compare::GREATER_THAN => '>'
-		}
-		comparators.each { |compareType, comparisonSymbol|
-			dc = Query::Compare.new('date', Date.new(2003, 1, 1), Invoice,
-					compareType)
-			assert_equal( "invoices.date #{ comparisonSymbol } '2003-01-01'",
-			              dc.to_sql )
-		}
-	end
-	
-	def testDbFieldName
-		compare = Query::Compare.new( 'text1', 'foobar', XmlSku,
-		                              Query::Compare::LESS_THAN )
-		assert_equal( "some_other_table.text_one < 'foobar'", compare.to_sql )
-	end
-
-	def testFieldBelongingToSuperclass
-		condition = Query::Compare.new('standard_rate', 10, InternalClient,
-				Query::Compare::LESS_THAN)
-		assert_equal( 'clients.standard_rate < 10', condition.to_sql )
-	end
-
-	def test_handles_dobj_that_doesnt_exist
-		condition = Query::Compare.new( 'client',
-		                                DomainObjectProxy.new( Client, 10 ),
-																		Invoice, Query::Compare::LESS_THAN )
-		assert_equal( 'invoices.client < 10', condition.to_sql )
-		assert_equal( 0, @mockObjectStore.get_subset( condition ).size )
-		condition2 = Query::Compare.new( 'client', 10, Invoice,
-		                                 Query::Compare::LESS_THAN )
-		assert_equal( 'invoices.client < 10', condition2.to_sql )
-		assert_equal( 0, @mockObjectStore.get_subset( condition2 ).size )		
-	end
-	
-	def testLessThan
-		condition = Query::Compare.new(
-				User.sql_primary_key_name, 10, User, Query::Compare::LESS_THAN)
-		assert_equal( 'users.pk_id < 10', condition.to_sql )
-	end
-
-	def testMockComparatorAndNilValue
-		invoice = Invoice.uncommitted_mock
-		invoice.date = nil
-		dc = Query::Compare.new(
-				'date', Date.today, Invoice, Query::Compare::LESS_THAN)
-		assert !dc.dobj_satisfies?(invoice)
-	end
-
-	def testMockComparators
-		date1 = Date.new(2001, 1, 1)
-		date2 = Date.new(2002, 1, 1)
-		date3 = Date.new(2003, 1, 1)
-		invoice = Invoice.uncommitted_mock
-		invoice1 = invoice.clone
-		invoice1.date = date1
-		invoice2 = invoice.clone
-		invoice2.date = date2
-		invoice3 = invoice.clone
-		invoice3.date = date3
-		dc1 = Query::Compare.new(
-				'date', date2, Invoice, Query::Compare::LESS_THAN)
-		assert dc1.dobj_satisfies?(invoice1)
-		assert !dc1.dobj_satisfies?(invoice2)
-		assert !dc1.dobj_satisfies?(invoice3)
-		dc2 = Query::Compare.new(
-				'date', date2, Invoice,
-				Query::Compare::LESS_THAN_OR_EQUAL)
-		assert dc2.dobj_satisfies?(invoice1)
-		assert dc2.dobj_satisfies?(invoice2)
-		assert !dc2.dobj_satisfies?(invoice3)
-		dc3 = Query::Compare.new(
-				'date', date2, Invoice,
-				Query::Compare::GREATER_THAN)
-		assert !dc3.dobj_satisfies?(invoice1)
-		assert !dc3.dobj_satisfies?(invoice2)
-		assert dc3.dobj_satisfies?(invoice3)
-		dc4 = Query::Compare.new(
-				'date', date2, Invoice,
-				Query::Compare::GREATER_THAN_OR_EQUAL)
-		assert !dc4.dobj_satisfies?(invoice1)
-		assert dc4.dobj_satisfies?(invoice2)
-		assert dc4.dobj_satisfies?(invoice3)
-	end
-
-	def testNumericalSearchingOfaDomainObjectField
-		condition = Query::Compare.new('client', 10, Invoice,
-				Query::Compare::LESS_THAN)
-		assert_equal( 'invoices.client < 10', condition.to_sql )
-	end
-end
-
-class TestCompoundCondition < LafcadioTestCase
-	def testCompareAndBooleanEquals		
-		pastExpDate = Query::Compare.new('date',
-				Date.new(2003, 1, 1), Invoice,
-				Query::Compare::GREATER_THAN_OR_EQUAL)
-		notExpiredYet = Query::Equals.new('hours', 10, Invoice)
-		condition = Query::CompoundCondition.new(pastExpDate, notExpiredYet)
-		assert_equal( "(invoices.date >= '2003-01-01' and invoices.hours = 10)",
-		              condition.to_sql )
-		assert_equal Invoice, condition.domain_class
-	end
-
-	def testMoreThanTwoConditions
-		pastExpDate = Query::Compare.new('date',
-				Date.new(2003, 1, 1), Invoice,
-				Query::Compare::GREATER_THAN_OR_EQUAL)
-		notExpiredYet = Query::Equals.new('rate', 10, Invoice)
-		notComplementary = Query::Equals.new(
-				'hours', 10, Invoice)
-		condition = Query::CompoundCondition.new(
-				pastExpDate, notExpiredYet, notComplementary)
-		assert_equal( "(invoices.date >= '2003-01-01' and invoices.rate = 10 and " +
-		              "invoices.hours = 10)",
-		              condition.to_sql )
-		invoice = Invoice.new({ 'pk_id' => 1, 'date' => Date.new(2003, 1, 1),
-				'rate' => 10, 'hours' => 10 })
-		assert condition.dobj_satisfies?(invoice)
-		invoice.hours = 10.5
-		assert !condition.dobj_satisfies?(invoice)
-	end
-
-	def testOr
-		email = Query::Equals.new('email', 'test@test.com', User)
-		fname = Query::Equals.new('firstNames', 'John', User)
-		user = User.uncommitted_mock
-		assert email.dobj_satisfies?(user)
-		assert !fname.dobj_satisfies?(user)
-		compound = Query::CompoundCondition.new(email, fname,
-				Query::CompoundCondition::OR)
-		assert_equal( "(users.email = 'test@test.com' or " +
-		              "users.firstNames = 'John')",
-		              compound.to_sql )
-		assert compound.dobj_satisfies?(user)
-	end
-end
-
-class TestCondition < LafcadioTestCase
-	def test_eql?
-		equals1 = Query::Equals.new( 'pk_id', 1, Client )
-		equals2 = Query::Equals.new( 'pk_id', 1, Client )
-		assert( equals1.eql?( equals2 ) )
-		assert( equals2.eql?( equals1 ) )
-		compound = Query::CompoundCondition.new(
-			Query::Equals.new( 'pk_id', 1, Client ),
-			Query::Like.new( 'name', 'name', Client )
-		)
-		assert( !equals1.eql?( compound ) )
-	end
-
-	def test_implies?
-		equals1 = Query::Equals.new( 'pk_id', 1, Client )
-		equals2 = Query::Equals.new( 'pk_id', 1, Client )
-		assert( equals1.implies?( equals2 ) )
-		compound1 = Query::CompoundCondition.new(
-			Query::Equals.new( 'pk_id', 1, Client ),
-			Query::Like.new( 'name', 'name', Client )
-		)
-		assert( compound1.implies?( equals1 ) )
-		assert( !equals1.implies?( compound1 ) )
-		compound2 = Query::CompoundCondition.new(
-			Query::Equals.new( 'pk_id', 1, Client ),
-			Query::Like.new( 'name', 'name', Client ),
-			Query::CompoundCondition::OR
-		)
-		assert( !compound2.implies?( equals1 ) )
-		assert( equals1.implies?( compound2 ) )
-		compound3 = Query::CompoundCondition.new(
-			Query::Equals.new( 'pk_id', 99, Client ),
-			Query::Like.new( 'name', 'name', Client ),
-			Query::CompoundCondition::OR
-		)
-		assert( !compound3.implies?( equals1 ) )
-		assert( !equals1.implies?( compound3 ) )
-	end
-	
-	def testRaisesExceptionIfInitHasWrongArguments
-		cond = Query::Condition.new( 'att name', 'name', Attribute )
-		begin
-			cond.field
-			fail "needs to raise MissingError"
-		rescue MissingError
-			errStr = "Couldn't find field \"att name\" in Attribute domain class"
-			assert_equal( errStr, $!.to_s )
-		end
-	end
-end
-
-class TestEquals < LafcadioTestCase
-	def testBooleanField
-		equals = Query::Equals.new( 'administrator', false, User )
-		assert_equal( 'users.administrator = 0', equals.to_sql )
-	end
-
-	def test_compare_to_other_field
-		email_field = User.field 'email'
-		equals = Query::Equals.new( 'firstNames', email_field, User )
-		assert_equal( 'users.firstNames = users.email', equals.to_sql )
-		odd_user = User.new( 'email' => 'foobar', 'firstNames' => 'foobar' )
-		assert( equals.dobj_satisfies?( odd_user ) )
-	end
-
-	def testDbFieldName
-		equals = Query::Equals.new( 'text1', 'foobar', XmlSku )
-		assert_equal( "some_other_table.text_one = 'foobar'", equals.to_sql )
-	end
-
-	def test_different_pk_name
-		equals1 = Query::Equals.new( 'pk_id', 123, XmlSku )
-		assert_equal( 'some_other_table.some_other_id = 123', equals1.to_sql )
-	end
-
-	def testEqualsByFieldType
-		equals = Query::Equals.new('email', 'john.doe@email.com', User)
-		assert_equal( "users.email = 'john.doe@email.com'", equals.to_sql )
-		equals2 = Query::Equals.new('date', Date.new(2003, 1, 1), Invoice)
-		assert_equal( "invoices.date = '2003-01-01'", equals2.to_sql )
-	end
-
-	def testNullClause
-		equals = Query::Equals.new('date', nil, Invoice)
-		assert_equal( 'invoices.date is null', equals.to_sql )
-	end
-
-	def testPkId
-		equals = Query::Equals.new('pk_id', 123, Client)
-		assert_equal( 'clients.pk_id = 123', equals.to_sql )
-	end
-
-	def testSubclass
-		clientCondition = Query::Equals.new('name', 'client 1', InternalClient)
-		assert_equal( "clients.name = 'client 1'", clientCondition.to_sql )
-	end
-end
-
 # necessary for test_global_methods_dont_interfere_with_method_missing
 def name; 'global name'; end
-
-class TestLike < LafcadioTestCase
-	def setup
-		super
-		@like1 = Query::Like.new('client', '606', Invoice)
-		@like2 = Query::Like.new('client', '606', Invoice,
-				Query::Like::PRE_ONLY)
-		@like3 = Query::Like.new('client', '606', Invoice,
-				Query::Like::POST_ONLY)
-	end
-
-	def test_case_insensitive
-		like = Query::Like.new( 'name', 'foobar', Client )
-		assert like.dobj_satisfies?( Client.new( 'name' => 'barfoobarfoo' ) )
-		assert like.dobj_satisfies?( Client.new( 'name' => 'foobar' ) )
-		assert like.dobj_satisfies?( Client.new( 'name' => 'FOobAR' ) )
-	end
-
-	def testDbFieldName
-		condition = Query::Like.new( 'text1', 'foobar', XmlSku )
-		assert_equal( "some_other_table.text_one like '%foobar%'", condition.to_sql )
-	end
-
-	def testFieldBelongingToSuperclass
-		condition = Query::Like.new('name', 'client name', InternalClient)
-		assert_equal( "clients.name like '%client name%'", condition.to_sql )
-	end
-
-	def testObjectMeets
-		like4 = Query::Like.new('client', '1', Invoice)
-		client212 = Client.new({ 'pk_id' => 212 })
-		invoiceWith212 = Invoice.new({ 'client' => client212 })
-		assert like4.dobj_satisfies?(invoiceWith212)
-		client234 = Client.new({ 'pk_id' => 234 })
-		invoiceWith234 = Invoice.new({ 'client' => client234 })
-		assert !like4.dobj_satisfies?(invoiceWith234)
-	end
-
-	def testToSql
-		assert_equal( "invoices.client like '%606%'", @like1.to_sql )
-		assert_equal( "invoices.client like '%606'", @like2.to_sql )
-		assert_equal( "invoices.client like '606%'", @like3.to_sql )
-	end
-end
-
-class TestNot < LafcadioTestCase
-	def setup
-		super
-		@not = Query::Not.new(
-				Query::Equals.new('email', 'test@test.com', User))
-	end
-	
-	def test_domain_class; assert_equal( User, @not.domain_class ); end
-
-	def testObjectsMeets
-		user = User.uncommitted_mock
-		assert !@not.dobj_satisfies?(user)
-		user2 = User.new({ 'email' => 'jane.doe@email.com' })
-		assert @not.dobj_satisfies?(user2)
-	end
-
-	def testToSql
-		assert_equal "!(users.email = 'test@test.com')", @not.to_sql
-	end
-end
 
 class TestQuery < LafcadioTestCase
 	def testByCondition
@@ -447,6 +141,252 @@ class TestQuery < LafcadioTestCase
 		query3 = Query::Max.new( XmlSku )
 		assert_equal( 'select max(some_other_id) from some_other_table',
 		              query3.to_sql )
+	end
+
+	class TestCompare < LafcadioTestCase
+		def test_comparators
+			comparators = {
+				Query::Compare::LESS_THAN => '<',
+				Query::Compare::LESS_THAN_OR_EQUAL => '<=',
+				Query::Compare::GREATER_THAN_OR_EQUAL => '>=',
+				Query::Compare::GREATER_THAN => '>'
+			}
+			comparators.each { |compareType, comparisonSymbol|
+				dc = Query::Compare.new('date', Date.new(2003, 1, 1), Invoice,
+						compareType)
+				assert_equal( "invoices.date #{ comparisonSymbol } '2003-01-01'",
+											dc.to_sql )
+			}
+		end
+		
+		def test_db_field_name
+			compare = Query::Compare.new( 'text1', 'foobar', XmlSku,
+																		Query::Compare::LESS_THAN )
+			assert_equal( "some_other_table.text_one < 'foobar'", compare.to_sql )
+		end
+	
+		def test_field_belonging_to_superclass
+			condition = Query::Compare.new('standard_rate', 10, InternalClient,
+					Query::Compare::LESS_THAN)
+			assert_equal( 'clients.standard_rate < 10', condition.to_sql )
+		end
+	
+		def test_handles_dobj_that_doesnt_exist
+			condition = Query::Compare.new( 'client',
+																			DomainObjectProxy.new( Client, 10 ),
+																			Invoice, Query::Compare::LESS_THAN )
+			assert_equal( 'invoices.client < 10', condition.to_sql )
+			assert_equal( 0, @mockObjectStore.get_subset( condition ).size )
+			condition2 = Query::Compare.new( 'client', 10, Invoice,
+																			 Query::Compare::LESS_THAN )
+			assert_equal( 'invoices.client < 10', condition2.to_sql )
+			assert_equal( 0, @mockObjectStore.get_subset( condition2 ).size )		
+		end
+		
+		def test_less_than
+			condition = Query::Compare.new(
+					User.sql_primary_key_name, 10, User, Query::Compare::LESS_THAN)
+			assert_equal( 'users.pk_id < 10', condition.to_sql )
+		end
+	
+		def test_mock_comparator_and_nil_value
+			invoice = Invoice.uncommitted_mock
+			invoice.date = nil
+			dc = Query::Compare.new(
+					'date', Date.today, Invoice, Query::Compare::LESS_THAN)
+			assert !dc.dobj_satisfies?(invoice)
+		end
+	
+		def test_mock_comparators
+			date1 = Date.new(2001, 1, 1)
+			date2 = Date.new(2002, 1, 1)
+			date3 = Date.new(2003, 1, 1)
+			invoice = Invoice.uncommitted_mock
+			invoice1 = invoice.clone
+			invoice1.date = date1
+			invoice2 = invoice.clone
+			invoice2.date = date2
+			invoice3 = invoice.clone
+			invoice3.date = date3
+			dc1 = Query::Compare.new(
+				'date', date2, Invoice, Query::Compare::LESS_THAN
+			)
+			assert dc1.dobj_satisfies?(invoice1)
+			assert !dc1.dobj_satisfies?(invoice2)
+			assert !dc1.dobj_satisfies?(invoice3)
+			dc2 = Query::Compare.new(
+				'date', date2, Invoice, Query::Compare::LESS_THAN_OR_EQUAL
+			)
+			assert dc2.dobj_satisfies?(invoice1)
+			assert dc2.dobj_satisfies?(invoice2)
+			assert !dc2.dobj_satisfies?(invoice3)
+			dc3 = Query::Compare.new(
+				'date', date2, Invoice, Query::Compare::GREATER_THAN
+			)
+			assert !dc3.dobj_satisfies?(invoice1)
+			assert !dc3.dobj_satisfies?(invoice2)
+			assert dc3.dobj_satisfies?(invoice3)
+			dc4 = Query::Compare.new(
+				'date', date2, Invoice, Query::Compare::GREATER_THAN_OR_EQUAL
+			)
+			assert !dc4.dobj_satisfies?(invoice1)
+			assert dc4.dobj_satisfies?(invoice2)
+			assert dc4.dobj_satisfies?(invoice3)
+		end
+	
+		def test_numerical_searching_of_a_domain_object_field
+			condition = Query::Compare.new('client', 10, Invoice,
+					Query::Compare::LESS_THAN)
+			assert_equal( 'invoices.client < 10', condition.to_sql )
+		end
+	end
+	
+	class TestCompoundCondition < LafcadioTestCase
+		def test_compare_and_boolean_equals
+			pastExpDate = Query::Compare.new('date',
+					Date.new(2003, 1, 1), Invoice,
+					Query::Compare::GREATER_THAN_OR_EQUAL)
+			notExpiredYet = Query::Equals.new('hours', 10, Invoice)
+			condition = Query::CompoundCondition.new(pastExpDate, notExpiredYet)
+			assert_equal( "(invoices.date >= '2003-01-01' and invoices.hours = 10)",
+										condition.to_sql )
+			assert_equal Invoice, condition.domain_class
+		end
+	
+		def test_more_than_two_conditions
+			pastExpDate = Query::Compare.new(
+				'date', Date.new(2003, 1, 1), Invoice,
+				Query::Compare::GREATER_THAN_OR_EQUAL
+			)
+			notExpiredYet = Query::Equals.new( 'rate', 10, Invoice )
+			notComplementary = Query::Equals.new( 'hours', 10, Invoice )
+			condition = Query::CompoundCondition.new(
+				pastExpDate, notExpiredYet, notComplementary
+			)
+			assert_equal(
+				"(invoices.date >= '2003-01-01' and invoices.rate = 10 and " +
+						"invoices.hours = 10)",
+				condition.to_sql
+			)
+			invoice = Invoice.new(
+				'pk_id' => 1, 'date' => Date.new(2003, 1, 1), 'rate' => 10, 'hours' => 10
+			)
+			assert condition.dobj_satisfies?(invoice)
+			invoice.hours = 10.5
+			assert !condition.dobj_satisfies?(invoice)
+		end
+	
+		def test_or
+			email = Query::Equals.new('email', 'test@test.com', User)
+			fname = Query::Equals.new('firstNames', 'John', User)
+			user = User.uncommitted_mock
+			assert email.dobj_satisfies?(user)
+			assert !fname.dobj_satisfies?(user)
+			compound = Query::CompoundCondition.new(email, fname,
+					Query::CompoundCondition::OR)
+			assert_equal( "(users.email = 'test@test.com' or " +
+										"users.firstNames = 'John')",
+										compound.to_sql )
+			assert compound.dobj_satisfies?(user)
+		end
+	end
+	
+	class TestCondition < LafcadioTestCase
+		def test_eql?
+			equals1 = Query::Equals.new( 'pk_id', 1, Client )
+			equals2 = Query::Equals.new( 'pk_id', 1, Client )
+			assert( equals1.eql?( equals2 ) )
+			assert( equals2.eql?( equals1 ) )
+			compound = Query::CompoundCondition.new(
+				Query::Equals.new( 'pk_id', 1, Client ),
+				Query::Like.new( 'name', 'name', Client )
+			)
+			assert( !equals1.eql?( compound ) )
+		end
+	
+		def test_implies?
+			equals1 = Query::Equals.new( 'pk_id', 1, Client )
+			equals2 = Query::Equals.new( 'pk_id', 1, Client )
+			assert( equals1.implies?( equals2 ) )
+			compound1 = Query::CompoundCondition.new(
+				Query::Equals.new( 'pk_id', 1, Client ),
+				Query::Like.new( 'name', 'name', Client )
+			)
+			assert( compound1.implies?( equals1 ) )
+			assert( !equals1.implies?( compound1 ) )
+			compound2 = Query::CompoundCondition.new(
+				Query::Equals.new( 'pk_id', 1, Client ),
+				Query::Like.new( 'name', 'name', Client ),
+				Query::CompoundCondition::OR
+			)
+			assert( !compound2.implies?( equals1 ) )
+			assert( equals1.implies?( compound2 ) )
+			compound3 = Query::CompoundCondition.new(
+				Query::Equals.new( 'pk_id', 99, Client ),
+				Query::Like.new( 'name', 'name', Client ),
+				Query::CompoundCondition::OR
+			)
+			assert( !compound3.implies?( equals1 ) )
+			assert( !equals1.implies?( compound3 ) )
+		end
+		
+		def testRaisesExceptionIfInitHasWrongArguments
+			cond = Query::Condition.new( 'att name', 'name', Attribute )
+			begin
+				cond.field
+				fail "needs to raise MissingError"
+			rescue MissingError
+				errStr = "Couldn't find field \"att name\" in Attribute domain class"
+				assert_equal( errStr, $!.to_s )
+			end
+		end
+	end
+	
+	class TestEquals < LafcadioTestCase
+		def testBooleanField
+			equals = Query::Equals.new( 'administrator', false, User )
+			assert_equal( 'users.administrator = 0', equals.to_sql )
+		end
+	
+		def test_compare_to_other_field
+			email_field = User.field 'email'
+			equals = Query::Equals.new( 'firstNames', email_field, User )
+			assert_equal( 'users.firstNames = users.email', equals.to_sql )
+			odd_user = User.new( 'email' => 'foobar', 'firstNames' => 'foobar' )
+			assert( equals.dobj_satisfies?( odd_user ) )
+		end
+	
+		def testDbFieldName
+			equals = Query::Equals.new( 'text1', 'foobar', XmlSku )
+			assert_equal( "some_other_table.text_one = 'foobar'", equals.to_sql )
+		end
+	
+		def test_different_pk_name
+			equals1 = Query::Equals.new( 'pk_id', 123, XmlSku )
+			assert_equal( 'some_other_table.some_other_id = 123', equals1.to_sql )
+		end
+	
+		def testEqualsByFieldType
+			equals = Query::Equals.new('email', 'john.doe@email.com', User)
+			assert_equal( "users.email = 'john.doe@email.com'", equals.to_sql )
+			equals2 = Query::Equals.new('date', Date.new(2003, 1, 1), Invoice)
+			assert_equal( "invoices.date = '2003-01-01'", equals2.to_sql )
+		end
+	
+		def testNullClause
+			equals = Query::Equals.new('date', nil, Invoice)
+			assert_equal( 'invoices.date is null', equals.to_sql )
+		end
+	
+		def testPkId
+			equals = Query::Equals.new('pk_id', 123, Client)
+			assert_equal( 'clients.pk_id = 123', equals.to_sql )
+		end
+	
+		def testSubclass
+			clientCondition = Query::Equals.new('name', 'client 1', InternalClient)
+			assert_equal( "clients.name = 'client 1'", clientCondition.to_sql )
+		end
 	end
 
 	class TestInferrer < LafcadioTestCase
@@ -679,6 +619,71 @@ class TestQuery < LafcadioTestCase
 						"order by standardPrice, salePrice desc",
 				qry.to_sql
 			)
+		end
+	end
+
+	class TestLike < LafcadioTestCase
+		def setup
+			super
+			@like1 = Query::Like.new('client', '606', Invoice)
+			@like2 = Query::Like.new('client', '606', Invoice,
+					Query::Like::PRE_ONLY)
+			@like3 = Query::Like.new('client', '606', Invoice,
+					Query::Like::POST_ONLY)
+		end
+	
+		def test_case_insensitive
+			like = Query::Like.new( 'name', 'foobar', Client )
+			assert like.dobj_satisfies?( Client.new( 'name' => 'barfoobarfoo' ) )
+			assert like.dobj_satisfies?( Client.new( 'name' => 'foobar' ) )
+			assert like.dobj_satisfies?( Client.new( 'name' => 'FOobAR' ) )
+		end
+	
+		def testDbFieldName
+			condition = Query::Like.new( 'text1', 'foobar', XmlSku )
+			assert_equal( "some_other_table.text_one like '%foobar%'", condition.to_sql )
+		end
+	
+		def testFieldBelongingToSuperclass
+			condition = Query::Like.new('name', 'client name', InternalClient)
+			assert_equal( "clients.name like '%client name%'", condition.to_sql )
+		end
+	
+		def testObjectMeets
+			like4 = Query::Like.new('client', '1', Invoice)
+			client212 = Client.new({ 'pk_id' => 212 })
+			invoiceWith212 = Invoice.new({ 'client' => client212 })
+			assert like4.dobj_satisfies?(invoiceWith212)
+			client234 = Client.new({ 'pk_id' => 234 })
+			invoiceWith234 = Invoice.new({ 'client' => client234 })
+			assert !like4.dobj_satisfies?(invoiceWith234)
+		end
+	
+		def testToSql
+			assert_equal( "invoices.client like '%606%'", @like1.to_sql )
+			assert_equal( "invoices.client like '%606'", @like2.to_sql )
+			assert_equal( "invoices.client like '606%'", @like3.to_sql )
+		end
+	end
+	
+	class TestNot < LafcadioTestCase
+		def setup
+			super
+			@not = Query::Not.new(
+					Query::Equals.new('email', 'test@test.com', User))
+		end
+		
+		def test_domain_class; assert_equal( User, @not.domain_class ); end
+	
+		def testObjectsMeets
+			user = User.uncommitted_mock
+			assert !@not.dobj_satisfies?(user)
+			user2 = User.new({ 'email' => 'jane.doe@email.com' })
+			assert @not.dobj_satisfies?(user2)
+		end
+	
+		def testToSql
+			assert_equal "!(users.email = 'test@test.com')", @not.to_sql
 		end
 	end
 end
