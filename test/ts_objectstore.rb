@@ -99,7 +99,7 @@ class TestDomainObjectProxy < LafcadioTestCase
 		@invoiceProxy = DomainObjectProxy.new(Invoice, 1)
 	end
 
-	def testCantInitializeWithAnotherProxy
+	def test_cant_initialize_with_another_proxy
 		begin
 			metaProxy = DomainObjectProxy.new( @clientProxy )
 			fail "Should raise ArgumentError"
@@ -108,7 +108,7 @@ class TestDomainObjectProxy < LafcadioTestCase
 		end
 	end
 
-	def testComparisons
+	def test_comparisons
 		assert @clientProxy == @client
 		assert @client == @clientProxy
 		assert @clientProxy < @clientProxy2
@@ -116,19 +116,7 @@ class TestDomainObjectProxy < LafcadioTestCase
 		assert @clientProxy != @invoiceProxy
 	end
 
-	def testEqlAndHash
-		assert( @client.eql?(@clientProxy))
-		assert( @clientProxy.eql?(@client))
-		assert_equal(@mockObjectStore.get_client(1).hash, @clientProxy.hash)
-	end
-	
-	def testFieldSettable
-		@clientProxy.name = 'new client name'
-		client = @clientProxy.db_object
-		assert_equal( 'new client name', client.name )
-	end
-
-	def testGetDbObject
+	def test_db_object
 		assert_equal @client, @clientProxy.db_object
 		begin
 			@clientProxy2.db_object
@@ -138,12 +126,24 @@ class TestDomainObjectProxy < LafcadioTestCase
 		end
 	end
 
-	def testInitFromDbObject
+	def test_eql_and_hash
+		assert( @client.eql?(@clientProxy))
+		assert( @clientProxy.eql?(@client))
+		assert_equal(@mockObjectStore.get_client(1).hash, @clientProxy.hash)
+	end
+	
+	def test_field_settable
+		@clientProxy.name = 'new client name'
+		client = @clientProxy.db_object
+		assert_equal( 'new client name', client.name )
+	end
+
+	def test_init_from_db_object
 		clientProxyPrime = DomainObjectProxy.new(@client)
 		assert @clientProxy == clientProxyPrime
 	end
 
-	def testMemberMethods
+	def test_member_methods
 		assert_equal @client.name, @clientProxy.name
 		assert_equal @invoice.name, @invoiceProxy.name
 	end
@@ -159,12 +159,12 @@ class TestObjectStore < LafcadioTestCase
 		ObjectStore.set_object_store @testObjectStore
 	end
 	
-	def setTestClient
+	def set_test_client
 		@client = Client.uncommitted_mock
 		@mockDbBridge.commit @client
 	end
 
-	def testCaching
+	def test_caching
 		@testObjectStore.get_all Invoice
 		assert_equal( 0, @mockDbBridge.queries( Client ).size )
 		assert_equal( 1, @mockDbBridge.queries( Invoice ).size )
@@ -195,7 +195,7 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal( Client, something.class )
 	end
 
-	def testConvertsFixnums
+	def test_converts_fixnums
 		@mockDbBridge.commit Client.uncommitted_mock
 		@testObjectStore.get Client, 1
 		@testObjectStore.get Client, "1"
@@ -207,7 +207,7 @@ class TestObjectStore < LafcadioTestCase
 		end
 	end
 
-	def testDeepLinking
+	def test_deep_linking
 		client1 = Client.uncommitted_mock
 		@mockDbBridge.commit client1
 		client1Proxy = DomainObjectProxy.new(Client, 1)
@@ -218,13 +218,13 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal Client, client2Prime.referringClient.domain_class
 	end
 
-	def testDefersLoading
+	def test_defers_loading
 		@testObjectStore.get_all Invoice
 		assert_equal( 0, @mockDbBridge.queries( Client ).size )
 		assert_equal( 1, @mockDbBridge.queries( Invoice ).size )
 	end
 
-	def testDeleteClearsCachedValue
+	def test_delete_clears_cached_value
 		client = Client.new({ 'pk_id' => 100, 'name' => 'client 100' })
 		@testObjectStore.commit client
 		assert_equal 1, @testObjectStore.get_all(Client).size
@@ -234,18 +234,18 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def test_dispatches_inferred_query_to_collector
-		setTestClient
+		set_test_client
 		clients = @testObjectStore.get_clients { |client|
 			client.name.equals( @client.name )
 		}
 	end
 	
-  def testDumpable
+  def test_dumpable
 		newOs = Marshal.load(Marshal.dump(@testObjectStore))
     assert_equal MockObjectStore, newOs.class
   end
 
-	def testDynamicMethodNameDispatchingRaisesNoMethodError
+	def test_dynamic_method_name_dispatching_raises_NoMethodError
 		begin
 			@testObjectStore.notAMethod
 			raise "Should raise NoMethodError"
@@ -261,7 +261,7 @@ class TestObjectStore < LafcadioTestCase
 		end
 	end
 
-	def testDynamicMethodNameDispatchesToCollectorMapObjectFunction
+	def test_dynamic_method_name_dispatches_to_collector_map_object_function
 		option = Option.uncommitted_mock
 		@testObjectStore.commit option
 		ili = InventoryLineItem.uncommitted_mock
@@ -273,13 +273,11 @@ class TestObjectStore < LafcadioTestCase
 				ili, option)
 	end
 
-	def testDynamicMethodNames
-		setTestClient
+	def test_dynamic_method_names
+		set_test_client
 		assert_equal @client, @testObjectStore.get_client(1)
-		invoice1 = Invoice.new( 'client' => nil )
-		invoice1.commit
-		invoice2 = Invoice.new( 'client' => @client )
-		invoice2.commit
+		invoice1 = Invoice.new( 'client' => nil ).commit
+		invoice2 = Invoice.new( 'client' => @client ).commit
 		begin
 			@testObjectStore.get_invoices( nil )
 			raise "Should raise ArgumentError"
@@ -290,18 +288,16 @@ class TestObjectStore < LafcadioTestCase
 		end
 		coll = @testObjectStore.get_invoices( nil, 'client' )
 		assert_equal( invoice1, coll.only )
-		xml_sku = XmlSku.new( 'pk_id' => 1 )
-		xml_sku.commit
+		xml_sku = XmlSku.new( 'pk_id' => 1 ).commit
 		user = User.committed_mock
-		xml_sku2 = XmlSku2.new( 'xml_sku' => xml_sku, 'link1' => user )
-		xml_sku2.commit
+		xml_sku2 = XmlSku2.new( 'xml_sku' => xml_sku, 'link1' => user ).commit
 		coll2 = @testObjectStore.get_xml_sku2s( xml_sku )
 		assert_equal( xml_sku2, coll2.only )
 		assert_equal( xml_sku2, @testObjectStore.get_xml_sku2s( user ).only )
 	end
 
 	def testDynamicMethodNamesAsFacadeForCollector
-		setTestClient
+		set_test_client
 		matchingClients = @testObjectStore.get_clients(@client.name, 'name')
 		assert_equal 1, matchingClients.size
 		assert_equal @client, matchingClients[0]
@@ -396,7 +392,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testGetSubset
-		setTestClient
+		set_test_client
 		condition = Query::Equals.new 'name', 'clientName1', Client
 		query = Query.new Client, condition
 		assert_equal @client, @testObjectStore.get_subset(condition)[0]
@@ -437,7 +433,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def testMax
-		setTestClient
+		set_test_client
 		assert_equal 1, @testObjectStore.get_max(Client)
 		Invoice.committed_mock
 		assert_equal( 70, @testObjectStore.get_max( Invoice, 'rate' ) )
@@ -906,5 +902,5 @@ class TestObjectStore < LafcadioTestCase
 			assert_equal 1, proxy.pk_id
 			assert_equal Client, proxy.domain_class
 		end
-end
+	end
 end
