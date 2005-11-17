@@ -545,7 +545,7 @@ class TestObjectStore < LafcadioTestCase
 			@cache.get_by_query q
 		end
 		
-		def testAssignsPkIdOnNewCommit
+		def test_assigns_pk_id_on_new_commit
 			client = Client.new({ 'name' => 'client name' })
 			assert_nil client.pk_id
 			@cache.commit client
@@ -573,7 +573,7 @@ class TestObjectStore < LafcadioTestCase
 			assert_equal( 0, @mockObjectStore.get_xml_skus.size )
 		end
 	
-		def testDeleteSetsDomainObjectFieldsToNil
+		def test_delete_sets_domain_object_fields_to_nil
 			client = Client.new( 'pk_id' => 1, 'name' => 'client name' )
 			invoice = Invoice.new(
 				'pk_id' => 1, 'client' => DomainObjectProxy.new( client ),
@@ -593,7 +593,7 @@ class TestObjectStore < LafcadioTestCase
 			assert_equal( ObjectStore::Cache, cache_prime.class )
 		end
 	
-		def testFlush
+		def test_flush
 			user = User.uncommitted_mock
 			user.commit
 			assert_equal( 1, all( User ).size )
@@ -616,7 +616,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	class TestCommitSqlStatementsAndBinds < LafcadioTestCase
-		def testCommitSQLWithApostrophe
+		def test_commit_sql_with_apostrophe
 			client = Client.new( { "name" => "T'est name" } )
 			assert_equal("T'est name", client.name)
 			sql = ObjectStore::CommitSqlStatementsAndBinds.new(client)[0][0]
@@ -624,7 +624,7 @@ class TestObjectStore < LafcadioTestCase
 			assert_not_nil sql.index("'T''est name'"), sql
 		end
 	
-		def testCommitSQLWithInvoice
+		def test_commit_sql_with_invoice
 			invoice = Invoice.new(
 				"client" => Client.uncommitted_mock, "rate" => 70,
 				"date" => Date.new(2001, 4, 5), "hours" => 36.5, "pk_id" => 1
@@ -637,12 +637,12 @@ class TestObjectStore < LafcadioTestCase
 			assert_not_nil(deleteSQL =~ /delete from invoices where pk_id=1/)
 		end
 	
-		def testFieldNamesForSQL
+		def test_field_names_for_sql
 			sqlMaker = ObjectStore::CommitSqlStatementsAndBinds.new Invoice.uncommitted_mock
 			assert_equal( 6, sqlMaker.get_name_value_pairs( Invoice ).size )
 		end
 		
-		def testInheritanceCommit
+		def test_inheritance_commit
 			ic = InternalClient.new({ 'pk_id' => 1, 'name' => 'client name',
 					'billingType' => 'trade' })
 			statements = ObjectStore::CommitSqlStatementsAndBinds.new ic
@@ -670,25 +670,24 @@ class TestObjectStore < LafcadioTestCase
 			assert_equal( 0, bind2.size )
 		end
 	
-		def testInsertUpdateAndDelete
+		def test_insert_update_and_delete
 			values = { "name" => "ClientName1" }
 			client1a = Client.new values
-			insertSql = ObjectStore::CommitSqlStatementsAndBinds.new(client1a)[0]
+			ObjectStore::CommitSqlStatementsAndBinds.new(client1a)[0]
 			values["pk_id"] = 1
 			client1b = Client.new values
 			updateSql = ObjectStore::CommitSqlStatementsAndBinds.new(client1b)[0][0]
 			assert_match( /update/, updateSql )
-			assert_not_nil updateSql.index("pk_id")
+			assert_match( /pk_id/, updateSql )
 			client1b.delete = true
 			delete_sql = ObjectStore::CommitSqlStatementsAndBinds.new(client1b)[0][0]
-			assert_not_nil delete_sql.index("delete")
-			assert_not_nil delete_sql.index("pk_id")
+			assert_match( /delete/, delete_sql )
+			assert_match( /pk_id/, delete_sql )
 			binds = ObjectStore::CommitSqlStatementsAndBinds.new(client1b)[0][1]
-			assert_not_nil( binds )
 			assert_equal( 0, binds.size )
 		end
-	
-		def testSetsNulls
+
+		def test_sets_nulls
 			client = Client.new({ 'pk_id' => 1, 'name' => 'client name',
 					'referringClient' => nil, 'priorityInvoice' => nil })
 			sql = ObjectStore::CommitSqlStatementsAndBinds.new( client )[0]
@@ -736,13 +735,13 @@ class TestObjectStore < LafcadioTestCase
 			)
 		end
 	
-		def testCommitsEdit
+		def test_commits_edit
 			@dbb.commit(@client)
 			sql = @mockDbh.sql_statements.last
 			assert(sql.index("update clients set name='clientName1'") != nil, sql)
 		end
 	
-		def testCommitsForInheritedObjects
+		def test_commits_for_inherited_objects
 			ic = InternalClient.new({ 'pk_id' => 1, 'name' => 'client name',
 					'billingType' => 'trade' })
 			@dbb.commit ic
@@ -753,7 +752,7 @@ class TestObjectStore < LafcadioTestCase
 			assert_match( /update internal_clients set/, sql2 )
 		end
 	
-		def testGetAll
+		def test_get_all
 			query = Query.new Domain::LineItem
 			coll = @dbb.select_dobjs query
 			assert_equal Array, coll.class
@@ -771,7 +770,7 @@ class TestObjectStore < LafcadioTestCase
 			assert_nil( @dbb.group_query( query4 ).only[:max] )
 		end
 	
-		def testLastPkIdInserted
+		def test_last_pk_id_inserted
 			client = Client.new( { "name" => "clientName1" } )
 			@dbb.commit client
 			assert_equal 12, @dbb.last_pk_id_inserted
@@ -779,7 +778,7 @@ class TestObjectStore < LafcadioTestCase
 			assert_equal 12, dbb2.last_pk_id_inserted
 		end
 		
-		def testLogsSql
+		def test_logs_sql
 			logFilePath = '../test/testOutput/sql'
 			@dbb.select_all 'select * from users'
 			if FileTest.exist?( logFilePath )
@@ -793,7 +792,7 @@ class TestObjectStore < LafcadioTestCase
 			fail if Time.now - File.ctime( logFilePath ) > 5
 		end
 		
-		def testLogsSqlToDifferentFileName
+		def test_logs_sql_to_different_file_name
 			LafcadioConfig.set_filename( '../test/testData/config_with_log_path.dat' )
 			LafcadioConfig.set_values( nil )
 			logFilePath = '../test/testOutput/another.sql'
@@ -822,14 +821,14 @@ class TestObjectStore < LafcadioTestCase
 			MockDbi.reset
 		end
 	
-		def testConnectionPooling
+		def test_connection_pooling
 			ObjectStore::DbConnection.connection_class = MockDbi
 			100.times { ObjectStore::DbConnection.get_db_connection }
 			ObjectStore::DbConnection.flush
 			ObjectStore::DbConnection.connection_class = DBI
 		end
 	
-		def testdb_name
+		def test_db_name
 			ObjectStore::DbConnection.connection_class = MockDbi
 			ObjectStore::DbConnection.flush
 			MockDbi.flush_instance_count
@@ -839,7 +838,7 @@ class TestObjectStore < LafcadioTestCase
 			ObjectStore::DbConnection.connection_class = DBI
 		end
 		
-		def testDisconnect
+		def test_disconnect
 			ObjectStore::DbConnection.get_db_connection.disconnect
 			@mockDbh = MockDbi.mock_dbh
 			assert !@mockDbh.connected?
@@ -847,7 +846,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	class TestSqlToRubyValues < LafcadioTestCase
-		def testConvertsPkId
+		def test_converts_pk_id
 			row_hash = { "pk_id" => "1", "name" => "clientName1",
 			"standard_rate" => "70" }
 			converter = ObjectStore::SqlToRubyValues.new(Client, row_hash)
@@ -860,7 +859,7 @@ class TestObjectStore < LafcadioTestCase
 			assert_equal( string, svc['text1'] )
 		end
 	
-		def testExecute
+		def test_executie
 			row_hash = { "id" => "1", "name" => "clientName1",
 			"standard_rate" => "70" }
 			converter = ObjectStore::SqlToRubyValues.new(Client, row_hash)
@@ -868,7 +867,7 @@ class TestObjectStore < LafcadioTestCase
 			assert_equal(70, converter["standard_rate"])
 		end
 	
-		def testInheritanceConstruction
+		def test_inheritance_construction
 			row_hash = { 'pk_id' => '1', 'name' => 'clientName1',
 					'billingType' => 'trade' }
 			objectHash = ObjectStore::SqlToRubyValues.new(InternalClient, row_hash)
@@ -884,7 +883,7 @@ class TestObjectStore < LafcadioTestCase
 			assert_raise( FieldMatchError, error_msg ) { object_hash['pk_id'] }
 		end
 	
-		def testTurnsLinkIdsIntoProxies
+		def test_turns_link_ids_into_proxies
 			row_hash = { "client" => "1", "date" => DBI::Date.new( 2001, 1, 1 ),
 									"rate" => "70", "hours" => "40",
 									"paid" => DBI::Date.new( 0, 0, 0 ) }
