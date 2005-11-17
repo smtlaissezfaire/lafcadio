@@ -12,26 +12,22 @@ class Lafcadio::ObjectStore
 end
 
 class MockDbi
-	def MockDbi.connect( dbAndHost, user, password )
-		@@dbName = dbAndHost.split(':')[2]
+	def self.connect( dbAndHost, user, password )
+		@@db_name = dbAndHost.split(':')[2]
 		@@instances += 1
 		raise "initialize me just once, please" if @@instances > 1
 		@@mock_dbh = MockDbh.new
 	end
 
-	def MockDbi.flushInstanceCount
-		@@instances = 0
-	end
-
-	def MockDbi.dbName
-		@@dbName
-	end
+	def self.db_name; @@db_name; end
 	
+	def self.flush_instance_count; @@instances = 0; end
+
 	def self.mock_dbh; @@mock_dbh; end
 	
 	def self.reset
 		@@instances = 0
-		@@dbName = nil
+		@@db_name = nil
 	end
 	
 	reset
@@ -48,22 +44,16 @@ class MockDbi
 
 		def []= ( key, val ); end
 
-    def connected?
-    	@@connected
-    end
+    def connected?; @@connected; end
 
-		def do( sql, *binds )
-			logSql( sql )
-		end
+		def do( sql, *binds ); log_sql( sql ); end
 
-    def disconnect
-    	@@connected = false
-    end
+    def disconnect; @@connected = false; end
     
-		def logSql( sql ); @sql_statements << sql; end
+		def log_sql( sql ); @sql_statements << sql; end
 
 		def select_all(str)
-			logSql( str )
+			log_sql( str )
       if str == "select last_insert_id()"
 				[ { 'last_insert_id()' => '12' } ]
 			elsif str == 'select max(pk_id) from clients'
@@ -394,13 +384,13 @@ class TestDbConnection < Test::Unit::TestCase
     ObjectStore::DbConnection.connection_class = DBI
   end
 
-	def testDbName
+	def testdb_name
   	ObjectStore::DbConnection.connection_class = MockDbi
   	ObjectStore::DbConnection.flush
-		MockDbi.flushInstanceCount
+		MockDbi.flush_instance_count
 		ObjectStore.db_name = 'some_other_db'
 		db = ObjectStore::DbBridge.new
-		assert_equal 'some_other_db', MockDbi.dbName
+		assert_equal 'some_other_db', MockDbi.db_name
     ObjectStore::DbConnection.connection_class = DBI
 	end
 	
