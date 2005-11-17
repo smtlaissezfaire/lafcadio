@@ -7,7 +7,7 @@ require '../test/mock_domain'
 def name; 'global name'; end
 
 class TestQuery < LafcadioTestCase
-	def testByCondition
+	def test_by_condition
 		client = Client.new({ 'pk_id' => 13 })
 		condition = Query::Equals.new('client', client, Invoice)
 		query = Query.new Invoice, condition
@@ -20,12 +20,12 @@ class TestQuery < LafcadioTestCase
 		assert_equal( 'select count(*) from clients', qry.to_sql )
 	end
 	
-	def testGetAll
+	def test_get_all
 		query = Query.new Domain::LineItem
 		assert_equal "select * from line_items", query.to_sql
 	end
 
-	def testGetSubsetWithCondition
+	def test_get_subset_with_condition
 		condition = Query::In.new('client', [ 1, 2, 3 ], Invoice)
 		query = Query.new Invoice, condition
 		assert_equal( 'select * from invoices where invoices.client in (1, 2, 3)',
@@ -65,8 +65,9 @@ class TestQuery < LafcadioTestCase
 	def test_infer
 		query = Query.infer( Invoice ) { |inv| inv.rate.equals( 75 ) }
 		assert_equal( Query, query.class )
-		assert_equal( 'select * from invoices where invoices.rate = 75',
-		              query.to_sql )
+		assert_equal(
+			'select * from invoices where invoices.rate = 75', query.to_sql
+		)
 		query = query.and { |inv| inv.date.gt( Date.new( 2004, 1, 1 ) ) }
 		assert_equal(
 			'select * from invoices where (invoices.rate = 75 and ' +
@@ -81,7 +82,7 @@ class TestQuery < LafcadioTestCase
 		)
 	end
 
-	def testLimit
+	def test_limit
 		query = Query.new Client
 		query.limit = 0..9
 		assert_equal 'select * from clients limit 0, 10', query.to_sql
@@ -90,7 +91,7 @@ class TestQuery < LafcadioTestCase
 		assert_equal 'select * from clients limit 10, 10', query2.to_sql
 	end
 
-	def testOnePkId
+	def test_one_pk_id
 		query = Query.new SKU, 199
     assert_equal( 'select * from skus where skus.pk_id = 199', query.to_sql )
 		query2 = Query.new( XmlSku, 199 )
@@ -101,22 +102,19 @@ class TestQuery < LafcadioTestCase
 		)
 	end
 
-	def testOrderBy
+	def test_order_by
 		query = Query.new Client
 		query.order_by = 'name'
 		query.order_by_order = Query::DESC
 		assert_equal 'select * from clients order by name desc', query.to_sql
-	end
-
-	def test_order_by
-		query = Query.new( XmlSku2 )
-		query.order_by = 'textList1'
+		query2 = Query.new( XmlSku2 )
+		query2.order_by = 'textList1'
 		assert_equal(
-			'select * from that_table order by text_list1 asc', query.to_sql
+			'select * from that_table order by text_list1 asc', query2.to_sql
 		)
 	end
 
-	def testTableJoinsForInheritance
+	def test_table_joins_for_inheritance
 		query = Query.new InternalClient, 1
 		assert_equal(
 			'select * from clients, internal_clients where clients.pk_id = ' +
@@ -133,7 +131,7 @@ class TestQuery < LafcadioTestCase
 		)
 	end
 
-	def testToSql
+	def test_to_sql
 		query = Query::Max.new(Client)
 		assert_equal 'select max(pk_id) from clients', query.to_sql
 		query2 = Query::Max.new( Invoice, 'rate' )
@@ -255,7 +253,7 @@ class TestQuery < LafcadioTestCase
 	
 		def test_more_than_two_conditions
 			pastExpDate = Query::Compare.new(
-				'date', Date.new(2003, 1, 1), Invoice,
+				'date', Date.new(2003, 1, 1), Invoice, 
 				Query::Compare::GREATER_THAN_OR_EQUAL
 			)
 			notExpiredYet = Query::Equals.new( 'rate', 10, Invoice )
@@ -269,7 +267,8 @@ class TestQuery < LafcadioTestCase
 				condition.to_sql
 			)
 			invoice = Invoice.new(
-				'pk_id' => 1, 'date' => Date.new(2003, 1, 1), 'rate' => 10, 'hours' => 10
+				'pk_id' => 1, 'date' => Date.new(2003, 1, 1), 'rate' => 10,
+				'hours' => 10
 			)
 			assert condition.dobj_satisfies?(invoice)
 			invoice.hours = 10.5
@@ -330,7 +329,7 @@ class TestQuery < LafcadioTestCase
 			assert( !equals1.implies?( compound3 ) )
 		end
 		
-		def testRaisesExceptionIfInitHasWrongArguments
+		def test_raises_exception_if_init_has_wrong_arguments
 			cond = Query::Condition.new( 'att name', 'name', Attribute )
 			begin
 				cond.field
@@ -343,7 +342,7 @@ class TestQuery < LafcadioTestCase
 	end
 	
 	class TestEquals < LafcadioTestCase
-		def testBooleanField
+		def test_boolean_field
 			equals = Query::Equals.new( 'administrator', false, User )
 			assert_equal( 'users.administrator = 0', equals.to_sql )
 		end
@@ -356,7 +355,7 @@ class TestQuery < LafcadioTestCase
 			assert( equals.dobj_satisfies?( odd_user ) )
 		end
 	
-		def testDbFieldName
+		def test_db_field_name
 			equals = Query::Equals.new( 'text1', 'foobar', XmlSku )
 			assert_equal( "some_other_table.text_one = 'foobar'", equals.to_sql )
 		end
@@ -366,24 +365,24 @@ class TestQuery < LafcadioTestCase
 			assert_equal( 'some_other_table.some_other_id = 123', equals1.to_sql )
 		end
 	
-		def testEqualsByFieldType
+		def test_equals_by_field_type
 			equals = Query::Equals.new('email', 'john.doe@email.com', User)
 			assert_equal( "users.email = 'john.doe@email.com'", equals.to_sql )
 			equals2 = Query::Equals.new('date', Date.new(2003, 1, 1), Invoice)
 			assert_equal( "invoices.date = '2003-01-01'", equals2.to_sql )
 		end
 	
-		def testNullClause
+		def test_null_clause
 			equals = Query::Equals.new('date', nil, Invoice)
 			assert_equal( 'invoices.date is null', equals.to_sql )
 		end
 	
-		def testPkId
+		def test_pk_id
 			equals = Query::Equals.new('pk_id', 123, Client)
 			assert_equal( 'clients.pk_id = 123', equals.to_sql )
 		end
 	
-		def testSubclass
+		def test_subclass
 			clientCondition = Query::Equals.new('name', 'client 1', InternalClient)
 			assert_equal( "clients.name = 'client 1'", clientCondition.to_sql )
 		end
@@ -415,7 +414,7 @@ class TestQuery < LafcadioTestCase
 			)
 		end
 	
-		def testCompare
+		def test_compare
 			date = Date.new( 2003, 1, 1 )
 			method_operator_hash = { 'lt' => '<', 'lte' => '<=', 'gte' => '>=',
 															 'gt' => '>' }
@@ -428,7 +427,7 @@ class TestQuery < LafcadioTestCase
 			}
 		end
 	
-		def testCompareFieldBelongingToSuperclass
+		def test_compare_field_belonging_to_superclass
 			desiredSql =
 				"select * from clients, internal_clients where clients.pk_id = " +
 				"internal_clients.pk_id and clients.standard_rate < 10"
@@ -437,12 +436,12 @@ class TestQuery < LafcadioTestCase
 			}
 		end
 	
-		def testCompareToDomainObjectField
+		def test_compare_to_domain_object_field
 			desiredSql = "select * from invoices where invoices.client < 10"
 			assert_infer_match( desiredSql, Invoice ) { |inv| inv.client.lt( 10 ) }
 		end
 		
-		def testCompound
+		def test_compound
 			desiredSql = "select * from invoices " +
 									 "where (invoices.date >= '2003-01-01' and invoices.hours = 10)"
 			date = Date.new( 2003, 1, 1 )
@@ -454,7 +453,7 @@ class TestQuery < LafcadioTestCase
 			}
 		end
 		
-		def testCompoundThree
+		def test_compound_three
 			desiredSql = "select * from invoices " +
 									 "where (invoices.date >= '2003-01-01' and " +
 									 "invoices.rate = 10 and invoices.hours = 10)"
@@ -472,7 +471,7 @@ class TestQuery < LafcadioTestCase
 			}
 		end
 	
-		def testEquals
+		def test_equals
 			desiredSql = "select * from invoices where invoices.hours = 10"
 			assert_infer_match( desiredSql, Invoice ) { |inv| inv.hours.equals( 10 ) }
 			desired_sql2 =
@@ -519,7 +518,7 @@ class TestQuery < LafcadioTestCase
 			}
 		end
 	
-		def testIn
+		def test_in
 			desiredSql = "select * from invoices where invoices.pk_id in (1, 2, 3)"
 			assert_infer_match( desiredSql, Invoice ) { |inv|
 				inv.pk_id.in( 1, 2, 3 )
@@ -546,7 +545,7 @@ class TestQuery < LafcadioTestCase
 			}
 		end
 	
-		def testLike
+		def test_like
 			desiredSql1 = "select * from users where users.email like '%hotmail%'"
 			assert_infer_match( desiredSql1, User ) { |user|
 				user.email.like( /hotmail/ )
@@ -560,10 +559,9 @@ class TestQuery < LafcadioTestCase
 				user.email.like( /hotmail$/ )
 			}
 			assert_raise( ArgumentError ) {
-				inferrer = Query::Inferrer.new( User ) { |user|
+				Query::Inferrer.new( User ) { |user|
 					user.email.like( 'hotmail' )
-				}
-				inferrer.execute
+				}.execute
 			}
 		end
 	
