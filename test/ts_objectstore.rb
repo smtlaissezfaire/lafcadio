@@ -296,14 +296,14 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal( xml_sku2, @testObjectStore.get_xml_sku2s( user ).only )
 	end
 
-	def testDynamicMethodNamesAsFacadeForCollector
+	def test_dynamic_method_names_as_facade_for_collector
 		set_test_client
 		matchingClients = @testObjectStore.get_clients(@client.name, 'name')
 		assert_equal 1, matchingClients.size
 		assert_equal @client, matchingClients[0]
 	end
 	
-	def testFlush
+	def test_flush
 		client = Client.uncommitted_mock
 		@mockDbBridge.commit client
 		assert_equal client.name, @testObjectStore.get(Client, 1).name
@@ -314,7 +314,7 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 'new client name', @testObjectStore.get(Client, 1).name
 	end
 
-	def testFlushCacheAfterNewObjectCommit
+	def test_flush_cache_after_new_object_commit
 		assert_equal 0, @testObjectStore.get_all(Client).size
 		client = Client.new({ })
 		@testObjectStore.commit client
@@ -335,11 +335,11 @@ class TestObjectStore < LafcadioTestCase
 		)
 	end
 	
-	def testGetDbBridge
+	def test_get_db_bridge
 		assert_equal( @mockDbBridge, @testObjectStore.get_db_bridge )
 	end
 	
-	def testGetInvoices
+	def test_get_invoices
 		client = Client.uncommitted_mock
 		client.commit
 		inv1 = Invoice.new(
@@ -354,7 +354,7 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 2, coll.size
 	end
 
-	def testGetMapObject
+	def test_get_map_object
 		ili = InventoryLineItem.committed_mock
 		option = Option.committed_mock
 		iliOption = InventoryLineItemOption.committed_mock
@@ -370,19 +370,12 @@ class TestObjectStore < LafcadioTestCase
 		end 
 	end
 	
-	def testGetObjects
-		@testObjectStore.commit Client.new( { "pk_id" => 1, "name" => "clientName1" } )
-		@testObjectStore.commit Client.new( { "pk_id" => 2, "name" => "clientName2" } )
+	def test_get_objects
+		Client.new( "pk_id" => 1, "name" => "clientName1" ).commit
+		Client.new( "pk_id" => 2, "name" => "clientName2" ).commit
 		coll = @testObjectStore.get_objects(Client, [ 1, 2 ])
 		assert_equal 2, coll.size
-		foundOne = false
-		foundTwo = false
-		coll.each { |obj|
-			foundOne = true if obj.pk_id == 1
-			foundTwo = true if obj.pk_id == 2
-		}
-		assert foundOne
-		assert foundTwo
+		[ 1, 2 ].each do |i| assert coll.any? { |obj| obj.pk_id == i }; end
 		assert_raise( ArgumentError ) {
 			@testObjectStore.get_objects(Client, [ "1", "2" ])
 		}
@@ -391,7 +384,7 @@ class TestObjectStore < LafcadioTestCase
 		}
 	end
 
-	def testGetSubset
+	def test_get_subset
 		set_test_client
 		condition = Query::Equals.new 'name', 'clientName1', Client
 		query = Query.new Client, condition
@@ -414,7 +407,7 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal( 1, @mockDbBridge.query_count( query2_prime.to_sql ) )
 	end
 
-	def testGetWithaNonLinkingField	
+	def test_get_with_a_non_linking_field	
 		client = Client.uncommitted_mock
 		@testObjectStore.commit client
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client 2' })
@@ -422,7 +415,7 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 2, @testObjectStore.get_clients('client 2', 'name')[0].pk_id
 	end
 
-	def testHandlesLinksThroughProxies
+	def test_handles_links_through_proxies
 		invoice = Invoice.committed_mock
 		origClient = @testObjectStore.get(Client, 1)
 		assert_equal Client, origClient.class
@@ -432,7 +425,7 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 1, matches.size
 	end
 
-	def testMax
+	def test_max
 		set_test_client
 		assert_equal 1, @testObjectStore.get_max(Client)
 		Invoice.committed_mock
@@ -463,26 +456,26 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def test_query_inference
-		client1 = Client.new( 'pk_id' => 1, 'name' => 'client 1' )
-		client1.commit
-		client2 = Client.new( 'pk_id' => 2, 'name' => 'client 2' )
-		client2.commit
-		client3 = Client.new( 'pk_id' => 3, 'name' => 'client 3' )
-		client3.commit
-		coll1 = @testObjectStore.get_clients { |client| client.name.equals( 'client 1' ) }
+		1.upto( 3 ) do |i|
+			Client.new( 'pk_id' => i, 'name' => "client #{ i }" ).commit
+		end
+		coll1 = @testObjectStore.get_clients { |client|
+			client.name.equals( 'client 1' )
+		}
 		assert_equal( 1, coll1.size )
 		assert_equal( 1, coll1[0].pk_id )
-		coll2 = @testObjectStore.get_clients { |client| client.name.like( /^clie/ ) }
+		coll2 = @testObjectStore.get_clients { |client|
+			client.name.like( /^clie/ )
+		}
 		assert_equal( 3, coll2.size )
-		coll3 = @testObjectStore.get_clients { |client| client.name.like( /^clie/ ).not }
+		coll3 = @testObjectStore.get_clients { |client|
+			client.name.like( /^clie/ ).not
+		}
 		assert_equal( 0, coll3.size )
-		begin
+		assert_raise( ArgumentError ) do
 			@testObjectStore.get_clients( 'client 1', 'name' ) { |client|
 				client.name.equals( 'client 1' ).not
 			}
-			raise "Should raise ArgumentError"
-		rescue ArgumentError
-			# okay
 		end
 		coll4 = @testObjectStore.get_clients
 		assert_equal( 3, coll4.size )
@@ -495,7 +488,7 @@ class TestObjectStore < LafcadioTestCase
 		}
 	end
 
-	def testRaisesExceptionIfCantFindObject
+	def test_raises_exception_if_cant_find_object
 		begin
 			@testObjectStore.get Client, 1
 			fail "should throw exception for unfindable object"
@@ -513,7 +506,7 @@ class TestObjectStore < LafcadioTestCase
 		}
 	end
 	
-	def testSelfLinking
+	def test_self_linking
 		client1Proxy = DomainObjectProxy.new(Client, 1)
 		client2Proxy = DomainObjectProxy.new(Client, 2)
 		client1 = Client.new({ 'pk_id' => 1, 'name' => 'client 1',
@@ -529,7 +522,7 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 100, client1Prime.referringClient.standard_rate
 	end
 
-	def testUpdateFlushesCache
+	def test_update_flushes_cache
 		client = Client.new({ 'pk_id' => 100, 'name' => 'client 100' })
 		@testObjectStore.commit client
 		assert_equal 'client 100', @testObjectStore.get(Client, 100).name
