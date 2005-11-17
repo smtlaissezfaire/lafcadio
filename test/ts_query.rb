@@ -247,239 +247,6 @@ end
 # necessary for test_global_methods_dont_interfere_with_method_missing
 def name; 'global name'; end
 
-class TestQueryInferrer < LafcadioTestCase
-	def assert_infer_match( desiredSql, domain_class, &action )
-		inferrer = Query::Inferrer.new( domain_class ) { |obj| action.call( obj ) }
-		assert_equal( desiredSql, inferrer.execute.to_sql )
-	end
-
-	def test_boolean_compound
-		sql = "select * from users where " +
-				"(users.administrator = 1 and " +
-				"users.email = 'administrator@hotmail.com')"
-		assert_equal(
-			sql,
-			Query.infer( User ) { |user|
-				Query.And(
-					user.administrator, user.email.equals( 'administrator@hotmail.com' )
-				)
-			}.to_sql
-		)
-		assert_equal(
-			sql,
-			Query.infer( User ) { |user|
-				user.administrator & user.email.equals( 'administrator@hotmail.com' )
-			}.to_sql
-		)
-	end
-
-	def testCompare
-		date = Date.new( 2003, 1, 1 )
-		method_operator_hash = { 'lt' => '<', 'lte' => '<=', 'gte' => '>=',
-		                         'gt' => '>' }
-		method_operator_hash.each { |method, operator|
-			desired_sql = "select * from invoices where invoices.date " +
-			              "#{ operator } '2003-01-01'"
-			assert_infer_match( desired_sql, Invoice ) { |inv|
-				inv.date.send( method, date )
-			}
-		}
-	end
-
-	def testCompareFieldBelongingToSuperclass
-		desiredSql =
-			"select * from clients, internal_clients where clients.pk_id = " +
-			"internal_clients.pk_id and clients.standard_rate < 10"
-    assert_infer_match( desiredSql, InternalClient ) { |intc|
-			intc.standard_rate.lt( 10 )
-		}
-	end
-
-	def testCompareToDomainObjectField
-		desiredSql = "select * from invoices where invoices.client < 10"
-		assert_infer_match( desiredSql, Invoice ) { |inv| inv.client.lt( 10 ) }
-	end
-	
-	def testCompound
-		desiredSql = "select * from invoices " +
-		             "where (invoices.date >= '2003-01-01' and invoices.hours = 10)"
-		date = Date.new( 2003, 1, 1 )
-		assert_infer_match( desiredSql, Invoice ) { |inv|
-			Query.And( inv.date.gte( date ), inv.hours.equals( 10 ) )
-		}
-		assert_infer_match( desiredSql, Invoice ) { |inv|
-			inv.date.gte( date ) & inv.hours.equals( 10 )
-		}
-	end
-	
-	def testCompoundThree
-		desiredSql = "select * from invoices " +
-		             "where (invoices.date >= '2003-01-01' and " +
-		             "invoices.rate = 10 and invoices.hours = 10)"
-		date = Date.new( 2003, 1, 1 )
-		assert_infer_match( desiredSql, Invoice ) { |inv|
-			Query.And( inv.date.gte( date ), inv.rate.equals( 10 ),
-								 inv.hours.equals( 10 ) )
-		}
-		desired_sql =
-			"select * from invoices " +
-			"where ((invoices.date >= '2003-01-01' and invoices.rate = 10) and " +
-			"invoices.hours = 10)"
-		assert_infer_match( desired_sql, Invoice ) { |inv|
-			inv.date.gte( date ) & inv.rate.equals( 10 ) & inv.hours.equals( 10 )
-		}
-	end
-
-	def testEquals
-		desiredSql = "select * from invoices where invoices.hours = 10"
-		assert_infer_match( desiredSql, Invoice ) { |inv| inv.hours.equals( 10 ) }
-		desired_sql2 =
-			'select * from inventory_line_item_options where ' +
-			'inventory_line_item_options.optionId = 1'
-		assert_infer_match( desired_sql2, InventoryLineItemOption ) { |ilio|
-			ilio.option.equals( Option.committed_mock )
-		}
-	end
-
-	def test_field_compare
-		desired_sql = 'select * from invoices where invoices.date = invoices.paid'
-		assert_infer_match( desired_sql, Invoice ) { |inv|
-			inv.date.equals( inv.paid )
-		}
-		desired_sql2 = 'select * from some_other_table ' +
-		               'where some_other_table.text_one = some_other_table.text2'
-		assert_infer_match( desired_sql2, XmlSku ) { |xml_sku|
-			xml_sku.text1.equals( xml_sku.text2 )
-		}
-		desired_sql3 = 'select * from invoices where invoices.pk_id > 10'
-		assert_infer_match( desired_sql3, Invoice ) { |inv| inv.pk_id.gt( 10 ) }
-	end
-
-	def test_global_methods_dont_interfere_with_method_missing
-		assert_infer_match(
-			"select * from clients where clients.name = 'ClientCo'", Client
-		) { |c| c.send( :name ).equals( 'ClientCo' ) }
-	end
-
-	def test_implied_boolean_eval
-		desired_sql1 = 'select * from users where users.administrator = 1'
-		assert_infer_match( desired_sql1, User ) { |user| user.administrator }
-		desired_sql2 = 'select * from users where !(users.administrator = 1)'
-		assert_infer_match( desired_sql2, User ) { |user| user.administrator.not }
-		desired_sql3 =
-			"select * from users " +
-			"where (!(users.administrator = 1) and users.email = 'test@test.com')"
-		assert_infer_match( desired_sql3, User ) { |user|
-			Query.And( user.administrator.not, user.email.equals( 'test@test.com' ) )
-		}
-		assert_infer_match( desired_sql3, User ) { |user|
-			user.administrator.not & user.email.equals( 'test@test.com' )
-		}
-	end
-
-	def testIn
-		desiredSql = "select * from invoices where invoices.pk_id in (1, 2, 3)"
-		assert_infer_match( desiredSql, Invoice ) { |inv|
-			inv.pk_id.in( 1, 2, 3 )
-		}
-		desired_sql2 =
-			"select * from clients where clients.name in ('name1', 'name2')"
-		assert_infer_match( desired_sql2, Client ) { |cli|
-			cli.name.in( 'name1', 'name2' )
-		}
-	end
-
-	def test_include?
-		desired_sql =
-			"select * from some_other_table where (" +
-			"some_other_table.text_list1 like '123,%' or " +
-			"some_other_table.text_list1 like '%,123,%' or " +
-			"some_other_table.text_list1 like '%,123' or " +
-			"some_other_table.text_list1 = '123')"
-		assert_infer_match( desired_sql, XmlSku ) { |xml_sku|
-			xml_sku.textList1.include?( '123' )
-		}
-		assert_raise( ArgumentError ) {
-			Query.infer( Client ) { |cli| cli.name.include?( 'a' ) }
-		}
-	end
-
-	def testLike
-		desiredSql1 = "select * from users where users.email like '%hotmail%'"
-		assert_infer_match( desiredSql1, User ) { |user|
-			user.email.like( /hotmail/ )
-		}
-		desiredSql2 = "select * from users where users.email like 'hotmail%'"
-		assert_infer_match( desiredSql2, User ) { |user|
-			user.email.like( /^hotmail/ )
-		}
-		desiredSql3 = "select * from users where users.email like '%hotmail'"
-		assert_infer_match( desiredSql3, User ) { |user|
-			user.email.like( /hotmail$/ )
-		}
-		assert_raise( ArgumentError ) {
-			inferrer = Query::Inferrer.new( User ) { |user|
-				user.email.like( 'hotmail' )
-			}
-			inferrer.execute
-		}
-	end
-
-	def testLink
-		aClient = Client.committed_mock
-		desiredSql = "select * from invoices where invoices.client = 1"
-		assert_infer_match( desiredSql, Invoice ) { |inv|
-			inv.client.equals( aClient )
-		}
-	end
-	
-	def test_nil?
-		sql1 = 'select * from clients where clients.name is null'
-		assert_infer_match( sql1, Client ) { |cli| cli.name.nil? }
-		sql2 = 'select * from clients where !(clients.name is null)'
-		assert_infer_match( sql2, Client ) { |cli| cli.name.nil?.not }
-	end
-
-	def testNot
-		desired_sql = "select * from invoices where !(invoices.hours = 10)"
-		assert_infer_match( desired_sql, Invoice ) { |inv|
-			inv.hours.equals( 10 ).not
-		}
-	end
-
-	def testOr
-		desiredSql = "select * from users " +
-		             "where (users.email = 'test@test.com' or " +
-		             "users.firstNames = 'John')"
-		assert_infer_match( desiredSql, User ) { |u|
-			Query.Or( u.email.equals( 'test@test.com' ),
-			          u.firstNames.equals( 'John' ) )
-		}
-		assert_infer_match( desiredSql, User ) { |u|
-			u.email.equals( 'test@test.com' ) | u.firstNames.equals( 'John' )
-		}
-		desired_sql2 =
-			"select * from users " +
-			"where (users.administrator = 1 or users.firstNames = 'John')"
-		assert_infer_match( desired_sql2, User ) { |u|
-			u.administrator | u.firstNames.equals( 'John' )
-		}
-	end
-	
-	def test_order
-		qry = Query.infer(
-			SKU,
-			:order_by => [ :standardPrice, :salePrice ],
-			:order_by_order => Query::DESC
-		) { |s| s.sku.nil? }
-		assert_equal(
-			"select * from skus where skus.sku is null " +
-					"order by standardPrice, salePrice desc",
-			qry.to_sql
-		)
-	end
-end
-
 class TestLike < LafcadioTestCase
 	def setup
 		super
@@ -524,61 +291,6 @@ class TestLike < LafcadioTestCase
 	end
 end
 
-class TestQuery < LafcadioTestCase
-	def test_count
-		qry = Query.new( Client, nil, { :group_functions => [ :count ] } )
-		assert_equal( 'select count(*) from clients', qry.to_sql )
-	end
-	
-	def test_implies?
-		query1 = Query.new( Client )
-		assert( query1.implies?( query1 ) )
-		query2 = Query.new( Client, 1 )
-		assert( query2.implies?( query2 ) )
-		assert( !query1.implies?( query2 ) )
-		assert( query2.implies?( query1 ) )
-		query3 = Query.infer( Client ) { |client|
-			Query.And( client.pk_id.equals( 1 ), client.name.like( /client/ ) )
-		}
-		assert( query3.implies?( query3 ) )
-		assert( query3.implies?( query1 ) )
-		assert( !query1.implies?( query3 ) )
-		assert( query3.implies?( query2 ) )
-		assert( !query2.implies?( query3 ) )
-		query4 = Query.new( Invoice )
-		assert( query4.implies?( query4 ) )
-		[ query1, query2, query3 ].each_with_index { |other_query, i|
-			assert( !query4.implies?( other_query ), i )
-			assert( !other_query.implies?( query4 ), i )
-		}
-		query5 = Query.infer( Client ) { |client|
-			Query.Or( client.pk_id.equals( 1 ), client.name.like( /client/ ) )
-		}
-		assert( query5.implies?( query1 ) )
-		[ query2, query3, query4 ].each_with_index { |other_query, i|
-			assert( !query5.implies?( other_query ), i )
-		}
-	end
-
-	def test_order_by
-		query = Query.new( XmlSku2 )
-		query.order_by = 'textList1'
-		assert_equal(
-			'select * from that_table order by text_list1 asc', query.to_sql
-		)
-	end
-
-	def testToSql
-		query = Query::Max.new(Client)
-		assert_equal 'select max(pk_id) from clients', query.to_sql
-		query2 = Query::Max.new( Invoice, 'rate' )
-		assert_equal( 'select max(rate) from invoices', query2.to_sql )
-		query3 = Query::Max.new( XmlSku )
-		assert_equal( 'select max(some_other_id) from some_other_table',
-		              query3.to_sql )
-	end
-end
-
 class TestNot < LafcadioTestCase
 	def setup
 		super
@@ -609,6 +321,11 @@ class TestQuery < LafcadioTestCase
 		              query.to_sql )
 	end
 
+	def test_count
+		qry = Query.new( Client, nil, { :group_functions => [ :count ] } )
+		assert_equal( 'select count(*) from clients', qry.to_sql )
+	end
+	
 	def testGetAll
 		query = Query.new Domain::LineItem
 		assert_equal "select * from line_items", query.to_sql
@@ -619,6 +336,36 @@ class TestQuery < LafcadioTestCase
 		query = Query.new Invoice, condition
 		assert_equal( 'select * from invoices where invoices.client in (1, 2, 3)',
 		              query.to_sql )
+	end
+
+	def test_implies?
+		query1 = Query.new( Client )
+		assert( query1.implies?( query1 ) )
+		query2 = Query.new( Client, 1 )
+		assert( query2.implies?( query2 ) )
+		assert( !query1.implies?( query2 ) )
+		assert( query2.implies?( query1 ) )
+		query3 = Query.infer( Client ) { |client|
+			Query.And( client.pk_id.equals( 1 ), client.name.like( /client/ ) )
+		}
+		assert( query3.implies?( query3 ) )
+		assert( query3.implies?( query1 ) )
+		assert( !query1.implies?( query3 ) )
+		assert( query3.implies?( query2 ) )
+		assert( !query2.implies?( query3 ) )
+		query4 = Query.new( Invoice )
+		assert( query4.implies?( query4 ) )
+		[ query1, query2, query3 ].each_with_index { |other_query, i|
+			assert( !query4.implies?( other_query ), i )
+			assert( !other_query.implies?( query4 ), i )
+		}
+		query5 = Query.infer( Client ) { |client|
+			Query.Or( client.pk_id.equals( 1 ), client.name.like( /client/ ) )
+		}
+		assert( query5.implies?( query1 ) )
+		[ query2, query3, query4 ].each_with_index { |other_query, i|
+			assert( !query5.implies?( other_query ), i )
+		}
 	end
 
 	def test_infer
@@ -667,6 +414,14 @@ class TestQuery < LafcadioTestCase
 		assert_equal 'select * from clients order by name desc', query.to_sql
 	end
 
+	def test_order_by
+		query = Query.new( XmlSku2 )
+		query.order_by = 'textList1'
+		assert_equal(
+			'select * from that_table order by text_list1 asc', query.to_sql
+		)
+	end
+
 	def testTableJoinsForInheritance
 		query = Query.new InternalClient, 1
 		assert_equal(
@@ -683,4 +438,248 @@ class TestQuery < LafcadioTestCase
 			query2.to_sql
 		)
 	end
+
+	def testToSql
+		query = Query::Max.new(Client)
+		assert_equal 'select max(pk_id) from clients', query.to_sql
+		query2 = Query::Max.new( Invoice, 'rate' )
+		assert_equal( 'select max(rate) from invoices', query2.to_sql )
+		query3 = Query::Max.new( XmlSku )
+		assert_equal( 'select max(some_other_id) from some_other_table',
+		              query3.to_sql )
+	end
+
+	class TestInferrer < LafcadioTestCase
+		def assert_infer_match( desiredSql, domain_class, &action )
+			inferrer = Query::Inferrer.new( domain_class ) { |obj| action.call( obj ) }
+			assert_equal( desiredSql, inferrer.execute.to_sql )
+		end
+	
+		def test_boolean_compound
+			sql = "select * from users where " +
+					"(users.administrator = 1 and " +
+					"users.email = 'administrator@hotmail.com')"
+			assert_equal(
+				sql,
+				Query.infer( User ) { |user|
+					Query.And(
+						user.administrator, user.email.equals( 'administrator@hotmail.com' )
+					)
+				}.to_sql
+			)
+			assert_equal(
+				sql,
+				Query.infer( User ) { |user|
+					user.administrator & user.email.equals( 'administrator@hotmail.com' )
+				}.to_sql
+			)
+		end
+	
+		def testCompare
+			date = Date.new( 2003, 1, 1 )
+			method_operator_hash = { 'lt' => '<', 'lte' => '<=', 'gte' => '>=',
+															 'gt' => '>' }
+			method_operator_hash.each { |method, operator|
+				desired_sql = "select * from invoices where invoices.date " +
+											"#{ operator } '2003-01-01'"
+				assert_infer_match( desired_sql, Invoice ) { |inv|
+					inv.date.send( method, date )
+				}
+			}
+		end
+	
+		def testCompareFieldBelongingToSuperclass
+			desiredSql =
+				"select * from clients, internal_clients where clients.pk_id = " +
+				"internal_clients.pk_id and clients.standard_rate < 10"
+			assert_infer_match( desiredSql, InternalClient ) { |intc|
+				intc.standard_rate.lt( 10 )
+			}
+		end
+	
+		def testCompareToDomainObjectField
+			desiredSql = "select * from invoices where invoices.client < 10"
+			assert_infer_match( desiredSql, Invoice ) { |inv| inv.client.lt( 10 ) }
+		end
+		
+		def testCompound
+			desiredSql = "select * from invoices " +
+									 "where (invoices.date >= '2003-01-01' and invoices.hours = 10)"
+			date = Date.new( 2003, 1, 1 )
+			assert_infer_match( desiredSql, Invoice ) { |inv|
+				Query.And( inv.date.gte( date ), inv.hours.equals( 10 ) )
+			}
+			assert_infer_match( desiredSql, Invoice ) { |inv|
+				inv.date.gte( date ) & inv.hours.equals( 10 )
+			}
+		end
+		
+		def testCompoundThree
+			desiredSql = "select * from invoices " +
+									 "where (invoices.date >= '2003-01-01' and " +
+									 "invoices.rate = 10 and invoices.hours = 10)"
+			date = Date.new( 2003, 1, 1 )
+			assert_infer_match( desiredSql, Invoice ) { |inv|
+				Query.And( inv.date.gte( date ), inv.rate.equals( 10 ),
+									 inv.hours.equals( 10 ) )
+			}
+			desired_sql =
+				"select * from invoices " +
+				"where ((invoices.date >= '2003-01-01' and invoices.rate = 10) and " +
+				"invoices.hours = 10)"
+			assert_infer_match( desired_sql, Invoice ) { |inv|
+				inv.date.gte( date ) & inv.rate.equals( 10 ) & inv.hours.equals( 10 )
+			}
+		end
+	
+		def testEquals
+			desiredSql = "select * from invoices where invoices.hours = 10"
+			assert_infer_match( desiredSql, Invoice ) { |inv| inv.hours.equals( 10 ) }
+			desired_sql2 =
+				'select * from inventory_line_item_options where ' +
+				'inventory_line_item_options.optionId = 1'
+			assert_infer_match( desired_sql2, InventoryLineItemOption ) { |ilio|
+				ilio.option.equals( Option.committed_mock )
+			}
+		end
+	
+		def test_field_compare
+			desired_sql = 'select * from invoices where invoices.date = invoices.paid'
+			assert_infer_match( desired_sql, Invoice ) { |inv|
+				inv.date.equals( inv.paid )
+			}
+			desired_sql2 = 'select * from some_other_table ' +
+										 'where some_other_table.text_one = some_other_table.text2'
+			assert_infer_match( desired_sql2, XmlSku ) { |xml_sku|
+				xml_sku.text1.equals( xml_sku.text2 )
+			}
+			desired_sql3 = 'select * from invoices where invoices.pk_id > 10'
+			assert_infer_match( desired_sql3, Invoice ) { |inv| inv.pk_id.gt( 10 ) }
+		end
+	
+		def test_global_methods_dont_interfere_with_method_missing
+			assert_infer_match(
+				"select * from clients where clients.name = 'ClientCo'", Client
+			) { |c| c.send( :name ).equals( 'ClientCo' ) }
+		end
+	
+		def test_implied_boolean_eval
+			desired_sql1 = 'select * from users where users.administrator = 1'
+			assert_infer_match( desired_sql1, User ) { |user| user.administrator }
+			desired_sql2 = 'select * from users where !(users.administrator = 1)'
+			assert_infer_match( desired_sql2, User ) { |user| user.administrator.not }
+			desired_sql3 =
+				"select * from users " +
+				"where (!(users.administrator = 1) and users.email = 'test@test.com')"
+			assert_infer_match( desired_sql3, User ) { |user|
+				Query.And( user.administrator.not, user.email.equals( 'test@test.com' ) )
+			}
+			assert_infer_match( desired_sql3, User ) { |user|
+				user.administrator.not & user.email.equals( 'test@test.com' )
+			}
+		end
+	
+		def testIn
+			desiredSql = "select * from invoices where invoices.pk_id in (1, 2, 3)"
+			assert_infer_match( desiredSql, Invoice ) { |inv|
+				inv.pk_id.in( 1, 2, 3 )
+			}
+			desired_sql2 =
+				"select * from clients where clients.name in ('name1', 'name2')"
+			assert_infer_match( desired_sql2, Client ) { |cli|
+				cli.name.in( 'name1', 'name2' )
+			}
+		end
+	
+		def test_include?
+			desired_sql =
+				"select * from some_other_table where (" +
+				"some_other_table.text_list1 like '123,%' or " +
+				"some_other_table.text_list1 like '%,123,%' or " +
+				"some_other_table.text_list1 like '%,123' or " +
+				"some_other_table.text_list1 = '123')"
+			assert_infer_match( desired_sql, XmlSku ) { |xml_sku|
+				xml_sku.textList1.include?( '123' )
+			}
+			assert_raise( ArgumentError ) {
+				Query.infer( Client ) { |cli| cli.name.include?( 'a' ) }
+			}
+		end
+	
+		def testLike
+			desiredSql1 = "select * from users where users.email like '%hotmail%'"
+			assert_infer_match( desiredSql1, User ) { |user|
+				user.email.like( /hotmail/ )
+			}
+			desiredSql2 = "select * from users where users.email like 'hotmail%'"
+			assert_infer_match( desiredSql2, User ) { |user|
+				user.email.like( /^hotmail/ )
+			}
+			desiredSql3 = "select * from users where users.email like '%hotmail'"
+			assert_infer_match( desiredSql3, User ) { |user|
+				user.email.like( /hotmail$/ )
+			}
+			assert_raise( ArgumentError ) {
+				inferrer = Query::Inferrer.new( User ) { |user|
+					user.email.like( 'hotmail' )
+				}
+				inferrer.execute
+			}
+		end
+	
+		def testLink
+			aClient = Client.committed_mock
+			desiredSql = "select * from invoices where invoices.client = 1"
+			assert_infer_match( desiredSql, Invoice ) { |inv|
+				inv.client.equals( aClient )
+			}
+		end
+		
+		def test_nil?
+			sql1 = 'select * from clients where clients.name is null'
+			assert_infer_match( sql1, Client ) { |cli| cli.name.nil? }
+			sql2 = 'select * from clients where !(clients.name is null)'
+			assert_infer_match( sql2, Client ) { |cli| cli.name.nil?.not }
+		end
+	
+		def testNot
+			desired_sql = "select * from invoices where !(invoices.hours = 10)"
+			assert_infer_match( desired_sql, Invoice ) { |inv|
+				inv.hours.equals( 10 ).not
+			}
+		end
+	
+		def testOr
+			desiredSql = "select * from users " +
+									 "where (users.email = 'test@test.com' or " +
+									 "users.firstNames = 'John')"
+			assert_infer_match( desiredSql, User ) { |u|
+				Query.Or( u.email.equals( 'test@test.com' ),
+									u.firstNames.equals( 'John' ) )
+			}
+			assert_infer_match( desiredSql, User ) { |u|
+				u.email.equals( 'test@test.com' ) | u.firstNames.equals( 'John' )
+			}
+			desired_sql2 =
+				"select * from users " +
+				"where (users.administrator = 1 or users.firstNames = 'John')"
+			assert_infer_match( desired_sql2, User ) { |u|
+				u.administrator | u.firstNames.equals( 'John' )
+			}
+		end
+		
+		def test_order
+			qry = Query.infer(
+				SKU,
+				:order_by => [ :standardPrice, :salePrice ],
+				:order_by_order => Query::DESC
+			) { |s| s.sku.nil? }
+			assert_equal(
+				"select * from skus where skus.sku is null " +
+						"order by standardPrice, salePrice desc",
+				qry.to_sql
+			)
+		end
+	end
 end
+

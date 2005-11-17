@@ -859,7 +859,7 @@ class TestObjectStore < LafcadioTestCase
 			assert_equal( string, svc['text1'] )
 		end
 	
-		def test_executie
+		def test_execute
 			row_hash = { "id" => "1", "name" => "clientName1",
 			"standard_rate" => "70" }
 			converter = ObjectStore::SqlToRubyValues.new(Client, row_hash)
