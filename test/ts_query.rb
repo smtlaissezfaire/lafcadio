@@ -565,7 +565,7 @@ class TestQuery < LafcadioTestCase
 			}
 		end
 	
-		def testLink
+		def test_link
 			aClient = Client.committed_mock
 			desiredSql = "select * from invoices where invoices.client = 1"
 			assert_infer_match( desiredSql, Invoice ) { |inv|
@@ -580,14 +580,14 @@ class TestQuery < LafcadioTestCase
 			assert_infer_match( sql2, Client ) { |cli| cli.name.nil?.not }
 		end
 	
-		def testNot
+		def test_not
 			desired_sql = "select * from invoices where !(invoices.hours = 10)"
 			assert_infer_match( desired_sql, Invoice ) { |inv|
 				inv.hours.equals( 10 ).not
 			}
 		end
 	
-		def testOr
+		def test_or
 			desiredSql = "select * from users " +
 									 "where (users.email = 'test@test.com' or " +
 									 "users.firstNames = 'John')"
@@ -637,17 +637,17 @@ class TestQuery < LafcadioTestCase
 			assert like.dobj_satisfies?( Client.new( 'name' => 'FOobAR' ) )
 		end
 	
-		def testDbFieldName
+		def test_db_field_name
 			condition = Query::Like.new( 'text1', 'foobar', XmlSku )
 			assert_equal( "some_other_table.text_one like '%foobar%'", condition.to_sql )
 		end
 	
-		def testFieldBelongingToSuperclass
+		def test_field_belonging_to_superclass
 			condition = Query::Like.new('name', 'client name', InternalClient)
 			assert_equal( "clients.name like '%client name%'", condition.to_sql )
 		end
 	
-		def testObjectMeets
+		def test_object_meets
 			like4 = Query::Like.new('client', '1', Invoice)
 			client212 = Client.new({ 'pk_id' => 212 })
 			invoiceWith212 = Invoice.new({ 'client' => client212 })
@@ -657,7 +657,7 @@ class TestQuery < LafcadioTestCase
 			assert !like4.dobj_satisfies?(invoiceWith234)
 		end
 	
-		def testToSql
+		def test_to_sql
 			assert_equal( "invoices.client like '%606%'", @like1.to_sql )
 			assert_equal( "invoices.client like '%606'", @like2.to_sql )
 			assert_equal( "invoices.client like '606%'", @like3.to_sql )
@@ -673,14 +673,14 @@ class TestQuery < LafcadioTestCase
 		
 		def test_domain_class; assert_equal( User, @not.domain_class ); end
 	
-		def testObjectsMeets
+		def test_object_meets
 			user = User.uncommitted_mock
 			assert !@not.dobj_satisfies?(user)
 			user2 = User.new({ 'email' => 'jane.doe@email.com' })
 			assert @not.dobj_satisfies?(user2)
 		end
 	
-		def testToSql
+		def test_to_sql
 			assert_equal "!(users.email = 'test@test.com')", @not.to_sql
 		end
 	end

@@ -3,7 +3,7 @@ require 'lafcadio/test'
 require 'lafcadio/util'
 require 'lafcadio/mock'
 
-class TestConfig < Test::Unit::TestCase
+class TestLafcadioConfig < Test::Unit::TestCase
 	include Lafcadio
 
 	def setup
@@ -13,12 +13,6 @@ class TestConfig < Test::Unit::TestCase
 	
 	def teardown
 		LafcadioConfig.set_values( nil )
-	end
-	
-	def test_empty_ok
-		LafcadioConfig.set_values nil
-		LafcadioConfig.set_filename nil
-		lc = LafcadioConfig.new
 	end
 
 	def test_define_in_code
@@ -33,6 +27,12 @@ class TestConfig < Test::Unit::TestCase
 		assert( config['domainDirs'].include?( 'lafcadio/domain/' ) )
 		LafcadioConfig.set_values( 'domainFiles' => %w( ../test/mock_domain ) )
 		DomainObject.require_domain_file( 'User' )
+	end
+	
+	def test_empty_ok
+		LafcadioConfig.set_values nil
+		LafcadioConfig.set_filename nil
+		lc = LafcadioConfig.new
 	end
 end
 
