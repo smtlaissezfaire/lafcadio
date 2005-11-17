@@ -255,7 +255,7 @@ class TestFloatField < LafcadioTestCase
 end
 
 class TestIntegerField < LafcadioTestCase
-	def testValueFromSQL
+	def test_value_from_sql
 		field = IntegerField.new nil, "number"
 		assert_equal Fixnum, field.value_from_sql("1").class
 		field.not_null = false
@@ -269,12 +269,12 @@ class TestMonthField < LafcadioTestCase
 		@field = MonthField.new nil, "expirationDate"
 	end
 
-	def testValueForSQL
+	def test_value_for_sql
 		assert_equal( "'2005-12-01'",
 		              @field.value_for_sql( Month.new( 2005, 12 ) ) )
 	end
 
-	def testVerifyMonths
+	def test_verify_months
 		@field.verify( Month.new( 2005, 12 ), nil )
 		caught = false
 		begin
@@ -296,7 +296,7 @@ class TestObjectField < LafcadioTestCase
 		@mockObjectStore.commit @user
 	end
 
-	def testComparable
+	def test_comparable
 		field1 = ObjectField.new User, "firstNames"
 		field2 = ObjectField.new User, "firstNames"
 		assert_equal field1, field2
@@ -304,13 +304,13 @@ class TestObjectField < LafcadioTestCase
 		assert field1 != field3
 	end
 
-	def testValueForSQL
+	def test_value_for_sql
     omf = ObjectField.new nil, "someField"
 		assert_equal String, omf.value_for_sql(nil).class
 		assert_equal 'null', omf.value_for_sql(nil)
 	end
 	
-	def testValueFromSql
+	def test_value_from_sql
 		of = ObjectField.new nil, 'someField'
 		of.not_null = false
 		valueFromSql = of.value_from_sql(nil)
@@ -318,7 +318,7 @@ class TestObjectField < LafcadioTestCase
 		assert_equal nil, valueFromSql
 	end
 	
-	def testVerifyFalseValue
+	def test_verify_false_value
 		field = ObjectField.new( Client, 'name' )
 		field.verify( false, nil )
 	end
@@ -337,7 +337,7 @@ class TestStringField < LafcadioTestCase
     @of = StringField.new(nil, "name")
   end
 
-  def testvalue_for_sql
+  def test_value_for_sql
     assert_equal("'clientName1'", @of.value_for_sql("clientName1"))
     name = "John's Doe"
     assert_equal("'John''s Doe'", @of.value_for_sql(name))
@@ -382,13 +382,13 @@ class TestTextListField < LafcadioTestCase
 		@tlf = TextListField.new nil, 'whatever'
 	end
 
-	def testValueForSQL
+	def test_value_for_sql
 		assert_equal "'a,b,c'",(@tlf.value_for_sql([ 'a', 'b', 'c' ]))
 		assert_equal "''",(@tlf.value_for_sql([ ]))
 		assert_equal( "'abc'", @tlf.value_for_sql( 'abc' ) )
 	end
 
-	def testValueFromSQL
+	def test_value_from_sql
 		array = @tlf.value_from_sql('a,b,c')
 		assert_not_nil array.index('a')
 		assert_not_nil array.index('b')

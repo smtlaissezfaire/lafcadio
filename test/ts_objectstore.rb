@@ -89,87 +89,6 @@ class MockDbi
 	end
 end
 
-class TestObjectStoreCache < LafcadioTestCase
-	def setup
-		super
-		@cache = @mockObjectStore.cache
-	end
-
-	def all( domain_class )
-		q = Query.new domain_class
-		@cache.get_by_query q
-	end
-	
-	def testAssignsPkIdOnNewCommit
-		client = Client.new({ 'name' => 'client name' })
-		assert_nil client.pk_id
-		@cache.commit client
-		assert_not_nil client.pk_id
-	end
-
-	def test_clones
-		user = User.uncommitted_mock
-		user.pk_id = 1
-		@cache.save( user )
-		assert( user.object_id != @cache.get( User, 1 ).object_id )
-		all( User ).each do |a_user|
-			assert( user.object_id != a_user.object_id )
-		end
-	end
-	
-	def test_delete_cascade
-		user = User.new( {} )
-		user.commit
-		assert( XmlSku.field( 'link1' ).delete_cascade )
-		xml_sku = XmlSku.new( 'link1' => user )
-		xml_sku.commit
-		user.delete = true
-		@cache.commit user
-		assert_equal( 0, @mockObjectStore.get_xml_skus.size )
-	end
-
-  def testDeleteSetsDomainObjectFieldsToNil
-		client = Client.new( 'pk_id' => 1, 'name' => 'client name' )
-		invoice = Invoice.new(
-			'pk_id' => 1, 'client' => DomainObjectProxy.new( client ),
-			'date' => Date.new( 2000, 1, 17 ), 'rate' => 45, 'hours' => 20
-		)
-		@cache.commit client
-		@cache.commit invoice
-    client.delete = true
-		@cache.commit client
-		assert_nil @cache[Client, 1]
-		assert_not_nil @cache[Invoice, 1]
-		assert_nil @cache[Invoice, 1].client
-  end
-
-	def test_dumpable
-		cache_prime = Marshal.load( Marshal.dump( @cache ) )
-		assert_equal( ObjectStore::Cache, cache_prime.class )
-	end
-
-	def testFlush
-		user = User.uncommitted_mock
-		user.commit
-		assert_equal( 1, all( User ).size )
-		user.delete = true
-		user.commit
-		assert_equal( 0, all( User ).size )
-	end
-
-	def test_last_commit_type
-		client = Client.new({ 'name' => 'client name' })
-		@cache.commit client
-		assert_equal( DomainObject::COMMIT_ADD, client.last_commit_type )
-		client2 = Client.new({ 'pk_id' => 25, 'name' => 'client 25' })
-		@cache.commit client2
-		assert_equal( DomainObject::COMMIT_EDIT, client2.last_commit_type )
-		client2.delete = true
-		@cache.commit client2
-		assert_equal(	DomainObject::COMMIT_DELETE, client2.last_commit_type )
-	end
-end
-
 class TestCommitSqlStatementsAndBinds < LafcadioTestCase
   def testCommitSQLWithApostrophe
     client = Client.new( { "name" => "T'est name" } )
@@ -946,6 +865,87 @@ class TestObjectStore < LafcadioTestCase
 		clientPrime.name = 'client 100.2'
 		@testObjectStore.commit clientPrime
 		assert_equal 'client 100.2', @testObjectStore.get(Client, 100).name		
+	end
+
+	class TestCache < LafcadioTestCase
+		def setup
+			super
+			@cache = @mockObjectStore.cache
+		end
+	
+		def all( domain_class )
+			q = Query.new domain_class
+			@cache.get_by_query q
+		end
+		
+		def testAssignsPkIdOnNewCommit
+			client = Client.new({ 'name' => 'client name' })
+			assert_nil client.pk_id
+			@cache.commit client
+			assert_not_nil client.pk_id
+		end
+	
+		def test_clones
+			user = User.uncommitted_mock
+			user.pk_id = 1
+			@cache.save( user )
+			assert( user.object_id != @cache.get( User, 1 ).object_id )
+			all( User ).each do |a_user|
+				assert( user.object_id != a_user.object_id )
+			end
+		end
+		
+		def test_delete_cascade
+			user = User.new( {} )
+			user.commit
+			assert( XmlSku.field( 'link1' ).delete_cascade )
+			xml_sku = XmlSku.new( 'link1' => user )
+			xml_sku.commit
+			user.delete = true
+			@cache.commit user
+			assert_equal( 0, @mockObjectStore.get_xml_skus.size )
+		end
+	
+		def testDeleteSetsDomainObjectFieldsToNil
+			client = Client.new( 'pk_id' => 1, 'name' => 'client name' )
+			invoice = Invoice.new(
+				'pk_id' => 1, 'client' => DomainObjectProxy.new( client ),
+				'date' => Date.new( 2000, 1, 17 ), 'rate' => 45, 'hours' => 20
+			)
+			@cache.commit client
+			@cache.commit invoice
+			client.delete = true
+			@cache.commit client
+			assert_nil @cache[Client, 1]
+			assert_not_nil @cache[Invoice, 1]
+			assert_nil @cache[Invoice, 1].client
+		end
+	
+		def test_dumpable
+			cache_prime = Marshal.load( Marshal.dump( @cache ) )
+			assert_equal( ObjectStore::Cache, cache_prime.class )
+		end
+	
+		def testFlush
+			user = User.uncommitted_mock
+			user.commit
+			assert_equal( 1, all( User ).size )
+			user.delete = true
+			user.commit
+			assert_equal( 0, all( User ).size )
+		end
+	
+		def test_last_commit_type
+			client = Client.new({ 'name' => 'client name' })
+			@cache.commit client
+			assert_equal( DomainObject::COMMIT_ADD, client.last_commit_type )
+			client2 = Client.new({ 'pk_id' => 25, 'name' => 'client 25' })
+			@cache.commit client2
+			assert_equal( DomainObject::COMMIT_EDIT, client2.last_commit_type )
+			client2.delete = true
+			@cache.commit client2
+			assert_equal(	DomainObject::COMMIT_DELETE, client2.last_commit_type )
+		end
 	end
 end
 

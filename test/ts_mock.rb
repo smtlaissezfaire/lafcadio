@@ -3,7 +3,7 @@ require 'lafcadio/query'
 require 'lafcadio/test'
 require '../test/mock_domain'
 
-class TestMockDBBridge < LafcadioTestCase
+class TestMockDbBridge < LafcadioTestCase
   def setup
   	super
 		@mockDbBridge = MockDbBridge.new
