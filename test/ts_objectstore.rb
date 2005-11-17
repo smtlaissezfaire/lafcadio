@@ -89,149 +89,6 @@ class MockDbi
 	end
 end
 
-class TestDBBridge < Test::Unit::TestCase
-	include Lafcadio
-
-  def setup
-		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
-		ObjectStore::DbConnection.connection_class = MockDbi
-		MockDbi.reset
-		@dbb = ObjectStore::DbBridge.new
-		@mockDbh = MockDbi.mock_dbh
-    @client = Client.new( {"pk_id" => 1, "name" => "clientName1"} )
-  end
-
-  def teardown
-		@dbb = nil
- 		ObjectStore::DbConnection.flush
-		ObjectStore::DbConnection.db_name = nil
-	end
-
-  def test_commits_delete
-    @client.delete = true
-    @dbb.commit(@client)
-    assert_equal(
-			"delete from clients where pk_id=1", @mockDbh.sql_statements.last
-		)
-  end
-
-  def testCommitsEdit
-    @dbb.commit(@client)
-    sql = @mockDbh.sql_statements.last
-    assert(sql.index("update clients set name='clientName1'") != nil, sql)
-  end
-
-	def testCommitsForInheritedObjects
-		ic = InternalClient.new({ 'pk_id' => 1, 'name' => 'client name',
-				'billingType' => 'trade' })
-		@dbb.commit ic
-		assert_equal 2, @mockDbh.sql_statements.size
-		sql1 = @mockDbh.sql_statements[0]
-		assert_not_nil sql1 =~ /update clients set/, sql1
-		sql2 = @mockDbh.sql_statements[1]
-		assert_match( /update internal_clients set/, sql2 )
-	end
-
-	def testGetAll
-		query = Query.new Domain::LineItem
-		coll = @dbb.select_dobjs query
-		assert_equal Array, coll.class
-	end
-
-	def test_group_query
-		query = Query::Max.new( Client )
-		assert_equal( 1, @dbb.group_query( query ).only[:max] )
-		invoice = Invoice.committed_mock
-		query2 = Query::Max.new( Invoice, 'date' )
-		assert_equal( invoice.date, @dbb.group_query( query2 ).only[:max].to_date )
-		query3 = Query::Max.new( XmlSku )
-		assert_equal( 5, @dbb.group_query( query3 ).only[:max] )
-		query4 = Query::Max.new( Attribute )
-		assert_nil( @dbb.group_query( query4 ).only[:max] )
-	end
-
-  def testLastPkIdInserted
-    client = Client.new( { "name" => "clientName1" } )
-    @dbb.commit client
-    assert_equal 12, @dbb.last_pk_id_inserted
-		dbb2 = ObjectStore::DbBridge.new
-    assert_equal 12, dbb2.last_pk_id_inserted
-  end
-	
-	def testLogsSql
-		logFilePath = '../test/testOutput/sql'
-		@dbb.select_all 'select * from users'
-		if FileTest.exist?( logFilePath )
-			fail if Time.now - File.ctime( logFilePath ) < 5
-		end
-		LafcadioConfig.set_filename(
-			'../test/testData/config_with_sql_logging.dat'
-		)
-		LafcadioConfig.set_values( nil )
-		@dbb.select_all 'select * from clients'
-		fail if Time.now - File.ctime( logFilePath ) > 5
-	end
-	
-	def testLogsSqlToDifferentFileName
-		LafcadioConfig.set_filename( '../test/testData/config_with_log_path.dat' )
-		LafcadioConfig.set_values( nil )
-		logFilePath = '../test/testOutput/another.sql'
-		@dbb.select_all 'select * from users'
-		fail if Time.now - File.ctime( logFilePath ) > 5
-	end
-	
-	def test_passes_sql_value_converter_to_domain_class_init
-		query = Query.new( XmlSku )
-		xml_sku = @dbb.select_dobjs( query ).only
-		assert_equal( 'foobar', xml_sku.text1 )
-		assert_equal( 'foobar', xml_sku.text1 )
-		assert_nil( xml_sku.date1 )
-		assert_nil( xml_sku.date1 )
-		assert_equal( DomainObjectProxy, xml_sku.link1.class )
-		assert_equal( 1, xml_sku.link1.pk_id )
-	end
-end
-
-class TestDbConnection < Test::Unit::TestCase
-	include Lafcadio
-
-  def setup
-		LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
-    ObjectStore::DbConnection.connection_class = MockDbi
-		MockDbi.reset
-	end
-
-  def testConnectionPooling
-  	ObjectStore::DbConnection.connection_class = MockDbi
-    100.times { ObjectStore::DbConnection.get_db_connection }
-    ObjectStore::DbConnection.flush
-    ObjectStore::DbConnection.connection_class = DBI
-  end
-
-	def testdb_name
-  	ObjectStore::DbConnection.connection_class = MockDbi
-  	ObjectStore::DbConnection.flush
-		MockDbi.flush_instance_count
-		ObjectStore.db_name = 'some_other_db'
-		db = ObjectStore::DbBridge.new
-		assert_equal 'some_other_db', MockDbi.db_name
-    ObjectStore::DbConnection.connection_class = DBI
-	end
-	
-	def testDisconnect
-		ObjectStore::DbConnection.get_db_connection.disconnect
-		@mockDbh = MockDbi.mock_dbh
-		assert !@mockDbh.connected?
-	end
-end
-
-class TestDomainComparable < LafcadioTestCase
-	def testComparableToNil
-		client = Client.committed_mock
-		assert( !( client == nil ) )
-	end
-end
-
 class TestDomainObjectProxy < LafcadioTestCase
 	def setup
 		super
@@ -289,90 +146,6 @@ class TestDomainObjectProxy < LafcadioTestCase
 	def testMemberMethods
 		assert_equal @client.name, @clientProxy.name
 		assert_equal @invoice.name, @invoiceProxy.name
-	end
-end
-
-class TestGMockObjectStore < LafcadioTestCase
-	def testAddsPkId
-		@mockObjectStore.commit User.uncommitted_mock
-		assert_equal 1, @mockObjectStore.get(User, 1).pk_id
-		@mockObjectStore.commit Client.new( { 'pk_id' => 10,
-				'name' => 'client 10' } )
-		assert_equal 'client 10', @mockObjectStore.get(Client, 10).name
-		@mockObjectStore.commit Client.new( { 'pk_id' => 20,
-				'name' => 'client 20' } )
-		assert_equal 'client 20', @mockObjectStore.get(Client, 20).name
-	end
-
-	def testDelete
-		user = User.uncommitted_mock
-		@mockObjectStore.commit user
-		assert_equal 1, @mockObjectStore.get_all(User).size
-		user.delete = true
-		@mockObjectStore.commit user
-		assert_equal 0, @mockObjectStore.get_all(User).size
-	end
-
-	def testDontChangeFieldsUntilCommit
-		user = User.uncommitted_mock
-		user.commit
-		user_prime = @mockObjectStore.get_user( 1 )
-		assert( user.object_id != user_prime.object_id )
-		new_email = "another@email.com"
-		user_prime.email = new_email
-		assert( new_email != @mockObjectStore.get_user( 1 ).email )
-		user_prime.commit
-		assert_equal( new_email, @mockObjectStore.get_user( 1 ).email )
-	end
-
-	def testObjectsRetrievable
-		@mockObjectStore.commit User.uncommitted_mock
-		assert_equal 1, @mockObjectStore.get(User, 1).pk_id
-	end
-
-	def test_order_by
-		client1 = Client.new( 'pk_id' => 1, 'name' => 'zzz' )
-		client1.commit
-		client2 = Client.new( 'pk_id' => 2, 'name' => 'aaa' )
-		client2.commit
-		query = Query.new Client
-		query.order_by = 'name'
-		clients = @mockObjectStore.get_subset( query )
-		assert_equal( 2, clients.size )
-		assert_equal( 'aaa', clients.first.name )
-		assert_equal( 'zzz', clients.last.name )
-		query2 = Query.new Client
-		query2.order_by = 'name'
-		query2.order_by_order = Query::DESC
-		clients2 = @mockObjectStore.get_subset( query2 )
-		assert_equal( 2, clients2.size )
-		assert_equal( 'zzz', clients2.first.name )
-		assert_equal( 'aaa', clients2.last.name )
-	end
-
-	def testRespectsLimit
-		10.times { User.new({ 'firstNames' => 'John' }).commit }
-		query = Query.new( User, Query::Equals.new( 'firstNames', 'John', User ) )
-		query.limit = (1..5)
-		assert_equal( 5, @mockObjectStore.get_subset( query ).size )
-	end
-
-	def testThrowsDomainObjectNotFoundError
-		begin
-			@mockObjectStore.get(User, 199)
-			fail 'Should throw DomainObjectNotFoundError'
-		rescue DomainObjectNotFoundError
-			# ok
-		end
-	end
-
-	def testUpdate
-		@mockObjectStore.commit Client.new( { 'pk_id' => 100,
-				'name' => 'client 100' } )
-		assert_equal 'client 100', @mockObjectStore.get(Client, 100).name
-		@mockObjectStore.commit Client.new( { 'pk_id' => 100,
-				'name' => 'client 100.1' } )
-		assert_equal 'client 100.1', @mockObjectStore.get(Client, 100).name
 	end
 end
 
@@ -947,55 +720,191 @@ class TestObjectStore < LafcadioTestCase
 			def self.table_name; 'table_name'; end
 		end
 	end
+
+	class TestDbBridge < Test::Unit::TestCase
+		include Lafcadio
+	
+		def setup
+			LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
+			ObjectStore::DbConnection.connection_class = MockDbi
+			MockDbi.reset
+			@dbb = ObjectStore::DbBridge.new
+			@mockDbh = MockDbi.mock_dbh
+			@client = Client.new( {"pk_id" => 1, "name" => "clientName1"} )
+		end
+	
+		def teardown
+			@dbb = nil
+			ObjectStore::DbConnection.flush
+			ObjectStore::DbConnection.db_name = nil
+		end
+	
+		def test_commits_delete
+			@client.delete = true
+			@dbb.commit(@client)
+			assert_equal(
+				"delete from clients where pk_id=1", @mockDbh.sql_statements.last
+			)
+		end
+	
+		def testCommitsEdit
+			@dbb.commit(@client)
+			sql = @mockDbh.sql_statements.last
+			assert(sql.index("update clients set name='clientName1'") != nil, sql)
+		end
+	
+		def testCommitsForInheritedObjects
+			ic = InternalClient.new({ 'pk_id' => 1, 'name' => 'client name',
+					'billingType' => 'trade' })
+			@dbb.commit ic
+			assert_equal 2, @mockDbh.sql_statements.size
+			sql1 = @mockDbh.sql_statements[0]
+			assert_not_nil sql1 =~ /update clients set/, sql1
+			sql2 = @mockDbh.sql_statements[1]
+			assert_match( /update internal_clients set/, sql2 )
+		end
+	
+		def testGetAll
+			query = Query.new Domain::LineItem
+			coll = @dbb.select_dobjs query
+			assert_equal Array, coll.class
+		end
+	
+		def test_group_query
+			query = Query::Max.new( Client )
+			assert_equal( 1, @dbb.group_query( query ).only[:max] )
+			invoice = Invoice.committed_mock
+			query2 = Query::Max.new( Invoice, 'date' )
+			assert_equal( invoice.date, @dbb.group_query( query2 ).only[:max].to_date )
+			query3 = Query::Max.new( XmlSku )
+			assert_equal( 5, @dbb.group_query( query3 ).only[:max] )
+			query4 = Query::Max.new( Attribute )
+			assert_nil( @dbb.group_query( query4 ).only[:max] )
+		end
+	
+		def testLastPkIdInserted
+			client = Client.new( { "name" => "clientName1" } )
+			@dbb.commit client
+			assert_equal 12, @dbb.last_pk_id_inserted
+			dbb2 = ObjectStore::DbBridge.new
+			assert_equal 12, dbb2.last_pk_id_inserted
+		end
+		
+		def testLogsSql
+			logFilePath = '../test/testOutput/sql'
+			@dbb.select_all 'select * from users'
+			if FileTest.exist?( logFilePath )
+				fail if Time.now - File.ctime( logFilePath ) < 5
+			end
+			LafcadioConfig.set_filename(
+				'../test/testData/config_with_sql_logging.dat'
+			)
+			LafcadioConfig.set_values( nil )
+			@dbb.select_all 'select * from clients'
+			fail if Time.now - File.ctime( logFilePath ) > 5
+		end
+		
+		def testLogsSqlToDifferentFileName
+			LafcadioConfig.set_filename( '../test/testData/config_with_log_path.dat' )
+			LafcadioConfig.set_values( nil )
+			logFilePath = '../test/testOutput/another.sql'
+			@dbb.select_all 'select * from users'
+			fail if Time.now - File.ctime( logFilePath ) > 5
+		end
+		
+		def test_passes_sql_value_converter_to_domain_class_init
+			query = Query.new( XmlSku )
+			xml_sku = @dbb.select_dobjs( query ).only
+			assert_equal( 'foobar', xml_sku.text1 )
+			assert_equal( 'foobar', xml_sku.text1 )
+			assert_nil( xml_sku.date1 )
+			assert_nil( xml_sku.date1 )
+			assert_equal( DomainObjectProxy, xml_sku.link1.class )
+			assert_equal( 1, xml_sku.link1.pk_id )
+		end
+	end
+
+	class TestDbConnection < Test::Unit::TestCase
+		include Lafcadio
+	
+		def setup
+			LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
+			ObjectStore::DbConnection.connection_class = MockDbi
+			MockDbi.reset
+		end
+	
+		def testConnectionPooling
+			ObjectStore::DbConnection.connection_class = MockDbi
+			100.times { ObjectStore::DbConnection.get_db_connection }
+			ObjectStore::DbConnection.flush
+			ObjectStore::DbConnection.connection_class = DBI
+		end
+	
+		def testdb_name
+			ObjectStore::DbConnection.connection_class = MockDbi
+			ObjectStore::DbConnection.flush
+			MockDbi.flush_instance_count
+			ObjectStore.db_name = 'some_other_db'
+			db = ObjectStore::DbBridge.new
+			assert_equal 'some_other_db', MockDbi.db_name
+			ObjectStore::DbConnection.connection_class = DBI
+		end
+		
+		def testDisconnect
+			ObjectStore::DbConnection.get_db_connection.disconnect
+			@mockDbh = MockDbi.mock_dbh
+			assert !@mockDbh.connected?
+		end
+	end
+
+	class TestSqlToRubyValues < LafcadioTestCase
+		def testConvertsPkId
+			row_hash = { "pk_id" => "1", "name" => "clientName1",
+			"standard_rate" => "70" }
+			converter = ObjectStore::SqlToRubyValues.new(Client, row_hash)
+			assert_equal(Fixnum, converter["pk_id"].class)
+		end
+	
+		def test_different_db_field_name
+			string = "Jane says I'm done with Sergio"
+			svc = ObjectStore::SqlToRubyValues.new( XmlSku, { 'text_one' => string } )
+			assert_equal( string, svc['text1'] )
+		end
+	
+		def testExecute
+			row_hash = { "id" => "1", "name" => "clientName1",
+			"standard_rate" => "70" }
+			converter = ObjectStore::SqlToRubyValues.new(Client, row_hash)
+			assert_equal("clientName1", converter["name"])
+			assert_equal(70, converter["standard_rate"])
+		end
+	
+		def testInheritanceConstruction
+			row_hash = { 'pk_id' => '1', 'name' => 'clientName1',
+					'billingType' => 'trade' }
+			objectHash = ObjectStore::SqlToRubyValues.new(InternalClient, row_hash)
+			assert_equal 'clientName1', objectHash['name']
+			assert_equal 'trade', objectHash['billingType']
+		end
+	
+		def test_raises_if_bad_primary_key_match
+			row_hash = { 'objId' => '1', 'name' => 'client name',
+									 'standard_rate' => '70' }
+			object_hash = ObjectStore::SqlToRubyValues.new( Client, row_hash )
+			error_msg = 'The field "pk_id" can\'t be found in the table "clients".'
+			assert_raise( FieldMatchError, error_msg ) { object_hash['pk_id'] }
+		end
+	
+		def testTurnsLinkIdsIntoProxies
+			row_hash = { "client" => "1", "date" => DBI::Date.new( 2001, 1, 1 ),
+									"rate" => "70", "hours" => "40",
+									"paid" => DBI::Date.new( 0, 0, 0 ) }
+			converter = ObjectStore::SqlToRubyValues.new(Invoice, row_hash)
+			assert_nil converter['clientId']
+			assert_equal DomainObjectProxy, converter['client'].class
+			proxy = converter['client']
+			assert_equal 1, proxy.pk_id
+			assert_equal Client, proxy.domain_class
+		end
 end
-
-class TestSqlToRubyValues < LafcadioTestCase
-  def testConvertsPkId
-    row_hash = { "pk_id" => "1", "name" => "clientName1",
-		"standard_rate" => "70" }
-    converter = ObjectStore::SqlToRubyValues.new(Client, row_hash)
-    assert_equal(Fixnum, converter["pk_id"].class)
-  end
-
-	def test_different_db_field_name
-		string = "Jane says I'm done with Sergio"
-		svc = ObjectStore::SqlToRubyValues.new( XmlSku, { 'text_one' => string } )
-		assert_equal( string, svc['text1'] )
-	end
-
-  def testExecute
-    row_hash = { "id" => "1", "name" => "clientName1",
-		"standard_rate" => "70" }
-    converter = ObjectStore::SqlToRubyValues.new(Client, row_hash)
-    assert_equal("clientName1", converter["name"])
-    assert_equal(70, converter["standard_rate"])
-  end
-
-	def testInheritanceConstruction
-		row_hash = { 'pk_id' => '1', 'name' => 'clientName1',
-				'billingType' => 'trade' }
-		objectHash = ObjectStore::SqlToRubyValues.new(InternalClient, row_hash)
-		assert_equal 'clientName1', objectHash['name']
-		assert_equal 'trade', objectHash['billingType']
-	end
-
-	def test_raises_if_bad_primary_key_match
-		row_hash = { 'objId' => '1', 'name' => 'client name',
-		             'standard_rate' => '70' }
-		object_hash = ObjectStore::SqlToRubyValues.new( Client, row_hash )
-		error_msg = 'The field "pk_id" can\'t be found in the table "clients".'
-		assert_raise( FieldMatchError, error_msg ) { object_hash['pk_id'] }
-	end
-
-  def testTurnsLinkIdsIntoProxies
-    row_hash = { "client" => "1", "date" => DBI::Date.new( 2001, 1, 1 ),
-                "rate" => "70", "hours" => "40",
-                "paid" => DBI::Date.new( 0, 0, 0 ) }
-    converter = ObjectStore::SqlToRubyValues.new(Invoice, row_hash)
-		assert_nil converter['clientId']
-		assert_equal DomainObjectProxy, converter['client'].class
-		proxy = converter['client']
-		assert_equal 1, proxy.pk_id
-		assert_equal Client, proxy.domain_class
-  end
 end

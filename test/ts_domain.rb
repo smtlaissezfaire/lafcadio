@@ -86,6 +86,13 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 	end
 end
 
+class TestDomainComparable < LafcadioTestCase
+	def testComparableToNil
+		client = Client.committed_mock
+		assert( !( client == nil ) )
+	end
+end
+
 # necessary for test_global_methods_dont_interfere_with_method_missing
 def name; 'global name'; end
 
