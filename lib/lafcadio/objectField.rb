@@ -32,7 +32,7 @@ module Lafcadio
 		include Comparable
 
 		attr_reader :domain_class, :name
-		attr_accessor :db_field_name, :not_null
+		attr_accessor :db_field_name, :not_nil
 
 		# [domain_class]  The domain class that this object field belongs to.
 		# [name]          The name of this field.
@@ -40,7 +40,7 @@ module Lafcadio
 			@domain_class = domain_class
 			@name = name
 			@db_field_name = name
-			@not_null = true
+			@not_nil = true
 		end
 		
 		def <=>(other)
@@ -78,7 +78,7 @@ module Lafcadio
 		end
 
 		def verify(value, pk_id) #:nodoc:
-			if value.nil? && not_null
+			if value.nil? && not_nil
 				raise(
 					FieldValueError,
 					"#{ self.domain_class.name }##{ name } can not be nil.",
@@ -473,7 +473,7 @@ module Lafcadio
 	class PrimaryKeyField < IntegerField
 		def initialize( domain_class )
 			super( domain_class, 'pk_id' )
-			@not_null = false
+			@not_nil = false
 		end
 	end
 
@@ -537,7 +537,7 @@ module Lafcadio
 	class TimeStampField < DateTimeField #:nodoc:
 		def initialize( domain_class, name = 'timeStamp' )
 			super( domain_class, name )
-			@not_null = false
+			@not_nil = false
 		end
 
 		def db_will_automatically_write?

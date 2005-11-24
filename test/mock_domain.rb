@@ -181,7 +181,7 @@ class XmlSku2 < Lafcadio::DomainObject
 	boolean              'boolean2',
 	                     { 'enums' => { true => 'yin', false => 'yang' },
 		                     'english_name' => 'boolean 2' }
-	date                 'date1', { 'not_null' => false }
+	date                 'date1', { 'not_nil' => false }
 	date                 'date2'
 	date_time            'dateTime1'
 	domain_object        User, 'link1', { 'delete_cascade' => true }

@@ -44,7 +44,7 @@ module Lafcadio
 			fieldAttr = []
 			fieldAttr << FieldAttribute.new( 'size', FieldAttribute::INTEGER )
 			fieldAttr << FieldAttribute.new( 'unique', FieldAttribute::BOOLEAN )
-			fieldAttr << FieldAttribute.new( 'not_null', FieldAttribute::BOOLEAN )
+			fieldAttr << FieldAttribute.new( 'not_nil', FieldAttribute::BOOLEAN )
 			fieldAttr << FieldAttribute.new( 'enum_type', FieldAttribute::ENUM,
 																			 BooleanField )
 			fieldAttr << FieldAttribute.new( 'enums', FieldAttribute::HASH )

@@ -67,11 +67,11 @@ class TestDateField < LafcadioTestCase
     @odf.verify(Date.new(2001, 4, 5), nil)
   end
 
-  def test_not_null
+  def test_not_nil
     odf1 = DateField.new nil
-    assert(odf1.not_null)
-    odf1.not_null = false
-    assert(!odf1.not_null)
+    assert(odf1.not_nil)
+    odf1.not_nil = false
+    assert(!odf1.not_nil)
   end
 
   def test_value_for_sql
@@ -198,7 +198,7 @@ class TestEmailField < LafcadioTestCase
 		rescue FieldValueError
 			# ok
 		end
-		field.not_null = false
+		field.not_nil = false
 		field.verify( nil, 1 )
 	end
 end
@@ -212,7 +212,7 @@ class TestEnumField < LafcadioTestCase
 	
 	def test_value_for_sql
 		field = EnumField.new User, "salutation", [ 'Mr', 'Mrs', 'Miss', 'Ms' ]
-		field.not_null = true
+		field.not_nil = true
 		assert_equal 'null', field.value_for_sql('')
 	end
 	
@@ -222,7 +222,7 @@ class TestEnumField < LafcadioTestCase
 		field = EnumField.new( User, "cardType", cardTypes )
 		field.verify( 'AX', 1 )
 		assert_raise( FieldValueError ) { field.verify( 'IOU', 1 ) }
-		field.not_null = false
+		field.not_nil = false
 		field.verify( nil, 1 )
 	end
 end
@@ -258,7 +258,7 @@ class TestIntegerField < LafcadioTestCase
 	def test_value_from_sql
 		field = IntegerField.new nil, "number"
 		assert_equal Fixnum, field.value_from_sql("1").class
-		field.not_null = false
+		field.not_nil = false
 		assert_equal nil, field.value_from_sql(nil)
 	end
 end
@@ -312,7 +312,7 @@ class TestObjectField < LafcadioTestCase
 	
 	def test_value_from_sql
 		of = ObjectField.new nil, 'someField'
-		of.not_null = false
+		of.not_nil = false
 		valueFromSql = of.value_from_sql(nil)
 		assert_equal NilClass, valueFromSql.class
 		assert_equal nil, valueFromSql

@@ -1,10 +1,10 @@
 <lafcadio_class_definition name="Client">
 	<field name="name" class="StringField" />
 	<field name="standard_rate" class="FloatField" english_name="Standard Rate"
-	       not_null="n"/>
+	       not_nil="n"/>
 	<field name="referringClient" class="DomainObjectField" linked_type="Client"
-	       not_null="n"/>
+	       not_nil="n"/>
 	<field name="priorityInvoice" class="SubsetDomainObjectField" linked_type="Invoice"
-	       subset_field="client" not_null="n" />
-	<field name="notes" class="BlobField" not_null="n"/>
+	       subset_field="client" not_nil="n" />
+	<field name="notes" class="BlobField" not_nil="n"/>
 </lafcadio_class_definition>

@@ -25,7 +25,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		            { 'enum_type' => BooleanField::ENUMS_CAPITAL_YES_NO } )
 		match_field( XmlSku, 'boolean2', BooleanField,
 		            { 'enums' => { true => 'yin', false => 'yang' } } )
-		match_field( XmlSku, 'date1', DateField, { 'not_null' => false } )
+		match_field( XmlSku, 'date1', DateField, { 'not_nil' => false } )
 		match_field( XmlSku, 'date2', DateField )
 		match_field( XmlSku, 'dateTime1', DateTimeField )
 		match_field( XmlSku, 'decimal1', FloatField )
@@ -53,7 +53,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		begin
 			get_class_fields( XmlSku, <<-XML
 				<lafcadio_class_definition name="XmlSku">
-					<field name="date1" class="DateField" not_null="n"/>
+					<field name="date1" class="DateField" not_nil="n"/>
 					<field name="date1" class="DateField"/>
 				</lafcadio_class_definition>
 			XML
@@ -75,7 +75,7 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 		begin
 			get_class_fields( XmlSku, <<-XML
 				<lafcadio_class_definition name="XmlSku">
-					<field name="date1" not_null="n"/>
+					<field name="date1" not_nil="n"/>
 				</lafcadio_class_definition>
 			XML
 			)
@@ -189,7 +189,7 @@ class TestDomainObject < LafcadioTestCase
 		            { 'enum_type' => BooleanField::ENUMS_CAPITAL_YES_NO } )
 		match_field( XmlSku2, 'boolean2', BooleanField,
 		            { 'enums' => { true => 'yin', false => 'yang' } } )
-		match_field( XmlSku2, 'date1', DateField, { 'not_null' => false } )
+		match_field( XmlSku2, 'date1', DateField, { 'not_nil' => false } )
 		match_field( XmlSku2, 'date2', DateField )
 		match_field( XmlSku2, 'dateTime1', DateTimeField )
 		match_field( XmlSku2, 'decimal1', FloatField )
