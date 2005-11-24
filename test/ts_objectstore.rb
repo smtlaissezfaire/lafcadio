@@ -251,6 +251,13 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 0, @testObjectStore.all(Client).size
 	end
 
+	def test_diff_pk
+		diff = DiffSqlPrimaryKey.new( 'pk_id' => 1, 'text' => 'sample text' )
+		@testObjectStore.commit diff
+		diff_prime = @testObjectStore.get_diff_sql_primary_keys( 1, 'pk_id' ).first
+		assert_equal( 'sample text', diff_prime.text )
+	end
+
 	def test_dispatches_inferred_query_to_collector
 		set_test_client
 		clients = @testObjectStore.get_clients { |client|

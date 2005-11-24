@@ -316,13 +316,6 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 	end
 	
 	def test_diff_pk
-		mock = TestDiffPkRow.new( 'pk_id' => 1, 'text_field' => 'sample text' )
-		mock_object_store = MockObjectStore.new
-		mock_object_store.commit mock
-		testdiffpkrow1_prime = mock_object_store.get_test_diff_pk_rows(
-			1, 'pk_id'
-		).first
-		assert_equal( 'sample text', testdiffpkrow1_prime.text_field )
 		sql = <<-SQL
 insert into test_diff_pk_rows( objId, text_field )
 values( 1, 'sample text' )

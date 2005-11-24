@@ -1,12 +1,12 @@
-require 'lafcadio/objectField'
 require 'lafcadio/depend'
 require 'lafcadio/domain'
+require 'lafcadio/objectField'
 require 'lafcadio/test'
 
 class Attribute < Lafcadio::DomainObject
 	def self.committed_mock
 		att = uncommitted_mock
-		ObjectStore.get_object_store.commit att
+		Lafcadio::ObjectStore.get_object_store.commit att
 		att
 	end
 
@@ -22,7 +22,7 @@ class Client < Lafcadio::DomainObject
 	
 	def self.committed_mock
 		client = uncommitted_mock
-		ObjectStore.get_object_store.commit client
+		Lafcadio::ObjectStore.get_object_store.commit client
 		client
 	end
 	
@@ -84,7 +84,7 @@ class InventoryLineItemOption < Lafcadio::MapObject
 		ilio = uncommitted_mock
 		ilio.inventory_line_item = InventoryLineItem.committed_mock
 		ilio.option = Option.committed_mock
-		ObjectStore.get_object_store.commit ilio
+		Lafcadio::ObjectStore.get_object_store.commit ilio
 		ilio
 	end
 
@@ -105,7 +105,7 @@ class Invoice < Lafcadio::DomainObject
 	def self.committed_mock
 		inv = uncommitted_mock
 		inv.client = Client.committed_mock
-		ObjectStore.get_object_store.commit inv
+		Lafcadio::ObjectStore.get_object_store.commit inv
 		inv
 	end
 	
@@ -129,7 +129,7 @@ class Option < Lafcadio::DomainObject
 	def self.committed_mock
 		opt = uncommitted_mock
 		opt.attribute = Attribute.committed_mock
-		ObjectStore.get_object_store.commit opt
+		Lafcadio::ObjectStore.get_object_store.commit opt
 		opt
 	end
 

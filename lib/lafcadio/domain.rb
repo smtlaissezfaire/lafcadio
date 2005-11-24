@@ -389,7 +389,12 @@ module Lafcadio
 					ObjectStore.get_object_store.query qry
 				end
 			else
-				ObjectStore.get_object_store.get_filtered( self.name, *args )
+				search_term = args.shift
+				field_name = (
+					args.shift or link_field( search_term.domain_class ).name
+				)
+				qry = Query::Equals.new( field_name, search_term, self )
+				ObjectStore.get_object_store.get_subset qry
 			end
 		end
 

@@ -166,14 +166,6 @@ module Lafcadio
 			)
 		end
 
-		def get_filtered(domain_class_name, searchTerm, fieldName = nil) #:nodoc:
-			domain_class = Class.by_name domain_class_name
-			unless fieldName
-				fieldName = domain_class.link_field( searchTerm.domain_class ).name
-			end
-			get_subset( Query::Equals.new( fieldName, searchTerm, domain_class ) )
-		end
-
 		def get_map_object( domain_class, map1, map2 ) #:nodoc:
 			unless map1 && map2
 				raise ArgumentError,
@@ -232,7 +224,7 @@ module Lafcadio
 				proc = block_given? ? ( proc { |obj| yield( obj ) } ) : nil
 				dispatch = MethodDispatch.new( methodId, proc, *args )
 				if dispatch.symbol
-					self.send( dispatch.symbol, *dispatch.args )
+					dispatch.dispatch self
 				else
 					super
 				end
@@ -310,9 +302,7 @@ module Lafcadio
 
 			def update_dependent_domain_class( db_object, aClass, field )
 				object_store = ObjectStore.get_object_store
-				collection = object_store.get_filtered(
-					aClass.name, db_object, field.name
-				)
+				collection = aClass.get( db_object, field.name )
 				collection.each { |dependentObject|
 					if field.delete_cascade
 						dependentObject.delete = true
@@ -654,16 +644,22 @@ module Lafcadio
 				$1.underscore_to_camel_case
 			end
 			
+			def dispatch( object_store )
+				target = ( @target or object_store )
+				target.send( @symbol, *@args )
+			end
+			
 			def dispatch_all
 				@symbol = :all
 				@args = [ @domain_class ]
 			end
 			
-			def dispatch_get_filtered( searchTerm, fieldName )
-				@symbol = :get_filtered
-				@args = [ @domain_class.name, searchTerm, fieldName ]
+			def dispatch_domain_class_get( searchTerm, fieldName )
+				@symbol = :get
+				@args = [ searchTerm, fieldName ]
+				@target = @domain_class
 			end
-
+			
 			def dispatch_get_map_object( domain_class )
 				@symbol = :get_map_object
 				@args = [ domain_class, @orig_args[0], @orig_args[1] ]
@@ -691,7 +687,7 @@ module Lafcadio
 					elsif !@maybe_proc.nil? && searchTerm.nil?
 						dispatch_get_plural_by_query_block
 					elsif @maybe_proc.nil? && ( !( searchTerm.nil? && fieldName.nil? ) )
-						dispatch_get_filtered( searchTerm, fieldName )
+						dispatch_domain_class_get( searchTerm, fieldName )
 					else
 						raise_get_plural_cant_have_both_query_block_and_search_term
 					end
