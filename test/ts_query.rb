@@ -7,6 +7,11 @@ require '../test/mock_domain'
 def name; 'global name'; end
 
 class TestQuery < LafcadioTestCase
+	def test_all
+		query = Query.new Domain::LineItem
+		assert_equal "select * from line_items", query.to_sql
+	end
+
 	def test_by_condition
 		client = Client.new({ 'pk_id' => 13 })
 		condition = Query::Equals.new('client', client, Invoice)
@@ -20,11 +25,6 @@ class TestQuery < LafcadioTestCase
 		assert_equal( 'select count(*) from clients', qry.to_sql )
 	end
 	
-	def test_get_all
-		query = Query.new Domain::LineItem
-		assert_equal "select * from line_items", query.to_sql
-	end
-
 	def test_get_subset_with_condition
 		condition = Query::In.new('client', [ 1, 2, 3 ], Invoice)
 		query = Query.new Invoice, condition

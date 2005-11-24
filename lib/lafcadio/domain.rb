@@ -258,7 +258,7 @@ module Lafcadio
 			[ MapObject ]
 		end
 		
-		def self.all; ObjectStore.get_object_store.get_all( self ); end
+		def self.all; ObjectStore.get_object_store.all( self ); end
 		
 		# Returns an array of all fields defined for this class and all concrete
 		# superclasses.

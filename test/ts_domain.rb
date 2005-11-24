@@ -237,10 +237,10 @@ class TestDomainObject < LafcadioTestCase
 	end
 	
 	def test_commit
-		assert_equal 0, @mockObjectStore.get_all(Client).size
+		assert_equal 0, @mockObjectStore.all(Client).size
 		client = new_test_client_without_pk_id
 		something = client.commit
-		assert_equal 1, @mockObjectStore.get_all(Client).size
+		assert_equal 1, @mockObjectStore.all(Client).size
 		assert_equal( Client, something.class )
 	end
 	

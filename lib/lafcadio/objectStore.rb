@@ -147,6 +147,11 @@ module Lafcadio
 			@cache = ObjectStore::Cache.new self.class.db_bridge
 		end
 
+		# Returns all domain objects for the given domain class.
+		def all(domain_class)
+			@cache.get_by_query( Query.new( domain_class ) )
+		end
+
 		# Returns the domain object corresponding to the domain class and pk_id.
 		def get( domain_class, pk_id )
 			@cache.get_by_query( Query.new( domain_class, pk_id ) ).first or (
@@ -155,11 +160,6 @@ module Lafcadio
 					caller
 				)
 			)
-		end
-
-		# Returns all domain objects for the given domain class.
-		def get_all(domain_class)
-			@cache.get_by_query( Query.new( domain_class ) )
 		end
 
 		# Returns the DbBridge; this is useful in case you need to use raw SQL for a
@@ -654,8 +654,8 @@ module Lafcadio
 				$1.underscore_to_camel_case
 			end
 			
-			def dispatch_get_all
-				@symbol = :get_all
+			def dispatch_all
+				@symbol = :all
 				@args = [ @domain_class ]
 			end
 			
@@ -683,7 +683,7 @@ module Lafcadio
 			
 			def dispatch_get_plural
 				if @orig_args.size == 0 && @maybe_proc.nil?
-					dispatch_get_all
+					dispatch_all
 				else
 					searchTerm, fieldName = @orig_args[0..1]
 					if searchTerm.nil? && @maybe_proc.nil? && fieldName.nil?

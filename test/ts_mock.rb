@@ -10,16 +10,27 @@ class TestMockDbBridge < LafcadioTestCase
     @client = Client.new( {"pk_id" => 1, "name" => "clientName1"} )
   end
 
+	def all(object_type)
+		query = Query.new object_type
+		@mockDbBridge.select_dobjs query
+	end
+	
 	def get(object_type, pk_id)
 		query = Query.new object_type, pk_id
 		@mockDbBridge.select_dobjs(query)[0]
 	end
 
-	def get_all(object_type)
-		query = Query.new object_type
-		@mockDbBridge.select_dobjs query
+	def test_all
+		@mockDbBridge.commit @client
+		assert_equal @client, all(Client)[0]
+		(2..10).each { |pk_id|
+			@mockDbBridge.commit( Client.new( 'pk_id' => pk_id ) )
+		}
+		all = all( Client )
+		assert_equal( 10, all.size )
+		( 1..10 ).each { |i| assert_equal( i, all[i-1].pk_id ) }
 	end
-	
+
 	def test_commit
 		bad_client = Client.new( 'pk_id' => '1', 'name' => 'my name' )
 		assert_raise( ArgumentError ) { @mockDbBridge.commit( bad_client ) }
@@ -29,10 +40,10 @@ class TestMockDbBridge < LafcadioTestCase
 		@mockDbBridge.commit @client
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client2' })
 		@mockDbBridge.commit client2
-		assert_equal 2, get_all(Client).size
+		assert_equal 2, all(Client).size
 		@client.delete = true
 		@mockDbBridge.commit @client
-		assert_equal 1, get_all(Client).size
+		assert_equal 1, all(Client).size
 		query = Query.new Client, 1
 		clientPrime = @mockDbBridge.select_dobjs(query)[0]
 		assert_nil clientPrime
@@ -41,17 +52,6 @@ class TestMockDbBridge < LafcadioTestCase
   def test_dumpable
 		assert_equal MockDbBridge, Marshal.load(Marshal.dump(@mockDbBridge)).class
   end
-
-	def test_get_all
-		@mockDbBridge.commit @client
-		assert_equal @client, get_all(Client)[0]
-		(2..10).each { |pk_id|
-			@mockDbBridge.commit( Client.new( 'pk_id' => pk_id ) )
-		}
-		all = get_all( Client )
-		assert_equal( 10, all.size )
-		( 1..10 ).each { |i| assert_equal( i, all[i-1].pk_id ) }
-	end
 
 	def test_group_query
 		assert_equal(
@@ -145,7 +145,7 @@ class TestMockDbBridge < LafcadioTestCase
 	end
 
   def test_returns_collection
-    assert_equal(Array, get_all(Client).class)
+    assert_equal(Array, all(Client).class)
   end
 	
 	def test_select_dobjs
@@ -200,10 +200,10 @@ class TestMockObjectStore < LafcadioTestCase
 	def testDelete
 		user = User.uncommitted_mock
 		@mockObjectStore.commit user
-		assert_equal 1, @mockObjectStore.get_all(User).size
+		assert_equal 1, @mockObjectStore.all(User).size
 		user.delete = true
 		@mockObjectStore.commit user
-		assert_equal 0, @mockObjectStore.get_all(User).size
+		assert_equal 0, @mockObjectStore.all(User).size
 	end
 
 	def testDontChangeFieldsUntilCommit

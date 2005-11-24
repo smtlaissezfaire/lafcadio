@@ -111,7 +111,7 @@ class TestDomainMock < Test::Unit::TestCase
 	def test_default_for_link
 		dobj_d = DobjD.default_mock
 		assert_nil dobj_d.dobj_a
-		assert_equal( 0, @mock_object_store.get_all( DobjA ).size )
+		assert_equal( 0, @mock_object_store.all( DobjA ).size )
 	end
 	
 	def test_default_mock_available

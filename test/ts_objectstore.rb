@@ -164,14 +164,28 @@ class TestObjectStore < LafcadioTestCase
 		@mockDbBridge.commit @client
 	end
 
+	def test_all_caches_for_later_subset_gets
+		client = Client.uncommitted_mock
+		client.commit
+		assert_equal( 1, @testObjectStore.all( Client ).size )
+		assert_equal( 1, @mockDbBridge.query_count( 'select * from clients' ) )
+		assert_equal( client, @testObjectStore.get_client( 1 ) )
+		assert_equal(
+			0,
+			@mockDbBridge.query_count(
+				'select * from clients where clients.pk_id = 1'
+			)
+		)
+	end
+	
 	def test_caching
-		@testObjectStore.get_all Invoice
+		@testObjectStore.all Invoice
 		assert_equal( 0, @mockDbBridge.queries( Client ).size )
 		assert_equal( 1, @mockDbBridge.queries( Invoice ).size )
-		@testObjectStore.get_all Invoice
+		@testObjectStore.all Invoice
 		assert_equal( 0, @mockDbBridge.queries( Client ).size )
 		assert_equal( 1, @mockDbBridge.queries( Invoice ).size )
-		@testObjectStore.get_all Client
+		@testObjectStore.all Client
 		assert_equal( 1, @mockDbBridge.queries( Client ).size )
 	end
 	
@@ -219,7 +233,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def test_defers_loading
-		@testObjectStore.get_all Invoice
+		@testObjectStore.all Invoice
 		assert_equal( 0, @mockDbBridge.queries( Client ).size )
 		assert_equal( 1, @mockDbBridge.queries( Invoice ).size )
 	end
@@ -227,10 +241,10 @@ class TestObjectStore < LafcadioTestCase
 	def test_delete_clears_cached_value
 		client = Client.new({ 'pk_id' => 100, 'name' => 'client 100' })
 		@testObjectStore.commit client
-		assert_equal 1, @testObjectStore.get_all(Client).size
+		assert_equal 1, @testObjectStore.all(Client).size
 		client.delete = true
 		@testObjectStore.commit client
-		assert_equal 0, @testObjectStore.get_all(Client).size
+		assert_equal 0, @testObjectStore.all(Client).size
 	end
 
 	def test_dispatches_inferred_query_to_collector
@@ -315,24 +329,10 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	def test_flush_cache_after_new_object_commit
-		assert_equal 0, @testObjectStore.get_all(Client).size
+		assert_equal 0, @testObjectStore.all(Client).size
 		client = Client.new({ })
 		@testObjectStore.commit client
-		assert_equal 1, @testObjectStore.get_all(Client).size
-	end
-	
-	def test_get_all_caches_for_later_subset_gets
-		client = Client.uncommitted_mock
-		client.commit
-		assert_equal( 1, @testObjectStore.get_all( Client ).size )
-		assert_equal( 1, @mockDbBridge.query_count( 'select * from clients' ) )
-		assert_equal( client, @testObjectStore.get_client( 1 ) )
-		assert_equal(
-			0,
-			@mockDbBridge.query_count(
-				'select * from clients where clients.pk_id = 1'
-			)
-		)
+		assert_equal 1, @testObjectStore.all(Client).size
 	end
 	
 	def test_get_db_bridge
@@ -358,7 +358,7 @@ class TestObjectStore < LafcadioTestCase
 		ili = InventoryLineItem.committed_mock
 		option = Option.committed_mock
 		iliOption = InventoryLineItemOption.committed_mock
-		assert_equal 1, @testObjectStore.get_all(InventoryLineItemOption).size
+		assert_equal 1, @testObjectStore.all(InventoryLineItemOption).size
 		assert_equal iliOption, @testObjectStore.get_map_object(InventoryLineItemOption,
 				ili, option)
 		begin
@@ -727,6 +727,12 @@ class TestObjectStore < LafcadioTestCase
 			ObjectStore::DbConnection.db_name = nil
 		end
 	
+		def test_all
+			query = Query.new Domain::LineItem
+			coll = @dbb.select_dobjs query
+			assert_equal Array, coll.class
+		end
+	
 		def test_commits_delete
 			@client.delete = true
 			@dbb.commit(@client)
@@ -750,12 +756,6 @@ class TestObjectStore < LafcadioTestCase
 			assert_not_nil sql1 =~ /update clients set/, sql1
 			sql2 = @mockDbh.sql_statements[1]
 			assert_match( /update internal_clients set/, sql2 )
-		end
-	
-		def test_get_all
-			query = Query.new Domain::LineItem
-			coll = @dbb.select_dobjs query
-			assert_equal Array, coll.class
 		end
 	
 		def test_group_query
