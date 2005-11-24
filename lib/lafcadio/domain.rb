@@ -720,11 +720,11 @@ module Lafcadio
 
 	# Any domain class that is used mostly to map between two other domain 
 	# classes should be a subclass of MapObject. Subclasses of MapObject should 
-	# override MapObject.mappedTypes, returning a two-element array containing 
+	# override MapObject.mapped_classes, returning a two-element array containing 
 	# the domain classes that the map object maps between.
 	class MapObject < DomainObject
 		def self.other_mapped_type(firstType) #:nodoc:
-			mt = mappedTypes.clone
+			mt = mapped_classes.clone
 			mt.delete firstType
 			mt.only
 		end

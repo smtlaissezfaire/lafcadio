@@ -96,7 +96,7 @@ class InventoryLineItemOption < Lafcadio::MapObject
 		)
 	end
 
-	def self.mappedTypes; [ InventoryLineItem, Option ]; end
+	def self.mapped_classes; [ InventoryLineItem, Option ]; end
 end
 
 class Invoice < Lafcadio::DomainObject
