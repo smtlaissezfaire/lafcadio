@@ -152,6 +152,10 @@ module Lafcadio
 			@cache.get_by_query( Query.new( domain_class ) )
 		end
 
+		# Returns the DbBridge; this is useful in case you need to use raw SQL for a
+		# specific query.
+		def db_bridge; @cache.db_bridge; end
+		
 		# Returns the domain object corresponding to the domain class and pk_id.
 		def get( domain_class, pk_id )
 			@cache.get_by_query( Query.new( domain_class, pk_id ) ).first or (
@@ -162,10 +166,6 @@ module Lafcadio
 			)
 		end
 
-		# Returns the DbBridge; this is useful in case you need to use raw SQL for a
-		# specific query.
-		def get_db_bridge; @cache.db_bridge; end
-		
 		def get_filtered(domain_class_name, searchTerm, fieldName = nil) #:nodoc:
 			domain_class = Class.by_name domain_class_name
 			unless fieldName

@@ -140,7 +140,7 @@ module Lafcadio
 		def self.custom_mock( custom_args = nil )
 			dobj_args = default_args
 			object_store = ObjectStore.get_object_store
-			dbb = object_store.get_db_bridge
+			dbb = object_store.db_bridge
 			dbb.set_next_pk_id( self, 2 ) if dbb.next_pk_id( self ) == 1
 			dobj_args['pk_id'] = nil
 			dobj_args = dobj_args.merge( custom_args ) if custom_args.is_a?( Hash )
@@ -165,7 +165,7 @@ module Lafcadio
 					dobj = ObjectStore.get_object_store.get( self, 1 )
 					dobj
 				rescue DomainObjectNotFoundError
-					dbb = ObjectStore.get_object_store.get_db_bridge
+					dbb = ObjectStore.get_object_store.db_bridge
 					dbb.set_next_pk_id( self, 1 ) if dbb.next_pk_id( self ) > 1
 					commit_mock( default_args, calling_class )
 				end

@@ -155,7 +155,7 @@ class TestObjectStore < LafcadioTestCase
 		context = ContextualService::Context.instance
 		context.flush
 		@testObjectStore = MockObjectStore.new
-		@mockDbBridge = @testObjectStore.get_db_bridge
+		@mockDbBridge = @testObjectStore.db_bridge
 		ObjectStore.set_object_store @testObjectStore
 	end
 	
@@ -221,6 +221,10 @@ class TestObjectStore < LafcadioTestCase
 		end
 	end
 
+	def test_db_bridge
+		assert_equal( @mockDbBridge, @testObjectStore.db_bridge )
+	end
+	
 	def test_deep_linking
 		client1 = Client.uncommitted_mock
 		@mockDbBridge.commit client1
@@ -333,10 +337,6 @@ class TestObjectStore < LafcadioTestCase
 		client = Client.new({ })
 		@testObjectStore.commit client
 		assert_equal 1, @testObjectStore.all(Client).size
-	end
-	
-	def test_get_db_bridge
-		assert_equal( @mockDbBridge, @testObjectStore.get_db_bridge )
 	end
 	
 	def test_get_invoices
