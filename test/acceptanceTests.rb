@@ -150,7 +150,7 @@ class AccTestBlobField < AcceptanceTestCase
 	def test_delete
 		test_str = 'The quick brown fox jumped over the lazy dog.'
 		@dbh.do( 'insert into test_rows( blob_field ) values( ? )', test_str )
-		test_row = @object_store.get_test_row 1
+		test_row = @object_store.test_row 1
 		test_row.delete = true
 		test_row.commit
 		assert_equal( 0, @object_store.all( TestRow ).size )
@@ -161,7 +161,7 @@ class AccTestBlobField < AcceptanceTestCase
 		test_row = TestRow.new( 'blob_field' => test_str )
 		test_row.commit
 		@object_store.flush test_row
-		test_row_prime = @object_store.get_test_row 1
+		test_row_prime = @object_store.test_row 1
 		assert_equal( test_str, test_row_prime.blob_field )
 	end
 	
@@ -169,7 +169,7 @@ class AccTestBlobField < AcceptanceTestCase
 		test_row = TestRow.new( {} )
 		test_row.commit
 		@object_store.flush test_row
-		test_row_prime = @object_store.get_test_row 1
+		test_row_prime = @object_store.test_row 1
 		assert_nil test_row_prime.blob_field
 	end
 end
@@ -177,10 +177,10 @@ end
 class AccTestBooleanField < AcceptanceTestCase
 	def test_value_from_sql
 		@dbh.do 'insert into test_rows( bool_field ) values( 1 )'
-		test_row = @object_store.get_test_row 1
+		test_row = @object_store.test_row 1
 		assert test_row.bool_field
 		@dbh.do 'insert into test_rows( bool_field ) values( 0 )'
-		test_row2 = @object_store.get_test_row 2
+		test_row2 = @object_store.test_row 2
 		assert !test_row2.bool_field
 	end
 end
@@ -194,10 +194,10 @@ end
 class AccTestDateTimeField < AcceptanceTestCase
 	def test_value_from_sql
 		@dbh.do 'insert into test_rows( date_time ) values( "2004-01-01" )'
-		test_row = @object_store.get_test_row 1
+		test_row = @object_store.test_row 1
 		assert_equal( Time.gm( 2004, 1, 1 ), test_row.date_time )
 		@dbh.do 'insert into test_rows( ) values( )'
-		test_row2 = @object_store.get_test_row 2
+		test_row2 = @object_store.test_row 2
 		assert_nil test_row2.date_time
 	end
 end
@@ -215,7 +215,7 @@ class AccTestDomainObject < AcceptanceTestCase
 		child = TestChildRow.new(
 			'text_field' => 'text', 'child_text_field' => 'child text'
 		).commit
-		child_prime = @object_store.get_test_child_row 1
+		child_prime = @object_store.test_child_row 1
 		assert_equal( child.text_field, child_prime.text_field )
 	end
 
@@ -266,7 +266,7 @@ class AccTestEquals < AcceptanceTestCase
 		cond = Query::Equals.new( 'text2', 'some text', TestRow )
 		assert_equal( 1, @object_store.query( cond ).size )
 		@object_store.flush row
-		row_prime = @object_store.get_test_row 1
+		row_prime = @object_store.test_row 1
 		assert_equal( 'some text', row_prime.text2 )
 	end
 end
@@ -449,16 +449,16 @@ some other line
 apostrophe's
 		TEXT
 		@dbh.do( 'insert into test_rows( text_field ) values( ? )', text )
-		testrow = @object_store.get_test_row( 1 )
+		testrow = @object_store.test_row( 1 )
 		testrow.commit
 		text2 = "Por favor, don't just forward the icon through email\n'cause then you won't be able to see 'em through the web interface."
 		@dbh.do( 'insert into test_rows( text_field ) values( ? )', text2 )
-		testrow2 = @object_store.get_test_row( 2 )
+		testrow2 = @object_store.test_row( 2 )
 		assert_equal( text2, testrow2.text_field )
 		testrow2.commit
 		text3 = "\n'''the defense asked if two days of work"
 		test_row3 = TestRow.new( 'text_field' => text3 ).commit
-		test_row3_prime = @object_store.get_test_row 3
+		test_row3_prime = @object_store.test_row 3
 		assert_equal( text3, test_row3_prime.text_field )
 	end
 end

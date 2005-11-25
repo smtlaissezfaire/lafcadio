@@ -68,17 +68,17 @@ class TestDomainMock < Test::Unit::TestCase
 
 	def test_commits_linked_dobjs
 		dobj_a = DobjA.custom_mock
-		@mock_object_store.get_dobj_b( 1 )
+		@mock_object_store.dobj_b 1
 	end
 	
 	def test_custom
 		dobj_a = DobjA.custom_mock
 		assert( dobj_a.pk_id > 1 )
-		assert_equal( dobj_a, @mock_object_store.get_dobj_a( dobj_a.pk_id ) )
+		assert_equal( dobj_a, @mock_object_store.dobj_a( dobj_a.pk_id ) )
 		dobj_a2 = DobjA.custom_mock
 		assert( dobj_a2.pk_id > dobj_a.pk_id )
 		assert_not_equal( dobj_a, dobj_a2 )
-		assert_equal( dobj_a2, @mock_object_store.get_dobj_a( dobj_a2.pk_id ) )
+		assert_equal( dobj_a2, @mock_object_store.dobj_a( dobj_a2.pk_id ) )
 		dobj_a3 = DobjA.new( 'text_field' => 'something' )
 		dobj_a3.commit
 		assert( dobj_a3.pk_id > dobj_a2.pk_id )
@@ -88,10 +88,10 @@ class TestDomainMock < Test::Unit::TestCase
 	
 	def test_custom_linking_to_custom
 		dobj_a = DobjA.custom_mock( 'pk_id' => 99, 'dobj_b' => nil )
-		@mock_object_store.get_dobj_a( dobj_a.pk_id )
+		@mock_object_store.dobj_a( dobj_a.pk_id )
 		dobj_b = DobjB.custom_mock( 'dobj_a' => dobj_a )
-		@mock_object_store.get_dobj_a( dobj_a.pk_id )
-		@mock_object_store.get_dobj_b( dobj_b.pk_id )
+		@mock_object_store.dobj_a( dobj_a.pk_id )
+		@mock_object_store.dobj_b( dobj_b.pk_id )
 	end
 
 	def test_cyclical_inclusion

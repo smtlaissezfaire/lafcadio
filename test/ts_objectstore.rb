@@ -129,7 +129,7 @@ class TestDomainObjectProxy < LafcadioTestCase
 	def test_eql_and_hash
 		assert( @client.eql?(@clientProxy))
 		assert( @clientProxy.eql?(@client))
-		assert_equal(@mockObjectStore.get_client(1).hash, @clientProxy.hash)
+		assert_equal(@mockObjectStore.client(1).hash, @clientProxy.hash)
 	end
 	
 	def test_field_settable
@@ -169,7 +169,7 @@ class TestObjectStore < LafcadioTestCase
 		client.commit
 		assert_equal( 1, @testObjectStore.all( Client ).size )
 		assert_equal( 1, @mockDbBridge.query_count( 'select * from clients' ) )
-		assert_equal( client, @testObjectStore.get_client( 1 ) )
+		assert_equal( client, @testObjectStore.client( 1 ) )
 		assert_equal(
 			0,
 			@mockDbBridge.query_count(
@@ -232,7 +232,7 @@ class TestObjectStore < LafcadioTestCase
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client 2',
 				'referringClient' => client1Proxy })
 		@mockDbBridge.commit client2
-		client2Prime = @testObjectStore.get_client 2
+		client2Prime = @testObjectStore.client 2
 		assert_equal Client, client2Prime.referringClient.domain_class
 	end
 
@@ -294,13 +294,13 @@ class TestObjectStore < LafcadioTestCase
 		ilio = InventoryLineItemOption.uncommitted_mock
 		@testObjectStore.commit ilio
 		assert_equal( ili, ilio.inventory_line_item )
-		assert_equal ilio, @testObjectStore.get_inventory_line_item_option(
+		assert_equal ilio, @testObjectStore.inventory_line_item_option(
 				ili, option)
 	end
 
 	def test_dynamic_method_names
 		set_test_client
-		assert_equal @client, @testObjectStore.get_client(1)
+		assert_equal @client, @testObjectStore.client(1)
 		invoice1 = Invoice.new( 'client' => nil ).commit
 		invoice2 = Invoice.new( 'client' => @client ).commit
 		begin
@@ -491,7 +491,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 	
 	def test_respond_to?
-		[ :get_client, :get_clients ].each { |meth_id|
+		[ :client, :get_clients ].each { |meth_id|
 			assert( @testObjectStore.respond_to?( meth_id ), meth_id )
 		}
 		[ :get_foo_bar, :foo_bar ].each { |meth_id|
@@ -510,7 +510,7 @@ class TestObjectStore < LafcadioTestCase
 														'standard_rate' => 100,
 														'referringClient' => client1Proxy })
 		@mockDbBridge.commit client2
-		client1Prime = @testObjectStore.get_client 1
+		client1Prime = @testObjectStore.client 1
 		assert_equal 2, client1Prime.referringClient.pk_id
 		assert_equal 100, client1Prime.referringClient.standard_rate
 	end

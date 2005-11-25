@@ -621,7 +621,11 @@ module Lafcadio
 				@orig_args = other_args
 				@maybe_proc = @orig_args.shift if @orig_args.size > 0
 				@methodName = orig_method.id2name
-				dispatch_get_method if @methodName =~ /^get(.*)$/
+				if @methodName =~ /^get(.*)$/
+					dispatch_get_method
+				else
+					dispatch_singular
+				end
 			end
 			
 			def camel_case_method_name_after_get
@@ -651,14 +655,12 @@ module Lafcadio
 			end
 
 			def dispatch_get_method
-				unless ( dispatch_get_singular )
-					domain_class_name = camel_case_method_name_after_get.singular
-					begin
-						@domain_class = Module.by_name domain_class_name
-						dispatch_get_plural
-					rescue NameError
-						# skip it
-					end
+				domain_class_name = camel_case_method_name_after_get.singular
+				begin
+					@domain_class = Module.by_name domain_class_name
+					dispatch_get_plural
+				rescue NameError
+					# skip it
 				end
 			end
 			
@@ -687,9 +689,10 @@ module Lafcadio
 				@args = [ inferrer.execute ]
 			end
 
-			def dispatch_get_singular
+			def dispatch_singular
 				begin
-					domain_class = Module.by_name camel_case_method_name_after_get
+					d_class_name = @orig_method.id2name.underscore_to_camel_case
+					domain_class = Module.by_name d_class_name
 					if @orig_args[0].class <= Integer
 						@symbol = :get
 						@args = [ domain_class, @orig_args[0] ]
