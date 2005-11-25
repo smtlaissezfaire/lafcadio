@@ -321,7 +321,7 @@ insert into test_diff_pk_rows( objId, text_field )
 values( 1, 'sample text' )
 		SQL
 		@dbh.do sql
-		assert_equal( 1, @object_store.get_max( TestDiffPkRow ) )
+		assert_equal( 1, @object_store.max( TestDiffPkRow ) )
 	end
 	
 	def test_dumpable
@@ -332,11 +332,6 @@ values( 1, 'sample text' )
 		diff_pk_row = TestDiffPkRow.new( 'text_field' => 'sample text' ).commit
 		test_row = TestRow.new( 'test_diff_pk_row' => diff_pk_row ).commit
 		assert_equal( 1, @object_store.get_test_rows( diff_pk_row ).size )
-	end
-
-	def test_get_max
-		assert_nil @object_store.get_max( TestRow )
-		assert_nil @object_store.get_max( TestDiffPkRow )
 	end
 
 	def test_large_result_set
@@ -355,10 +350,12 @@ values( 1, 'sample text' )
 	end
 
 	def test_max
+		assert_nil @object_store.max( TestRow )
+		assert_nil @object_store.max( TestDiffPkRow )
 		y2k = Time.utc( 2000, 1, 1 )
 		row1 = TestRow.new( 'date_time' => y2k ).commit
 		row2 = TestRow.new( 'date_time' => Time.utc( 1999, 1, 1 ) ).commit
-		assert_equal( y2k, @object_store.get_max( TestRow, 'date_time' ).to_time )
+		assert_equal( y2k, @object_store.max( TestRow, 'date_time' ).to_time )
 	end
 	
 	def test_query_field_comparison

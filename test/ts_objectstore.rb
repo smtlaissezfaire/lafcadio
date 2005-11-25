@@ -434,12 +434,12 @@ class TestObjectStore < LafcadioTestCase
 
 	def test_max
 		set_test_client
-		assert_equal 1, @testObjectStore.get_max(Client)
+		assert_equal 1, @testObjectStore.max(Client)
 		Invoice.committed_mock
-		assert_equal( 70, @testObjectStore.get_max( Invoice, 'rate' ) )
+		assert_equal( 70, @testObjectStore.max( Invoice, 'rate' ) )
 		xml_sku = XmlSku.new( 'pk_id' => 25 )
 		xml_sku.commit
-		assert_equal( 25, @testObjectStore.get_max( XmlSku ) )
+		assert_equal( 25, @testObjectStore.max( XmlSku ) )
 	end
 
 	def test_method_missing

@@ -182,16 +182,6 @@ module Lafcadio
 			get_subset( query ).first
 		end
 
-		# Retrieves the maximum value across all instances of one domain class.
-		#   ObjectStore#get_max( Client )
-		# returns the highest +pk_id+ in the +clients+ table.
-		#   ObjectStore#get_max( Invoice, "rate" )
-		# will return the highest rate for all invoices.
-		def get_max( domain_class, field_name = 'pk_id' )
-			qry = Query::Max.new( domain_class, field_name )
-			@cache.group_query( qry ).only[:max]
-		end
-
 		# Retrieves a collection of domain objects by +pk_id+.
 		#   ObjectStore#get_objects( Clients, [ 1, 2, 3 ] )
 		def get_objects( domain_class, pk_ids )
@@ -217,6 +207,16 @@ module Lafcadio
 			@cache.get_by_query( query )
 		end
 		
+		# Retrieves the maximum value across all instances of one domain class.
+		#   ObjectStore#max( Client )
+		# returns the highest +pk_id+ in the +clients+ table.
+		#   ObjectStore#max( Invoice, "rate" )
+		# will return the highest rate for all invoices.
+		def max( domain_class, field_name = 'pk_id' )
+			qry = Query::Max.new( domain_class, field_name )
+			@cache.group_query( qry ).only[:max]
+		end
+
 		def method_missing(methodId, *args) #:nodoc:
 			if [ :commit, :flush, :last_commit_time ].include?( methodId )
 				@cache.send( methodId, *args )
