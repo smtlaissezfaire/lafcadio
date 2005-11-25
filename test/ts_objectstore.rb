@@ -377,20 +377,6 @@ class TestObjectStore < LafcadioTestCase
 		end 
 	end
 	
-	def test_get_objects
-		Client.new( "pk_id" => 1, "name" => "clientName1" ).commit
-		Client.new( "pk_id" => 2, "name" => "clientName2" ).commit
-		coll = @testObjectStore.get_objects(Client, [ 1, 2 ])
-		assert_equal 2, coll.size
-		[ 1, 2 ].each do |i| assert coll.any? { |obj| obj.pk_id == i }; end
-		assert_raise( ArgumentError ) {
-			@testObjectStore.get_objects(Client, [ "1", "2" ])
-		}
-		assert_raise( ArgumentError ) {
-			@testObjectStore.get_objects( Client, 1 )
-		}
-	end
-
 	def test_get_subset
 		set_test_client
 		condition = Query::Equals.new 'name', 'clientName1', Client
