@@ -386,7 +386,7 @@ module Lafcadio
 					ObjectStore.get_object_store.get( self, *args )
 				else
 					qry = Query.new( self, nil, { :group_functions => [ :count ] } )
-					ObjectStore.get_object_store.query qry
+					ObjectStore.get_object_store.group_query qry
 				end
 			else
 				search_term = args.shift

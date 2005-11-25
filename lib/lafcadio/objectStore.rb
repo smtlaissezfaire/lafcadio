@@ -192,6 +192,8 @@ module Lafcadio
 			@cache.get_by_query( query )
 		end
 		
+		def group_query( query ); @cache.group_query( query ); end
+
 		# Retrieves the maximum value across all instances of one domain class.
 		#   ObjectStore#max( Client )
 		# returns the highest +pk_id+ in the +clients+ table.
@@ -220,8 +222,6 @@ module Lafcadio
 			false
 		end
 		
-		def query( query ); @cache.group_query( query ); end
-
 		def respond_to?( symbol, include_private = false )
 			if MethodDispatch.new( symbol ).symbol
 				true
