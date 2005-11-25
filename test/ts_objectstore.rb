@@ -377,29 +377,6 @@ class TestObjectStore < LafcadioTestCase
 		end 
 	end
 	
-	def test_get_subset
-		set_test_client
-		condition = Query::Equals.new 'name', 'clientName1', Client
-		query = Query.new Client, condition
-		assert_equal @client, @testObjectStore.get_subset(condition)[0]
-		assert_equal(
-			1, @mockDbBridge.queries.select { |q| q.to_sql == query.to_sql }.size
-		)
-		assert_equal( 1, @mockDbBridge.query_count( query.to_sql ) )
-		assert_equal @client, @testObjectStore.get_subset(query)[0]
-		assert_equal( 1, @mockDbBridge.query_count( query.to_sql ) )
-		query2 = Query.new( Client, Query::Equals.new( 'name', 'foobar', Client ) )
-		assert_equal( 0, @testObjectStore.get_subset( query2 ).size )
-		assert_equal( 1, @mockDbBridge.query_count( query2.to_sql ) )
-		assert_equal( 0, @testObjectStore.get_subset( query2 ).size )
-		assert_equal( 1, @mockDbBridge.query_count( query2.to_sql ) )
-		query2_prime = Query.new(
-			Client, Query::Equals.new( 'name', 'foobar', Client )
-		)
-		assert_equal( 0, @testObjectStore.get_subset( query2_prime ).size )
-		assert_equal( 1, @mockDbBridge.query_count( query2_prime.to_sql ) )
-	end
-
 	def test_get_with_a_non_linking_field	
 		client = Client.uncommitted_mock
 		@testObjectStore.commit client
@@ -435,6 +412,29 @@ class TestObjectStore < LafcadioTestCase
 		rescue NoMethodError
 			# okay
 		end
+	end
+
+	def test_query
+		set_test_client
+		condition = Query::Equals.new 'name', 'clientName1', Client
+		query = Query.new Client, condition
+		assert_equal @client, @testObjectStore.query(condition)[0]
+		assert_equal(
+			1, @mockDbBridge.queries.select { |q| q.to_sql == query.to_sql }.size
+		)
+		assert_equal( 1, @mockDbBridge.query_count( query.to_sql ) )
+		assert_equal @client, @testObjectStore.query(query)[0]
+		assert_equal( 1, @mockDbBridge.query_count( query.to_sql ) )
+		query2 = Query.new( Client, Query::Equals.new( 'name', 'foobar', Client ) )
+		assert_equal( 0, @testObjectStore.query( query2 ).size )
+		assert_equal( 1, @mockDbBridge.query_count( query2.to_sql ) )
+		assert_equal( 0, @testObjectStore.query( query2 ).size )
+		assert_equal( 1, @mockDbBridge.query_count( query2.to_sql ) )
+		query2_prime = Query.new(
+			Client, Query::Equals.new( 'name', 'foobar', Client )
+		)
+		assert_equal( 0, @testObjectStore.query( query2_prime ).size )
+		assert_equal( 1, @mockDbBridge.query_count( query2_prime.to_sql ) )
 	end
 
 	def test_query_field_comparison

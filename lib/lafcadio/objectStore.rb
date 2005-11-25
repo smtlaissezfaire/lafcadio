@@ -179,19 +179,9 @@ module Lafcadio
 					map2.domain_class.basename.camel_case_to_underscore
 				).equals( map2 )
 			}
-			get_subset( query ).first
+			query( query ).first
 		end
 
-		def get_subset(conditionOrQuery) #:nodoc:
-			if conditionOrQuery.class <= Query::Condition
-				condition = conditionOrQuery
-				query = Query.new condition.domain_class, condition
-			else
-				query = conditionOrQuery
-			end
-			@cache.get_by_query( query )
-		end
-		
 		def group_query( query ); @cache.group_query( query ); end
 
 		# Retrieves the maximum value across all instances of one domain class.
@@ -220,6 +210,16 @@ module Lafcadio
 		
 		def mock? #:nodoc:
 			false
+		end
+		
+		def query(conditionOrQuery) #:nodoc:
+			if conditionOrQuery.class <= Query::Condition
+				condition = conditionOrQuery
+				query = Query.new condition.domain_class, condition
+			else
+				query = conditionOrQuery
+			end
+			@cache.get_by_query( query )
 		end
 		
 		def respond_to?( symbol, include_private = false )
@@ -683,7 +683,7 @@ module Lafcadio
 				inferrer = Query::Inferrer.new( @domain_class ) { |obj|
 					@maybe_proc.call( obj )
 				}
-				@symbol = :get_subset
+				@symbol = :query
 				@args = [ inferrer.execute ]
 			end
 

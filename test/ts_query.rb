@@ -25,13 +25,6 @@ class TestQuery < LafcadioTestCase
 		assert_equal( 'select count(*) from clients', qry.to_sql )
 	end
 	
-	def test_get_subset_with_condition
-		condition = Query::In.new('client', [ 1, 2, 3 ], Invoice)
-		query = Query.new Invoice, condition
-		assert_equal( 'select * from invoices where invoices.client in (1, 2, 3)',
-		              query.to_sql )
-	end
-
 	def test_implies?
 		query1 = Query.new( Client )
 		assert( query1.implies?( query1 ) )
@@ -114,6 +107,13 @@ class TestQuery < LafcadioTestCase
 		)
 	end
 
+	def test_query_with_condition
+		condition = Query::In.new('client', [ 1, 2, 3 ], Invoice)
+		query = Query.new Invoice, condition
+		assert_equal( 'select * from invoices where invoices.client in (1, 2, 3)',
+		              query.to_sql )
+	end
+
 	def test_table_joins_for_inheritance
 		query = Query.new InternalClient, 1
 		assert_equal(
@@ -174,11 +174,11 @@ class TestQuery < LafcadioTestCase
 																			DomainObjectProxy.new( Client, 10 ),
 																			Invoice, Query::Compare::LESS_THAN )
 			assert_equal( 'invoices.client < 10', condition.to_sql )
-			assert_equal( 0, @mockObjectStore.get_subset( condition ).size )
+			assert_equal( 0, @mockObjectStore.query( condition ).size )
 			condition2 = Query::Compare.new( 'client', 10, Invoice,
 																			 Query::Compare::LESS_THAN )
 			assert_equal( 'invoices.client < 10', condition2.to_sql )
-			assert_equal( 0, @mockObjectStore.get_subset( condition2 ).size )		
+			assert_equal( 0, @mockObjectStore.query( condition2 ).size )		
 		end
 		
 		def test_less_than

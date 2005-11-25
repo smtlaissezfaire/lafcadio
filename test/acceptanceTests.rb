@@ -264,7 +264,7 @@ class AccTestEquals < AcceptanceTestCase
 	def test_db_field_name
 		row = TestRow.new( 'text2' => 'some text' ).commit
 		cond = Query::Equals.new( 'text2', 'some text', TestRow )
-		assert_equal( 1, @object_store.get_subset( cond ).size )
+		assert_equal( 1, @object_store.query( cond ).size )
 		@object_store.flush row
 		row_prime = @object_store.get_test_row 1
 		assert_equal( 'some text', row_prime.text2 )
@@ -435,7 +435,7 @@ class AccTestQuery < AcceptanceTestCase
 		assert_equal(
 			'select * from test_rows order by text_field2 asc', query.to_sql
 		)
-		coll = @object_store.get_subset query
+		coll = @object_store.query query
 		assert_equal( 2, coll.size )
 		assert_equal( r2, coll.first )
 	end

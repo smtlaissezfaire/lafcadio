@@ -230,14 +230,14 @@ class TestMockObjectStore < LafcadioTestCase
 		client2.commit
 		query = Query.new Client
 		query.order_by = 'name'
-		clients = @mockObjectStore.get_subset( query )
+		clients = @mockObjectStore.query( query )
 		assert_equal( 2, clients.size )
 		assert_equal( 'aaa', clients.first.name )
 		assert_equal( 'zzz', clients.last.name )
 		query2 = Query.new Client
 		query2.order_by = 'name'
 		query2.order_by_order = Query::DESC
-		clients2 = @mockObjectStore.get_subset( query2 )
+		clients2 = @mockObjectStore.query( query2 )
 		assert_equal( 2, clients2.size )
 		assert_equal( 'zzz', clients2.first.name )
 		assert_equal( 'aaa', clients2.last.name )
@@ -247,7 +247,7 @@ class TestMockObjectStore < LafcadioTestCase
 		10.times { User.new({ 'firstNames' => 'John' }).commit }
 		query = Query.new( User, Query::Equals.new( 'firstNames', 'John', User ) )
 		query.limit = (1..5)
-		assert_equal( 5, @mockObjectStore.get_subset( query ).size )
+		assert_equal( 5, @mockObjectStore.query( query ).size )
 	end
 
 	def testThrowsDomainObjectNotFoundError

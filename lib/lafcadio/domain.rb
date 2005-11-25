@@ -361,7 +361,7 @@ module Lafcadio
 			query = Query.infer( self ) { |dobj|
 				dobj.send( field_name ).equals( search_term )
 			}
-			!ObjectStore.get_object_store.get_subset( query ).empty?
+			!ObjectStore.get_object_store.query( query ).empty?
 		end
 		
 		def self.field( fieldName ) #:nodoc:
@@ -379,7 +379,7 @@ module Lafcadio
 		def self.get( *args )
 			if block_given?
 				query = Query.infer( self ) { |dobj| yield( dobj ) }
-				ObjectStore.get_object_store.get_subset( query )
+				ObjectStore.get_object_store.query( query )
 			elsif args.size == 1
 				arg = args.first
 				if arg.is_a? Fixnum
@@ -394,7 +394,7 @@ module Lafcadio
 					args.shift or link_field( search_term.domain_class ).name
 				)
 				qry = Query::Equals.new( field_name, search_term, self )
-				ObjectStore.get_object_store.get_subset qry
+				ObjectStore.get_object_store.query qry
 			end
 		end
 
