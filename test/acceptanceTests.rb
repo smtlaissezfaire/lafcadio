@@ -250,7 +250,7 @@ end
 class AccTestDomainObjectProxy < AcceptanceTestCase
 	def test_correct_hashing
 		TestRow.new( 'text_field' => 'some text' ).commit
-		coll = @object_store.get_test_rows { |test_row|
+		coll = @object_store.test_rows { |test_row|
 			test_row.text_field.equals 'some text'
 		}
 		assert_equal( 1, coll.size )
@@ -331,13 +331,13 @@ values( 1, 'sample text' )
 	def test_get_by_domain_class
 		diff_pk_row = TestDiffPkRow.new( 'text_field' => 'sample text' ).commit
 		test_row = TestRow.new( 'test_diff_pk_row' => diff_pk_row ).commit
-		assert_equal( 1, @object_store.get_test_rows( diff_pk_row ).size )
+		assert_equal( 1, @object_store.test_rows( diff_pk_row ).size )
 	end
 
 	def test_large_result_set
 		num_rows = 1000
 		insert_1000_rows
-		rows = @object_store.get_test_rows
+		rows = @object_store.test_rows
 		assert_equal( num_rows, rows.size )
 		1.upto( num_rows ) { |i|
 			row = rows[i-1]
@@ -361,12 +361,12 @@ values( 1, 'sample text' )
 	def test_query_field_comparison
 		TestRow.new( 'text_field' => 'a', 'text2' => 'b' ).commit
 		TestRow.new( 'text_field' => 'c', 'text2' => 'c' ).commit
-		matches = @object_store.get_test_rows { |test_row|
+		matches = @object_store.test_rows { |test_row|
 			test_row.text_field.equals test_row.text2
 		}
 		assert_equal( 1, matches.size )
 		assert_equal( 'c', matches.only.text_field )
-		matches2 = @object_store.get_test_rows { |test_row|
+		matches2 = @object_store.test_rows { |test_row|
 			test_row.text2.equals test_row.text_field
 		}
 		assert_equal( 1, matches2.size )
@@ -414,7 +414,7 @@ class AccTestQuery < AcceptanceTestCase
 		TestRow.new( 'text_field' => 'something', 'bool_field' => true ).commit
 		TestRow.new( 'text_field' => 'something', 'bool_field' => false ).commit
 		assert_equal(
-			1, @object_store.get_test_rows { |tr|
+			1, @object_store.test_rows { |tr|
 				Query.And( tr.bool_field, tr.text_field.equals( 'something' ) )
 			}.size
 		)

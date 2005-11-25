@@ -254,13 +254,13 @@ class TestObjectStore < LafcadioTestCase
 	def test_diff_pk
 		diff = DiffSqlPrimaryKey.new( 'pk_id' => 1, 'text' => 'sample text' )
 		@testObjectStore.commit diff
-		diff_prime = @testObjectStore.get_diff_sql_primary_keys( 1, 'pk_id' ).first
+		diff_prime = @testObjectStore.diff_sql_primary_keys( 1, 'pk_id' ).first
 		assert_equal( 'sample text', diff_prime.text )
 	end
 
 	def test_dispatches_inferred_query_to_collector
 		set_test_client
-		clients = @testObjectStore.get_clients { |client|
+		clients = @testObjectStore.clients { |client|
 			client.name.equals( @client.name )
 		}
 	end
@@ -304,26 +304,26 @@ class TestObjectStore < LafcadioTestCase
 		invoice1 = Invoice.new( 'client' => nil ).commit
 		invoice2 = Invoice.new( 'client' => @client ).commit
 		begin
-			@testObjectStore.get_invoices( nil )
+			@testObjectStore.invoices nil
 			raise "Should raise ArgumentError"
 		rescue ArgumentError
-			expected = "ObjectStore#get_invoices needs a field name as its second " +
+			expected = "ObjectStore#invoices needs a field name as its second " +
 			           "argument if its first argument is nil"
 			assert_equal( expected, $!.to_s )
 		end
-		coll = @testObjectStore.get_invoices( nil, 'client' )
+		coll = @testObjectStore.invoices( nil, 'client' )
 		assert_equal( invoice1, coll.only )
 		xml_sku = XmlSku.new( 'pk_id' => 1 ).commit
 		user = User.committed_mock
 		xml_sku2 = XmlSku2.new( 'xml_sku' => xml_sku, 'link1' => user ).commit
-		coll2 = @testObjectStore.get_xml_sku2s( xml_sku )
+		coll2 = @testObjectStore.xml_sku2s( xml_sku )
 		assert_equal( xml_sku2, coll2.only )
-		assert_equal( xml_sku2, @testObjectStore.get_xml_sku2s( user ).only )
+		assert_equal( xml_sku2, @testObjectStore.xml_sku2s( user ).only )
 	end
 
 	def test_dynamic_method_names_as_facade_for_collector
 		set_test_client
-		matchingClients = @testObjectStore.get_clients(@client.name, 'name')
+		matchingClients = @testObjectStore.clients(@client.name, 'name')
 		assert_equal 1, matchingClients.size
 		assert_equal @client, matchingClients[0]
 	end
@@ -346,21 +346,6 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal 1, @testObjectStore.all(Client).size
 	end
 	
-	def test_get_invoices
-		client = Client.uncommitted_mock
-		client.commit
-		inv1 = Invoice.new(
-			'client' => client, 'date' => Date.today, 'rate' => 30, 'hours' => 40
-		)
-		@testObjectStore.commit inv1
-		inv2 = Invoice.new(
-			'client' => client, 'date' => Date.today - 7, 'rate' => 30, 'hours' => 40
-		)
-		@testObjectStore.commit inv2
-		coll = @testObjectStore.get_invoices(client)
-		assert_equal 2, coll.size
-	end
-
 	def test_get_map_object
 		ili = InventoryLineItem.committed_mock
 		option = Option.committed_mock
@@ -382,7 +367,7 @@ class TestObjectStore < LafcadioTestCase
 		@testObjectStore.commit client
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client 2' })
 		@testObjectStore.commit client2
-		assert_equal 2, @testObjectStore.get_clients('client 2', 'name')[0].pk_id
+		assert_equal 2, @testObjectStore.clients('client 2', 'name')[0].pk_id
 	end
 
 	def test_handles_links_through_proxies
@@ -391,8 +376,23 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal Client, origClient.class
 		clientProxy = invoice.client
 		assert_equal DomainObjectProxy, clientProxy.class
-		matches = @testObjectStore.get_invoices(clientProxy)
+		matches = @testObjectStore.invoices(clientProxy)
 		assert_equal 1, matches.size
+	end
+
+	def test_invoices
+		client = Client.uncommitted_mock
+		client.commit
+		inv1 = Invoice.new(
+			'client' => client, 'date' => Date.today, 'rate' => 30, 'hours' => 40
+		)
+		@testObjectStore.commit inv1
+		inv2 = Invoice.new(
+			'client' => client, 'date' => Date.today - 7, 'rate' => 30, 'hours' => 40
+		)
+		@testObjectStore.commit inv2
+		coll = @testObjectStore.invoices(client)
+		assert_equal 2, coll.size
 	end
 
 	def test_max
@@ -442,7 +442,7 @@ class TestObjectStore < LafcadioTestCase
 		inv1.commit
 		inv2 = Invoice.new( 'date' => Date.today, 'paid' => Date.today )
 		inv2.commit
-		matches = @testObjectStore.get_invoices { |inv|
+		matches = @testObjectStore.invoices { |inv|
 			inv.date.equals( inv.paid )
 		}
 		assert_equal( 1, matches.size )
@@ -452,32 +452,32 @@ class TestObjectStore < LafcadioTestCase
 		1.upto( 3 ) do |i|
 			Client.new( 'pk_id' => i, 'name' => "client #{ i }" ).commit
 		end
-		coll1 = @testObjectStore.get_clients { |client|
+		coll1 = @testObjectStore.clients { |client|
 			client.name.equals( 'client 1' )
 		}
 		assert_equal( 1, coll1.size )
 		assert_equal( 1, coll1[0].pk_id )
-		coll2 = @testObjectStore.get_clients { |client|
+		coll2 = @testObjectStore.clients { |client|
 			client.name.like( /^clie/ )
 		}
 		assert_equal( 3, coll2.size )
-		coll3 = @testObjectStore.get_clients { |client|
+		coll3 = @testObjectStore.clients { |client|
 			client.name.like( /^clie/ ).not
 		}
 		assert_equal( 0, coll3.size )
 		assert_raise( ArgumentError ) do
-			@testObjectStore.get_clients( 'client 1', 'name' ) { |client|
+			@testObjectStore.clients( 'client 1', 'name' ) { |client|
 				client.name.equals( 'client 1' ).not
 			}
 		end
-		coll4 = @testObjectStore.get_clients
+		coll4 = @testObjectStore.clients
 		assert_equal( 3, coll4.size )
 	end
 	
 	def test_raises_error_with_querying_with_uncommitted_dobj
 		uncommitted = Client.new( {} )
 		assert_raise( ArgumentError ) {
-			@testObjectStore.get_invoices( uncommitted )
+			@testObjectStore.invoices( uncommitted )
 		}
 	end
 
@@ -491,7 +491,7 @@ class TestObjectStore < LafcadioTestCase
 	end
 	
 	def test_respond_to?
-		[ :client, :get_clients ].each { |meth_id|
+		[ :client, :clients ].each { |meth_id|
 			assert( @testObjectStore.respond_to?( meth_id ), meth_id )
 		}
 		[ :get_foo_bar, :foo_bar ].each { |meth_id|
@@ -563,7 +563,7 @@ class TestObjectStore < LafcadioTestCase
 			xml_sku.commit
 			user.delete = true
 			@cache.commit user
-			assert_equal( 0, @mockObjectStore.get_xml_skus.size )
+			assert_equal( 0, @mockObjectStore.xml_skus.size )
 		end
 	
 		def test_delete_sets_domain_object_fields_to_nil

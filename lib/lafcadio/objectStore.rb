@@ -621,16 +621,11 @@ module Lafcadio
 				@orig_args = other_args
 				@maybe_proc = @orig_args.shift if @orig_args.size > 0
 				@methodName = orig_method.id2name
-				if @methodName =~ /^get(.*)$/
-					dispatch_get_method
-				else
-					dispatch_singular
-				end
+				dispatch_method
 			end
 			
-			def camel_case_method_name_after_get
-				@orig_method.id2name =~ /^get(.*)$/
-				$1.underscore_to_camel_case
+			def camel_case_method_name
+				@orig_method.id2name.underscore_to_camel_case
 			end
 			
 			def dispatch( object_store )
@@ -654,34 +649,24 @@ module Lafcadio
 				@args = [ domain_class, @orig_args[0], @orig_args[1] ]
 			end
 
-			def dispatch_get_method
-				domain_class_name = camel_case_method_name_after_get.singular
-				begin
-					@domain_class = Module.by_name domain_class_name
-					dispatch_get_plural
-				rescue NameError
-					# skip it
-				end
-			end
-			
-			def dispatch_get_plural
+			def dispatch_plural
 				if @orig_args.size == 0 && @maybe_proc.nil?
 					dispatch_all
 				else
 					searchTerm, fieldName = @orig_args[0..1]
 					if searchTerm.nil? && @maybe_proc.nil? && fieldName.nil?
-						raise_get_plural_needs_field_arg_if_first_arg_nil
+						raise_plural_needs_field_arg_if_first_arg_nil
 					elsif !@maybe_proc.nil? && searchTerm.nil?
-						dispatch_get_plural_by_query_block
+						dispatch_plural_by_query_block
 					elsif @maybe_proc.nil? && ( !( searchTerm.nil? && fieldName.nil? ) )
 						dispatch_domain_class_get( searchTerm, fieldName )
 					else
-						raise_get_plural_cant_have_both_query_block_and_search_term
+						raise_plural_cant_have_both_query_block_and_search_term
 					end
 				end
 			end
 			
-			def dispatch_get_plural_by_query_block
+			def dispatch_plural_by_query_block
 				inferrer = Query::Inferrer.new( @domain_class ) { |obj|
 					@maybe_proc.call( obj )
 				}
@@ -689,6 +674,18 @@ module Lafcadio
 				@args = [ inferrer.execute ]
 			end
 
+			def dispatch_method
+				unless ( dispatch_singular )
+					domain_class_name = camel_case_method_name.singular
+					begin
+						@domain_class = Module.by_name domain_class_name
+						dispatch_plural
+					rescue NameError
+						# skip it
+					end
+				end
+			end
+			
 			def dispatch_singular
 				begin
 					d_class_name = @orig_method.id2name.underscore_to_camel_case
@@ -707,13 +704,13 @@ module Lafcadio
 				end
 			end
 			
-			def raise_get_plural_needs_field_arg_if_first_arg_nil
+			def raise_plural_needs_field_arg_if_first_arg_nil
 				msg = "ObjectStore\##{ @orig_method } needs a field name as its " +
 				      "second argument if its first argument is nil"
 				raise( ArgumentError, msg, caller )
 			end
 			
-			def raise_get_plural_cant_have_both_query_block_and_search_term
+			def raise_plural_cant_have_both_query_block_and_search_term
 				raise(
 					ArgumentError, "Shouldn't send both a query block and a search term",
 					caller

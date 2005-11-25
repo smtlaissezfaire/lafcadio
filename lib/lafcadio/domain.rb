@@ -623,11 +623,10 @@ module Lafcadio
 			elsif ( field = getter_field( methId ) )
 				field_value( field )
 			else
-				new_symbol = ( 'get_' + methId.id2name ).to_sym
 				object_store = ObjectStore.get_object_store
-				if object_store.respond_to? new_symbol
+				if object_store.respond_to? methId
 					args = [ self ].concat args
-					object_store.send( 'get_' + methId.id2name, *args )
+					object_store.send( methId, *args )
 				else
 					super( methId, *args )
 				end
