@@ -120,6 +120,8 @@ module Lafcadio
 		class InvalidDataError < ArgumentError; end
 	end
 
+	# DomainComparable is used by DomainObject and DomainObjectProxy to define
+	# comparisons.
 	module DomainComparable
 		include Comparable
 
@@ -137,6 +139,8 @@ module Lafcadio
 			end
 		end
 		
+		# Two DomainObjects or DomainObjectProxies are eql? if they have the same
+		# +domain_class+ and the same +pk_id+.
 		def eql?( otherObj ); self == otherObj; end
 
 		def hash; "#{ self.class.name } #{ pk_id }".hash; end
@@ -146,8 +150,50 @@ module Lafcadio
 	# of DomainObject.
 	#
 	# = Defining fields
-	# There are two ways to define the fields of a DomainObject subclass.
-	# 1. Defining fields in an XML file. To do this,
+	# There are three ways to define the fields of a DomainObject subclass.
+	# 1. <b>One-line field definitions</b>: When defining the class, add fields
+	#    with class methods like so:
+	#      class User < Lafcadio::DomainObject
+	#        string 'lastName'
+	#        email  'email'
+	#        string 'password'
+	#        date   'birthday'
+	#      end
+	#    These can also be pluralized:
+	#      class User < Lafcadio::DomainObject
+	#        strings 'lastName', 'password'
+	#        email   'email'
+	#        date    'birthday'
+	#      end
+	#    The class methods you can use are +blob+, +boolean+, +date+,
+	#    +date_time+, +domain_object+, +email+, +enum+, +float+, +integer+,
+	#    +month+, +state+, +subset_domain_object+, +string+, +text_list+, and
+	#    +time_stamp+. These correspond to BlobField, BooleanField, DateField,
+	#    DateTimeField, DomainObjectField, EmailField, EnumField, FloatField,
+	#    IntegerField, MonthField, StateField, SubsetDomainObjectField,
+	#    StringField, TextListField, and TimeStampField, respectively. Consult
+	#    their individual RDoc entries for more on how to parameterize them
+	#    through the class methods.
+	# 2. <b>Overriding DomainObject.get_class_fields</b>: The method should
+	#    return an Array of instances of ObjectField or its children. If you use
+	#    this method, make sure to call the superclass (this is needed to define
+	#    the primary key field). The order of fields in the Array is unimportant.
+	#    For example:
+	#      class User < DomainObject 
+	#        def User.get_class_fields 
+	#          fields = super
+	#          fields << StringField.new(self, 'firstName') 
+	#          fields << StringField.new(self, 'lastName') 
+	#          fields << StringField.new(self, 'email') 
+	#          fields << StringField.new(self, 'password') 
+	#          fields << DateField.new(self, 'birthday') 
+	#          fields 
+	#        end 
+	#      end
+	#    This method is probably not worth the trouble unless you end up defining
+	#    your own field classes for some reason.
+	# 3. <b>Defining fields in an XML file</b>: Note that this method may be
+	#    removed in the future. To do this:
 	#    1. Set one directory to contain all your XML files, by setting
 	#       +classDefinitionDir+ in your LafcadioConfig file.
 	#    2. Write one XML file per domain class. For example, a User.xml file
@@ -158,77 +204,75 @@ module Lafcadio
 	#           <field name="password" class="StringField"/>
 	#           <field name="birthday" class="DateField"/>
 	#         </lafcadio_class_definition>
-	# 2. Overriding DomainObject.get_class_fields. The method should return an Array
-	#    of instances of ObjectField or its children. The order is unimportant.
-	#    For example:
-	#      class User < DomainObject 
-	#        def User.get_class_fields 
-	#          fields = [] 
-	#          fields << StringField.new(self, 'firstName') 
-	#          fields << StringField.new(self, 'lastName') 
-	#          fields << StringField.new(self, 'email') 
-	#          fields << StringField.new(self, 'password') 
-	#          fields << DateField.new(self, 'birthday') 
-	#          fields 
-	#        end 
-	#      end
 	#
 	# = Setting and retrieving fields
 	# Once your fields are defined, you can create an instance by passing in a
 	# hash of field names and values.
-	#   john = User.new( 'firstName' => 'John', 'lastName' => 'Doe',
-	#                    'email' => 'john.doe@email.com',
-	#                    'password' => 'my_password',
-	#                    'birthday' => tenYearsAgo )
+	#
+	#   john = User.new(
+	#     :firstName => 'John', :lastName => 'Doe',
+	#     :email => 'john.doe@email.com', :password => 'my_password',
+	#     :birthday => Date.new( 1979, 1, 15 )
+	#   )
 	#
 	# You can read and write these fields like normal instance attributes.
-	#   john.email => 'john.doe@email.com'
+	#   john.email # => 'john.doe@email.com'
 	#   john.email = 'john.doe@mail.email.com'
 	#
 	# If your domain class has fields that refer to other domain classes, or even
-	# to another row in the same table, you can use a DomainObjectField to express the
-	# relation.
-	#   <lafcadio_class_definition name="Message">
-	#     <field name="subject" class="StringField" />
-	#     <field name="body" class="StringField" />
-	#     <field name="author" class="DomainObjectField" linked_type="User" />
-	#     <field name="recipient" class="DomainObjectField" linked_type="User" />
-	#     <field name="dateSent" class="DateField" />
-	#   </lafcadio_class_definition>
- 	#
- 	#   msg = Message.new( 'subject' => 'hi there',
- 	#                      'body' => 'You wanna go to the movies on Saturday?',
- 	#                      'author' => john, 'recipient' => jane,
- 	#                      'dateSent' => Date.today )
+	# to another row in the same table, you can use a DomainObjectField to 
+	# express the relation.
+	#
+	#   class Message < Lafcadio::DomainObject
+	#     strings       'subject', 'body'
+	#     domain_object User, 'author'
+	#     domain_object User, 'recipient'
+	#     date          'date_sent'
+	#   end
+	#
+ 	#   msg = Message.new(
+	#     :subject => 'hi there',
+	#     :body => 'You wanna go to the movies on Saturday?',
+ 	#     :author => john, :recipient => jane, :dateSent => Date.today
+	#   )
 	#
 	# = pk_id and committing
-	# Lafcadio requires that each table has a numeric primary key. It assumes that
-	# this key is named +pk_id+ in the database, though that can be overridden.
+	# Lafcadio requires that each table has a numeric primary key. It assumes
+	# that this key is named +pk_id+ in the database, though that can be
+	# overridden.
 	#
-	# When you create a domain object by calling new, you should not assign a
-	# +pk_id+ to the new instance. The pk_id will automatically be set when you
-	# commit the object by calling DomainObject#commit.
+	# When you create a domain object by calling DomainObject.new, you should not
+	# assign a +pk_id+ to the new instance. The pk_id will automatically be set
+	# when you commit the object by calling DomainObject#commit.
 	#
-	# However, you may want to manually set +pk_id+ when setting up a test case, so
-	# you can ensure that a domain object has a given primary key.
+	# However, you may want to manually set +pk_id+ when setting up a test case, 
+	# so you can ensure that a domain object has a given primary key.
 	#
 	# = Naming assumptions, and how to override them
 	# By default, Lafcadio assumes that every domain object is indexed by the
 	# field +pk_id+ in the database schema. If you're dealing with a table that 
-	# uses a different field name, override DomainObject.sql_primary_key_name.
+	# uses a different field name, call DomainObject.sql_primary_key_name.
 	# However, you will always use +pk_id+ in your Ruby code.
 	#
-	# Lafcadio assumes that a domain class corresponds to a table whose name is 
-	# the plural of the class name, and whose first letter is lowercase. A User 
-	# class is assumed to be stored in a "users" table, while a ProductCategory 
-	# class is assumed to be stored in a "productCategories" table. Override
+	# Lafcadio assumes that a domain class corresponds to a table whose name is
+	# the pluralized, lower-case, underscored version of the class name. A User
+	# class is assumed to be stored in a "users" table, while a ProductCategory
+	# class is assumed to be stored in a "product_categories" table. Call
 	# DomainObject.table_name to override this behavior.
+	#
+	#   class LegacyThing < Lafcadio::DomainObject
+	#     string 'some_field'
+	#     sql_primary_key_name 'some_legacy_id'
+	#     table_name 'some_legacy_table'
+	#   end
+	#   thing = LegacyThing[9909]
+	#   thing.pk_id # => 9909
 	#
 	# = Inheritance
 	# Domain classes can inherit from other domain classes; they have all the 
 	# fields of any concrete superclasses plus any new fields defined for 
 	# themselves. You can use normal inheritance to define this:
-	#   class User < DomainObject
+	#   class User < Lafcadio::DomainObject
 	#     ...
 	#   end
 	#
@@ -248,6 +292,9 @@ module Lafcadio
 
 		include DomainComparable
 		
+		# Shortcut method for retrieving one domain object.
+		#
+		#   User[7356] # => user with the pk_id 7536
 		def self.[]( pk_id ); get( pk_id ); end
 		
 		def self.abstract_subclass?( a_class ) #:nodoc:
@@ -258,11 +305,12 @@ module Lafcadio
 			[ MapObject ]
 		end
 		
+		# Returns every committed instance of the domain class.
+		#
+		#   User.all # => all users
 		def self.all; ObjectStore.get_object_store.all( self ); end
 		
-		# Returns an array of all fields defined for this class and all concrete
-		# superclasses.
-		def self.all_fields
+		def self.all_fields # :nodoc:
 			self_and_concrete_superclasses.map { |a_class|
 				a_class.class_fields
 			}.flatten
@@ -286,7 +334,7 @@ module Lafcadio
 			subclass_record.fields
 		end
 
-		def self.create_field( field_class, *args )
+		def self.create_field( field_class, *args ) #:nodoc:
 			subclass_record.maybe_init_fields
 			att_hash = create_field_att_hash( field_class, *args )
 			field = field_class.create_with_args( self, att_hash )
@@ -328,6 +376,20 @@ module Lafcadio
 			create_field( field_class, arg ) unless arg.nil?
 		end
 		
+		# Sets a default setup hash for a field of a certain class. Useful for
+		# mapping domain classes with lots of fields and unusual field 
+		# configurations.
+		#
+		#   class LotsOfBooleans < Lafcadio::DomainObject
+		#     default_field_setup_hash(
+		#       Lafcadio::BooleanField,
+		#       {
+		#         'enum_type' => Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO
+		#       }
+		#     )
+		#     booleans 'this', 'that', 'the_other', 'and_another_one',
+		#              'this_one_too'
+		#   end
 		def self.default_field_setup_hash( field_class, hash )
 			subclass_record.default_field_setup_hash[field_class] = hash
 		end
@@ -357,6 +419,11 @@ module Lafcadio
 			end
 		end
 		
+		# Tests whether a given domain object exists.
+		#
+		#   User.exist?( 8280 ) # => returns true iff there's a User 8280
+		#   User.exist?( 'Hwang', :lastName ) # => returns true iff there's a User
+		#                                     #    with the last name 'Hwang'
 		def self.exist?( search_term, field_name = :pk_id )
 			query = Query.infer( self ) { |dobj|
 				dobj.send( field_name ).equals( search_term )
@@ -374,8 +441,27 @@ module Lafcadio
 			field
 		end
 
+		# Returns the first domain object it can find.
+		#
+		#   very_first_user = User.first
 		def self.first; all.first; end
-			
+		
+		# This class method has a few uses, depending on how you use it.
+		# 1. Pass DomainObject.get a block in order to run a complex query:
+		#      adult_hwangs = User.get { |user|
+		#        user.lastName.equals( 'Hwang' ) &
+		#          user.birthday.lte( Date.today - ( 365 * 18 ) )
+		#      }
+		#    See query.rb for more information about how to form these
+		#    queries.
+		# 2. Pass it a simple search term and a field name to retrieve every domain
+		#    object matching the term. The field name will default to +pk_id+.
+		#      hwangs = User.get( 'Hwang', :lastName )
+		#      user123 = User.get( 123 ).first
+		# 3. Pass it a { :group => :count } hash to retrieve a count result hash.
+		#    This interface is fairly new and may be refined (that is, changed) in
+		#    the future.
+		#      num_users = User.get( :group => :count ).first[:count]
 		def self.get( *args )
 			if block_given?
 				query = Query.infer( self ) { |dobj| yield( dobj ) }
@@ -399,7 +485,9 @@ module Lafcadio
 		end
 
 		# Returns an Array of ObjectField instances for this domain class, parsing
-		# them from XML if necessary.
+		# them from XML if necessary. You can override this to define a domain
+		# class' fields, though it will probably just be simpler to use one-line 
+		# class methods instead. 
 		def self.get_class_fields
 			if self.methods( false ).include?( 'get_class_fields' )
 				[ subclass_record.pk_field ]
@@ -421,6 +509,9 @@ module Lafcadio
 			superclass != DomainObject and !abstract_subclass?( superclass )
 		end
 
+		# Returns the last domain object.
+		#
+		#   last_msg = Message.last
 		def self.last; all.last; end
 		
 		def self.link_field( linked_domain_class ) # :nodoc:
@@ -462,9 +553,13 @@ module Lafcadio
 			end
 		end
 
+		# Returns the only committed instance of the domain class. Will raise an
+		# IndexError if there are 0, or more than 1, domain objects.
+		#
+		#   the_one_user = User.only
 		def self.only; all.only; end
 
-		def self.require_domain_file( typeString )
+		def self.require_domain_file( typeString ) # :nodoc:
 			typeString =~ /([^\:]*)$/
 			fileName = $1
 			domain_dirs.each { |domainDir|
@@ -490,7 +585,7 @@ module Lafcadio
 			classes
 		end
 
-		def self.singleton_method_added( symbol )
+		def self.singleton_method_added( symbol ) # :nodoc:
 			if symbol.id2name == 'sql_primary_key_name' && self < DomainObject
 				begin
 					field( 'pk_id' ).db_field_name = self.send( symbol )
@@ -500,23 +595,47 @@ module Lafcadio
 			end
 		end
 		
-		# Returns the name of the primary key in the database, retrieving it from
-		# the class definition XML if necessary.
+		# If +set_db_field_name+ is nil, this will return the sql name of the
+		# primary key. If +set_db_field_name+ isn't nil, it will set the sql name.
+		#
+		#   class User < Lafcadio::DomainObject
+		#     string 'firstNames'
+		#   end
+		#   User.sql_primary_key_name # => 'pk_id'
+		#   class User < Lafcadio::DomainObject
+		#     sql_primary_key_name 'some_other_id'
+		#   end
+		#   User.sql_primary_key_name # => 'some_other_id'
 		def self.sql_primary_key_name( set_db_field_name = nil )
 			field( 'pk_id' ).db_field_name = set_db_field_name if set_db_field_name
 			field( 'pk_id' ).db_field_name
 		end
 		
-		def self.subclass_record; @@subclass_records[self]; end
+		def self.subclass_record # :nodoc:
+			@@subclass_records[self]
+		end
 
 		def self.subclasses #:nodoc:
 			@@subclass_records.keys
 		end
 
-		# Returns the table name, which is assumed to be the domain class name 
-		# pluralized, and with the first letter lowercase. A User class is
-		# assumed to be stored in a "users" table, while a ProductCategory class is
-		# assumed to be stored in a "productCategories" table.
+		# If +set_table_name+ is nil, DomainObject.table_name will return the table
+		# name. Lafcadio assumes that a domain class corresponds to a table whose
+		# name is the pluralized, lower-case, underscored version of the class
+		# name. A User class is assumed to be stored in a "users" table, while a
+		# ProductCategory class is assumed to be stored in a "product_categories"
+		# table.
+		#
+		# If +set_table_name+ is not nil, this will set the table name.
+		#
+		#   class User < Lafcadio::DomainObject
+		#     string 'firstNames'
+		#   end
+		#   User.table_name # => 'users'
+		#   class User < Lafcadio::DomainObject
+		#     table_name 'some_table'
+		#   end
+		#   User.table_name # => 'some_table'
 		def self.table_name( set_table_name = nil )
 			if set_table_name
 				@table_name = set_table_name
@@ -532,7 +651,7 @@ module Lafcadio
 			end
 		end
 
-		def self.try_load_xml_parser
+		def self.try_load_xml_parser # :nodoc:
 			require 'lafcadio/domain'
 			dirName = LafcadioConfig.new['classDefinitionDir']
 			xmlFileName = self.basename + '.xml'
@@ -549,12 +668,14 @@ module Lafcadio
 		attr_reader :delete
 		protected :fields_set, :field_values
 
-		# fieldHash should contain key-value associations for the different
+		# +field_hash+ should contain key-value associations for the different
 		# fields of this domain class. For example, instantiating a User class 
 		# might look like:
 		#
-		#   User.new( 'firstNames' => 'John', 'lastName' => 'Doe',
-		#             'email' => 'john.doe@email.com', 'password' => 'l33t' )
+		#   User.new(
+		#     'firstNames' => 'John', 'lastName' => 'Doe',
+		#     'email' => 'john.doe@email.com', 'password' => 'l33t'
+		#   )
 		#
 		# In normal usage any code you write that creates a domain object will not
 		# define the +pk_id+ field. The system assumes that a domain object with an
@@ -563,8 +684,8 @@ module Lafcadio
 		#
 		# If you're creating mock objects for unit tests, you can explicitly set 
 		# the +pk_id+ to represent objects that already exist in the database.
-		def initialize(fieldHash)
-			fieldHash = preprocess_field_hash fieldHash
+		def initialize( field_hash )
+			field_hash = preprocess_field_hash field_hash
 			@field_values = {}
 			@fields_set = []
 			@original_values = ReadOnlyHash.new @fieldHash
@@ -594,6 +715,8 @@ module Lafcadio
 			@delete = value
 		end
 		
+		# Deletes a domain object, committing the delete to the database
+		# immediately.
 		def delete!
 			self.delete = true
 			commit
@@ -639,7 +762,7 @@ module Lafcadio
 			nil
 		end
 
-		def preprocess_field_hash( fieldHash )
+		def preprocess_field_hash( fieldHash ) # :nodoc:
 			if fieldHash.is_a? Hash
 				fieldHash.keys.each { |key|
 					if self.class.field( key.to_s ).nil?
@@ -682,11 +805,18 @@ module Lafcadio
 			end
 		end
 		
+		# Updates a domain object and commits the changes to the database 
+		# immediately.
+		#
+		#   user99 = User[99]
+		#   user99.update!( :firstNames => 'Bill', :password => 'n3wp4ssw0rd' )
 		def update!( changes )
 			changes.each do |sym, value| self.send( sym.to_s + '=', value ); end
 			commit
 		end
 		
+		# If you're running against a MockObjectStore, this will verify each field
+		# and raise an error if there's any invalid fields.
 		def verify
 			if ObjectStore.mock?
 				self.class.get_class_fields.each { |field|
@@ -695,11 +825,11 @@ module Lafcadio
 			end
 		end
 		
-		class ReadOnlyHash < DelegateClass( Hash )
+		class ReadOnlyHash < DelegateClass( Hash ) # :nodoc:
 			def []=( key, val ); raise NoMethodError; end
 		end
 		
-		class SubclassRecord
+		class SubclassRecord # :nodoc:
 			attr_accessor :default_field_setup_hash, :fields, :sql_primary_key
 			
 			def initialize( subclass )
