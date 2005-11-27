@@ -104,9 +104,18 @@ module Lafcadio
 	# Externally, the MockObjectStore looks and acts exactly like the ObjectStore,
 	# but stores all its data in memory. This makes it very useful for unit
 	# testing, and in fact LafcadioTestCase#setup creates a new instance of
-	# MockObjectStore for each test case.
+	# MockObjectStore for each test case. For example:
+	#
+	#   class SomeTestCase < Test::Unit::TestCase
+	#     def setup
+	#       @mock_object_store = Lafcadio::MockObjectStore.new
+	#       Lafcadio::ObjectStore.set_object_store @mock_object_store
+	#     end
+	#   end
 	class MockObjectStore < ObjectStore
-		def self.db_bridge; MockDbBridge.new; end
+		def self.db_bridge #:nodoc:
+			MockDbBridge.new
+		end
 		
 		public_class_method :new
 

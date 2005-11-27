@@ -167,13 +167,12 @@ module Lafcadio
 	#      end
 	#    The class methods you can use are +blob+, +boolean+, +date+,
 	#    +date_time+, +domain_object+, +email+, +enum+, +float+, +integer+,
-	#    +month+, +state+, +subset_domain_object+, +string+, +text_list+, and
-	#    +time_stamp+. These correspond to BlobField, BooleanField, DateField,
-	#    DateTimeField, DomainObjectField, EmailField, EnumField, FloatField,
-	#    IntegerField, MonthField, StateField, SubsetDomainObjectField,
-	#    StringField, TextListField, and TimeStampField, respectively. Consult
-	#    their individual RDoc entries for more on how to parameterize them
-	#    through the class methods.
+	#    +month+, +state+, +string+, +text_list+. These correspond to BlobField,
+	#    BooleanField, DateField, DateTimeField, DomainObjectField, EmailField,
+	#    EnumField, FloatField, IntegerField, MonthField, StateField,
+	#    StringField, and TextListField, respectively. Consult their individual
+	#    RDoc entries for more on how to parameterize them through the class
+	#    methods.
 	# 2. <b>Overriding DomainObject.get_class_fields</b>: The method should
 	#    return an Array of instances of ObjectField or its children. If you use
 	#    this method, make sure to call the superclass (this is needed to define

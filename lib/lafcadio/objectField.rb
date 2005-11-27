@@ -4,6 +4,25 @@ require 'lafcadio/util'
 
 module Lafcadio
 	# ObjectField is the abstract base class of any field for domain objects.
+	# Fields can be added to a domain class using DomainObject.string,
+	# DomainObject.integer, etc.
+	#
+	#   class User < Lafcadio::DomainObject
+	#     string 'fname'
+	#     date   'birthday'
+	#   end
+	#
+	# All fields accept the following arguments in hashes:
+	# [not_nil]        This is +true+ by default. Set it to +false+ to avoid
+	#                  checking for nil values in tests.
+	# [db_field_name]  By default, fields are assumed to have the same name in
+	#                  the database, but you can override this assumption using
+	#                  +db_field_name+.
+	#
+	#   class User < Lafcadio::DomainObject
+	#     string 'fname', { 'not_nil' => false }
+	#     date   'birthday', { 'db_field_name' => 'bday' }
+	#   end
 	class ObjectField
 		def self.create_from_xml( domain_class, fieldElt ) #:nodoc:
 			parameters = creation_parameters( fieldElt )
@@ -34,7 +53,7 @@ module Lafcadio
 		attr_reader :domain_class, :name
 		attr_accessor :db_field_name, :not_nil
 
-		# [domain_class]  The domain class that this object field belongs to.
+		# [domain_class]  The domain class that this field belongs to.
 		# [name]          The name of this field.
 		def initialize( domain_class, name )
 			@domain_class = domain_class
@@ -51,9 +70,11 @@ module Lafcadio
 			end
 		end
 
-		def bind_write?; false; end #:nodoc:
+		def bind_write? #:nodoc:
+			false
+		end
 		
-		def db_column
+		def db_column #:nodoc:
 			"#{ domain_class.table_name }.#{ db_field_name }"
 		end
 
@@ -88,7 +109,7 @@ module Lafcadio
 			verify_non_nil_value( value, pk_id ) if value
 		end
 
-		def verify_non_nil_value( value, pk_id )
+		def verify_non_nil_value( value, pk_id ) #:nodoc:
 			value_type = self.class.value_type
 			unless value.class <= value_type
 				raise(
@@ -108,7 +129,7 @@ module Lafcadio
 
 	# A StringField is expected to contain a string value.
 	class StringField < ObjectField
-		def value_for_sql(value) #:nodoc:
+		def value_for_sql(value)
 			if value
 				value = value.gsub(/(\\?')/) { |m| m.length == 1 ? "''" : m }
 				value = value.gsub(/\\/) { '\\\\' }
@@ -121,7 +142,7 @@ module Lafcadio
 
 	# IntegerField represents an integer.
 	class IntegerField < ObjectField
-		def value_from_sql(string) #:nodoc:
+		def value_from_sql(string)
 			value = super
 			value ? value.to_i : nil
 		end
@@ -130,38 +151,35 @@ module Lafcadio
 	# BlobField stores a string value and expects to store its value in a BLOB
 	# field in the database.
 	class BlobField < ObjectField
-		def self.value_type; String; end
+		def self.value_type #:nodoc:
+			String
+		end
 
 		def bind_write?; true; end #:nodoc:
 
-		def value_for_sql(value); "?"; end #:nodoc:
+		def value_for_sql(value); "?"; end
 	end
 
 	# BooleanField represents a boolean value. By default, it assumes that the
-	# table field represents True and False with the integers 1 and 0. There are
-	# two different ways to change this default.
+	# table field represents +true+ and +false+ with the integers 1 and 0. There
+	# are two different ways to change this default.
 	#
 	# First, BooleanField includes a few enumerated defaults. Currently there are
 	# only
 	#   * BooleanField::ENUMS_ONE_ZERO (the default, uses integers 1 and 0)
 	#   * BooleanField::ENUMS_CAPITAL_YES_NO (uses characters 'Y' and 'N')
-	# In the XML class definition, this field would look like
-	#   <field name="field_name" class="BooleanField"
-	#          enum_type="ENUMS_CAPITAL_YES_NO"/>
-	# If you're defining a field in Ruby, simply set BooleanField#enum_type to one
-	# of the values.
+	# In a class definition, this would look like
+	#   class User < Lafcadio::DomainObject
+	#     boolean 'administrator',
+	#             { 'enum_type' => Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO }
+	#   end
 	#
-	# For more fine-grained specification you can pass specific values in. Use
-	# this format for the XML class definition:
-	#   <field name="field_name" class="BooleanField">
-	#     <enums>
-	#       <enum key="true">yin</enum>
-	#       <enum key="false">tang</enum>
-	#     </enums>
-	#   </field>
-	# If you're defining the field in Ruby, set BooleanField#enums to a hash.
-	#   myBooleanField.enums = { true => 'yin', false => 'yang' }
-	#
+	# For more fine-grained specification you can pass a hash with the keys
+	# +true+ and +false+ using the argument +enums+.
+	#   class User < Lafcadio::DomainObject
+	#     boolean 'administrator',
+	#             { 'enums' => { true => 'yin', false => 'yang' } }
+	#   end
 	# +enums+ takes precedence over +enum_type+.
 	class BooleanField < ObjectField
 		ENUMS_ONE_ZERO = 0
@@ -258,9 +276,35 @@ module Lafcadio
 		end
 	end
 
-	# A DomainObjectField is used to link from one domain class to another.
+	# A DomainObjectField is used to link from one domain class to another. To
+	# add such an association in a class definition, call
+	# DomainObject.domain_object:
+	#   class Invoice < Lafcadio::DomainObject
+	#     domain_object Client
+	#   end
+	# By default, the field name is assumed to be the same as the class name,
+	# only lower-cased and camel-case.
+	#   class LineItem < Lafcadio::DomainObject
+	#     domain_object Product         # field name 'product'
+	#     domain_object CatalogOrder    # field name 'catalog_order'
+	#   end
+	# The field name can be explicitly set as the 2nd argument of
+	# DomainObject.domain_object.
+	#   class Message < Lafcadio::DomainObject
+	#     domain_object User, 'sender'
+	#     domain_object User, 'recipient'
+	#   end
+	# Setting +delete_cascade+ to true means that if the domain object being
+	# associated to is deleted, this domain object will also be deleted.
+	#   class Invoice < Lafcadio::DomainObject
+	#     domain_object Client, 'client', { 'delete_cascade' => true }
+	#   end
+	#   cli = Client.new( 'name' => 'big company' ).commit
+	#   inv = Invoice.new( 'client' => cli ).commit
+	#   cli.delete!
+	#   inv_prime = Invoice[inv.pk_id] # => will raise DomainObjectNotFoundError
 	class DomainObjectField < ObjectField
-		def self.auto_name( linked_type )
+		def self.auto_name( linked_type ) #:nodoc:
 			linked_type.basename.camel_case_to_underscore
 		end
 
@@ -289,14 +333,8 @@ module Lafcadio
 		attr_reader :linked_type
 		attr_accessor :delete_cascade
 
-		# [domain_class]    The domain class that this field belongs to.
-		# [linked_type]     The domain class that this field points to.
-		# [name]            The name of this field.
-		# [delete_cascade]  If this is true, deleting the domain object that is
-		#                   linked to will cause this domain object to be deleted
-		#                   as well.
 		def initialize( domain_class, linked_type, name = nil,
-		                delete_cascade = false )
+		                delete_cascade = false ) #:nodoc:
 			name = self.class.auto_name( linked_type ) unless name
 			super( domain_class, name )
 			( @linked_type, @delete_cascade ) = linked_type, delete_cascade
@@ -330,7 +368,7 @@ module Lafcadio
 			end
 		end
 
-		def verify_subset_link_field( subsetDomainObjectField, pk_id )
+		def verify_subset_link_field( subsetDomainObjectField, pk_id ) #:nodoc:
 			begin
 				prevObjLinkedTo = domain_class[pk_id].send(name)
 				possiblyMyObj = prevObjLinkedTo.send subsetDomainObjectField.name
@@ -369,24 +407,17 @@ module Lafcadio
 	end
 
 	# EnumField represents an enumerated field that can only be set to one of a
-	# set range of string values. To set the enumeration in the class definition
-	# XML, use the following format:
-	#   <field name="flavor" class="EnumField">
-	#     <enums>
-	#       <enum>Vanilla</enum>
-	#       <enum>Chocolate</enum>
-	#       <enum>Lychee</enum>
-	#     </enums>
-	#   </field>
-	# If you're defining the field in Ruby, you can simply pass in an array of
-	# enums as the +enums+ argument.
-	#
+	# set range of string values. To set the enumeration in the class definition,
+	# pass in an Array of values as +enums+.
+	#   class IceCream < Lafcadio::DomainObject
+	#     enum 'flavor', { 'enums' => %w( Vanilla Chocolate Lychee ) }
+	#   end
 	class EnumField < StringField
 		def self.create_with_args( domain_class, parameters ) #:nodoc:
 			self.new( domain_class, parameters['name'], parameters['enums'] )
 		end
 
-		def self.enum_queue_hash( fieldElt )
+		def self.enum_queue_hash( fieldElt ) #:nodoc:
 			enumValues = []
 			fieldElt.elements.each( 'enums/enum' ) { |enumElt|
 				enumValues << enumElt.attributes['key']
@@ -410,11 +441,7 @@ module Lafcadio
 		
 		attr_reader :enums
 
-		# [domain_class]  The domain class that this field belongs to.
-		# [name]          The name of this domain class.
-		# [enums]         An array of Strings representing the possible choices for
-		#                 this field.
-		def initialize( domain_class, name, enums )
+		def initialize( domain_class, name, enums ) #:nodoc:
 			super( domain_class, name )
 			if enums.class == Array 
 				@enums = QueueHash.new_from_array enums
@@ -470,16 +497,16 @@ module Lafcadio
 		end
 	end
 
-	class PrimaryKeyField < IntegerField
+	class PrimaryKeyField < IntegerField #:nodoc:
 		def initialize( domain_class )
 			super( domain_class, 'pk_id' )
 			@not_nil = false
 		end
 	end
 
-	# A StateField is a specialized subclass of EnumField; its possible values are
-	# any of the 50 states of the United States, stored as each state's two-letter
-	# postal code.
+	# A StateField is a specialized subclass of EnumField; its possible value
+	# are any of the 50 states of the United States, stored as each state's
+	# two-letter postal code.
 	class StateField < EnumField
 		def initialize( domain_class, name = "state" )
 			super( domain_class, name, USCommerce::UsStates.states )

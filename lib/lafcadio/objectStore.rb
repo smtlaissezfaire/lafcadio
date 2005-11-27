@@ -12,11 +12,11 @@ module Lafcadio
 	end
 
 	# The DomainObjectProxy is used when retrieving domain objects that are 
-	# linked to other domain objects with DomainObjectFields. In terms of +domain_class+
-	# and 
-	# +pk_id+, a DomainObjectProxy instance looks to the outside world like the 
-	# domain object it's supposed to represent. It only retrieves its domain 
-	# object from the database when member data is requested.
+	# linked to other domain objects with DomainObjectFields. In terms of
+	# +domain_class+ and +pk_id+, a DomainObjectProxy instance looks to the
+	# outside world like the domain object it's supposed to represent. It only
+	# retrieves its domain object from the database when member data is
+	# requested.
 	#
 	# In normal usage you will probably never manipulate a DomainObjectProxy
 	# directly, but you may discover it by accident by calling
@@ -27,7 +27,7 @@ module Lafcadio
 
 		attr_accessor :domain_class, :pk_id
 
-		def initialize( *args )
+		def initialize( *args ) #:nodoc:
 			if args.size == 2
 				@domain_class = args.first
 				@pk_id = args.last
@@ -40,7 +40,7 @@ module Lafcadio
 			end
 		end
 
-		def db_object
+		def db_object #:nodoc:
 			if @db_object.nil? || needs_refresh?
 				@db_object = ObjectStore.get_object_store.get( @domain_class, @pk_id )
 				@d_obj_retrieve_time = Time.now
@@ -48,21 +48,21 @@ module Lafcadio
 			@db_object
 		end
 
-		def hash
+		def hash #:nodoc:
 			db_object.hash
 		end
 
-		def method_missing( methodId, *args )
+		def method_missing( methodId, *args ) #:nodoc:
 			db_object.send( methodId, *args )
 		end
 
-		def needs_refresh?
+		def needs_refresh? #:nodoc:
 			object_store = ObjectStore.get_object_store
 			last_commit_time = object_store.last_commit_time( @domain_class, @pk_id )
 			last_commit_time && last_commit_time > @d_obj_retrieve_time
 		end
 		
-		def to_s
+		def to_s #:nodoc:
 			db_object.to_s
 		end
 	end
