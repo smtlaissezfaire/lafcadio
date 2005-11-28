@@ -80,29 +80,31 @@ module Lafcadio
 	# [dbhost]     The database host.
 	#
 	# = Instantiating ObjectStore
-	# The ObjectStore is a ContextualService, meaning you can't get an instance by
-	# calling ObjectStore.new. Instead, you should call
-	# ObjectStore.get_object_store. (Using a ContextualService makes it easier to
-	# make out the ObjectStore for unit tests: See ContextualService for more.)
+	# You can't get an instance of ObjectStore by calling ObjectStore.new.
+	# Instead, you should call ObjectStore.get_object_store.
 	#
 	# = Dynamic method calls
 	# ObjectStore uses reflection to provide a lot of convenience methods for
 	# querying domain objects in a number of ways.
-	# [ObjectStore#get< domain class > (pk_id)]
+	# [ObjectStore#< domain class >( pk_id )]
 	#   Retrieves one domain object by pk_id. For example,
-	#     ObjectStore#getUser( 100 )
-	#   will return User 100.
-	# [ObjectStore#get< domain class >s (searchTerm, fieldName = nil)]
+	#     ObjectStore#user( 100 )
+	#   will return User 100. Note that you can also just user DomainObject.[]:
+	#     User[100]
+	# [ObjectStore#< plural of domain class >( searchTerm, fieldName = nil )]
 	#   Returns a collection of all instances of that domain class matching that
 	#   search term. For example,
-	#     ObjectStore#getProducts( aProductCategory )
+	#     ObjectStore#products( a_product_category )
 	#   queries MySQL for all products that belong to that product category. You
 	#   can omit +fieldName+ if +searchTerm+ is a non-nil domain object, and the
 	#   field connecting the first domain class to the second is named after the
 	#   domain class. (For example, the above line assumes that Product has a
-	#   field named "productCategory".) Otherwise, it's best to include
+	#   field named "product_category".) Otherwise, it's best to include
 	#   +fieldName+:
-	#     ObjectStore#getUsers( "Jones", "lastName" )
+	#     ObjectStore#users( "Jones", "lastName" )
+	#   Note that these can also be accessed through DomainObject.get:
+	#     Product.get( a_product_category )
+	#     User.get( "Jones", "lastName" )
 	#
 	# = Querying
 	# ObjectStore can also be used to generate complex, ad-hoc queries which
@@ -110,14 +112,19 @@ module Lafcadio
 	# Furthermore, these queries can be run against in-memory data stores, which
 	# is particularly useful for tests.
 	#   date = Date.new( 2003, 1, 1 )
-	#   ObjectStore#getInvoices { |invoice|
-	#     Query.And( invoice.date.gte( date ), invoice.rate.equals( 10 ),
-	#                invoice.hours.equals( 10 ) )
+	#   ObjectStore#invoices { |invoice|
+	#     invoice.date.gte( date ) & invoice.rate.equals( 10 ) &
+	#                invoice.hours.equals( 10 )
 	#   }
 	# is the same as
 	#   select * from invoices
 	#   where (date >= '2003-01-01' and rate = 10 and hours = 10)
-	# See lafcadio/query.rb for more.
+	# Note that you can also use DomainObject.get:
+	#   Invoice.get { |invoice|
+	#     invoice.date.gte( date ) & invoice.rate.equals( 10 ) &
+	#                invoice.hours.equals( 10 )
+	#   }
+	# See lafcadio/query.rb for more on the query inference syntax.
 	#
 	# = SQL Logging
 	# Lafcadio uses log4r to log all of its SQL statements. The simplest way to
@@ -131,15 +138,19 @@ module Lafcadio
 	# = Triggers
 	# Domain classes can be set to fire triggers either before or after commits.
 	# Since these triggers are executed in Ruby, they're easy to test. See
-	# DomainObject#pre_commit_trigger and DomainObject#post_commit_trigger for more.
+	# DomainObject#pre_commit_trigger and DomainObject#post_commit_trigger for
+	# more.
 	class ObjectStore < ContextualService::Service
+		# Returns true if the current stored instance is a MockObjectStore.
 		def self.mock?; get_object_store.mock?; end
 		
 		@@db_bridge = nil
-			
+		
+		# Returns the DbBridge; this is useful in case you need to use raw SQL for
+		# a specific query.
 		def self.db_bridge; @@db_bridge ||= DbBridge.new; end
 			
-		def self.db_name= (dbName) #:nodoc:
+		def self.db_name= (dbName)
 			DbConnection.db_name= dbName
 		end
 		
@@ -152,8 +163,8 @@ module Lafcadio
 			@cache.get_by_query( Query.new( domain_class ) )
 		end
 
-		# Returns the DbBridge; this is useful in case you need to use raw SQL for a
-		# specific query.
+		# Returns the DbBridge; this is useful in case you need to use raw SQL for
+		# a specific query.
 		def db_bridge; @cache.db_bridge; end
 		
 		# Returns the domain object corresponding to the domain class and pk_id.
@@ -182,7 +193,9 @@ module Lafcadio
 			query( query ).first
 		end
 
-		def group_query( query ); @cache.group_query( query ); end
+		def group_query( query ) #:nodoc:
+			@cache.group_query( query )
+		end
 
 		# Retrieves the maximum value across all instances of one domain class.
 		#   ObjectStore#max( Client )
@@ -212,7 +225,10 @@ module Lafcadio
 			false
 		end
 		
-		def query(conditionOrQuery) #:nodoc:
+		# Passes a query and selects with it.
+		#   qry = Query.infer( User ) { |user| user.fname.equals( 'Francis' ) }
+		#   francises = ObjectStore.get_object_store.query( qry )
+		def query(conditionOrQuery)
 			if conditionOrQuery.class <= Query::Condition
 				condition = conditionOrQuery
 				query = Query.new condition.domain_class, condition
@@ -222,7 +238,7 @@ module Lafcadio
 			@cache.get_by_query( query )
 		end
 		
-		def respond_to?( symbol, include_private = false )
+		def respond_to?( symbol, include_private = false ) #:nodoc:
 			if MethodDispatch.new( symbol ).symbol
 				true
 			else
@@ -230,6 +246,13 @@ module Lafcadio
 			end
 		end
 		
+		# As long as the underlying database table sorts transactions, you can use
+		# this to run transactional logic. These transactions will auto commit at 
+		# the end of the block, and can be rolled back.
+		#   ObjectStore.get_object_store.transaction do |tr|
+		#     Client.new( 'name' => 'Big Co.' ).commit
+		#     tr.rollback
+		#   end   # the client will not be saved to the DB
 		def transaction( &action ); @cache.transaction( action ); end
 		
 		class Cache #:nodoc:
@@ -307,7 +330,7 @@ module Lafcadio
 				}
 			end
 			
-			class DomainClassCache < Hash
+			class DomainClassCache < Hash #:nodoc:
 				attr_reader :commit_times, :domain_class, :queries
 				
 				def initialize( domain_class, db_bridge )
@@ -566,7 +589,7 @@ module Lafcadio
 				end
 			end
 			
-			class Transaction
+			class Transaction #:nodoc:
 				def initialize( db_conn ); @db_conn = db_conn; end
 				
 				def commit; @db_conn.commit; end
@@ -577,10 +600,11 @@ module Lafcadio
 				end
 			end
 			
-			class RollbackError < StandardError; end
+			class RollbackError < StandardError #:nodoc:
+			end
 		end
 
-		class DbConnection < ContextualService::Service
+		class DbConnection < ContextualService::Service #:nodoc:
 			@@conn_class = DBI
 			@@db_name = nil
 	

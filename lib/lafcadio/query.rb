@@ -1,19 +1,46 @@
 # = Overview
 # By passing a block to ObjectStore, you can write complex, ad-hoc queries in
-# Ruby. This involves a few more keystrokes than writing raw SQL, but also makes
-# it easier to change queries at runtime, and these queries can also be fully
-# tested against the MockObjectStore.
-#   big_invoices = object_store.getInvoices { |inv| inv.rate.gt( 50 ) }
-#   # => "select * from invoices where rate > 50"
+# Ruby. This involves a few more keystrokes than writing raw SQL, but also
+# makes it easier to change queries at runtime, and these queries can also be
+# fully tested against the MockObjectStore.
+#   big_invoices = Invoice.get { |inv| inv.rate.gt( 50 ) }
+#   # => runs "select * from invoices where rate > 50"
 # This a full-fledged block, so you can pass in values from the calling context.
 #   date = Date.new( 2004, 1, 1 )
-#   recent_invoices = object_store.getInvoices { |inv| inv.date.gt( date ) }
-#   # => "select * from invoices where date > '2004-01-01'"
+#   recent_invoices = Invoice.get { |inv| inv.date.gt( date ) }
+#   # => runs "select * from invoices where date > '2004-01-01'"
+#
+# = Building and accessing queries
+# To build a query and run it immediately, call DomainObject.get and pass it a
+# block:
+#   hwangs = User.get { |u| u.lname.equals( 'Hwang' ) }
+# You can also call ObjectStore#[ plural domain class ] with a block:
+#   hwangs = ObjectStore.get_object_store.users { |u|
+#     u.lname.equals( 'Hwang' )
+#   }
+# If you want more fine-grained control over a query, first create it with
+# Query.infer and then build it, using ObjectStore#query to run it.
+#   qry = Query.infer( User ) { |u| u.lname.equals( 'Hwang' ) }
+#   qry.to_sql # => "select * from users where users.lname = 'Hwang'"
+#   qry = qry.and { |u| u.fname.equals( 'Francis' ) }
+#   qry.to_sql # => "select * from users where (users.lname = 'Hwang' and
+#                    users.fname = 'Francis')"
+#   qry.limit = 0..5
+#   qry.to_sql # => "select * from users where (users.lname = 'Hwang' and
+#                    users.fname = 'Francis') limit 0, 6"
+# Using Query.infer, you can also set order_by and order_by_order clauses:
+#   qry = Query.infer(
+#     SKU,
+#     :order_by => [ :standardPrice, :salePrice ],
+#     :order_by_order => Query::DESC
+#   ) { |s| s.sku.nil? }
+#   qry.to_sql # => "select * from skus where skus.sku is null order by
+#                    standardPrice, salePrice desc"
 # 
-# = Query operators
+# = Query inference operators
 # You can compare fields either to simple values, or to other fields in the same
 # table.
-#   paid_immediately = object_store.getInvoices { |inv|
+#   paid_immediately = Invoice.get { |inv|
 #     inv.date.equals( inv.paid )
 #   }
 #   # => "select * from invoices where date = paid"
@@ -21,81 +48,121 @@
 # == Numerical comparisons: +lt+, +lte+, +gte+, +gt+
 # +lt+, +lte+, +gte+, and +gt+ stand for "less than", "less than or equal",
 # "greater than or equal", and "greater than", respectively.
-#   tiny_invoices = object_store.getInvoices { |inv| inv.rate.lte( 25 ) }
+#   tiny_invoices = Invoice.get { |inv| inv.rate.lte( 25 ) }
 #   # => "select * from invoices where rate <= 25"
 # These comparators work on fields that contain numbers, dates, and even
 # references to other domain objects.
-#   for_1st_ten_clients = object_store.getInvoices { |inv|
+#   for_1st_ten_clients = Invoice.get { |inv|
 #     inv.client.lte( 10 )
+#   }
+#   # => "select * from invoices where client <= 10"
+#   client10 = Client[10]
+#   for_1st_ten_clients = Invoice.get { |inv|
+#     inv.client.lte( client10 )
 #   }
 #   # => "select * from invoices where client <= 10"
 #
 # == Equality: +equals+
-#   full_week_invs = object_store.getInvoices { |inv| inv.hours.equals( 40 ) }
+#   full_week_invs = Invoice.get { |inv| inv.hours.equals( 40 ) }
 #   # => "select * from invoices where hours = 40"
 # If you're comparing to a domain object you should pass in the object itself.
-#   client = object_store.getClient( 99 )
-#   invoices = object_store.getInvoices { |inv| inv.client.equals( client ) }
+#   client = Client[99]
+#   invoices = Invoice.get { |inv| inv.client.equals( client ) }
 #   # => "select * from invoices where client = 99"
+# If you're comparing to a boolean value you don't need to use
+# <tt>equals( true )</tt>.
+#   administrators = User.get { |u| u.administrator.equals( true ) }
+#   administrators = User.get { |u| u.administrator } # both forms work
+# Matching for +nil+ can use <tt>nil?</tt>
+#   no_email = User.get { |u| u.email.nil? }
 # 
-# == Inclusion: +in+
-#   first_three_invs = object_store.getInvoices { |inv| inv.pk_id.in( 1, 2, 3 ) }
+# == Inclusion: +in+ and <tt>include?</tt>
+# Any field can be matched via +in+:
+#   first_three_invs = Invoice.get { |inv| inv.pk_id.in( 1, 2, 3 ) }
 #   # => "select * from invoices where pk_id in ( 1, 2, 3 )"
+# A TextListField can be matched via <tt>include?</tt>
+#   aim_users = User.get { |u| u.im_methods.include?( 'aim' ) }
+#   # => "select * from users where user.im_methods like 'aim,%' or
+#         user.im_methods like '%,aim,%' or user.im_methods like '%,aim' or
+#         user.im_methods = 'aim'"
 #
 # == Text comparison: +like+
-#   fname_starts_with_a = object_store.getUsers { |user|
-#     user.fname.like( /^a/ )
-#   }
+#   fname_starts_with_a = User.get { |user| user.fname.like( /^a/ ) }
 #   # => "select * from users where fname like 'a%'"
-#   fname_ends_with_a = object_store.getUsers { |user|
-#     user.fname.like( /a$/ )
-#   }
+#   fname_ends_with_a = User.get { |user| user.fname.like( /a$/ ) }
 #   # => "select * from users where fname like '%a'"
-#   fname_contains_a = object_store.getUsers { |user|
-#     user.fname.like( /a/ )
-#   }
+#   fname_contains_a = User.get { |user| user.fname.like( /a/ ) }
 #   # => "select * from users where fname like '%a%'"
 # Please note that although we're using the Regexp operators here, these aren't
 # full-fledged regexps. Only ^ and $ work for this.
 #
-# == Compound conditions: <tt>Query.And</tt> and <tt>Query.Or</tt>
-#   invoices = object_store.getInvoices { |inv|
-#     Query.And( inv.hours.equals( 40 ), inv.rate.equals( 50 ) )
+# == Compound conditions: <tt>&</tt> and <tt>|</tt>
+#   invoices = Invoice.get { |inv|
+#     inv.hours.equals( 40 ) & inv.rate.equals( 50 )
 #   }
 #   # => "select * from invoices where (hours = 40 and rate = 50)"
-#   client99 = object_store.getClient( 99 )
-#   invoices = object_store.getInvoices { |inv|
-#     Query.Or( inv.hours.equals( 40 ),
-#               inv.rate.equals( 50 ),
-#               inv.client.equals( client99 ) )
+#   client99 = Client[99]
+#   invoices = Invoice.get { |inv|
+#     inv.hours.equals( 40 ) | inv.rate.equals( 50 ) |
+#       inv.client.equals( client99 )
 #   }
 #   # => "select * from invoices where (hours = 40 or rate = 50 or client = 99)"
-# Note that both compound operators can take 2 or more arguments. Also, they can
-# be nested:
+# Note that both compound operators can be nested:
 #   invoices = object_store.getInvoices { |inv|
-#     Query.And( inv.hours.equals( 40 ),
-#                Query.Or( inv.rate.equals( 50 ),
-#                          inv.client.equals( client99 ) ) )
+#     inv.hours.equals( 40 ) &
+#       ( inv.rate.equals( 50 ) | inv.client.equals( client99 ) )
 #   }
 #   # => "select * from invoices where (hours = 40 and 
 #   #     (rate = 50 or client = 99))"
 #
 # == Negation: +not+
-#   invoices = object_store.getInvoices { |inv| inv.rate.equals( 50 ).not }
+#   invoices = Invoice.get { |inv| inv.rate.equals( 50 ).not }
 #   # => "select * from invoices where rate != 50"
+# This can be used directly against boolean and nil comparisons, too.
+#   not_administrators = User.get { |u| u.administrator.not }
+#   # => "select * from users where administrator != 1"
+#   has_email = User.get { |u| u.email.nil?.not }
+#   # => "select * from users where email is not null"
+#
+# = Query caching via subset matching
+# Lafcadio caches every query, and optimizes based on a simple subset
+# calculation. For example, if you run these statements:
+#   User.get { |u| u.lname.equals( 'Smith' ) }
+#   User.get { |u| u.lname.equals( 'Smith' ) & u.fname.like( /John/ ) }
+#   User.get { |u| u.lname.equals( 'Smith' ) & u.email.like( /hotmail/ ) }
+# Lafcadio can tell that the 2nd and 3rd queries are subsets of the first. So
+# these three statements will result in one database call, for the first 
+# statement: The 2nd and 3rd statements will be handled entirely in Ruby. The 
+# result is less database calls with no extra work for the programmer.
 
 require 'delegate'
 
 module Lafcadio
 	class Query
-		def self.And( *conditions ); CompoundCondition.new( *conditions ); end
+		def self.And( *conditions ) #:nodoc:
+			CompoundCondition.new( *conditions )
+		end
 		
+		# Infers a query from a block. The first required argument is the domain 
+		# class. Other optional arguments should be passed in hash form:
+		# [:order_by] An array of fields to order the results by.
+		# [:order_by_order] Possible values are Query::ASC or Query::DESC. Defaults
+		#                   to Query::DESC.
+		#   qry = Query.infer( User ) { |u| u.lname.equals( 'Hwang' ) }
+		#   qry.to_sql # => "select * from users where users.lname = 'Hwang'"
+		#   qry = Query.infer(
+		#     SKU,
+		#     :order_by => [ :standardPrice, :salePrice ],
+		#     :order_by_order => Query::DESC
+		#   ) { |s| s.sku.nil? }
+		#   qry.to_sql # => "select * from skus where skus.sku is null order by
+		#                    standardPrice, salePrice desc"
 		def self.infer( *args, &action )
 			inferrer = Query::Inferrer.new( *args ) { |obj| action.call( obj ) }
 			inferrer.execute
 		end
 		
-		def self.Or( *conditions )
+		def self.Or( *conditions ) #:nodoc:
 			conditions << CompoundCondition::OR
 			CompoundCondition.new( *conditions)
 		end
@@ -106,7 +173,7 @@ module Lafcadio
 		attr_reader :domain_class, :condition
 		attr_accessor :order_by, :order_by_order, :limit
 
-		def initialize(domain_class, pk_id_or_condition = nil, opts = {} )
+		def initialize(domain_class, pk_id_or_condition = nil, opts = {} ) #:nodoc:
 			@domain_class, @opts = domain_class, opts
 			( @condition, @order_by, @limit ) = [ nil, nil, nil ]
 			if pk_id_or_condition
@@ -121,9 +188,16 @@ module Lafcadio
 			@order_by_order = ASC
 		end
 		
+		# Returns a new query representing the condition of the current query and
+		# the new inferred query.
+		#   qry = Query.infer( User ) { |u| u.lname.equals( 'Hwang' ) }
+		#   qry.to_sql # => "select * from users where users.lname = 'Hwang'"
+		#   qry = qry.and { |u| u.fname.equals( 'Francis' ) }
+		#   qry.to_sql # => "select * from users where (users.lname = 'Hwang' and
+		#                    users.fname = 'Francis')"
 		def and( &action ); compound( CompoundCondition::AND, action ); end
 		
-		def collect( coll )
+		def collect( coll ) #:nodoc:
 			if @opts[:group_functions] == [:count]
 				[ result_row( [coll.size] ) ]
 			else
@@ -131,24 +205,30 @@ module Lafcadio
 			end
 		end
 			
-		def compound( comp_type, action )
+		def compound( comp_type, action ) #:nodoc:
 			rquery = Query.infer( @domain_class ) { |dobj| action.call( dobj ) }
 			Query::CompoundCondition.new(
 				@condition, rquery.condition, comp_type
 			).query
 		end
 		
-		def dobj_satisfies?( dobj )
+		def dobj_satisfies?( dobj ) #:nodoc:
 			@condition.nil? or @condition.dobj_satisfies?( dobj )
 		end
 
-		def eql?( other ); other.is_a?( Query ) && other.to_sql == to_sql; end
+		def eql?( other ) #:nodoc:
+			other.is_a?( Query ) && other.to_sql == to_sql
+		end
 
-		def fields; @opts[:group_functions] == [:count] ? 'count(*)' : '*'; end
+		def fields #:nodoc:
+			@opts[:group_functions] == [:count] ? 'count(*)' : '*'
+		end
 
-		def hash; to_sql.hash; end
+		def hash #:nodoc:
+			to_sql.hash
+		end
 		
-		def implies?( other_query )
+		def implies?( other_query ) #:nodoc:
 			if other_query == self
 				true
 			elsif @domain_class == other_query.domain_class
@@ -160,13 +240,20 @@ module Lafcadio
 			end
 		end
 		
-		def limit_clause
+		def limit_clause #:nodoc:
 			"limit #{ @limit.begin }, #{ @limit.end - @limit.begin + 1 }" if @limit
 		end
 		
+		# Returns a new query representing the condition of the current query and
+		# the new inferred query.
+		#   qry = Query.infer( User ) { |u| u.lname.equals( 'Hwang' ) }
+		#   qry.to_sql # => "select * from users where users.lname = 'Hwang'"
+		#   qry = qry.or { |u| u.fname.equals( 'Francis' ) }
+		#   qry.to_sql # => "select * from users where (users.lname = 'Hwang' or
+		#                    users.fname = 'Francis')"
 		def or( &action ); compound( CompoundCondition::OR, action ); end
 		
-		def order_clause
+		def order_clause #:nodoc:
 			if @order_by
 				field_str = @order_by.map { |f_name|
 					@domain_class.field( f_name.to_s ).db_field_name
@@ -177,7 +264,7 @@ module Lafcadio
 			end
 		end
 		
-		def result_row( row )
+		def result_row( row ) #:nodoc:
 			if @opts[:group_functions] == [:count]
 				{ :count => row.first }
 			else
@@ -185,11 +272,11 @@ module Lafcadio
 			end
 		end
 
-		def sql_primary_key_field(domain_class)
+		def sql_primary_key_field(domain_class) #:nodoc:
 			"#{ domain_class.table_name }.#{ domain_class.sql_primary_key_name }"
 		end
 
-		def tables
+		def tables #:nodoc:
 			concrete_classes = domain_class.self_and_concrete_superclasses.reverse
 			table_names = concrete_classes.collect { |domain_class|
 				domain_class.table_name
@@ -205,7 +292,7 @@ module Lafcadio
 			clauses.join ' '
 		end
 
-		def where_clause
+		def where_clause #:nodoc:
 			concrete_classes = domain_class.self_and_concrete_superclasses.reverse
 			where_clauses = []
 			concrete_classes.each_with_index { |domain_class, i|
@@ -461,7 +548,7 @@ module Lafcadio
 			end
 		end
 		
-		class Include < CompoundCondition
+		class Include < CompoundCondition #:nodoc:
 			def initialize( field_name, search_term, domain_class )
 				begin_cond = Like.new(
 					field_name, search_term + ',', domain_class, Like::POST_ONLY
