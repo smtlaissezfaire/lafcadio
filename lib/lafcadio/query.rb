@@ -570,7 +570,7 @@ module Lafcadio
 				unless args.size == 1
 					h = args.last
 					@order_by = h[:order_by]
-					@order_by_order = h[:order_by_order]
+					@order_by_order = ( h[:order_by_order] or ASC )
 				end
 			end
 			

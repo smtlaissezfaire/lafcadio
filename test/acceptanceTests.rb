@@ -428,14 +428,25 @@ class AccTestQuery < AcceptanceTestCase
 	end
 
 	def test_order_by
-		r1 = TestRow.new( 'text2' => 'zzz' ).commit
-		r2 = TestRow.new( 'text2' => 'aaa' ).commit
+		r1 = TestRow.new( 'text2' => 'zzz', 'text_field' => 'something' ).commit
+		r2 = TestRow.new( 'text2' => 'aaa', 'text_field' => 'something' ).commit
 		query = Query.new( TestRow )
 		query.order_by = 'text2'
 		assert_equal(
 			'select * from test_rows order by text_field2 asc', query.to_sql
 		)
 		coll = @object_store.query query
+		assert_equal( 2, coll.size )
+		assert_equal( r2, coll.first )
+		query2 = Query.infer( TestRow, :order_by => [ :text2 ] ) { |tr|
+			tr.text_field.equals( 'something' )
+		}
+		assert_equal(
+			"select * from test_rows where test_rows.text_field = 'something' " +
+					"order by text_field2 asc",
+			query2.to_sql
+		)
+		coll2 = @object_store.query query2
 		assert_equal( 2, coll.size )
 		assert_equal( r2, coll.first )
 	end

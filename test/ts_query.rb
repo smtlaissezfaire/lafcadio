@@ -617,6 +617,15 @@ class TestQuery < LafcadioTestCase
 						"order by standardPrice, salePrice desc",
 				qry.to_sql
 			)
+			qry = Query.infer(
+				SKU,
+				:order_by => [ :standardPrice, :salePrice ]
+			) { |s| s.sku.nil? }
+			assert_equal(
+				"select * from skus where skus.sku is null " +
+						"order by standardPrice, salePrice asc",
+				qry.to_sql
+			)
 		end
 	end
 
