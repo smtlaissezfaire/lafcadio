@@ -21,23 +21,34 @@ class LafcadioTestCase < Test::Unit::TestCase
 		)
   end
 	
+	# Asserts that for each key-value pair in +att_values+, sending the key to
+	# +object+ will return the value.
+	#   u = User.new( 'fname' => 'Francis', 'lname' => 'Hwang' )
+	#   assert_attributes( u, { 'fname' => 'Francis', 'lname' => 'Hwang' } )
 	def assert_attributes( object, att_values )
 		att_values.each { |method, expected|
 			assert_equal( expected, object.send( method ), method.to_s )
 		}
 	end
 	
-	def default_test; end
+	def default_test #:nodoc:
+	end
 end
 
 module Lafcadio
-	def BooleanField.mock_value; true; end
+	def BooleanField.mock_value #:nodoc:
+		true
+	end
 	
-	def DateField.mock_value; Date.today; end
+	def DateField.mock_value #:nodoc:
+		Date.today
+	end
 
-	def DateTimeField.mock_value; Time.now; end
+	def DateTimeField.mock_value #:nodoc:
+		Time.now
+	end
 	
-	module DomainMock
+	module DomainMock #:nodoc:
 		Version = '0.1.0'
 		
 		def self.included( includer )
@@ -89,7 +100,7 @@ module Lafcadio
 			self.class.setup_procs.each { |proc| proc.call( self ) }
 		end
 	
-		class DomainClassSymbolMapper < Hash
+		class DomainClassSymbolMapper < Hash #:nodoc:
 			def initialize; @last_domain_class = nil; end
 		
 			def default_symbol_name( domain_class )
@@ -126,7 +137,7 @@ module Lafcadio
 			hash[a_class] = default_args
 		}
 	
-		def self.commit_mock( args, caller = nil )
+		def self.commit_mock( args, caller = nil ) #:nodoc:
 			dobj = self.new( args )
 			link_fields = all_fields.select { |field| field.is_a? DomainObjectField }
 			link_fields.each do |field|
@@ -137,6 +148,29 @@ module Lafcadio
 			dobj
 		end
 	
+		# Commits and returns a custom mock object of the given domain class. All
+		# the field values are set to defaults, except for the fields passed in
+		# through +custom_args+. This mock object will have a +pk_id+ greater than
+		# 1, and each successive call to DomainObject.custom_mock will return an
+		# object with a unique +pk_id+.
+		#
+		# This class method is only visible if you include
+		# <tt>lafcadio/test.rb</tt>.
+		#
+		#   class User < Lafcadio::DomainObject
+		#     string :fname, :lname, :email
+		#   end
+		#   u1 = User.custom_mock
+		#   u1.fname # => 'test text'
+		#   u1.lname # => 'test text'
+		#   u1.email # => 'test text'
+		#   u1.pk_id # => probably 2, guaranteed to be greater than 1
+		#   u2 = User.custom_mock( 'fname' => 'Francis', 'lname' => 'Hwang' )
+		#   u2.fname # => 'Francis'
+		#   u2.lname # => 'Hwang'
+		#   u2.email # => 'test text'
+		#   u2.pk_id # => probably 3, guaranteed to not be u1.pk_id and to be
+		#            #    greater than 1 
 		def self.custom_mock( custom_args = nil )
 			dobj_args = default_args
 			object_store = ObjectStore.get_object_store
@@ -147,6 +181,27 @@ module Lafcadio
 			commit_mock( dobj_args )
 		end
 		
+		# Returns a hash of default arguments for mock instances of this domain
+		# class. DomainObject.default_mock uses exactly these arguments to create
+		# the default mock for a given domain class, and DomainObject.custom_mock
+		# overrides some of the field arguments based on its custom arguments.
+		#
+		# By default this will retrieve simple values based on the field type:
+		# * BooleanField:      +true+
+		# * DateField:         Date.today
+		# * DateTimeField:     Time.now
+		# * DomainObjectField: The instance of the domain class with +pk_id+ 1
+		# * EmailField:        "john.doe@email.com"
+		# * FloatField:        0.0
+		# * IntegerField:      1
+		# * StringField:       "test text"
+		# * TextListField:     [ 'a', 'b', 'c' ]
+		#
+		# You can override this method, if you like. However, it will probably be
+		# simpler just to call DomainObject.mock_value.
+		#
+		# This class method is only visible if you include
+		# <tt>lafcadio/test.rb</tt>.
 		def self.default_args
 			default_args = {}
 			@@default_arg_directives[self].each do |name, value_or_proc|
@@ -159,6 +214,22 @@ module Lafcadio
 			default_args
 		end
 		
+		# Commits and returns a mock object of the given domain class. All
+		# the field values are set to defaults. This mock object will have a
+		# +pk_id+ of 1. Successive calls to DomainObject.default_mock will always 
+		# return the same mock object.
+		#
+		# This class method is only visible if you include
+		# <tt>lafcadio/test.rb</tt>.
+		#
+		#   class User < Lafcadio::DomainObject
+		#     string :fname, :lname, :email
+		#   end
+		#   u1 = User.default_mock
+		#   u1.fname # => 'test text'
+		#   u1.lname # => 'test text'
+		#   u1.email # => 'test text'
+		#   u1.pk_id # => 1
 		def self.default_mock( calling_class = nil )
 			if @@default_mock_available[self]
 				begin
@@ -174,11 +245,11 @@ module Lafcadio
 			end
 		end
 
-		def self.default_mock_available( is_avail )
+		def self.default_mock_available( is_avail ) #:nodoc:
 			@@default_mock_available[self] = is_avail
 		end
 		
-		def self.maybe_call_default_mock( field, caller )
+		def self.maybe_call_default_mock( field, caller ) #:nodoc:
 			linked_type = field.linked_type
 			begin
 				ObjectStore.get_object_store.get( linked_type, 1 )
@@ -189,34 +260,81 @@ module Lafcadio
 			end
 		end
 
+		# Sets the mock value for the given field. These mock values are used in
+		# DomainObject.default_mock and DomainObject.custom_mock
+		#
+		# This class method is only visible if you include
+		# <tt>lafcadio/test.rb</tt>.
+		#
+		#   class User < Lafcadio::DomainObject
+		#     string :fname, :lname, :email
+		#   end
+		#   User.mock_value :fname, 'Bill'
+		#   User.mock_value :lname, 'Smith'
+		#   u1 = User.default_mock
+		#   u1.fname # => 'Bill'
+		#   u1.lname # => 'Smith'
+		#   u1.email # => 'test text'
+		#   u1.pk_id # => 1
 		def self.mock_value( field_sym, value )
 			@@default_arg_directives[self][field_sym.id2name] = value
 		end
 		
+		# Sets the mock value for the fields in +hash+. These mock values are used
+		# in DomainObject.default_mock and DomainObject.custom_mock
+		#
+		# This class method is only visible if you include
+		# <tt>lafcadio/test.rb</tt>.
+		#
+		#   class User < Lafcadio::DomainObject
+		#     string :fname, :lname, :email
+		#   end
+		#   User.mock_values { :fname => 'Bill', :lname => 'Smith' }
+		#   u1 = User.default_mock
+		#   u1.fname # => 'Bill'
+		#   u1.lname # => 'Smith'
+		#   u1.email # => 'test text'
+		#   u1.pk_id # => 1
 		def self.mock_values( hash )
 			hash.each do |field_sym, value| mock_value( field_sym, value ); end
 		end
 	end
 	
 	class DomainObjectField < ObjectField
-		def default_mock_value; DomainObjectProxy.new( linked_type, 1 ); end
+		def default_mock_value #:nodoc:
+			DomainObjectProxy.new( linked_type, 1 )
+		end
 	end
 	
-	def EmailField.mock_value; 'john.doe@email.com'; end
+	def EmailField.mock_value #:nodoc:
+		'john.doe@email.com'
+	end
 
-	def FloatField.mock_value; 0.0; end
+	def FloatField.mock_value #:nodoc:
+		0.0
+	end
 
-	def IntegerField.mock_value; 1; end
+	def IntegerField.mock_value #:nodoc:
+		1
+	end
 
 	class ObjectField
 		attr_writer :mock_value
 	
-		def default_mock_value; self.class.mock_value; end
+		def default_mock_value #:nodoc:
+			self.class.mock_value
+		end
 	end
 
-	def PrimaryKeyField.mock_value; nil; end
+	def PrimaryKeyField.mock_value #:nodoc:
+		nil
+	end
 
-	def StringField.mock_value; 'test text'; end
+	def StringField.mock_value #:nodoc:
+		'test text'
+	end
 	
-	def TextListField.mock_value; %w( a b c ); end
+	def TextListField.mock_value #:nodoc:
+		%w( a b c )
+	end
 end
