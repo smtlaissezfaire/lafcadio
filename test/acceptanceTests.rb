@@ -418,6 +418,11 @@ class AccTestQuery < AcceptanceTestCase
 				Query.And( tr.bool_field, tr.text_field.equals( 'something' ) )
 			}.size
 		)
+		TestRow.new( 'text_field' => 's', 'bool_field' => true ).commit
+		qry = Query.infer( TestRow ) { |tr| tr.bool_field }
+		qry.limit = 0..0
+		qry = qry.and { |tr| tr.text_field.like( /^s/ ) }
+		assert_equal( 1, @object_store.query( qry ).size )
 	end
 	
 	def test_count

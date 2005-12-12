@@ -207,9 +207,13 @@ module Lafcadio
 			
 		def compound( comp_type, action ) #:nodoc:
 			rquery = Query.infer( @domain_class ) { |dobj| action.call( dobj ) }
-			Query::CompoundCondition.new(
+			q = Query::CompoundCondition.new(
 				@condition, rquery.condition, comp_type
 			).query
+			[ :order_by, :order_by_order, :limit ].each do |attr|
+				q.send( attr.to_s + '=', self.send( attr ) )
+			end
+			q
 		end
 		
 		def dobj_satisfies?( dobj ) #:nodoc:
