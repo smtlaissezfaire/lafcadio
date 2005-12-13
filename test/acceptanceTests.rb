@@ -315,6 +315,23 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		end
 	end
 	
+	def test_caching_accounts_for_limits_and_sort_by
+		TestRow.new( 'text_field' => 'aza' ).commit
+		TestRow.new( 'text_field' => 'bzb' ).commit
+		TestRow.new( 'text_field' => 'czc' ).commit
+		q = Query.infer( TestRow ) { |tr| tr.text_field.like( /z/ ) }
+		assert_equal(
+			3, @object_store.test_rows { |tr| tr.text_field.like( /z/ ) }.size
+		)
+		q = Query.infer( TestRow ) { |tr| tr.text_field.like( /z/ ) }
+		q.limit = 0..0
+		assert_equal( 1, @object_store.query( q ).size )
+		q.limit = nil
+		q.order_by = 'text_field'
+		q.order_by_order = Query::DESC
+		assert_equal( 'aza', @object_store.query( q ).last.text_field )
+	end
+	
 	def test_diff_pk
 		sql = <<-SQL
 insert into test_diff_pk_rows( objId, text_field )

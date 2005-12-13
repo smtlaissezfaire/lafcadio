@@ -347,11 +347,11 @@ module Lafcadio
 				
 				def collect_from_superset( query )
 					if ( pk_ids = find_superset_pk_ids( query ) )
-						queries[query] = ( pk_ids.collect { |pk_id|
+						db_objects = ( pk_ids.collect { |pk_id|
 							self[ pk_id ]
-						} ).select { |dobj| query.dobj_satisfies?( dobj ) }.collect { |dobj|
-							dobj.pk_id
-						}
+						} ).select { |dobj| query.dobj_satisfies?( dobj ) }
+						db_objects = query.order_and_limit_collection db_objects
+						queries[query] = db_objects.collect { |dobj| dobj.pk_id }
 						true
 					else
 						false

@@ -268,6 +268,21 @@ module Lafcadio
 			end
 		end
 		
+		def order_and_limit_collection( objects )
+			objects = objects.sort_by { |dobj|
+				if order_by.nil?
+					dobj.pk_id
+				elsif order_by.is_a?( Array )
+					order_by.map { |field_name| dobj.send( field_name ) }
+				else
+					dobj.send order_by
+				end
+			}
+			objects.reverse! if order_by_order == Query::DESC
+			objects = objects[limit] if limit
+			objects
+		end
+		
 		def result_row( row ) #:nodoc:
 			if @opts[:group_functions] == [:count]
 				{ :count => row.first }

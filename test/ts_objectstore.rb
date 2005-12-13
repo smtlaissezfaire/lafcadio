@@ -545,6 +545,23 @@ class TestObjectStore < LafcadioTestCase
 			assert_not_nil client.pk_id
 		end
 	
+		def test_caching_accounts_for_limits_and_sort_by
+			@cache.commit( User.new( 'pk_id' => 1, 'firstNames' => 'aza' ) )
+			@cache.commit( User.new( 'pk_id' => 2, 'firstNames' => 'bzb' ) )
+			@cache.commit( User.new( 'pk_id' => 3, 'firstNames' => 'czc' ) )
+			q = Query.infer( User ) { |tr| tr.firstNames.like( /z/ ) }
+			assert_equal( 3, @cache.get_by_query( q ).size )
+			q = Query.infer( User ) { |tr| tr.firstNames.like( /z/ ) }
+			q.order_by = 'firstNames'
+			q.order_by_order = Query::DESC
+			coll = @cache.get_by_query q
+			assert_equal( 3, coll.size )
+			assert_equal( 'aza', coll.last.firstNames )
+			q.order_by = nil
+			q.limit = 0..0
+			assert_equal( 1, @cache.get_by_query( q ).size )
+		end
+
 		def test_clones
 			user = User.uncommitted_mock
 			user.pk_id = 1
