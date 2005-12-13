@@ -272,6 +272,7 @@ module Lafcadio
 				db_object.pk_id = @db_bridge.last_pk_id_inserted unless db_object.pk_id
 				update_after_commit db_object
 				db_object.post_commit_trigger
+				db_object.reset_original_values_hash
 				db_object
 			end
 			

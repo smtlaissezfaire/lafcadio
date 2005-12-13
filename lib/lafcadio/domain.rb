@@ -687,7 +687,7 @@ module Lafcadio
 			field_hash = preprocess_field_hash field_hash
 			@field_values = {}
 			@fields_set = []
-			@original_values = ReadOnlyHash.new @fieldHash
+			reset_original_values_hash @fieldHash
 			check_fields = LafcadioConfig.new()['checkFields']
 			verify if %w( onInstantiate onAllStates ).include?( check_fields )
 		end
@@ -779,6 +779,10 @@ module Lafcadio
 		# override it to ensure code is executed after a commit.
 		def post_commit_trigger
 			nil
+		end
+
+		def reset_original_values_hash( f = @field_values ) #:nodoc:
+			@original_values = ReadOnlyHash.new( f.clone )
 		end
 
 		def set_field_value( field, value ) #:nodoc:
