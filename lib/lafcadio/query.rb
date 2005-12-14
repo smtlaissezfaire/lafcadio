@@ -170,8 +170,8 @@ module Lafcadio
 		ASC		= 1
 		DESC 	= 2
 
-		attr_reader :domain_class, :condition
-		attr_accessor :order_by, :order_by_order, :limit
+		attr_reader :domain_class, :condition, :limit
+		attr_accessor :order_by, :order_by_order
 
 		def initialize(domain_class, pk_id_or_condition = nil, opts = {} ) #:nodoc:
 			@domain_class, @opts = domain_class, opts
@@ -242,6 +242,10 @@ module Lafcadio
 					self.condition and self.condition.implies?( other_query.condition )
 				end
 			end
+		end
+		
+		def limit=( limit )
+			@limit = limit.is_a?( Fixnum ) ? 0..limit-1 : limit
 		end
 		
 		def limit_clause #:nodoc:
@@ -590,6 +594,7 @@ module Lafcadio
 					h = args.last
 					@order_by = h[:order_by]
 					@order_by_order = ( h[:order_by_order] or ASC )
+					@limit = h[:limit]
 				end
 			end
 			
@@ -599,6 +604,7 @@ module Lafcadio
 				query = Query.new( @domain_class, condition )
 				query.order_by = @order_by
 				query.order_by_order = @order_by_order
+				query.limit = @limit
 				query
 			end
 		end

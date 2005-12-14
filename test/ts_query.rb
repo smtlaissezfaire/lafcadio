@@ -90,6 +90,24 @@ class TestQuery < LafcadioTestCase
 					"clients.pk_id >= 99) limit 0, 10",
 			query3.to_sql
 		)
+		query4 = Query.new Client
+		query4.limit = 10
+		assert_equal( 'select * from clients limit 0, 10', query4.to_sql )
+		query5 = Query.infer( Client, :limit => 0..9 ) { |c|
+			c.name.equals( 'client name' )
+		}
+		assert_equal(
+			"select * from clients where clients.name = 'client name' limit 0, 10",
+			query5.to_sql
+		)
+		query6 = Query.infer( Client, :limit => 10 ) { |c|
+			c.name.equals( 'client name' )
+		}
+		assert_equal(
+			"select * from clients where clients.name = 'client name' limit 0, 10",
+			query6.to_sql
+		)
+		
 	end
 
 	def test_one_pk_id
