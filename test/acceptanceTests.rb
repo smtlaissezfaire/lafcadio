@@ -202,6 +202,11 @@ class AccTestDateTimeField < AcceptanceTestCase
 	end
 end
 
+class DomainObject
+	# used in test_refresh_original_values_after_commit
+	attr_accessor :original_values
+end
+
 class AccTestDomainObject < AcceptanceTestCase
 	def test_dont_check_field_values_if_using_real_object_store
 		LafcadioConfig.set_values(
@@ -237,6 +242,15 @@ class AccTestDomainObject < AcceptanceTestCase
 			},
 			TestRow.class_fields.inspect
 		)
+	end
+
+	def test_refresh_original_values_after_commit
+		tr = TestRow.new( 'text_field' => 'text' ).commit
+		assert_equal( 'text', tr.original_values['text_field'] )
+		tr.text_field = 'something else'
+		assert_equal( 'text', tr.original_values['text_field'] )
+		tr.commit
+		assert_equal( 'something else', tr.original_values['text_field'] )
 	end
 
 	def test_sql_primary_key_name

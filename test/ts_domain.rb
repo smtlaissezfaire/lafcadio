@@ -96,6 +96,11 @@ end
 # necessary for test_global_methods_dont_interfere_with_method_missing
 def name; 'global name'; end
 
+class Client < Lafcadio::DomainObject
+	# used in test_refresh_original_values_after_commit
+	attr_accessor :original_values
+end
+
 class TestDomainObject < LafcadioTestCase
 	def teardown
 		super
@@ -505,6 +510,15 @@ class TestDomainObject < LafcadioTestCase
 	
 	def test_pk_id_needs_fixnum
 		assert_equal Fixnum, Client.uncommitted_mock.pk_id.class
+	end
+
+	def test_refresh_original_values_after_commit
+		client = Client.new( 'name' => 'text' ).commit
+		assert_equal( 'text', client.original_values['name'] )
+		client.name = 'something else'
+		assert_equal( 'text', client.original_values['name'] )
+		client.commit
+		assert_equal( 'something else', client.original_values['name'] )
 	end
 
 	def test_sql_primary_key_name
