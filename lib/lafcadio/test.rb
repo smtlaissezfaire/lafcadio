@@ -177,7 +177,9 @@ module Lafcadio
 			dbb = object_store.db_bridge
 			dbb.set_next_pk_id( self, 2 ) if dbb.next_pk_id( self ) == 1
 			dobj_args['pk_id'] = nil
-			dobj_args = dobj_args.merge( custom_args ) if custom_args.is_a?( Hash )
+			if custom_args.is_a? Hash
+				custom_args.each do |k, v| dobj_args[k.to_s] = v; end
+			end
 			commit_mock( dobj_args )
 		end
 		

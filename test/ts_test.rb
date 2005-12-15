@@ -148,5 +148,10 @@ class TestDomainMock < Test::Unit::TestCase
 		dobj_a99 = DobjA.custom_mock( 'pk_id' => 99 )
 		assert_equal( 99, dobj_a99.pk_id )
 		assert_not_equal( dobj_a1, dobj_a99 )
+		dobj_a101 = DobjA.custom_mock(
+			:pk_id => 101, :text_field => 'some string'
+		)
+		assert_equal( 101, dobj_a101.pk_id )
+		assert_equal( 'some string', dobj_a101.text_field )
 	end
 end
