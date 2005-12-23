@@ -1,5 +1,19 @@
 CHANGELOG
 
+0.9.1 -- December 23 2005
+* WARNING: Renamed ObjectField#not_null to #not_nil, MapObject#mappedTypes to
+  #mapped_classes, ObjectStore#get_all to #all, ObjectStore#get_db_bridge to
+	#db_bridge, ObjectStore#get_max to #max, ObjectStore#query to #group_query,
+	ObjectStore#get_subset to #query, ObjectStore#get_user to #user, and
+	ObjectStore#get_users to #users. Removed ObjectStore#get_filtered,
+	ObjectStore#get_objects, ObjectStore#set_db_name
+* Fixed bugs in Query.infer, Query#and, Query#or, and
+  ObjectStore::Cache#get_by_query in handling order_by, order_by_order, and
+	limit clauses
+* Fixed bug where DomainObject#commit did not update @original_values
+* You can pass Query#limit either a Fixnum or a Range
+* DomainObject#custom_mock can take either symbols or strings as hash keys
+
 0.9.0 -- October 23 2005
 * Added count queries
 * Fixed missing gem dependency to ContextualService
