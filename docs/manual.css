@@ -1,0 +1,5 @@
+body { font-family: "Georgia","Times Roman", serif }
+pre { padding: 1em; background-color: black; color: #bbf }
+
+.note { border: 1px dashed black; padding: 0 1em 0 1em }
+.note h3 { font-style: italic; margin-bottom: -0.5em; color: grey }

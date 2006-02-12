@@ -652,14 +652,15 @@ module Lafcadio
 
 		def self.try_load_xml_parser # :nodoc:
 			require 'lafcadio/domain'
-			dirName = LafcadioConfig.new['classDefinitionDir']
-			xmlFileName = self.basename + '.xml'
-			xmlPath = File.join( dirName, xmlFileName )
-			begin
-				xml = File.open( xmlPath ) do |f| f.gets( nil ); end
-				ClassDefinitionXmlParser.new( self, xml )
-			rescue Errno::ENOENT
-				# no xml file, so no @xmlParser
+			if ( dirName = LafcadioConfig.new['classDefinitionDir'] )
+				xmlFileName = self.basename + '.xml'
+				xmlPath = File.join( dirName, xmlFileName )
+				begin
+					xml = File.open( xmlPath ) do |f| f.gets( nil ); end
+					ClassDefinitionXmlParser.new( self, xml )
+				rescue Errno::ENOENT
+					# no xml file, so no @xmlParser
+				end
 			end
 		end
 		

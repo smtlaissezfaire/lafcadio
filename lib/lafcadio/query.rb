@@ -108,7 +108,7 @@
 #   }
 #   # => "select * from invoices where (hours = 40 or rate = 50 or client = 99)"
 # Note that both compound operators can be nested:
-#   invoices = object_store.getInvoices { |inv|
+#   invoices = Invoice.get { |inv|
 #     inv.hours.equals( 40 ) &
 #       ( inv.rate.equals( 50 ) | inv.client.equals( client99 ) )
 #   }

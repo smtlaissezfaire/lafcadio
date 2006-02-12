@@ -1,26 +1,43 @@
 $: << 'lib'
 require 'lafcadio'
 
-@@versionStr = Lafcadio::Version
+@@version_str = Lafcadio::Version
 
-def releaseTag
-	( uber, major, minor ) = @@versionStr.split( '.' ).collect! { |str| str.to_i }
+def release_tag
+	( uber, major, minor ) = @@version_str.split( '.' ).collect! { |str|
+		str.to_i
+	}
 	"rel-#{ uber }-#{ major }-#{ minor }"
 end
 
-def releaseDirName
-	"lafcadio-#{ @@versionStr }"
+def release_dir_name
+	"lafcadio-#{ @@version_str }"
 end
 
-task :exportReleaseDir do
+file 'docs/manual.html' => [ 'docs/manual.xml' ] do
+	sh "xsltproc --output docs/manual.html docs/xsl/manual.xsl docs/manual.xml"
+end
+
+file 'docs/manual/index.html' => [ 'docs/manual.xml' ] do
+	sh "xsltproc -stringparam base.dir docs/manual/ docs/xsl/manual-multi.xsl docs/manual.xml"
+end
+
+file 'docs/doc/index.html' => ['changelog.txt'] do
+	Dir.chdir 'lib'
+	`rdoc --op ../docs/doc/ --main lafcadio.rb`
+	Dir.chdir '..'
+end
+
+task :manual => [ 'docs/manual.html', 'docs/manual/index.html' ]
+
+task :export_release_dir do
 	Dir.chdir('../releases')
 	ext = "-d:ext:francis@rubyforge.org:/var/cvs/lafcadio"
-	`cvs #{ ext } export -r #{ releaseTag } -d #{ releaseDirName } lafcadio`
+	`cvs #{ ext } export -r #{ release_tag } -d #{ release_dir_name } lafcadio`
 end
 
-task :updateDocs do
-	Dir.chdir( 'lib' )
-	`rdoc --op ../../lafcadio.rubyforge.org/doc/ --main lafcadio.rb`
-	Dir.chdir( '..' )
-	`cp -r ../lafcadio.rubyforge.org/ ./docs`
+task :build_docs => [:manual, 'docs/doc/index.html']
+
+task :site_staging => [:build_docs] do
+	sh "cp -r ./docs/ ../lafcadio.rubyforge.org/"
 end

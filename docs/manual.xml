@@ -1,0 +1,1006 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+                      "http://www.docbook.org/xml/4.3/docbookx.dtd" >
+<book>
+	<bookinfo><title>Lafcadio</title></bookinfo>
+	<chapter>
+		<title>Introduction</title>
+		<para>
+			Lafcadio is an object-relational mapping library for Ruby and MySQL. The point of an ORM is to allow you to treat database rows like first-class objects, minimizing the amount of time you have to spend thinking about SQL vagaries so you can spend more time thinking about your program's logic.
+		</para>
+		<para>
+			Features include:
+			<itemizedlist>
+				<listitem>
+					Strong support for testing with a full-featured mock database and dead-simple dependency injection (via ContextualService).
+				</listitem>
+				<listitem>
+					A rich query inference language that takes full advantage of Ruby's reflective nature. You can use this to create database queries that run against both the real database and the mock database. You can also use this to build complex queries without the annoying and error-prone process of concatenating SQL strings.
+				</listitem>
+				<listitem>
+					Heavy support for legacy databases. Lafcadio's attitude towards schemas is fairly pragmatic: Although it's nice to be able to create a schema from scratch, there are a lot of legacy schemas out there that still need support. Lafcadio goes quite far in supporting those older schemas. If you've got a boolean field whose values are "y" and "n" instead of 0 and 1, Lafcadio can handle that. If you've got a field that stores an array as a comma-delimited list, Lafcadio can handle that too.
+				</listitem>
+			</itemizedlist>
+		</para>
+		<para>
+			In development since 2002, Lafcadio is still in active development, but is mature enough to be used in production systems. Most notably, it's used at <ulink url="http://rhizome.org/">Rhizome.org</ulink>, an online arts website that gets more than a million pageviews a month.
+		</para>
+	</chapter>
+	<chapter>
+		<title>Installation</title>
+		<sect1>
+			<title>Installation overview</title>
+			<para>
+				Because Lafcadio depends on Ruby-DBI, and Ruby-DBI depends on MySQL/Ruby, an installation of Lafcadio requires at least three separate steps: Installing MySQL/Ruby, installing Ruby-DBI, and installing Lafcadio. You may already have installed the first two parts installed, but in case you haven't I've included install instructions here.
+			</para>
+		</sect1>
+		<sect1>
+			<title>Install MySQL/Ruby (or Ruby/MySQL)</title>
+			<para>
+				First install <ulink url="http://www.tmtm.org/en/mysql/ruby/">MySQL/Ruby</ulink>. The following will work for most setups:
+				<programlisting>% curl http://tmtm.org/downloads/mysql/ruby/mysql-ruby-2.7.tar.gz -o mysql-ruby-2.7.tar.gz
+% tar zxvf mysql-ruby-2.7.tar.gz
+% cd mysql-ruby-2.7
+% ruby extconf.rb --with-mysql-config
+% make
+% ruby test.rb [hostname] [username] [dbpassword]
+% make install     # as superuser</programlisting>
+				If your configuration is slightly different, check the <ulink url="http://www.tmtm.org/en/mysql/ruby/">MySQL/Ruby page</ulink> for more detailed setup info.
+			</para>
+			<note>
+				<para>
+					Please note that MySQL/Ruby has some known issues on certain architectures. If you have strange segfaults while running MySQL/Ruby tests, we recommend that you install <ulink url="http://www.tmtm.org/en/ruby/mysql/README_en.html">Ruby/MySQL</ulink> instead. Make sure that MySQL/Ruby is uninstalled, so that Ruby-DBI will unambiguously know which library to load.
+				</para>
+				<para>
+					In case you're wondering: MySQL/Ruby and Ruby/MySQL, both written by Tomita Masahiro, are two implementations of the same API in C and pure Ruby, respectively. Ruby/MySQL is mildly slower, but both look the same from the outside, and to Ruby-DBI.
+				</para>
+			</note>
+		</sect1>
+		<sect1>
+			<title>Install Ruby-DBI</title>
+			<para>
+				<ulink url="http://rubyforge.org/projects/ruby-dbi">Ruby-DBI</ulink> offers a generic DB connection interface. To install, try the following:
+				<programlisting>% curl http://rubyforge.org/frs/download.php/655/ruby-dbi-all-0.0.23.tar.gz -o ruby-dbi-all-0.0.23.tar.gz
+% tar zxvf ruby-dbi-all-0.0.23.tar.gz
+% cd ruby-dbi-all
+% ruby setup.rb config --with=dbi,dbd_mysql
+% ruby setup.rb setup
+% ruby setup.rb install    # as superuser</programlisting>
+			</para>
+			<note>
+				<para>
+					Ruby-DBI is a project in flux right now, and its documentation is scattered as a result. Check both the <ulink url="http://rubyforge.org/projects/ruby-dbi/">Rubyforge page</ulink> and older <ulink url="http://ruby-dbi.sourceforge.net/">SourceForge page</ulink> if you need more info or help.
+				</para>
+			</note>
+		</sect1>
+		<sect1>
+			<title>Install Lafcadio</title>
+			<sect2>
+				<title>... with RubyGems</title>
+				<para>
+					Lafcadio has a number of external dependencies, and installing via RubyGems is highly recommended to help manage these dependencies. With RubyGems, you can install with
+					<programlisting>% gem install lafcadio     # as superuser</programlisting>
+				</para>
+				<para>
+					Note that MySQL/Ruby and Ruby-DBI are currently not Gem-installable, so you will have to install them by hand, as discussed above.
+				</para>
+			</sect2>
+			<sect2>
+				<title>... without RubyGems</title>
+				<para>
+					If for some reason you want to do an old fashioned install without RubyGems, you'll have to install its dependencies by yourself. After installing MySQL/Ruby and Ruby-DBI, you should also install the following Ruby libraries:
+					<itemizedlist>
+						<listitem>
+							<ulink url="http://englishext.rubyforge.org/">English Extensions</ulink>
+						</listitem>
+						<listitem>
+							<ulink url="http://extensions.rubyforge.org/">Extensions</ulink>
+						</listitem>
+						<listitem>
+							<ulink url="http://queuehash.rubyforge.org/">QueueHash</ulink>
+						</listitem>
+						<listitem>
+							<ulink url="http://log4r.sourceforge.net/">log4r</ulink>
+						</listitem>
+						<listitem>
+							<ulink url="http://www.germane-software.com/software/rexml/">REXML</ulink>. If you're using Ruby 1.8 or later you already have REXML.
+						</listitem>
+						<listitem>
+							<ulink url="http://month.rubyforge.org/">Ruby Month</ulink>
+						</listitem>
+						<listitem>
+							<ulink url="http://uscommerce.rubyforge.org/">USCommerce</ulink>
+						</listitem>
+					</itemizedlist>
+				</para>
+				<para>
+					Once you've done that, you can install Lafcadio with
+					<programlisting>% ruby install.rb     # as superuser</programlisting>
+				</para>
+			</sect2>
+			<sect2>
+				<title>Test Lafcadio (optional)</title>
+				<para>
+					If you like, you can run all the tests. The test suite assumes you have a MySQL user with the username of "test" and a password of "password" (These values are set in lib/lafcadio/test/testconfig.dat.) You should create this user, and give it full permissions to a database called "test". You probably shouldn't let the account do anything more than that.
+					<programlisting>% cd lib
+% ruby ../test/unitTests.rb
+% ruby ../test/acceptanceTests.rb</programlisting>
+				</para>
+			</sect2>
+		</sect1>
+	</chapter>
+	<chapter>
+		<title>Tutorial</title>
+		<sect1>
+			<title>Create a configuration file</title>
+			<para>
+				Configurations in Lafcadio are set in-Ruby, as opposed to an external file with YAML or XML. If you want to swap out different configurations, it's easy enough to do so by requiring different Ruby files.
+			</para>
+			<para>
+				For this tutorial we'll create a single Ruby file called <filename>tutorial_setup.rb</filename>. Here's what it should look like to start:
+			</para>
+			<programlisting>require     'rubygems'
+require_gem 'lafcadio'
+
+Lafcadio::LafcadioConfig.set_values(
+  'dbuser' => 'test',
+  'dbpassword' => 'password',
+  'dbname' => 'test',
+  'dbhost' => 'localhost'
+)</programlisting>
+			<para>
+				Of course, if you're not using Rubygems you should just replace the first two lines with "require 'lafcadio'".
+			</para>
+			<para>
+				You can test this configuration with:
+				<programlisting>% ruby -e "require 'tutorial_setup'; Lafcadio::ObjectStore.get_object_store"</programlisting>
+			</para>
+		</sect1>
+		<sect1>
+			<title>Create a table, and corresponding domain class</title>
+			<para>
+				Object types that are represented in the database are called domain objects. You need to write a class definition for each different domain object type.
+			</para>
+			<para>
+				First, so we have a domain object type, let's create a User type. Log into MySQL and create a users table:
+			</para>
+<programlisting>create table users (
+  pk_id       int not null auto_increment,
+  primary key (pk_id),
+  first_name  varchar(64),
+  last_name   varchar(64),
+  email       varchar(64) not null,
+  password    varchar(64) not null,
+  birthday    date
+);</programlisting>
+			<para>
+				Note that the primary key is named <constant>pk_id</constant>. Lafcadio is fairly flexible about what your tables look like, but it requires each table to have a numeric primary key. It assumes that it's going to be named <constant>pk_id</constant>, and that can be changed, but it's a little less work to go with the default.
+			</para>
+			<para>
+				Although we're creating a new table in this example, Lafcadio can also be integrated with pre-existing tables with only a little more work.
+			</para>
+			<para>
+				Next, write a child of DomainObject which defines the fields. Let's put this at the end of <filename>tutorial_setup.rb</filename>:
+			</para>
+<programlisting>class User &lt; Lafcadio::DomainObject
+  string 'first_name'
+  string 'last_name'
+  string 'email'
+  string 'password'
+  date   'birthday'
+end</programlisting>
+			<para>
+				You write one field directive for every field in the table, except for <constant>pk_id</constant>. For style reasons, Lafcadio expects the table name to be the plural (<constant>users</constant>) and expects the domain class type to be singular (<constant>User</constant>). You can override this assumption if you like.
+			</para>
+		</sect1>
+		<sect1>
+			<title>Create, update, and delete Users</title>
+			<para>
+				Now that we've defined a domain object class, we can write a script that makes use of this.
+			</para>
+			<sect2>
+				<title>Create a new user and save it to the database</title>
+<programlisting>require 'tutorial_setup'
+
+ten_years_ago = Date.today - (365 * 10)
+john = User.new(
+  'birthday' => ten_years_ago,
+  'email' => 'john.doe@email.com',
+  'first_name' => 'John',
+  'last_name' => 'Doe',
+  'password' => 'my_password'
+)
+john.commit</programlisting>
+				<para>
+					To create a user, you instantiate it with a hash. Notice that for the birthday field you don't have to think about SQL date formats; Lafcadio takes care of that automatically for you.
+				</para>
+				<para>
+					If you run this script you'll find that your users table will have one record in it with an pk_id 1; this is John Doe.
+				</para>
+			</sect2>
+			<sect2>
+				<title>Retrieve a user and change some values</title>
+<programlisting>require 'tutorial_setup'
+
+john = User[1]
+ten_years = 365 * 10
+john.birthday -= ten_years
+john.email = 'john.doe@mail.email.com'
+john.commit</programlisting>
+				<para>
+					Note that all the domain object properties can be accessed like any object's properties. Furthermore, when you committed the object last time, the object store inserted a row into the database. This time, it updates the pre-existing row instead.
+				</para>
+			</sect2>
+			<sect2>
+				<title>Delete the user</title>
+<programlisting>require 'tutorial_setup'
+
+john = User[1]
+john.delete = true
+john.commit</programlisting>
+			</sect2>
+		</sect1>
+		<sect1>
+			<title>Add methods to the User class</title>
+			<para>
+				The <constant>User</constant> class can be saved to the database, but it's also a normal Ruby class, too. Accordingly, you can add methods to it to give yourself functionality that might be a pain to get with a SQL statement.
+			</para>
+			<para>
+				For example, some users will enter only their first name or only their last name, or no name at all. It'd be convenient to have a method that accounts for this, so:
+			</para>
+<programlisting>require 'tutorial_setup'
+
+class User &lt; Lafcadio::DomainObject
+  def name; [ first_name, last_name ].compact.join( ' ' ); end
+end</programlisting>
+		</sect1>
+		<sect1>
+			<title>Record an association between Users and Messages</title>
+			<para>
+				Since you're dealing with a relational database, you'll likely want to have different tables relating to one another. For example, let's say you want to have a simple email-like system where users can send one another messages.
+			</para>
+			<para>First, create a <constant>messages</constant> table in MySQL:</para>
+<programlisting>create table messages (
+  pk_id       int not null auto_increment,
+  primary key (pk_id),
+  subject     varchar(64) not null,
+  body        varchar(255) not null,
+  author      int not null,
+  recipient   int not null,
+  date_sent   date not null 
+);</programlisting>
+			<para>
+				Then add a <constant>Message</constant> class to the end of <filename>tutorial_setup.rb</filename>.
+			</para>
+<programlisting>class Message &lt; Lafcadio::DomainObject
+  string        'subject'
+  string        'body'
+  domain_object User, 'author'
+  domain_object User, 'recipient'
+  date          'date_sent'
+end</programlisting>
+			<para>
+				As before, you leave out the <constant>pk_id</constant> field.
+			</para>
+			<para>
+				Once you've defined the <constant>Message</constant> class, you can treat instances of <constant>User</constant> as values of the fields <constant>Message#author</constant> and <constant>Message#recipient</constant>.
+			</para>
+<programlisting>require 'tutorial_setup'
+
+john = User[1]
+five_years_ago = Date.today - ( 365 * 5 )
+jane = User.new(
+	'birthday' => five_years_ago
+  'email' => 'jane.doe@email.com',
+  'first_name' => 'Jane',
+  'last_name' => 'Doe',
+  'password' => 'jane_pass',
+)
+jane.commit
+message_body = "Hey, Jane,\n\nWanna go to the movies on Saturday?"
+message = Message.new(
+  'subject' => 'hey',
+  'body' => message_body,
+  'author' => john,
+  'recipient' => jane,
+  'date_sent' => Date.today
+)
+message.commit</programlisting>
+			<para>
+				With this code Lafcadio will save all the appropriate id numbers in the right fields in MySQL.
+			</para>
+		</sect1>
+		<sect1>
+			<title>Query Users</title>
+			<para>
+				To query <constant>User</constant>, you use Lafcadio's query inference.
+			</para>
+<programlisting>require 'tutorial_setup'
+
+does = User.get { |u| u.last_name.equals( 'Doe' ) }
+puts "There are #{ does.size } user(s) with the last name 'Doe'."
+jane_does = User.get { |u|
+  Lafcadio::Query.And(
+    u.first_name.equals( 'Jane' ), u.last_name.equals( 'Doe' )
+  )
+}
+puts "There are #{ jane_does.size } user(s) with the first name 'Jane' and the last name 'Doe'."
+messages_to_jane = Message.get { |m| m.recipient.equals( jane_does.first ) }
+puts "There are #{ messages_to_jane.size } message(s) to Jane Doe."</programlisting>
+		</sect1>
+	</chapter>
+	<chapter>
+		<title>Matching database tables to domain classes</title>
+		<sect1>
+			<title>Defining domain class fields</title>
+			<para>
+				Lafcadio takes a Ruby-centric approach to object-relational mapping, as opposed to a database-centric approach. That means it relies on information in the Ruby code, as opposed to a live database schema, to tell it what fields tables have. The tradeoffs to this are significant. On one hand, Lafcadio has a test mode that runs in-memory, and in tandem with this test mode, defining domain classes fully in-Ruby means that you can write and test an application using Lafcadio without even having MySQL installed. On the other hand, there's definitely more typing up-front, as you have to define individual fields in Lafcadio classes.
+			</para>
+			<para>
+				Domain class fields are set with one-line class methods which look something like:
+			</para>
+<programlisting>class Message &lt; Lafcadio::DomainObject
+  string        'subject'
+  string        'body'
+  domain_object User, 'author'
+  domain_object User, 'recipient'
+  date          'date_sent'
+end</programlisting>
+			<note>
+				<para>
+					Earlier versions of Lafcadio involved overriding DomainObject.get_class_fields and writing XML configuration files to determine fields. Such methods of specifying domain class fields are deprecated and may break in future releases.
+				</para>
+			</note>
+			<para>
+				When specifying fields, additional arguments can be passed this way:
+			</para>
+<programlisting>class Message &lt; Lafcadio::DomainObject
+  string 'subject', { 'not_nil' => false }
+  string 'body', { 'db_field_name' => 'b' }
+end</programlisting>
+			<para>
+				The following arguments apply across all field types:
+			</para>
+			<itemizedlist>
+				<listitem>
+					<constant>db_field_name</constant>: By default, fields are assumed to have the same name in the database, but you can override this assumption using <constant>db_field_name</constant>.
+				</listitem>
+				<listitem>
+					<constant>not_nil</constant>: This is <constant>true</constant> by default. Set it to <constant>false</constant> to avoid checking for nil
+					values in tests. (For more on testing, see the "Testing" chapter below.)
+				</listitem>
+			</itemizedlist>
+			<para>
+				Every field can be specified using the pluralized method as well:
+			</para>
+<programlisting>class User &lt; Lafcadio::DomainObject
+	strings    'fname', 'lname'
+	date_times 'created', 'modified'
+end</programlisting>
+			<para>
+				Many of the fields map directly to common types of fields in SQL databases, but a few are also specialized extensions that might be convenient. The fields are:
+			</para>
+			<sect2>
+				<title>blob</title>
+				<para>
+					Maps to a blob field in MySQL. This acts fairly the same as <constant>string</constant>, below.
+				</para>
+			</sect2>
+			<sect2>
+				<title>boolean</title>
+				<para>
+					A field representing a boolean value. By default, it assumes that the
+					table field represents <constant>true</constant> and <constant>false</constant> with the integers 1 and 0. To change this default, pass a hash with the keys <constant>true</constant> and <constant>false</constant>:
+				</para>
+				<para>
+<programlisting>class User &lt; Lafcadio::DomainObject
+  boolean 'administrator', { 'enums' => { true => 'yin', false => 'yang' } }
+end</programlisting>
+				</para>
+			</sect2>
+			<sect2>
+				<title>date</title>
+				<para>A field representing a date.</para>
+			</sect2>
+			<sect2>
+				<title>date_time</title>
+				<para>A field representing a time.</para>
+			</sect2>
+			<sect2>
+				<title>domain_object</title>
+				<para>
+					A field representing a relation to another domain object. To add such an association in a class definition, call <constant>DomainObject.domain_object</constant>:
+				</para>
+<programlisting>class Invoice &lt; Lafcadio::DomainObject
+  domain_object Client
+end</programlisting>
+				<para>
+					Note that the syntax <constant>domain_object</constant> differs from that of other field definitions, in that the argument passed is a domain class, not a field name. By default, the field name is assumed to be the same as the class name, only lower-cased and camel-case.
+				</para>
+<programlisting>class LineItem &lt; Lafcadio::DomainObject
+  domain_object Product         # field name 'product'
+  domain_object CatalogOrder    # field name 'catalog_order'
+end</programlisting>
+				<para>
+					The field name can be explicitly set as the 2nd argument of DomainObject.domain_object.
+				</para>
+<programlisting>class Message &lt; Lafcadio::DomainObject
+  domain_object User, 'sender'
+  domain_object User, 'recipient'
+end</programlisting>
+				<para>
+					Setting <constant>delete_cascade</constant> to <constant>true</constant> means that if the domain object being associated to is deleted, this domain object will also be deleted.
+				</para>
+<programlisting>class Invoice &lt; Lafcadio::DomainObject
+  domain_object Client, 'client', { 'delete_cascade' => true }
+end
+cli = Client.new( 'name' => 'big company' ).commit
+inv = Invoice.new( 'client' => cli ).commit
+cli.delete!
+inv_prime = Invoice[inv.pk_id] # => will raise DomainObjectNotFoundError</programlisting>
+			</sect2>
+			<sect2>
+				<title>email</title>
+				<para>
+					<constant>email</constant> takes a text value that is expected to be formatted as a single valid email address. It acts the same as <constant>text</constant> in production code, but if you're validating field types in tests, this will check to ensure it's a valid email address. See the "Testing" chapter for more on validating domain object fields.
+				</para>
+			</sect2>
+			<sect2>
+				<title>enum</title>
+				<para>
+					<constant>enum</constant> represents an enumerated field that can only be set to one of a set range of string values. To set the enumeration, pass in an Array of values as "enums". These enumerations are tested against during field validation.
+				</para>
+<programlisting>class IceCream &lt; Lafcadio::DomainObject
+  enum 'flavor', { 'enums' => %w( Vanilla Chocolate Lychee ) }
+end</programlisting>
+			</sect2>
+			<sect2>
+				<title>float</title>
+				<para>
+					<constant>float</constant> represents a <constant>Float</constant> value.
+				</para>
+			</sect2>
+			<sect2>
+				<title>integer</title>
+				<para>
+					<constant>integer</constant> represents an <constant>Integer</constant> value.
+				</para>
+			</sect2>
+			<sect2>
+				<title>month</title>
+				<para>
+					Accepts a <constant>Month</constant> as a value. (This convenience class is imported from the <ulink url="http://month.rubyforge.org">Ruby Month</ulink> library.) Values of this field type will be saved in the database as the first day of the month.
+				</para>
+			</sect2>
+			<sect2>
+				<title>state</title>
+				<para>
+					A special <constant>enum</constant> field whose possible values are any of the 50 states of the United States, stored as each state's two-letter postal code.
+				</para>
+			</sect2>
+			<sect2>
+				<title>string</title>
+				<para>Contains a <constant>String</constant> value.</para>
+			</sect2>
+			<sect2>
+				<title>text_list</title>
+				<para>
+					Maps to any String SQL field that tries to represent a quick-and-dirty list with a comma-separated string. It returns an Array. For example, a SQL field with the value <constant>"john,bill,dave"</constant>, then the Ruby field will have the value <constant>[ "john", "bill", "dave" ]</constant>.
+				</para>
+			</sect2>
+		</sect1>
+		<sect1>
+			<title>Naming assumptions, and how to override them</title>
+			<para>
+				Lafcadio assumes that each table has a single primary key named <constant>pk_id</constant>. This can be overridden by using <constant>DomainObject.sql_primary_key_name</constant>.
+			</para>
+<programlisting>class User &lt; Lafcadio::DomainObject
+  strings 'fname', 'lname'
+  sql_primary_key_name 'user_id'
+end</programlisting>
+			<para>
+				No matter what the primary key is named in the database, in your Ruby code you'll always call <constant>DomainObject#pk_id</constant>.
+			</para>
+			<para>
+				Similarly, Lafcadio assumes that the database name of the table is the same as the class name, only lower-case, pluralized, and with underscores instead of camel case.
+			</para>
+<programlisting>class User &lt; Lafcadio::DomainObject; end
+puts User.table_name          # "users"
+class BlogEntry &lt; Lafcadio::DomainObject; end
+puts BlogEntry.table_name     # "blog_entries"</programlisting>
+			<para>
+				You can override this behavior by calling <constant>DomainObject.table_name</constant> and passing it an argument.
+			</para>
+<programlisting>class BlogEntry &lt; Lafcadio::DomainObject
+  table_name 'some_other_table'
+end
+puts BlogEntry.table_name     # "some_other_table"</programlisting>
+		</sect1>
+		<sect1>
+			<title>Domain class inheritance</title>
+			<para>
+				Inheritance can be achieved in Lafcadio by using separate tables, one for each level in a class hierarchy. For each record in the child table, there will also be one in the parent table as well. Retrievals will draw from both tables, and commits will affect both tables.
+			</para>
+			<para>
+				For example, let's imagine a web site with users, and administrators. Administrators are also users. Let's say the schemas look something like this:
+			</para>
+<programlisting>create table users (
+  pk_id       int not null auto_increment,
+  primary key (pk_id),
+  first_name  varchar(64),
+  last_name   varchar(64),
+  email       varchar(64) not null,
+  password    varchar(64) not null,
+  birthday    date
+);
+
+create table administrators (
+  pk_id       int not null auto_increment,
+  primary key (pk_id),
+  granted_by  int,
+  last_login  datetime
+);</programlisting>
+			<para>
+				The matching Ruby code looks like this:
+			</para>
+<programlisting>class User &lt; Lafcadio::DomainObject
+  string 'first_name'
+  string 'last_name'
+  string 'email'
+  string 'password'
+  date   'birthday'
+end
+
+class Administrator &lt; User
+  domain_object User, 'granted_by'
+  date_time     'last_login'
+end</programlisting>
+			<para>
+				Users and administrators can now be instantiated and retrieved naturally. Lafcadio handles the work of matching primary keys, and stitching together the results of multiple SQL statements.
+			</para>
+<programlisting>user1 = User.new(
+  'first_name' => 'John',
+  'last_name' => 'Doe',
+  'email' => 'john.doe@email.com'
+).commit
+
+admin2 = Administrator.new(
+	'first_name' => 'Jane',
+  'last_name' => 'Doe',
+  'email' => 'jane.doe@email.com',
+  'last_login' => Time.now
+).commit
+
+user1_pk_id = user1.pk_id     # most likely 1
+admin2_pk_id = admin2.pk_id   # most likely 2
+user1_prime = User[user1_pk_id]
+admin2_prime = Administrator[admin2_pk_id]</programlisting>
+			<para>
+				One important caveat: Lafcadio does not correctly protect you from retrieving, as a parent instance, an instance that might more correctly be a child. For example, the following code will work in Lafcadio:
+			</para>
+<programlisting>user2_prime = User[admin2_pk_id]</programlisting>
+			<para>
+				This code retrieves an instance of <constant>User</constant>, using a <constant>pk_id</constant> that could just as well be an <constant>Administrator</constant>, and it will contain only the methods and data of a <constant>User</constant> instance. Lafcadio will not detect that this is happening, so your program logic should not assume that just because it was possible to retrieve it as a User that it is not an Administrator.
+			</para>
+		</sect1>
+	</chapter>
+	<chapter>
+		<title>Using domain classes</title>
+		<sect1>
+			<title>Inserting, updating, and deleting</title>
+			<para>
+				To insert a table row with Lafcadio, simply create a domain object in Ruby, then commit it. A newly created domain object has no <constant>pk_id</constant> set, but this will be set once it's been committed.
+			</para>
+<programlisting>user = User.new( 'first_name' => 'John', 'last_name' => 'Doe' )
+puts user.pk_id     # nil
+user.commit
+puts user.pk_id     # won't be nil</programlisting>
+			<para>
+				Unless you're writing test code and using the MockObjectStore, it's not recommended to create a domain object with a <constant>pk_id</constant>. Doing so will override the database's role in setting the primary key for you, and can have unpredictable results.
+			</para>
+<programlisting># Don't do this:
+user = User.new( 'pk_id' => 99, 'first_name' => 'John', 'last_name' => 'Doe' )
+user.commit</programlisting>
+			<para>
+				To update an existing domain object, you retrieve it with DomainObject[], modify some fields, and then commit it.
+			</para>
+<programlisting>user = User[5555]
+user.last_name = 'Smith'
+user.commit</programlisting>
+			<para>
+				You can shortcut this with <constant>DomainObject#update!</constant>, with takes a hash of values to update, and then commits the domain object.
+			</para>
+			<programlisting>user.update!( 'last_name' => 'Smith' )</programlisting>
+			<para>
+				Deleting a domain object simply involves setting <constant>DomainObject.delete</constant> to <constant>true</constant>, and then committing it.
+			</para>
+<programlisting>user.delete = true
+user.commit</programlisting>
+		</sect1>
+		<sect1>
+			<title>Dynamic associations</title>
+			<para>
+				Using a <constant>domain_object</constant> field will automatically create an associations method on the domain class being associated to. For example:
+			</para>
+<programlisting>class Client &lt; Lafcadio::DomainObject
+  string 'client_name'
+end
+
+class Invoice &lt; Lafcadio::DomainObject
+  date          'date'
+  float         'amount'
+  domain_object Client
+end
+
+...
+
+client = Client[123]
+invoices = client.invoices
+invoices.each do |inv|
+  puts "invoice #{ inv.pk_id } is for $#{ inv.amount }"
+end</programlisting>
+		</sect1>
+		<sect1>
+			<title>Triggers</title>
+			<para>
+				You can define triggers as methods by defining <constant>pre_commit_trigger</constant> and <constant>post_commit_trigger</constant>, which run before or after the commit, respectively.
+			</para>
+<programlisting>class Payment &lt; Lafcadio::DomainObject
+  domain_object User
+  float         'amount'
+
+  def post_commit_trigger
+    self.user.email_thanks_for_your_payment_letter
+  end
+end</programlisting>
+			<para>
+				You can use triggers to check values and raise exceptions, if you like.
+			</para>
+<programlisting>class Payment &lt; Lafcadio::DomainObject
+  domain_object User
+  float         'amount'
+
+  def pre_commit_trigger
+    raise if amount &lt; 0
+  end
+end</programlisting>
+			<para>
+				Each domain object automatically maintains a hash of values called <constant>@original_values</constant>, which records the last values known to come from the database. So if the domain object has been withdrawn from the database, <constant>@original_values</constant> will contain the values from the database regardless of changes made to the Ruby version of the domain object. When you commit to the database, <constant>@original_values</constant> is reset.
+			</para>
+<programlisting>class Payment &lt; Lafcadio::DomainObject
+  domain_object User
+  float         'amount'
+
+  def pre_commit_trigger
+    raise if amount != @original_values['amount']
+  end
+end</programlisting>
+		</sect1>
+	</chapter>
+	<chapter>
+		<title>Querying</title>
+		<para>
+			When using Lafcadio, you can pass in a block to <constant>DomainObject.get</constant> in order to write complex, ad-hoc queries in Ruby. This involves a few more keystrokes than writing raw SQL, but also makes it easier to change queries at runtime, and these queries can also be fully tested against the MockObjectStore.
+		</para>
+<programlisting>big_invoices = Invoice.get { |inv| inv.rate.gt( 50 ) }
+# => runs "select * from invoices where rate &gt; 50"</programlisting>
+		<para>
+			This a full-fledged block, so you can pass in values from the calling context.
+		</para>
+<programlisting>date = Date.new( 2004, 1, 1 )
+recent_invoices = Invoice.get { |inv| inv.date.gt( date ) }
+# => runs "select * from invoices where date &gt; '2004-01-01'"</programlisting>
+		<sect1>
+			<title>Building and accessing queries</title>
+			<para>
+				Most commonly, you'll access the query language through <constant>DomainObject.get</constant>, which builds a query and runs it immediately.
+			</para>
+<programlisting># runs "select * from users where first_name = 'Jane'"
+janes = User.get { |u| u.first_name.equals( 'Jane' ) }</programlisting>
+			<para>
+				If you want more fine-grained control over a query, first create it with <constant>Query.infer</constant> and then build it, using <constant>ObjectStore#query</constant> to run it. This can come in handy if you're doing complex query construction, for example if you're dealing with an advanced search with many possible search options.
+			</para>
+<programlisting>qry = Query.infer( User ) { |u| u.last_name.equals( 'Hwang' ) }
+qry.to_sql # => "select * from users where users.last_name = 'Hwang'"
+qry = qry.and { |u| u.first_name.equals( 'Francis' ) }
+qry.to_sql
+# => "select * from users where (users.last_name = 'Hwang' and users.first_name = 'Francis')"
+qry.limit = 0..5
+qry.to_sql
+# => "select * from users where (users.last_name = 'Hwang' and users.first_name = 'Francis') limit 0, 6"</programlisting>
+			<para>
+				Using Query.infer, you can also set order_by and order_by_order clauses.
+			</para>
+<programlisting>qry = Query.infer(
+  SKU,
+  :order_by => [ :standardPrice, :salePrice ],
+  :order_by_order => Query::DESC
+) { |s| s.sku.nil? }
+qry.to_sql
+# => "select * from skus where skus.sku is null order by standardPrice, salePrice desc"</programlisting>
+		</sect1>
+		<sect1>
+			<title>Query inference operators</title>
+			<para>
+				You can compare fields either to simple values, or to other fields in the same table.
+			</para>
+<programlisting>paid_immediately = Invoice.get { |inv|
+  inv.date.equals( inv.paid )
+}
+# => runs "select * from invoices where date = paid"</programlisting>
+			<sect2>
+				<title>
+					Numerical comparisons: <constant>lt</constant>, <constant>lte</constant>, <constant>gte</constant>, <constant>gt</constant>
+				</title>
+				<para>
+					<constant>lt</constant>, <constant>lte</constant>, <constant>gte</constant>, <constant>gt</constant> stand for "less than", "less than or equal", "greater than or equal", and "greater than", respectively.
+				</para>
+<programlisting>tiny_invoices = Invoice.get { |inv| inv.rate.lte( 25 ) }
+# => runs "select * from invoices where rate &lt;= 25"</programlisting>
+				<para>
+					These comparators work on fields that contain numbers, dates, and even references to other domain objects.
+				</para>
+<programlisting>for_1st_ten_clients = Invoice.get { |inv|
+  inv.client.lte( 10 )
+}
+# => runs "select * from invoices where client &lt;= 10"
+client10 = Client[10]
+for_1st_ten_clients = Invoice.get { |inv|
+  inv.client.lte( client10 )
+}
+# => runs "select * from invoices where client &lt;= 10"</programlisting>
+			</sect2>
+			<sect2>
+				<title>Equality: <constant>equals</constant></title>
+<programlisting>full_week_invs = Invoice.get { |inv| inv.hours.equals( 40 ) }
+# => "select * from invoices where hours = 40"</programlisting>
+				<para>
+					If you're comparing to a domain object you should pass in the object itself.
+				</para>
+<programlisting>client = Client[99]
+invoices = Invoice.get { |inv| inv.client.equals( client ) }
+# => "select * from invoices where client = 99"</programlisting>
+				<para>
+					If you're comparing to a boolean value you don't need to use <constant>equals( true )</constant>.
+				</para>
+<programlisting>administrators = User.get { |u| u.administrator.equals( true ) }
+administrators = User.get { |u| u.administrator } # both forms work</programlisting>
+				<para>
+					Matching for <constant>nil</constant> can use <constant>nil?</constant>
+				</para>
+<programlisting>no_email = User.get { |u| u.email.nil? }</programlisting>
+			</sect2>
+			<sect2>
+				<title>
+					Inclusion: <constant>in</constant> and <constant>include?</constant>
+				</title>
+				<para>Any field can be matched via <constant>in</constant>:</para>
+<programlisting>first_three_invs = Invoice.get { |inv| inv.pk_id.in( 1, 2, 3 ) }
+# => "select * from invoices where pk_id in ( 1, 2, 3 )"</programlisting>
+				<para>
+					A TextListField can be matched via <constant>include?</constant>
+				</para>
+<programlisting>aim_users = User.get { |u| u.im_methods.include?( 'aim' ) }
+# => "select * from users where user.im_methods like 'aim,%' or
+#     user.im_methods like '%,aim,%' or user.im_methods like '%,aim' or
+#     user.im_methods = 'aim'"</programlisting>
+			</sect2>
+			<sect2>
+				<title>Text comparison: <constant>like</constant></title>
+<programlisting>fname_starts_with_a = User.get { |user| user.fname.like( /^a/ ) }
+# => "select * from users where fname like 'a%'"
+fname_ends_with_a = User.get { |user| user.fname.like( /a$/ ) }
+# => "select * from users where fname like '%a'"
+fname_contains_a = User.get { |user| user.fname.like( /a/ ) }
+# => "select * from users where fname like '%a%'"</programlisting>
+				<para>
+					Please note that although we're using the Regexp operators here, these aren't full-fledged regexps. Only ^ and $ work for this.
+				</para>
+			</sect2>
+			<sect2>
+				<title>
+					Compound conditions: <constant>&amp;</constant> and <constant>|</constant>
+				</title>
+<programlisting>invoices = Invoice.get { |inv|
+  inv.hours.equals( 40 ) &amp; inv.rate.equals( 50 )
+}
+# => "select * from invoices where (hours = 40 and rate = 50)"
+client99 = Client[99]
+invoices = Invoice.get { |inv|
+  inv.hours.equals( 40 ) | inv.rate.equals( 50 ) |
+    inv.client.equals( client99 )
+}
+# => "select * from invoices where (hours = 40 or rate = 50 or client = 99)"</programlisting>
+				<para>Note that both compound operators can be nested:</para>
+<programlisting>invoices = Invoice.get { |inv|
+  inv.hours.equals( 40 ) &amp;
+    ( inv.rate.equals( 50 ) | inv.client.equals( client99 ) )
+}
+# => "select * from invoices where (hours = 40 and 
+#     (rate = 50 or client = 99))"</programlisting>
+			</sect2>
+			<sect2>
+				<title>Negation: <constant>not</constant></title>
+<programlisting>invoices = Invoice.get { |inv| inv.rate.equals( 50 ).not }
+# => "select * from invoices where rate != 50"</programlisting>
+				<para>
+					This can be used directly against boolean and nil comparisons, too.
+				</para>
+<programlisting>not_administrators = User.get { |u| u.administrator.not }
+# => "select * from users where administrator != 1"
+has_email = User.get { |u| u.email.nil?.not }
+# => "select * from users where email is not null"</programlisting>
+			</sect2>
+		</sect1>
+		<sect1>
+			<title>Hands-on query construction</title>
+			<para>
+				The standard way to run a query is through DomainObject.get, which generates the query and runs it immediately, returning the results. However, there are times when you'll want a more fine-grained way to construct a query.
+			</para>
+			<para>
+				As an example, let's imagine a search form on a online dating website. The code to generate the query will use Query#infer, and then run it via ObjectStore#query.
+			</para>
+<programlisting>qry = Lafcadio::Query.infer( User ) { |u|
+  u.gender.equals( @search[:gender] )
+}
+if @search[:min_age]
+  qry = qry.and { |u| u.age.gte( @search[:min_age] }
+end
+if @search[:max_age]
+  qry = qry.and { |u| u.age.lte( @search[:max_age] }
+end
+if @search[:require_photos]
+  qry = qry.and { |u| u.num_photos.gte( 1 ) }
+end
+matches = Lafcadio::ObjectStore.get_object_store.query( qry )
+</programlisting>
+		</sect1>
+		<sect1>
+			<title>Query caching via subset matching</title>
+			<para>
+				Lafcadio caches every query, and optimizes based on a simple subset calculation. For example, if you run these statements:
+			</para>
+<programlisting>User.get { |u| u.lname.equals( 'Smith' ) }
+User.get { |u| u.lname.equals( 'Smith' ) &amp; u.fname.like( /John/ ) }
+User.get { |u| u.lname.equals( 'Smith' ) &amp; u.email.like( /hotmail/ ) }</programlisting>
+			<para>
+				Lafcadio can tell that the 2nd and 3rd queries are subsets of the first. So these three statements will result in one database call, for the first  statement: The 2nd and 3rd statements will be handled entirely in Ruby. The result is less database calls with no extra work for the programmer.</para>
+		</sect1>
+	</chapter>
+	<chapter>
+		<title>Testing</title>
+		<sect1>
+			<title>Setting up testing in a Lafcadio-based program</title>
+			<para>
+				Lafcadio's philosophy about testing is to try to mock out as much as possible, so that extensive database-dependent tests can be run through memory quickly. The primary engine behind that is the <constant>MockObjectStore</constant>, which pretends to be the <constant>ObjectStore</constant> representing the database.
+			</para>
+<programlisting>mock_object_store = MockObjectStore.new
+ObjectStore.set_object_store mock_object_store</programlisting>
+			<para>
+				Adding the above two lines to your test class' <constant>setup</constant> method will make every database-dependent call going through Lafcadio go through the virtual database.
+			</para>
+		</sect1>
+		<sect1>
+			<title>Domain objects in test cases</title>
+			<para>
+				Once your MockObjectStore is setup, domain objects in test cases can be setup the same as they would be in live code.
+			</para>
+<programlisting>def test_commit_user_msg
+  john = User.new( 'first_name' => 'John', 'last_name' => 'Doe' ).commit
+  jane = User.new( 'first_name' => 'John', 'last_name' => 'Doe' ).commit
+  commit_user_msg( john, jane, "Hi Jane, let's go to the movies" )
+  msg = Message.all.first
+  assert_equal( john, msg.author )
+end</programlisting>
+			<para>
+				One small difference is that in live code, you should never set <constant>pk_id</constant> for a new domain object, because it's the database's job to assign new primary keys. In test code running through the <constant>MockObjectStore</constant>, you can set the <constant>pk_id</constant> if you want to.
+			</para>
+<programlisting>def test_msg_url
+  msg = Message.new( 'pk_id' => 999 )
+  assert_equal( "/msg/999", msg.url )
+end</programlisting>
+		</sect1>
+		<sect1>
+			<title>Quicker ways to setup mock objects</title>
+			<para>
+				Setting up mock objects can be somewhat tedious, so you can add the methods <constant>DomainObject.default_mock</constant> and <constant>DomainObject.custom_mock</constant> by requiring <constant>lafcadio/test.rb</constant>.
+			</para>
+			<para>
+				<constant>DomainObject.default_mock</constant> will commit its best guess of a typical instance of the class if one doesn't already exist, and then return that instance. Field values will be valid, but for the most part meaningless. This instance will always have a <constant>pk_id</constant> of 1, and any relations to other domain classes will refer to the <constant>default_mock</constant> of that class. Note that multiple calls to <constant>DomainObject.default_mock</constant> will return the same instance.
+			</para>
+<programlisting>require 'lafcadio/test'
+mock_object_store = MockObjectStore.new
+ObjectStore.set_object_store mock_object_store
+john = User.default_mock
+puts john.first_name        # "test text"
+puts john.email             # "test text"
+john2 = User.default_mock
+puts ( john == john2 )      # true
+msg = Message.default_mock
+puts ( msg.author == john ) # true</programlisting>
+			<para>
+				If you want to create custom mocks that are mostly the same but vary in a few fields, you can use <constant>DomainObject.custom_mock</constant>. This always commits a new instance, with specific fields set to new values.
+			</para>
+<programlisting>jane = User.custom_mock( 'first_name' => 'Jane' )
+puts ( john == jane )       # false</programlisting>
+			<para>
+				The field values that Lafcadio guesses are really pretty stupid, and are just there to be a half-step better than <constant>nil</constant>. You might want to create better values for those mock object fields, and you can do so with <constant>DomainObject.mock_values</constant>. These will affect the default values used both in <constant>DomainObject.default_mock</constant> and <constant>DomainObject.custom_mock</constant>. Note that given the open nature of Ruby classes, you can have this <constant>mock_values</constant> code in an entirely separate file, to only be required for testing.
+			</para>
+<programlisting>class User &lt; Lafcadio::DomainObject
+  mock_values 'first_name' => 'John', 'last_name' => 'Doe',
+              'email' => 'john.doe@email.com', 'password' => 'password',
+              'birthday' => ( Date.today - 365 * 30 )
+end
+john = User.default_mock
+puts john.first_name        # "John"
+puts john.last_name         # "Doe"
+puts john.email             # "john.doe@email.com"
+jane = User.custom_mock(
+  'first_name' => 'Jane', 'email' => 'jane.doe@email.com'
+)
+puts jane.first_name        # "Jane"
+puts jane.last_name         # "Doe"
+puts jane.email             # "jane.doe@email.com"</programlisting>
+			<para>
+				And if your test case includes <constant>Lafcadio::DomainMock</constant>, you can use the class method <constant>setup_mock_dobjs</constant> to auto-create default mocks as part of the setup method. These will be set as local variables. Note that if you write your own <constant>setup</constant> method in such a test case, you should remember to call <constant>super</constant> to ensure that the mock setup is run correctly.
+			</para>
+<programlisting>class TestUser &lt; Test::Unit::TestCase
+  include Lafcadio::DomainMock
+  setup_mock_dobjs User
+
+  def test_first_name
+    assert_equal( "John", @user.first_name )
+  end
+end</programlisting>
+		</sect1>
+	</chapter>
+	<chapter>
+		<title>Advanced ObjectStore tricks</title>
+		<sect1>
+			<title>Transactions</title>
+			<para>
+				Lafcadio will support transactions as long as the underlying table type will support them. This is done using blocks; when the block is exited, the transaction is committed. For example, in a PayPal-like system where you're transferring money from one user to another, you want transactions to make sure all the rows are recorded or none of them are.
+			</para>
+<programlisting>object_store = Lafcadio::ObjectStore.get_object_store
+object_store.transaction do |tr|
+  from_account.update!( 'amount' => from_account.amount - transfer_amount )
+  to_account.update!( 'amount' => to_account.amount + transfer_amount )
+end</programlisting>
+			<para>
+				Rollbacks work by calling the rollback method on the transactional object passed through the block.
+			</para>
+<programlisting>object_store.transaction do |tr|
+  from_account.update!( 'amount' => from_account.amount - transfer_amount )
+  tr.rollback
+  to_account.update!( 'amount' => to_account.amount + transfer_amount )
+end</programlisting>
+			<para>
+				In fact, raising any sort of error within the transaction will rollback the transaction.
+			</para>
+<programlisting>object_store.transaction do |tr|
+  from_account.update!( 'amount' => from_account.amount - transfer_amount )
+  raise "just kidding"
+  to_account.update!( 'amount' => to_account.amount + transfer_amount )
+end</programlisting>
+		</sect1>
+		<sect1>
+			<title>The ObjectStore cache</title>
+			<para>
+				<constant>ObjectStore</constant> automatically caches the results of any selects it runs. This reduces SQL calls in surprising ways, in particular by calculating if queries are subsets of previous queries. The cache is only updated on updates, inserts, and deletes.
+			</para>
+			<para>
+				If you are running a long-running program that does a lot of selects, without updates, inserts, and deletes--for example, a big reporting program--you'll find that the program will use a lot of memory, as it slowly begins to clone the MySQL database in RAM. You can trim the cache by calling ObjectStore#flush.
+			</para>
+<programlisting>object_store.flush( user )</programlisting>
+		</sect1>
+	</chapter>
+	<chapter>
+		<title>Credits</title>
+		<para>
+			Lafcadio is written and maintained by <ulink url="http://fhwang.net/">Francis Hwang</ulink>.
+		</para>
+		<para>
+			Thanks to Kaspar Schiess for submitting patches for added Blob field support, and fixing problems with inserts on inherited domain objects.
+		</para>
+	</chapter>
+</book>
