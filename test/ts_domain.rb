@@ -534,6 +534,11 @@ class TestDomainObject < LafcadioTestCase
 	def test_to_s
 		assert_match( /Client/, new_test_client_without_pk_id.to_s )
 	end
+	
+	def test_try_load_xml_parser
+		LafcadioConfig.set_values( {} )
+		assert_nil Client.try_load_xml_parser
+	end
 
 	def test_update!
 		client = Client.new( {} ).commit
