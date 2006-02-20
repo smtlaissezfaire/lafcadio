@@ -659,7 +659,7 @@ module Lafcadio
 			end
 
 			def to_sql
-				withWildcards = @searchTerm
+				withWildcards = @searchTerm.clone
 				if @matchType == PRE_AND_POST
 					withWildcards = "%" + withWildcards + "%"
 				elsif @matchType == PRE_ONLY
@@ -667,6 +667,7 @@ module Lafcadio
 				elsif @matchType == POST_ONLY
 					withWildcards += "%"
 				end
+				withWildcards.gsub!( /(\\?\.)/ ) { |m| m.size == 1 ? "_" : "." }
 				"#{ db_field_name } like '#{ withWildcards }'"
 			end
 		end

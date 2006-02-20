@@ -589,6 +589,15 @@ class TestQuery < LafcadioTestCase
 					user.email.like( 'hotmail' )
 				}.execute
 			}
+			desired_sql4 = "select * from users where users.email like '%h_tmail%'"
+			assert_infer_match( desired_sql4, User ) { |user|
+				user.email.like( /h.tmail/ )
+			}
+			desired_sql5 =
+					"select * from users where users.email like '%hotmail.com%'"
+			assert_infer_match( desired_sql5, User ) { |user|
+				user.email.like( /hotmail\.com/ )
+			}
 		end
 	
 		def test_link
