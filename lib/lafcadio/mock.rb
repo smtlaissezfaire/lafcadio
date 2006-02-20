@@ -9,6 +9,7 @@ module Lafcadio
 			@objects = {}
 			@next_pk_ids = {}
 			@queries = []
+			@transaction = nil
 		end
 
 		def all( domain_class )
@@ -29,12 +30,16 @@ module Lafcadio
 			if db_object.pk_id and !db_object.pk_id.is_a?( Integer )
 				raise ArgumentError
 			end
-			objects_by_domain_class = objects_by_domain_class db_object.domain_class
-			if db_object.delete
-				objects_by_domain_class.delete( db_object.pk_id )
+			if @transaction
+				@transaction << db_object
 			else
-				object_pk_id = pre_commit_pk_id( db_object )
-				objects_by_domain_class[object_pk_id] = db_object
+				objects_by_domain_class = objects_by_domain_class db_object.domain_class
+				if db_object.delete
+					objects_by_domain_class.delete( db_object.pk_id )
+				else
+					object_pk_id = pre_commit_pk_id( db_object )
+					objects_by_domain_class[object_pk_id] = db_object
+				end
 			end
 		end
 				
@@ -82,6 +87,23 @@ module Lafcadio
 		def set_next_pk_id( domain_class, npi )
 			@next_pk_ids = {} unless @next_pk_ids
 			@next_pk_ids[ domain_class ] = npi
+		end
+		
+		def transaction( action )
+			tr = MockDbBridge::Transaction.new
+			@transaction = tr
+			begin
+				action.call tr
+				@transaction = nil
+				tr.each do |dobj_to_commit| commit( dobj_to_commit ); end
+			rescue RollbackError; end
+		end
+		
+		class Transaction < Array
+			def rollback; raise RollbackError; end
+		end
+		
+		class RollbackError < StandardError #:nodoc:
 		end
 	end
 

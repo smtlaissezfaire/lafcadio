@@ -258,6 +258,33 @@ class TestMockObjectStore < LafcadioTestCase
 			# ok
 		end
 	end
+	
+	def test_transaction
+		@mockObjectStore.transaction do |tr|
+			User.new( 'firstNames' => 'John' ).commit
+			tr.rollback
+			raise 'should stop block before you get to this line'
+		end
+		assert_equal( 0, User.all.size )
+		begin
+			@mockObjectStore.transaction do |tr|
+				User.new( 'firstNames' => 'John' ).commit
+				raise Errno::ENOENT, 'msg here', caller
+				raise 'should stop block before you get to this line'
+			end
+		rescue Errno::ENOENT
+			assert_match( /msg here/, $!.to_s )
+		end
+		assert_equal( 0, User.all.size )
+		@mockObjectStore.transaction do |tr|
+			User.new( 'firstNames' => 'John' ).commit
+		end
+		assert_equal( 1, User.all.size )
+		User.new( 'firstNames' => 'John' ).commit
+		@mockObjectStore.transaction do |tr|
+			tr.rollback
+		end
+	end
 
 	def testUpdate
 		@mockObjectStore.commit Client.new( { 'pk_id' => 100,
