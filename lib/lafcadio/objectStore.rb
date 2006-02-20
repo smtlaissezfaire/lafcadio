@@ -381,17 +381,16 @@ module Lafcadio
 
 				def get_by_query( query )
 					unless queries[query]
-						collected = collect_from_superset query
+						if query.one_pk_id?
+							collected = false
+						else
+							collected = collect_from_superset query
+						end
 						if !collected and queries.values
 							query_db query
 						end
 					end
-					collection = []
-					queries[query].each { |pk_id|
-						dobj = self[ pk_id ]
-						collection << dobj if dobj
-					}
-					collection
+					queries[query].map { |pk_id| self[pk_id] }.compact
 				end
 
 				def last_commit_time( pk_id ); commit_times[pk_id]; end

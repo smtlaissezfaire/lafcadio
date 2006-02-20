@@ -252,6 +252,8 @@ module Lafcadio
 			"limit #{ @limit.begin }, #{ @limit.end - @limit.begin + 1 }" if @limit
 		end
 		
+		def one_pk_id?; @condition and @condition.one_pk_id?; end
+		
 		# Returns a new query representing the condition of the current query and
 		# the new inferred query.
 		#   qry = Query.infer( User ) { |u| u.lname.equals( 'Hwang' ) }
@@ -376,6 +378,8 @@ module Lafcadio
 			end
 			
 			def not; Query::Not.new( self ); end
+			
+			def one_pk_id?; self.is_a?( Equals ) and primary_key_field?; end
 
 			def primary_key_field?; 'pk_id' == @fieldName; end
 			
