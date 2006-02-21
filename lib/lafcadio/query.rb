@@ -170,8 +170,8 @@ module Lafcadio
 		ASC		= 1
 		DESC 	= 2
 
-		attr_reader :domain_class, :condition, :limit
-		attr_accessor :order_by, :order_by_order
+		attr_reader :domain_class, :condition, :limit, :order_by
+		attr_accessor :order_by_order
 
 		def initialize(domain_class, pk_id_or_condition = nil, opts = {} ) #:nodoc:
 			@domain_class, @opts = domain_class, opts
@@ -262,6 +262,10 @@ module Lafcadio
 		#   qry.to_sql # => "select * from users where (users.lname = 'Hwang' or
 		#                    users.fname = 'Francis')"
 		def or( &action ); compound( CompoundCondition::OR, action ); end
+		
+		def order_by=( ob )
+			@order_by = ( ob.is_a?( Array ) ? ob.map { |f| f.to_s } : ob.to_s ) if ob
+		end
 		
 		def order_clause #:nodoc:
 			if @order_by

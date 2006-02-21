@@ -428,8 +428,10 @@ class TestQuery < LafcadioTestCase
 	end
 
 	class TestInferrer < LafcadioTestCase
-		def assert_infer_match( desiredSql, domain_class, &action )
-			inferrer = Query::Inferrer.new( domain_class ) { |obj| action.call( obj ) }
+		def assert_infer_match( desiredSql, *infer_args, &action )
+			inferrer = Query::Inferrer.new( *infer_args ) { |obj|
+				action.call( obj )
+			}
 			assert_equal( desiredSql, inferrer.execute.to_sql )
 		end
 	
@@ -674,6 +676,10 @@ class TestQuery < LafcadioTestCase
 						"order by standardPrice, salePrice asc",
 				qry.to_sql
 			)
+			sql = "select * from clients where clients.pk_id >= 99 order by name asc"
+			assert_infer_match( sql, Client, :order_by => :name ) { |c|
+				c.pk_id.gte 99
+			}
 		end
 	end
 
