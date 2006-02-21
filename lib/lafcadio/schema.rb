@@ -32,9 +32,9 @@ module Lafcadio
 				createDefinitions << definition_terms( field )
 			}
 			<<-SQL
-	create table #{ @domain_class.table_name } (
-		#{ createDefinitions.join(",\n  ") }
-	);
+create table #{ @domain_class.table_name } (
+#{ createDefinitions.join(",\n  ") }
+);
 			SQL
 		end
 		

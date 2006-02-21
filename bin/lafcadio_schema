@@ -1,36 +1,38 @@
 #!/usr/bin/env ruby
 
 require 'ubygems'
-require 'lafcadio/depend'
-require 'lafcadio/schema'
-require 'lafcadio/util'
 require 'getoptlong'
+require 'lafcadio'
 include Lafcadio
 
+$all_domain_classes = []
+module Lafcadio
+	def DomainObject.inherited( subclass )
+		$all_domain_classes << subclass
+	end
+end
+
+( config, dclass_name ) = [ nil, nil ]
 opts = GetoptLong.new(
-	[ '--config', '-c', GetoptLong::REQUIRED_ARGUMENT ],
+	[ '--config', '-c', GetoptLong::OPTIONAL_ARGUMENT ],
 	[ '--class',  '-C', GetoptLong::OPTIONAL_ARGUMENT ]
 )
-if ( ( optArray = opts.get ) && ARGV.size >= 1 )
-	configFile = optArray[1]
-	LafcadioConfig.set_filename( configFile )
-	class_opts = opts.get
-	ARGV.each { |fileName|
-		require "#{ fileName }"
-		if class_opts
-			className = class_opts.last
-		else
-			fileName =~ /(\w*)\.rb/
-			className = $1
-		end
-		domainClass = Class.by_name( className )
-		if domainClass
-			statement = CreateTableStatement.new( domainClass )
-			puts statement.to_sql
-		else
-			puts "No domain class in #{ fileName }"
-		end
-	}
+opts.each do |opt, arg|
+	config = arg if opt == '--config'
+	dclass_name = arg if opt == '--class'
+end
+if ARGV.size >= 1
+	LafcadioConfig.set_filename config if config
+	ARGV.each { |fileName| require fileName }
+	if dclass_name
+		domain_classes = [ Class.by_name( dclass_name ) ]
+	else
+		domain_classes = $all_domain_classes
+	end
+	sql = domain_classes.map { |domain_class|
+		CreateTableStatement.new( domain_class ).to_sql
+	}.join( "\n\n" )
+	puts sql
 else
-	puts "lafcadio_schema -c config domain1.rb {, domain2.rb, domain3.rb ... }"
+	puts "lafcadio_schema [-C domain_class] file1.rb [file2.rb file3.rb ...]"
 end
