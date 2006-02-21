@@ -504,7 +504,10 @@ module Lafcadio
 							if ( classField = self.domain_class.field( fieldName ) )
 								ObjectFieldImpostor.new( self, classField )
 							else
-								super( methId, *args )
+								msg = "undefined method `" + fieldName +
+								      "' for #<DomainObjectImpostor::" +
+								      '#{ domain_class.name }' + ">"
+								raise( NoMethodError, msg )
 							end
 						end
 						

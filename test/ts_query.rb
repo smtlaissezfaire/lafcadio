@@ -367,6 +367,19 @@ class TestQuery < LafcadioTestCase
 		end
 	end
 	
+	class TestDomainObjectImpostor < LafcadioTestCase
+		def test_helpful_error_message
+			impostor = Query::DomainObjectImpostor.impostor User
+			impostor.email
+			begin
+				impostor.emaill
+				fail "should raise NoMethodError"
+			rescue NoMethodError => err
+				assert_match( /for #<DomainObjectImpostor::User/, err.to_s )
+			end
+		end
+	end
+	
 	class TestEquals < LafcadioTestCase
 		def test_boolean_field
 			equals = Query::Equals.new( 'administrator', false, User )
