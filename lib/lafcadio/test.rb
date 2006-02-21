@@ -48,9 +48,35 @@ module Lafcadio
 		Time.now
 	end
 	
-	module DomainMock #:nodoc:
-		Version = '0.1.0'
-		
+	# A convenience module for test-cases of Lafcadio-dependent applications.
+	# Include this module in a test-case, and you automatically get the
+	# class-level method <tt>setup_mock_dobjs</tt>. This calls
+	# DomainObject.default_mock, and assigns the result to an instance variable 
+	# named after the domain class. Note that if your test case also defines a 
+	# <tt>setup</tt>, you should make sure to call <tt>super</tt> in that setup 
+	# method to make <tt>setup_mock_dobjs</tt> work.
+	#
+	#   class User < Lafcadio::DomainObject
+	#     strings :fname, :lname, :email
+	#   end
+	#
+	#   class TestSendMessage < Test::Unit::TestCase
+	#     include Lafcadio::DomainMock
+	#     setup_mock_dobjs User
+	#     def test_send_to_self
+	#       SendMessage.new( 'sender' => @user, 'recipient' => @user )
+	#       assert_equal( 1, Message.all.size )
+	#     end
+	#   end
+	#
+	# <tt>setup_mock_dobjs</tt> can handle plural domain classes:
+	#
+	#   setup_mock_dobjs User, Message
+	#
+	# It can also handle assignments to different instance variables:
+	#
+	#   setup_mock_dobjs User, '@sender'
+	module DomainMock
 		def self.included( includer )
 			def includer.setup_mock_dobjs( *domain_classes_or_symbol_names )
 				domain_classes = DomainClassSymbolMapper.new
@@ -158,7 +184,7 @@ module Lafcadio
 		# <tt>lafcadio/test.rb</tt>.
 		#
 		#   class User < Lafcadio::DomainObject
-		#     string :fname, :lname, :email
+		#     strings :fname, :lname, :email
 		#   end
 		#   u1 = User.custom_mock
 		#   u1.fname # => 'test text'
@@ -225,7 +251,7 @@ module Lafcadio
 		# <tt>lafcadio/test.rb</tt>.
 		#
 		#   class User < Lafcadio::DomainObject
-		#     string :fname, :lname, :email
+		#     strings :fname, :lname, :email
 		#   end
 		#   u1 = User.default_mock
 		#   u1.fname # => 'test text'
@@ -269,7 +295,7 @@ module Lafcadio
 		# <tt>lafcadio/test.rb</tt>.
 		#
 		#   class User < Lafcadio::DomainObject
-		#     string :fname, :lname, :email
+		#     strings :fname, :lname, :email
 		#   end
 		#   User.mock_value :fname, 'Bill'
 		#   User.mock_value :lname, 'Smith'
@@ -289,7 +315,7 @@ module Lafcadio
 		# <tt>lafcadio/test.rb</tt>.
 		#
 		#   class User < Lafcadio::DomainObject
-		#     string :fname, :lname, :email
+		#     strings :fname, :lname, :email
 		#   end
 		#   User.mock_values { :fname => 'Bill', :lname => 'Smith' }
 		#   u1 = User.default_mock

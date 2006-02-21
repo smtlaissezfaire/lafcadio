@@ -23,10 +23,13 @@ file 'docs/manual/index.html' => [ 'docs/manual.xml' ] do
 end
 
 file 'docs/doc/index.html' => ['changelog.txt'] do
+	FileUtils.rm_rf( 'docs/doc' ) if File.exist?( 'docs/doc' )
 	Dir.chdir 'lib'
 	`rdoc --op ../docs/doc/ --main lafcadio.rb`
 	Dir.chdir '..'
 end
+
+task :build_docs => [:manual, :rdoc]
 
 task :manual => [ 'docs/manual.html', 'docs/manual/index.html' ]
 
@@ -36,7 +39,7 @@ task :export_release_dir do
 	`cvs #{ ext } export -r #{ release_tag } -d #{ release_dir_name } lafcadio`
 end
 
-task :build_docs => [:manual, 'docs/doc/index.html']
+task :rdoc => ['docs/doc/index.html']
 
 task :site_staging => [:build_docs] do
 	sh "cp -r ./docs/ ../lafcadio.rubyforge.org/"
