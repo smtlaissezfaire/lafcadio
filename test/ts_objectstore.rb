@@ -553,7 +553,7 @@ class TestObjectStore < LafcadioTestCase
 			assert_equal( 3, @cache.get_by_query( q ).size )
 			q = Query.infer( User ) { |tr| tr.firstNames.like( /z/ ) }
 			q.order_by = 'firstNames'
-			q.order_by_order = Query::DESC
+			q.order_by_order = :desc
 			coll = @cache.get_by_query q
 			assert_equal( 3, coll.size )
 			assert_equal( 'aza', coll.last.firstNames )

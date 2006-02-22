@@ -32,7 +32,7 @@
 #   qry = Query.infer(
 #     SKU,
 #     :order_by => [ :standardPrice, :salePrice ],
-#     :order_by_order => Query::DESC
+#     :order_by_order => :desc
 #   ) { |s| s.sku.nil? }
 #   qry.to_sql # => "select * from skus where skus.sku is null order by
 #                    standardPrice, salePrice desc"
@@ -146,14 +146,13 @@ module Lafcadio
 		# Infers a query from a block. The first required argument is the domain 
 		# class. Other optional arguments should be passed in hash form:
 		# [:order_by] An array of fields to order the results by.
-		# [:order_by_order] Possible values are Query::ASC or Query::DESC. Defaults
-		#                   to Query::DESC.
+		# [:order_by_order] Possible values are :asc or :desc. Defaults to :desc.
 		#   qry = Query.infer( User ) { |u| u.lname.equals( 'Hwang' ) }
 		#   qry.to_sql # => "select * from users where users.lname = 'Hwang'"
 		#   qry = Query.infer(
 		#     SKU,
 		#     :order_by => [ :standardPrice, :salePrice ],
-		#     :order_by_order => Query::DESC
+		#     :order_by_order => :desc
 		#   ) { |s| s.sku.nil? }
 		#   qry.to_sql # => "select * from skus where skus.sku is null order by
 		#                    standardPrice, salePrice desc"
@@ -166,9 +165,6 @@ module Lafcadio
 			conditions << CompoundCondition::OR
 			CompoundCondition.new( *conditions)
 		end
-
-		ASC		= 1
-		DESC 	= 2
 
 		attr_reader :domain_class, :condition, :limit, :order_by
 		attr_accessor :order_by_order
@@ -185,7 +181,7 @@ module Lafcadio
 					)
 				end
 			end
-			@order_by_order = ASC
+			@order_by_order = :asc
 		end
 		
 		# Returns a new query representing the condition of the current query and
@@ -273,7 +269,7 @@ module Lafcadio
 					@domain_class.field( f_name.to_s ).db_field_name
 				}.join( ', ' )
 				clause = "order by #{ field_str } "
-				clause += @order_by_order == ASC ? 'asc' : 'desc'
+				clause += @order_by_order == :asc ? 'asc' : 'desc'
 				clause
 			end
 		end
@@ -288,7 +284,7 @@ module Lafcadio
 					dobj.send order_by
 				end
 			}
-			objects.reverse! if order_by_order == Query::DESC
+			objects.reverse! if order_by_order == :desc
 			objects = objects[limit] if limit
 			objects
 		end
@@ -604,7 +600,7 @@ module Lafcadio
 				unless args.size == 1
 					h = args.last
 					@order_by = h[:order_by]
-					@order_by_order = ( h[:order_by_order] or ASC )
+					@order_by_order = ( h[:order_by_order] or :asc )
 					@limit = h[:limit]
 				end
 			end

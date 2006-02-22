@@ -124,7 +124,7 @@ class TestQuery < LafcadioTestCase
 	def test_order_by
 		query = Query.new Client
 		query.order_by = 'name'
-		query.order_by_order = Query::DESC
+		query.order_by_order = :desc
 		assert_equal 'select * from clients order by name desc', query.to_sql
 		query2 = Query.new( XmlSku2 )
 		query2.order_by = 'textList1'
@@ -660,7 +660,7 @@ class TestQuery < LafcadioTestCase
 			qry = Query.infer(
 				SKU,
 				:order_by => [ :standardPrice, :salePrice ],
-				:order_by_order => Query::DESC
+				:order_by_order => :desc
 			) { |s| s.sku.nil? }
 			assert_equal(
 				"select * from skus where skus.sku is null " +

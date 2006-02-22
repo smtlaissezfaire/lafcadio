@@ -342,7 +342,7 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		assert_equal( 1, @object_store.query( q ).size )
 		q.limit = nil
 		q.order_by = 'text_field'
-		q.order_by_order = Query::DESC
+		q.order_by_order = :desc
 		assert_equal( 'aza', @object_store.query( q ).last.text_field )
 	end
 	
