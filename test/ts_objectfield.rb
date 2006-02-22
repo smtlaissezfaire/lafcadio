@@ -40,7 +40,7 @@ class TestBooleanField < LafcadioTestCase
 
 	def test_with_different_enums
 		bf2 = BooleanField.new nil, 'whatever'
-		bf2.enum_type = BooleanField::ENUMS_CAPITAL_YES_NO
+		bf2.enum_type = :capital_yes_no
 		assert_equal("'N'", bf2.value_for_sql(false))
 		assert_equal true, bf2.value_from_sql('Y')
 		assert_equal false, bf2.value_from_sql('N')

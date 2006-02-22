@@ -166,12 +166,11 @@ module Lafcadio
 	#
 	# First, BooleanField includes a few enumerated defaults. Currently there are
 	# only
-	#   * BooleanField::ENUMS_ONE_ZERO (the default, uses integers 1 and 0)
-	#   * BooleanField::ENUMS_CAPITAL_YES_NO (uses characters 'Y' and 'N')
+	#   * :one_zero (the default, uses integers 1 and 0)
+	#   * :capital_yes_no (uses characters 'Y' and 'N')
 	# In a class definition, this would look like
 	#   class User < Lafcadio::DomainObject
-	#     boolean 'administrator',
-	#             { 'enum_type' => Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO }
+	#     boolean 'administrator', { 'enum_type' => :capital_yes_no }
 	#   end
 	#
 	# For more fine-grained specification you can pass a hash with the keys
@@ -182,28 +181,25 @@ module Lafcadio
 	#   end
 	# +enums+ takes precedence over +enum_type+.
 	class BooleanField < ObjectField
-		ENUMS_ONE_ZERO = 0
-		ENUMS_CAPITAL_YES_NO = 1
-
 		attr_accessor :enum_type
 		attr_writer   :enums
 
 		def initialize( domain_class, name )
 			super( domain_class, name )
-			@enum_type = ENUMS_ONE_ZERO
+			@enum_type = :one_zero
 			@enums = nil
 		end
 
 		def enums( value = nil ) # :nodoc:
 			if @enums
 				@enums
-			elsif @enum_type == ENUMS_ONE_ZERO
+			elsif @enum_type == :one_zero
 				if value.is_a?( String )
 					{ true => '1', false => '0' }
 				else
 					{ true => 1, false => 0 }
 				end
-			elsif @enum_type == ENUMS_CAPITAL_YES_NO
+			elsif @enum_type == :capital_yes_no
 				{ true => 'Y', false => 'N' }
 			else
 				raise MissingError
@@ -215,7 +211,7 @@ module Lafcadio
 		end
 
 		def text_enum_type? # :nodoc:
-			@enums ? @enums[true].class == String : @enum_type == ENUMS_CAPITAL_YES_NO
+			@enums ? @enums[true].class == String : @enum_type == :capital_yes_no
 		end
 
 		def true_enum( value = nil ) # :nodoc:

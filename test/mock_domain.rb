@@ -52,15 +52,11 @@ module Domain; class LineItem < Lafcadio::DomainObject; end; end
 
 class DomainObjChild1 < Lafcadio::DomainObject
 	default_field_setup_hash Lafcadio::BooleanField,
-	                         {
-													   'enum_type' =>   Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO
-													 }
+	                         { 'enum_type' => :capital_yes_no }
 
 	boolean  'bool1'
-	boolean  'bool2', { 'enum_type' => Lafcadio::BooleanField::ENUMS_ONE_ZERO }
-	booleans 'bool3',
-           'bool4', { 'enum_type' => Lafcadio::BooleanField::ENUMS_ONE_ZERO },
-	         'bool5'
+	boolean  'bool2', { 'enum_type' => :one_zero }
+	booleans 'bool3', 'bool4', { 'enum_type' => :one_zero }, 'bool5'
 	strings  'text1', 'text2'
 end
 
@@ -174,10 +170,7 @@ end
 class XmlSku < Lafcadio::DomainObject; end
 
 class XmlSku2 < Lafcadio::DomainObject
-	boolean              'boolean1',
-	                     { 'enum_type' =>
-											     Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO
-											 }
+	boolean              'boolean1', { 'enum_type' => :capital_yes_no }
 	boolean              'boolean2',
 	                     { 'enums' => { true => 'yin', false => 'yang' },
 		                     'english_name' => 'boolean 2' }
@@ -206,8 +199,7 @@ class XmlSku2 < Lafcadio::DomainObject
 end
 
 class XmlSku3 < Lafcadio::DomainObject
-	boolean	'boolean1',
-	        { 'enum_type' => Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO }
+	boolean	'boolean1', { 'enum_type' => :capital_yes_no }
 	boolean	:boolean2,
 	        {
 						'enums' => { true => 'yin', false => 'yang' },

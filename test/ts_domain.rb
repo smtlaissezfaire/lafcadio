@@ -21,8 +21,9 @@ class TestClassDefinitionXmlParser < LafcadioTestCase
 
 	def test_class_fields_from_xml
 		XmlSku.class_fields
-		match_field( XmlSku, 'boolean1', BooleanField,
-		            { 'enum_type' => BooleanField::ENUMS_CAPITAL_YES_NO } )
+		match_field(
+			XmlSku, 'boolean1', BooleanField, { 'enum_type' => :capital_yes_no }
+		)
 		match_field( XmlSku, 'boolean2', BooleanField,
 		            { 'enums' => { true => 'yin', false => 'yang' } } )
 		match_field( XmlSku, 'date1', DateField, { 'not_nil' => false } )
@@ -190,8 +191,9 @@ class TestDomainObject < LafcadioTestCase
 	
 	def test_class_fields_from_one_line_class_methods
 		XmlSku2.class_fields
-		match_field( XmlSku2, 'boolean1', BooleanField,
-		            { 'enum_type' => BooleanField::ENUMS_CAPITAL_YES_NO } )
+		match_field(
+			XmlSku2, 'boolean1', BooleanField, { 'enum_type' => :capital_yes_no }
+		)
 		match_field( XmlSku2, 'boolean2', BooleanField,
 		            { 'enums' => { true => 'yin', false => 'yang' } } )
 		match_field( XmlSku2, 'date1', DateField, { 'not_nil' => false } )
@@ -226,8 +228,7 @@ class TestDomainObject < LafcadioTestCase
 	def test_class_fields_plural
 		match_field( DomainObjChild1, 'bool3', BooleanField )
 		match_field(
-			DomainObjChild1, 'bool4', BooleanField,
-			{ 'enum_type' => BooleanField::ENUMS_ONE_ZERO }
+			DomainObjChild1, 'bool4', BooleanField, { 'enum_type' => :one_zero }
 		)
 		match_field( DomainObjChild1, 'bool5', BooleanField )
 		match_field( DomainObjChild1, 'text1', StringField )
@@ -301,14 +302,8 @@ class TestDomainObject < LafcadioTestCase
 	end
 
 	def test_default_field_setup_hash
-		assert_equal(
-			BooleanField::ENUMS_CAPITAL_YES_NO,
-			DomainObjChild1.field( 'bool1' ).enum_type
-		)
-		assert_equal(
-			BooleanField::ENUMS_ONE_ZERO,
-			DomainObjChild1.field( 'bool2' ).enum_type
-		)
+		assert_equal( :capital_yes_no, DomainObjChild1.field( 'bool1' ).enum_type )
+		assert_equal( :one_zero, DomainObjChild1.field( 'bool2' ).enum_type )
 	end
 
 	def test_defers_field_copying

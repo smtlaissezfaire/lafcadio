@@ -105,7 +105,7 @@ module Lafcadio
 				elsif @value_class == :boolean
 					valueStr == 'y'
 				elsif @value_class == :enum
-					eval "#{ @objectFieldClass.name }::#{ valueStr }"
+					eval ":#{ valueStr }"
 				end
 			end
 		end
@@ -370,10 +370,7 @@ module Lafcadio
 		#
 		#   class LotsOfBooleans < Lafcadio::DomainObject
 		#     default_field_setup_hash(
-		#       Lafcadio::BooleanField,
-		#       {
-		#         'enum_type' => Lafcadio::BooleanField::ENUMS_CAPITAL_YES_NO
-		#       }
+		#       Lafcadio::BooleanField, { 'enum_type' => :capital_yes_no }
 		#     )
 		#     booleans 'this', 'that', 'the_other', 'and_another_one',
 		#              'this_one_too'
