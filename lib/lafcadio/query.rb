@@ -162,7 +162,7 @@ module Lafcadio
 		end
 		
 		def self.Or( *conditions ) #:nodoc:
-			conditions << CompoundCondition::OR
+			conditions << :or
 			CompoundCondition.new( *conditions)
 		end
 
@@ -191,7 +191,7 @@ module Lafcadio
 		#   qry = qry.and { |u| u.fname.equals( 'Francis' ) }
 		#   qry.to_sql # => "select * from users where (users.lname = 'Hwang' and
 		#                    users.fname = 'Francis')"
-		def and( &action ); compound( CompoundCondition::AND, action ); end
+		def and( &action ); compound( :and, action ); end
 		
 		def collect( coll ) #:nodoc:
 			if @opts[:group_functions] == [:count]
@@ -257,7 +257,7 @@ module Lafcadio
 		#   qry = qry.or { |u| u.fname.equals( 'Francis' ) }
 		#   qry.to_sql # => "select * from users where (users.lname = 'Hwang' or
 		#                    users.fname = 'Francis')"
-		def or( &action ); compound( CompoundCondition::OR, action ); end
+		def or( &action ); compound( :or, action ); end
 		
 		def order_by=( ob )
 			@order_by = ( ob.is_a?( Array ) ? ob.map { |f| f.to_s } : ob.to_s ) if ob
@@ -389,23 +389,13 @@ module Lafcadio
 		end
 
 		class Compare < Condition #:nodoc:
-			LESS_THAN							= 1
-			LESS_THAN_OR_EQUAL		= 2
-			GREATER_THAN_OR_EQUAL = 3
-			GREATER_THAN					= 4
-
-			@@comparators = {
-				LESS_THAN => '<',
-				LESS_THAN_OR_EQUAL => '<=',
-				GREATER_THAN_OR_EQUAL => '>=',
-				GREATER_THAN => '>'
-			}
+			@@comparators = { :lt => '<', :lte => '<=', :gte => '>=', :gt => '>' }
 
 			@@mockComparators = {
-				LESS_THAN => Proc.new { |d1, d2| d1 < d2 },
-				LESS_THAN_OR_EQUAL => Proc.new { |d1, d2| d1 <= d2 },
-				GREATER_THAN_OR_EQUAL => Proc.new { |d1, d2| d1 >= d2 },
-				GREATER_THAN => Proc.new { |d1, d2| d1 > d2 }
+				:lt => Proc.new { |d1, d2| d1 < d2 },
+				:lte => Proc.new { |d1, d2| d1 <= d2 },
+				:gte => Proc.new { |d1, d2| d1 >= d2 },
+				:gt => Proc.new { |d1, d2| d1 > d2 }
 			}
 
 			def initialize(fieldName, searchTerm, domain_class, compareType)
@@ -435,15 +425,12 @@ module Lafcadio
 		end
 
 		class CompoundCondition < Condition #:nodoc:
-			AND = 1
-			OR  = 2
-			
 			def initialize( *args )
-				if( [ AND, OR ].include?( args.last ) )
+				if( [ :and, :or ].include?( args.last ) )
 					@compound_type = args.last
 					args.pop
 				else
-					@compound_type = AND
+					@compound_type = :and
 				end
 				@conditions = args.map { |arg|
 					arg.respond_to?( :to_condition ) ? arg.to_condition : arg
@@ -452,7 +439,7 @@ module Lafcadio
 			end
 
 			def dobj_satisfies?(anObj)
-				if @compound_type == AND
+				if @compound_type == :and
 					@conditions.inject( true ) { |result, cond|
 						result && cond.dobj_satisfies?( anObj )
 					}
@@ -464,25 +451,25 @@ module Lafcadio
 			end
 
 			def implied_by?( other_condition )
-				@compound_type == OR && @conditions.any? { |cond|
+				@compound_type == :or && @conditions.any? { |cond|
 					cond.implies?( other_condition )
 				}
 			end
 			
 			def implies?( other_condition )
 				super( other_condition ) or (
-					@compound_type == AND and @conditions.any? { |cond|
+					@compound_type == :and and @conditions.any? { |cond|
 						cond.implies? other_condition
 					}
 				) or (
-					@compound_type == OR and @conditions.all? { |cond|
+					@compound_type == :or and @conditions.all? { |cond|
 						cond.implies? other_condition
 					}
 				)
 			end
 
 			def to_sql
-				booleanString = @compound_type == AND ? 'and' : 'or'
+				booleanString = @compound_type == :and ? 'and' : 'or'
 				subSqlStrings = @conditions.collect { |cond| cond.to_sql }
 				"(#{ subSqlStrings.join(" #{ booleanString } ") })"
 			end
@@ -590,7 +577,7 @@ module Lafcadio
 					field_name, ',' + search_term, domain_class, Like::PRE_ONLY
 				)
 				only_cond = Equals.new( field_name, search_term, domain_class )
-				super( begin_cond, mid_cond, end_cond, only_cond, OR )
+				super( begin_cond, mid_cond, end_cond, only_cond, :or )
 			end
 		end
 
@@ -720,11 +707,7 @@ module Lafcadio
 
 		class ObjectFieldImpostor #:nodoc:
 			def self.comparators
-				{ 
-					'lt' => Compare::LESS_THAN, 'lte' => Compare::LESS_THAN_OR_EQUAL,
-					'gte' => Compare::GREATER_THAN_OR_EQUAL,
-					'gt' => Compare::GREATER_THAN
-				}
+				{ 'lt' => :lt, 'lte' => :lte, 'gte' => :gte, 'gt' => :gt }
 			end
 			
 			attr_reader :class_field
