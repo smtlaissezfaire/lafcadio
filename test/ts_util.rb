@@ -34,6 +34,15 @@ class TestLafcadioConfig < Test::Unit::TestCase
 		LafcadioConfig.set_filename nil
 		lc = LafcadioConfig.new
 	end
+	
+	def test_set_value
+		lc = LafcadioConfig.new
+		assert_equal( 'localhost', lc['dbhost'] )
+		host2 = 'some.other.server.com'
+		LafcadioConfig['dbhost'] = host2
+		assert_equal( host2, lc['dbhost'] )
+		assert_equal( host2, LafcadioConfig.new['dbhost'] )
+	end
 end
 
 class TestString < Test::Unit::TestCase

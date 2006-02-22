@@ -797,14 +797,12 @@ class TestObjectStore < LafcadioTestCase
 			LafcadioConfig.set_filename(
 				'../test/testData/config_with_sql_logging.dat'
 			)
-			LafcadioConfig.set_values( nil )
 			@dbb.select_all 'select * from clients'
 			fail if Time.now - File.ctime( logFilePath ) > 5
 		end
 		
 		def test_logs_sql_to_different_file_name
 			LafcadioConfig.set_filename( '../test/testData/config_with_log_path.dat' )
-			LafcadioConfig.set_values( nil )
 			logFilePath = '../test/testOutput/another.sql'
 			@dbb.select_all 'select * from users'
 			fail if Time.now - File.ctime( logFilePath ) > 5

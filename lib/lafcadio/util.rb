@@ -14,22 +14,36 @@ module Lafcadio
 	#   dbname:lafcadio_test
 	#   dbhost:localhost
 	class LafcadioConfig < Hash
-		@@filename = nil
-		@@value_hash = nil
-	
-		def self.set_filename(filename); @@filename = filename; end
+		@@value_hash = {}
+		@@instances = []
 		
-		def self.set_values( value_hash ); @@value_hash = value_hash; end
-
-		def initialize
-			if @@value_hash
-				@@value_hash.each { |key, value| self[key] = value }
-			elsif @@filename
-				File.new( @@filename ).each_line { |line|
+		def self.[]=( k, v )
+			@@value_hash[k] = v
+			@@instances.each do |instance| instance[k] = v; end
+		end
+		
+		def self.new
+			inst = super
+			@@instances << inst
+			inst
+		end
+	
+		def self.set_filename(filename)
+			@@value_hash = {}
+			if filename
+				File.new( filename ).each_line { |line|
 					line.chomp =~ /^(.*?):(.*)$/
 					self[$1] = $2
 				}
 			end
+		end
+		
+		def self.set_values( value_hash )
+			@@value_hash = ( value_hash.nil? ? {} : value_hash )
+		end
+
+		def initialize
+			@@value_hash.each { |key, value| self[key] = value }
 		end
 	end
 
