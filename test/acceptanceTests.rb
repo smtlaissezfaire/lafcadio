@@ -412,6 +412,35 @@ values( 1, 'sample text' )
 		}
 	end
 	
+	def test_threading
+		threads = []
+		rows = []
+		25.times do
+			threads << Thread.new do
+				row = TestRow.new( 'text_field' => rand( 10000 ).to_s ).commit
+				synchronize do
+					rows << row
+				end
+			end
+		end
+		threads.each do |th| th.join; end
+		rows.each do |row|
+			row_prime = TestRow[row.pk_id]
+			assert_equal( row.pk_id, row_prime.pk_id )
+			assert_equal(
+				row.text_field, row_prime.text_field, "mismatch for row #{ row.pk_id }"
+			)
+		end
+		rows.each do |row| @object_store.flush( row ); end
+		rows.each do |row|
+			row_prime = TestRow[row.pk_id]
+			assert_equal( row.pk_id, row_prime.pk_id )
+			assert_equal(
+				row.text_field, row_prime.text_field, "mismatch for row #{ row.pk_id }"
+			)
+		end
+	end
+	
 	def test_transaction
 		@object_store.transaction do |tr|
 			TestInnoDBRow.new( 'string' => 'some string' ).commit

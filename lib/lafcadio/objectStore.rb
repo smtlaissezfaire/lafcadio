@@ -3,6 +3,7 @@ require 'lafcadio/depend'
 require 'lafcadio/domain'
 require 'lafcadio/query'
 require 'lafcadio/util'
+require 'monitor'
 
 module Lafcadio
 	class DomainObjectInitError < RuntimeError #:nodoc:
@@ -256,9 +257,12 @@ module Lafcadio
 		def transaction( &action ); @cache.transaction( action ); end
 		
 		class Cache #:nodoc:
+			include MonitorMixin
+		
 			attr_reader :db_bridge
 			
 			def initialize( db_bridge = DbBridge.new )
+				super()
 				@db_bridge = db_bridge
 				@domain_class_caches = {}
 			end
@@ -268,8 +272,12 @@ module Lafcadio
 				db_object.last_commit_type = get_last_commit db_object
 				db_object.pre_commit_trigger
 				update_dependent_domain_objects( db_object ) if db_object.delete
-				@db_bridge.commit db_object
-				db_object.pk_id = @db_bridge.last_pk_id_inserted unless db_object.pk_id
+				synchronize do
+					@db_bridge.commit db_object
+					unless db_object.pk_id
+						db_object.pk_id = @db_bridge.last_pk_id_inserted
+					end
+				end
 				update_after_commit db_object
 				db_object.post_commit_trigger
 				db_object.reset_original_values_hash
