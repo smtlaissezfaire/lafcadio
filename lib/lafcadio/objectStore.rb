@@ -295,11 +295,11 @@ module Lafcadio
 			
 			def get_last_commit( db_object )
 				if db_object.delete
-					DomainObject::COMMIT_DELETE
+					:delete
 				elsif db_object.pk_id
-					DomainObject::COMMIT_EDIT
+					:update
 				else
-					DomainObject::COMMIT_ADD
+					:insert
 				end
 			end
 
@@ -418,11 +418,11 @@ module Lafcadio
 				def set_commit_time( d_obj ); commit_times[d_obj.pk_id] = Time.now; end
 
 				def update_after_commit( db_object ) #:nodoc:
-					if [ DomainObject::COMMIT_EDIT, DomainObject::COMMIT_ADD ].include?(
+					if [ :update, :insert ].include?(
 						db_object.last_commit_type
 					)
 						save db_object
-					elsif db_object.last_commit_type == DomainObject::COMMIT_DELETE
+					elsif db_object.last_commit_type == :delete
 						flush db_object
 					end
 					set_commit_time db_object

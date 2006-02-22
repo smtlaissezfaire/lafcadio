@@ -42,15 +42,13 @@ module Lafcadio
 		
 		def possible_field_attributes
 			fieldAttr = []
-			fieldAttr << FieldAttribute.new( 'size', FieldAttribute::INTEGER )
-			fieldAttr << FieldAttribute.new( 'unique', FieldAttribute::BOOLEAN )
-			fieldAttr << FieldAttribute.new( 'not_nil', FieldAttribute::BOOLEAN )
-			fieldAttr << FieldAttribute.new( 'enum_type', FieldAttribute::ENUM,
-																			 BooleanField )
-			fieldAttr << FieldAttribute.new( 'enums', FieldAttribute::HASH )
-			fieldAttr << FieldAttribute.new( 'range', FieldAttribute::ENUM,
-																			 DateField )
-			fieldAttr << FieldAttribute.new( 'large', FieldAttribute::BOOLEAN )
+			fieldAttr << FieldAttribute.new( 'size', :integer )
+			fieldAttr << FieldAttribute.new( 'unique', :boolean )
+			fieldAttr << FieldAttribute.new( 'not_nil', :boolean )
+			fieldAttr << FieldAttribute.new( 'enum_type', :enum, BooleanField )
+			fieldAttr << FieldAttribute.new( 'enums', :hash )
+			fieldAttr << FieldAttribute.new( 'range', :enum, DateField )
+			fieldAttr << FieldAttribute.new( 'large', :boolean )
 		end
 
 		def register_name( name )
@@ -69,11 +67,6 @@ module Lafcadio
 		end
 		
 		class FieldAttribute
-			INTEGER = 1
-			BOOLEAN = 2
-			ENUM    = 3
-			HASH    = 4
-			
 			attr_reader :name, :value_class
 		
 			def initialize( name, value_class, objectFieldClass = nil )
@@ -84,7 +77,7 @@ module Lafcadio
 			def maybe_set_field_attr( field, fieldElt )
 				setterMethod = "#{ name }="
 				if field.respond_to?( setterMethod )
-					if value_class != FieldAttribute::HASH
+					if value_class != :hash
 						if ( attrStr = fieldElt.attributes[name] )
 							field.send( setterMethod, value_from_string( attrStr ) )
 						end
@@ -107,11 +100,11 @@ module Lafcadio
 			end
 			
 			def value_from_string( valueStr )
-				if @value_class == INTEGER
+				if @value_class == :integer
 					valueStr.to_i
-				elsif @value_class == BOOLEAN
+				elsif @value_class == :boolean
 					valueStr == 'y'
-				elsif @value_class == ENUM
+				elsif @value_class == :enum
 					eval "#{ @objectFieldClass.name }::#{ valueStr }"
 				end
 			end
@@ -284,10 +277,6 @@ module Lafcadio
 	# different levels.
 	class DomainObject
 		@@subclass_records = Hash.new do |h, k| h[k] = SubclassRecord.new( k ); end
-
-		COMMIT_ADD = 1
-		COMMIT_EDIT = 2
-		COMMIT_DELETE = 3
 
 		include DomainComparable
 		

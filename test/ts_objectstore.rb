@@ -615,13 +615,13 @@ class TestObjectStore < LafcadioTestCase
 		def test_last_commit_type
 			client = Client.new({ 'name' => 'client name' })
 			@cache.commit client
-			assert_equal( DomainObject::COMMIT_ADD, client.last_commit_type )
+			assert_equal( :insert, client.last_commit_type )
 			client2 = Client.new({ 'pk_id' => 25, 'name' => 'client 25' })
 			@cache.commit client2
-			assert_equal( DomainObject::COMMIT_EDIT, client2.last_commit_type )
+			assert_equal( :update, client2.last_commit_type )
 			client2.delete = true
 			@cache.commit client2
-			assert_equal(	DomainObject::COMMIT_DELETE, client2.last_commit_type )
+			assert_equal( :delete, client2.last_commit_type )
 		end
 	end
 
