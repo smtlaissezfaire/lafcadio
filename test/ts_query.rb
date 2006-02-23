@@ -671,10 +671,8 @@ class TestQuery < LafcadioTestCase
 		def setup
 			super
 			@like1 = Query::Like.new('client', '606', Invoice)
-			@like2 = Query::Like.new('client', '606', Invoice,
-					Query::Like::PRE_ONLY)
-			@like3 = Query::Like.new('client', '606', Invoice,
-					Query::Like::POST_ONLY)
+			@like2 = Query::Like.new( 'client', '606', Invoice, :pre_only )
+			@like3 = Query::Like.new( 'client', '606', Invoice, :post_only )
 		end
 	
 		def test_case_insensitive

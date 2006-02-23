@@ -568,13 +568,13 @@ module Lafcadio
 		class Include < CompoundCondition #:nodoc:
 			def initialize( field_name, search_term, domain_class )
 				begin_cond = Like.new(
-					field_name, search_term + ',', domain_class, Like::POST_ONLY
+					field_name, search_term + ',', domain_class, :post_only
 				)
 				mid_cond = Like.new(
 					field_name, ',' + search_term + ',', domain_class
 				)
 				end_cond = Like.new(
-					field_name, ',' + search_term, domain_class, Like::PRE_ONLY
+					field_name, ',' + search_term, domain_class, :pre_only
 				)
 				only_cond = Equals.new( field_name, search_term, domain_class )
 				super( begin_cond, mid_cond, end_cond, only_cond, :or )
@@ -604,12 +604,8 @@ module Lafcadio
 		end
 		
 		class Like < Condition #:nodoc:
-			PRE_AND_POST	= 1
-			PRE_ONLY			= 2
-			POST_ONLY			= 3
-
 			def initialize(
-				fieldName, searchTerm, domain_class, matchType = PRE_AND_POST
+				fieldName, searchTerm, domain_class, matchType = :pre_and_post
 			)
 				if searchTerm.is_a? Regexp
 					searchTerm = process_regexp searchTerm
@@ -631,34 +627,34 @@ module Lafcadio
 			
 			def process_regexp( searchTerm )
 				if searchTerm.source =~ /^\^(.*)/
-					@matchType = Query::Like::POST_ONLY
+					@matchType = :post_only
 					$1
 				elsif searchTerm.source =~ /(.*)\$$/
-					@matchType = Query::Like::PRE_ONLY
+					@matchType = :pre_only
 					$1
 				else
-					@matchType = Query::Like::PRE_AND_POST
+					@matchType = :pre_and_post
 					searchTerm.source
 				end
 			end
 
 			def regexp
-				if @matchType == PRE_AND_POST
+				if @matchType == :pre_and_post
 					Regexp.new( @searchTerm, Regexp::IGNORECASE )
-				elsif @matchType == PRE_ONLY
+				elsif @matchType == :pre_only
 					Regexp.new( @searchTerm.to_s + "$", Regexp::IGNORECASE )
-				elsif @matchType == POST_ONLY
+				elsif @matchType == :post_only
 					Regexp.new( "^" + @searchTerm, Regexp::IGNORECASE )
 				end
 			end
 
 			def to_sql
 				withWildcards = @searchTerm.clone
-				if @matchType == PRE_AND_POST
+				if @matchType == :pre_and_post
 					withWildcards = "%" + withWildcards + "%"
-				elsif @matchType == PRE_ONLY
+				elsif @matchType == :pre_only
 					withWildcards = "%" + withWildcards
-				elsif @matchType == POST_ONLY
+				elsif @matchType == :post_only
 					withWildcards += "%"
 				end
 				withWildcards.gsub!( /(\\?\.)/ ) { |m| m.size == 1 ? "_" : "." }
