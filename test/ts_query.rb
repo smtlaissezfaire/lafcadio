@@ -15,20 +15,33 @@ class TestQuery < LafcadioTestCase
 	def test_by_condition
 		client = Client.new({ 'pk_id' => 13 })
 		condition = Query::Equals.new('client', client, Invoice)
-		query = Query.new Invoice, condition
+		query = Query.new( Invoice, :condition => condition )
 		assert_equal( 'select * from invoices where invoices.client = 13',
 		              query.to_sql )
 	end
 
 	def test_count
-		qry = Query.new( Client, nil, { :group_functions => [ :count ] } )
+		qry = Query.new( Client, :group_functions => [ :count ] )
 		assert_equal( 'select count(*) from clients', qry.to_sql )
+	end
+	
+	def test_eager_loading
+		qry = Query.new( Invoice, :include => :client )
+		assert_equal(
+			'select * from invoices left outer join clients on invoices.client = clients.pk_id',
+			qry.to_sql
+		)
+		qry2 = Query.new( XmlSku2, :include => [ :link1, :xml_sku ] )
+		assert_equal(
+			'select * from that_table left outer join users on that_table.link1 = users.pk_id left outer join some_other_table on that_table.xml_sku = some_other_table.some_other_id',
+			qry2.to_sql
+		)
 	end
 	
 	def test_implies?
 		query1 = Query.new( Client )
 		assert( query1.implies?( query1 ) )
-		query2 = Query.new( Client, 1 )
+		query2 = Query.new( Client, :pk_id => 1 )
 		assert( query2.implies?( query2 ) )
 		assert( !query1.implies?( query2 ) )
 		assert( query2.implies?( query1 ) )
@@ -111,9 +124,9 @@ class TestQuery < LafcadioTestCase
 	end
 
 	def test_one_pk_id
-		query = Query.new SKU, 199
+		query = Query.new( SKU, :pk_id => 199 )
     assert_equal( 'select * from skus where skus.pk_id = 199', query.to_sql )
-		query2 = Query.new( XmlSku, 199 )
+		query2 = Query.new( XmlSku, :pk_id => 199 )
 		assert_equal(
 			'select * from some_other_table ' +
 					'where some_other_table.some_other_id = 199',
@@ -135,23 +148,23 @@ class TestQuery < LafcadioTestCase
 
 	def test_query_with_condition
 		condition = Query::In.new('client', [ 1, 2, 3 ], Invoice)
-		query = Query.new Invoice, condition
+		query = Query.new( Invoice, :condition => condition )
 		assert_equal( 'select * from invoices where invoices.client in (1, 2, 3)',
 		              query.to_sql )
 	end
 
 	def test_table_joins_for_inheritance
-		query = Query.new InternalClient, 1
+		query = Query.new( InternalClient, :pk_id => 1 )
 		assert_equal(
-			'select * from clients, internal_clients where clients.pk_id = ' +
-					'internal_clients.pk_id and internal_clients.pk_id = 1',
+			'select * from clients inner join internal_clients on clients.pk_id = ' +
+					'internal_clients.pk_id where internal_clients.pk_id = 1',
 			query.to_sql
 		)
 		condition = Query::Equals.new('billingType', 'whatever', InternalClient)
-		query2 = Query.new InternalClient, condition
+		query2 = Query.new( InternalClient, :condition => condition )
 		assert_equal(
-			'select * from clients, internal_clients where clients.pk_id = ' +
-					'internal_clients.pk_id and internal_clients.billingType = ' +
+			'select * from clients inner join internal_clients on clients.pk_id = ' +
+					'internal_clients.pk_id where internal_clients.billingType = ' +
 					'\'whatever\'',
 			query2.to_sql
 		)
@@ -454,8 +467,7 @@ class TestQuery < LafcadioTestCase
 	
 		def test_compare_field_belonging_to_superclass
 			desiredSql =
-				"select * from clients, internal_clients where clients.pk_id = " +
-				"internal_clients.pk_id and clients.standard_rate < 10"
+				"select * from clients inner join internal_clients on clients.pk_id = internal_clients.pk_id where clients.standard_rate < 10"
 			assert_infer_match( desiredSql, InternalClient ) { |intc|
 				intc.standard_rate.lt( 10 )
 			}

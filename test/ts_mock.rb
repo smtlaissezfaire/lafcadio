@@ -16,7 +16,7 @@ class TestMockDbBridge < LafcadioTestCase
 	end
 	
 	def get(object_type, pk_id)
-		query = Query.new object_type, pk_id
+		query = Query.new( object_type, :pk_id => pk_id )
 		@mockDbBridge.select_dobjs(query)[0]
 	end
 
@@ -44,7 +44,7 @@ class TestMockDbBridge < LafcadioTestCase
 		@client.delete = true
 		@mockDbBridge.commit @client
 		assert_equal 1, all(Client).size
-		query = Query.new Client, 1
+		query = Query.new( Client, :pk_id => 1 )
 		clientPrime = @mockDbBridge.select_dobjs(query)[0]
 		assert_nil clientPrime
 	end
@@ -152,7 +152,7 @@ class TestMockDbBridge < LafcadioTestCase
 		@mockDbBridge.commit @client
 		client2 = Client.new({ 'pk_id' => 2, 'name' => 'client2' })
 		@mockDbBridge.commit client2
-		query = Query.new Client, 2
+		query = Query.new( Client, :pk_id => 2 )
 		coll = @mockDbBridge.select_dobjs(query)
 		assert_equal 1, coll.size
 		assert_equal client2, coll[0]
@@ -245,7 +245,9 @@ class TestMockObjectStore < LafcadioTestCase
 
 	def testRespectsLimit
 		10.times { User.new({ 'firstNames' => 'John' }).commit }
-		query = Query.new( User, Query::Equals.new( 'firstNames', 'John', User ) )
+		query = Query.new(
+			User, :condition => Query::Equals.new( 'firstNames', 'John', User )
+		)
 		query.limit = (1..5)
 		assert_equal( 5, @mockObjectStore.query( query ).size )
 	end

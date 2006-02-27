@@ -296,7 +296,9 @@ module Lafcadio
 		# Returns every committed instance of the domain class.
 		#
 		#   User.all # => all users
-		def self.all; ObjectStore.get_object_store.all( self ); end
+		def self.all( opts = {} )
+			ObjectStore.get_object_store.all( self, opts )
+		end
 		
 		def self.all_fields # :nodoc:
 			self_and_concrete_superclasses.map { |a_class|
@@ -305,7 +307,7 @@ module Lafcadio
 		end
 
 		def self.class_field(fieldName) #:nodoc:
-			self.class_fields.find { |field| field.name == fieldName }
+			self.class_fields.find { |field| field.name == fieldName.to_s }
 		end
 		
 		def self.class_fields #:nodoc:
@@ -456,7 +458,7 @@ module Lafcadio
 				if arg.is_a? Fixnum
 					ObjectStore.get_object_store.get( self, *args )
 				else
-					qry = Query.new( self, nil, { :group_functions => [ :count ] } )
+					qry = Query.new( self, :group_functions => [ :count ] )
 					ObjectStore.get_object_store.group_query qry
 				end
 			else

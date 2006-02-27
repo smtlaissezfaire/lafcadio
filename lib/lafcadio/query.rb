@@ -166,20 +166,19 @@ module Lafcadio
 			CompoundCondition.new( *conditions)
 		end
 
-		attr_reader :domain_class, :condition, :limit, :order_by
+		attr_reader :domain_class, :condition, :include, :limit, :order_by
 		attr_accessor :order_by_order
 
-		def initialize(domain_class, pk_id_or_condition = nil, opts = {} ) #:nodoc:
+		def initialize(domain_class, opts = {} ) #:nodoc:
 			@domain_class, @opts = domain_class, opts
 			( @condition, @order_by, @limit ) = [ nil, nil, nil ]
-			if pk_id_or_condition
-				if pk_id_or_condition.is_a?( Condition )
-					@condition = pk_id_or_condition
-				else
-					@condition = Query::Equals.new(
-						:pk_id, pk_id_or_condition, domain_class
-					)
-				end
+			if ( cond = opts[:condition] )
+				@condition = cond
+			elsif ( pk_id = opts[:pk_id] )
+				@condition = Query::Equals.new( :pk_id, pk_id, domain_class )
+			end
+			if ( @include = opts[:include] )
+				@include = [ @include ] unless @include.is_a?( Array )
 			end
 			@order_by_order = :asc
 		end
@@ -303,10 +302,25 @@ module Lafcadio
 
 		def tables #:nodoc:
 			concrete_classes = domain_class.self_and_concrete_superclasses.reverse
-			table_names = concrete_classes.collect { |domain_class|
-				domain_class.table_name
-			}
-			table_names.join( ', ' )
+			sql = ''
+			dclass = nil
+			until concrete_classes.empty?
+				prev_dclass = dclass
+				dclass = concrete_classes.shift
+				if sql == ''
+					sql = dclass.table_name
+				else
+					sql += " inner join #{ dclass.table_name } on #{ sql_primary_key_field( prev_dclass ) } = #{ sql_primary_key_field( dclass ) }"
+				end
+			end
+			if @include
+				@include.each do |include_sym|
+					field = dclass.field include_sym
+					included_dclass = field.linked_type
+					sql += " left outer join #{ included_dclass.table_name } on #{ dclass.table_name }.#{ field.db_field_name } = #{ sql_primary_key_field( included_dclass ) }"
+				end
+			end
+			sql
 		end
 
 		def to_sql
@@ -318,17 +332,8 @@ module Lafcadio
 		end
 
 		def where_clause #:nodoc:
-			concrete_classes = domain_class.self_and_concrete_superclasses.reverse
 			where_clauses = []
-			concrete_classes.each_with_index { |domain_class, i|
-				if i < concrete_classes.size - 1
-					join_clause = sql_primary_key_field( domain_class ) + ' = ' +
-					              sql_primary_key_field( concrete_classes[i+1] )
-					where_clauses << join_clause
-				else
-					where_clauses << @condition.to_sql if @condition
-				end
-			}
+			where_clauses << @condition.to_sql if @condition
 			!where_clauses.empty? ? 'where ' + where_clauses.join( ' and ' ) : nil
 		end
 
@@ -383,7 +388,7 @@ module Lafcadio
 
 			def primary_key_field?; 'pk_id' == @fieldName; end
 			
-			def query; Query.new( @domain_class, self ); end
+			def query; Query.new( @domain_class, :condition => self ); end
 			
 			def to_condition; self; end
 		end
@@ -595,7 +600,7 @@ module Lafcadio
 			def execute
 				impostor = DomainObjectImpostor.impostor @domain_class
 				condition = @action.call( impostor ).to_condition
-				query = Query.new( @domain_class, condition )
+				query = Query.new( @domain_class, :condition => condition )
 				query.order_by = @order_by
 				query.order_by_order = @order_by_order
 				query.limit = @limit

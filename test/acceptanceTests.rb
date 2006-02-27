@@ -9,6 +9,18 @@ require 'test/unit'
 
 include Lafcadio
 
+class ObjectStore::DbConnection
+	attr_accessor :allow_select
+
+	def select_all( sql )
+		if @allow_select.nil? or @allow_select
+			@dbh.select_all sql
+		else
+			raise
+		end
+	end
+end
+
 def connect_to_dbh
 	LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
 	config = LafcadioConfig.new
@@ -107,7 +119,8 @@ create table test_rows (
 	bool_field tinyint,
 	blob_field blob,
 	text_field2 text,
-	test_diff_pk_row int
+	test_diff_pk_row int,
+	test_inno_db_row int
 )
 		CREATE
 	end
@@ -118,7 +131,8 @@ create table test_rows (
 	string        'text_field'
 	string        'text2', { 'db_field_name' => 'text_field2' }
 	domain_object TestDiffPkRow
-
+	domain_object TestInnoDBRow
+	
 	def TestRow.sql_primary_key_name
 		'pk_id'
 	end
@@ -357,6 +371,28 @@ values( 1, 'sample text' )
 	
 	def test_dumpable
 		os_prime = Marshal.load( Marshal.dump( @object_store ) )
+	end
+	
+	def test_eager_loading
+		dpr = TestDiffPkRow.new( 'text_field' => 'text 1' ).commit
+		idr = TestInnoDBRow.new( 'string' => 'text 2' ).commit
+		tr = TestRow.new(
+			'text_field' => 'text 3', 'test_diff_pk_row' => dpr,
+			'test_inno_db_row' => idr
+		).commit
+		trs = TestRow.all( :include => :test_diff_pk_row )
+		dbc = ObjectStore::DbConnection.get_db_connection
+		dbc.allow_select = false
+		assert_equal( 'text 1', trs.first.test_diff_pk_row.text_field )
+		dbc.allow_select = true
+		trs = TestRow.all( :include => [ :test_diff_pk_row, :test_inno_db_row ] )
+		dbc.allow_select = false
+		assert_equal( 'text 1', trs.first.test_diff_pk_row.text_field )
+		assert_equal( 'text 2', trs.first.test_inno_db_row.string )
+		dbc.allow_select = true
+		tr2 = TestRow.new( 'text_field' => 'text 4' ).commit
+		trs = TestRow.all( :include => :test_diff_pk_row )
+		assert_equal( 2, trs.size )
 	end
 
 	def test_get_by_domain_class

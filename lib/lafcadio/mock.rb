@@ -16,16 +16,6 @@ module Lafcadio
 			@objects[domain_class] ? @objects[domain_class].values : []
 		end
 		
-		def select_dobjs(query)
-			@queries << query
-			domain_class = query.domain_class
-			objects = []
-			all( domain_class ).each { |dbObj|
-				objects << dbObj if query.dobj_satisfies?( dbObj )
-			}
-			query.order_and_limit_collection objects
-		end
-
 		def commit(db_object)
 			if db_object.pk_id and !db_object.pk_id.is_a?( Integer )
 				raise ArgumentError
@@ -84,6 +74,16 @@ module Lafcadio
 			@queries.select { |qry| qry.to_sql == sql }.size
 		end
 		
+		def select_dobjs(query)
+			@queries << query
+			domain_class = query.domain_class
+			objects = []
+			all( domain_class ).each { |dbObj|
+				objects << dbObj if query.dobj_satisfies?( dbObj )
+			}
+			query.order_and_limit_collection objects
+		end
+
 		def set_next_pk_id( domain_class, npi )
 			@next_pk_ids = {} unless @next_pk_ids
 			@next_pk_ids[ domain_class ] = npi

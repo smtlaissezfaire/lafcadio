@@ -43,10 +43,15 @@ module Lafcadio
 
 		def db_object #:nodoc:
 			if @db_object.nil? || needs_refresh?
-				@db_object = ObjectStore.get_object_store.get( @domain_class, @pk_id )
-				@d_obj_retrieve_time = Time.now
+				dbo = ObjectStore.get_object_store.get( @domain_class, @pk_id )
+				self.db_object = dbo
 			end
 			@db_object
+		end
+		
+		def db_object=( dbo )
+			@db_object = dbo
+			@d_obj_retrieve_time = Time.now
 		end
 
 		def hash #:nodoc:
@@ -160,8 +165,8 @@ module Lafcadio
 		end
 
 		# Returns all domain objects for the given domain class.
-		def all(domain_class)
-			@cache.get_by_query( Query.new( domain_class ) )
+		def all( domain_class, opts = {} )
+			@cache.get_by_query( Query.new( domain_class, opts ) )
 		end
 
 		# Returns the DbBridge; this is useful in case you need to use raw SQL for
@@ -170,7 +175,8 @@ module Lafcadio
 		
 		# Returns the domain object corresponding to the domain class and pk_id.
 		def get( domain_class, pk_id )
-			@cache.get_by_query( Query.new( domain_class, pk_id ) ).first or (
+			qry = Query.new( domain_class, :pk_id => pk_id )
+			@cache.get_by_query( qry ).first or (
 				raise(
 					DomainObjectNotFoundError, "Can't find #{domain_class} #{pk_id}",
 					caller
@@ -232,7 +238,7 @@ module Lafcadio
 		def query(conditionOrQuery)
 			if conditionOrQuery.class <= Query::Condition
 				condition = conditionOrQuery
-				query = Query.new condition.domain_class, condition
+				query = Query.new( condition.domain_class, :condition => condition )
 			else
 				query = conditionOrQuery
 			end
@@ -293,6 +299,23 @@ module Lafcadio
 				@domain_class_caches[domain_class]
 			end
 			
+			def get_by_query( query )
+				main_cache = cache query.domain_class
+				unless main_cache.queries[query]
+					if query.one_pk_id?
+						collected = false
+					else
+						collected = main_cache.collect_from_superset query
+					end
+					if !collected and main_cache.queries.values
+						newObjects = @db_bridge.select_dobjs query
+						newObjects.each { |dbObj| main_cache.save dbObj }
+						main_cache.queries[query] = newObjects.collect { |dobj| dobj.pk_id }
+					end
+				end
+				main_cache.queries[query].map { |pk_id| main_cache[pk_id] }.compact
+			end
+
 			def get_last_commit( db_object )
 				if db_object.delete
 					:delete
@@ -305,8 +328,7 @@ module Lafcadio
 
 			def method_missing( meth, *args )
 				simple_dispatch = [
-					:get_by_query, :queries, :save, :set_commit_time,
-					:update_after_commit
+					:queries, :save, :set_commit_time, :update_after_commit
 				]
 				if simple_dispatch.include?( meth )
 					cache( args.first.domain_class ).send( meth, *args )
@@ -387,28 +409,8 @@ module Lafcadio
 					end
 				end
 
-				def get_by_query( query )
-					unless queries[query]
-						if query.one_pk_id?
-							collected = false
-						else
-							collected = collect_from_superset query
-						end
-						if !collected and queries.values
-							query_db query
-						end
-					end
-					queries[query].map { |pk_id| self[pk_id] }.compact
-				end
-
 				def last_commit_time( pk_id ); commit_times[pk_id]; end
 				
-				def query_db( query )
-					newObjects = @db_bridge.select_dobjs query
-					newObjects.each { |dbObj| save dbObj }
-					queries[query] = newObjects.collect { |dobj| dobj.pk_id }
-				end
-							
 				# Saves a domain object.
 				def save(db_object)
 					self[db_object.pk_id] = db_object
@@ -578,7 +580,21 @@ module Lafcadio
 			def select_dobjs(query)
 				domain_class = query.domain_class
 				select_all( query.to_sql ).collect { |row_hash|
-					domain_class.new( SqlToRubyValues.new( domain_class, row_hash ) )
+					dobj = domain_class.new(
+						SqlToRubyValues.new( domain_class, row_hash )
+					)
+					if query.include
+						query.include.each do |include_sym|
+							field = domain_class.field include_sym
+							included_dclass = field.linked_type
+							if dobj.send( field.name )
+								dobj.send( field.name ).db_object = included_dclass.new(
+									SqlToRubyValues.new( included_dclass, row_hash )
+								)
+							end
+						end
+					end
+					dobj
 				}
 			end
 			

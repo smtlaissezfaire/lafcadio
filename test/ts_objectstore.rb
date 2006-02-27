@@ -35,11 +35,12 @@ class MockDbi
 	class MockDbh
   	@@connected = false
 
-		attr_reader :sql_statements
+		attr_reader :select_results, :sql_statements
 		
 		def initialize
 			@sql_statements = []
 			@@connected = true
+			@select_results = Hash.new { |h, k| h[k] = [] }
 		end
 
 		def []= ( key, val ); end
@@ -54,38 +55,23 @@ class MockDbi
 
 		def select_all(str)
 			log_sql( str )
-      if str == "select last_insert_id()"
-				[ { 'last_insert_id()' => '12' } ]
-			elsif str == 'select max(pk_id) from clients'
-				[ [ 1 ] ]
-			elsif str == 'select max(date) from invoices'
-				[ [ DBI::Date.new( 2001, 4, 5 ) ] ]
-			elsif str == 'select * from some_other_table'
-				[ OneTimeAccessHash.new( 'some_other_id' => '16',
-				                         'text_one' => 'foobar', 'link1' => '1' ) ]
-			elsif str == 'select max(some_other_id) from some_other_table'
-				[ [ 5 ] ]
-			elsif str == 'select max(pk_id) from attributes'
-				[ [ nil ] ]
-			else
-				[]
-      end
+			@select_results[str]
     end
 	end
+end
 
-	class OneTimeAccessHash < DelegateClass( Hash )
-		attr_reader :key_lookups
+class OneTimeAccessHash < DelegateClass( Hash )
+	attr_reader :key_lookups
+
+	def initialize( hash )
+		super( hash )
+		@key_lookups = Hash.new( 0 )
+	end
 	
-		def initialize( hash )
-			super( hash )
-			@key_lookups = Hash.new( 0 )
-		end
-		
-		def []( key )
-			@key_lookups[key] += 1
-			raise "Should only access #{ key } once" if @key_lookups[key] > 1
-			super( key )
-		end
+	def []( key )
+		@key_lookups[key] += 1
+		raise "Should only access #{ key } once" if @key_lookups[key] > 1
+		super( key )
 	end
 end
 
@@ -417,7 +403,7 @@ class TestObjectStore < LafcadioTestCase
 	def test_query
 		set_test_client
 		condition = Query::Equals.new 'name', 'clientName1', Client
-		query = Query.new Client, condition
+		query = Query.new( Client, :condition => condition )
 		assert_equal @client, @testObjectStore.query(condition)[0]
 		assert_equal(
 			1, @mockDbBridge.queries.select { |q| q.to_sql == query.to_sql }.size
@@ -425,13 +411,15 @@ class TestObjectStore < LafcadioTestCase
 		assert_equal( 1, @mockDbBridge.query_count( query.to_sql ) )
 		assert_equal @client, @testObjectStore.query(query)[0]
 		assert_equal( 1, @mockDbBridge.query_count( query.to_sql ) )
-		query2 = Query.new( Client, Query::Equals.new( 'name', 'foobar', Client ) )
+		query2 = Query.new(
+			Client, :condition => Query::Equals.new( 'name', 'foobar', Client )
+		)
 		assert_equal( 0, @testObjectStore.query( query2 ).size )
 		assert_equal( 1, @mockDbBridge.query_count( query2.to_sql ) )
 		assert_equal( 0, @testObjectStore.query( query2 ).size )
 		assert_equal( 1, @mockDbBridge.query_count( query2.to_sql ) )
 		query2_prime = Query.new(
-			Client, Query::Equals.new( 'name', 'foobar', Client )
+			Client, :condition => Query::Equals.new( 'name', 'foobar', Client )
 		)
 		assert_equal( 0, @testObjectStore.query( query2_prime ).size )
 		assert_equal( 1, @mockDbBridge.query_count( query2_prime.to_sql ) )
@@ -611,7 +599,7 @@ class TestObjectStore < LafcadioTestCase
 			user.commit
 			assert_equal( 0, all( User ).size )
 		end
-	
+		
 		def test_last_commit_type
 			client = Client.new({ 'name' => 'client name' })
 			@cache.commit client
@@ -767,20 +755,73 @@ class TestObjectStore < LafcadioTestCase
 			sql2 = @mockDbh.sql_statements[1]
 			assert_match( /update internal_clients set/, sql2 )
 		end
+		
+		def test_eager_loading
+			sql1 = 'select * from invoices left outer join clients on invoices.client = clients.pk_id'
+			@mockDbh.select_results[sql1] = [
+				{ 'pk_id' => '1', 'client' => '1', 'name' => 'client1' },
+				{ 'pk_id' => '2', 'client' => '1', 'name' => 'client1' },
+				{ 'pk_id' => '3', 'client' => nil, 'name' => nil }
+			]
+			qry1 = Query.new( Invoice, :include => :client )
+			invoices = @dbb.select_dobjs qry1
+			assert_equal( 3, invoices.size )
+			assert_equal(
+				2, invoices.select { |i| i.client && i.client.name == 'client1' }.size
+			)
+			assert_equal( 1, invoices.select { |i| i.client.nil? }.size )
+			sql2 = 'select * from that_table left outer join users on that_table.link1 = users.pk_id left outer join some_other_table on that_table.xml_sku = some_other_table.some_other_id'
+			@mockDbh.select_results[sql2] = [
+				{ 'pk_id' => '1', 'link1' => '1', 'firstNames' => 'John' },
+				{ 'pk_id' => '2', 'xml_sku' => '1', 'email1' => 'someone@email.com' },
+				{ 'pk_id' => '3', 'link1' => '1', 'xml_sku' => '1',
+				  'firstNames' => 'John', 'email1' => 'someone@email.com' },
+				{ 'pk_id' => '4' }
+			]
+			qry2 = Query.new( XmlSku2, :include => [ :link1, :xml_sku ] )
+			xml_sku2s = @dbb.select_dobjs qry2
+			assert_equal( 4, xml_sku2s.size )
+			assert_equal(
+				2,
+				xml_sku2s.select { |xs2|
+					xs2.link1 && xs2.link1.firstNames == 'John'
+				}.size
+			)
+			assert_equal(
+				2,
+				xml_sku2s.select { |xs2|
+					xs2.xml_sku && xs2.xml_sku.email1 == 'someone@email.com'
+				}.size
+			)
+			assert_equal(
+				1, xml_sku2s.select { |xs2| xs2.link1.nil? && xs2.xml_sku.nil? }.size
+			)
+		end
 	
 		def test_group_query
+			@mockDbh.select_results['select max(pk_id) from clients'] = [ [ 1 ] ]
 			query = Query::Max.new( Client )
 			assert_equal( 1, @dbb.group_query( query ).only[:max] )
+			@mockDbh.select_results['select max(date) from invoices'] = [
+				[ DBI::Date.new( 2001, 4, 5 ) ]
+			]
 			invoice = Invoice.committed_mock
 			query2 = Query::Max.new( Invoice, 'date' )
 			assert_equal( invoice.date, @dbb.group_query( query2 ).only[:max].to_date )
+			sql3 = 'select max(some_other_id) from some_other_table'
+			@mockDbh.select_results[sql3] = [ [ 5 ] ]
 			query3 = Query::Max.new( XmlSku )
 			assert_equal( 5, @dbb.group_query( query3 ).only[:max] )
+			@mockDbh.select_results['select max(pk_id) from attributes'] = [
+				[ nil ]
+			]
 			query4 = Query::Max.new( Attribute )
 			assert_nil( @dbb.group_query( query4 ).only[:max] )
 		end
 	
 		def test_last_pk_id_inserted
+			@mockDbh.select_results["select last_insert_id()"] =
+					[ { 'last_insert_id()' => '12' } ]
 			client = Client.new( { "name" => "clientName1" } )
 			@dbb.commit client
 			assert_equal 12, @dbb.last_pk_id_inserted
@@ -809,6 +850,11 @@ class TestObjectStore < LafcadioTestCase
 		end
 		
 		def test_passes_sql_value_converter_to_domain_class_init
+			@mockDbh.select_results['select * from some_other_table'] = [
+				OneTimeAccessHash.new(
+					'some_other_id' => '16', 'text_one' => 'foobar', 'link1' => '1'
+				)
+			]
 			query = Query.new( XmlSku )
 			xml_sku = @dbb.select_dobjs( query ).only
 			assert_equal( 'foobar', xml_sku.text1 )
