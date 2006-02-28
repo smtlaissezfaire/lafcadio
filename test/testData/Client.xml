@@ -6,5 +6,5 @@
 	       not_nil="n"/>
 	<field name="priorityInvoice" class="SubsetDomainObjectField" linked_type="Invoice"
 	       subset_field="client" not_nil="n" />
-	<field name="notes" class="BlobField" not_nil="n"/>
+	<field name="notes" class="BinaryField" not_nil="n"/>
 </lafcadio_class_definition>

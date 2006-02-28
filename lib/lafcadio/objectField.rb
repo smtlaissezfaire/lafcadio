@@ -148,9 +148,9 @@ module Lafcadio
 		end
 	end
 
-	# BlobField stores a string value and expects to store its value in a BLOB
+	# BinaryField stores a string value and expects to store its value in a BLOB
 	# field in the database.
-	class BlobField < ObjectField
+	class BinaryField < ObjectField
 		def self.value_type #:nodoc:
 			String
 		end

@@ -158,11 +158,11 @@ module Lafcadio
 	#        email   'email'
 	#        date    'birthday'
 	#      end
-	#    The class methods you can use are +blob+, +boolean+, +date+,
+	#    The class methods you can use are +binary+, +boolean+, +date+,
 	#    +date_time+, +domain_object+, +email+, +enum+, +float+, +integer+,
-	#    +month+, +state+, +string+, +text_list+. These correspond to BlobField,
-	#    BooleanField, DateField, DateTimeField, DomainObjectField, EmailField,
-	#    EnumField, FloatField, IntegerField, MonthField, StateField,
+	#    +month+, +state+, +string+, +text_list+. These correspond to
+	#    BinaryField, BooleanField, DateField, DateTimeField, DomainObjectField,
+	#    EmailField, EnumField, FloatField, IntegerField, MonthField, StateField,
 	#    StringField, and TextListField, respectively. Consult their individual
 	#    RDoc entries for more on how to parameterize them through the class
 	#    methods.

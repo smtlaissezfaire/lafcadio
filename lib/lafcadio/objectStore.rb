@@ -523,6 +523,7 @@ module Lafcadio
 			
 			def initialize
 				@db_conn = DbConnection.get_db_connection
+				@transaction = nil
 				ObjectSpace.define_finalizer( self, proc { |id|
 					DbConnection.get_db_connection.disconnect
 				} )
@@ -545,6 +546,7 @@ module Lafcadio
 					result = select_all( sql )
 					@@last_pk_id_inserted = result[0]['last_insert_id()'].to_i
 				end
+				@db_conn.do( 'commit' ) unless @transaction
 			end
 			
 			def group_query( query )
@@ -599,18 +601,19 @@ module Lafcadio
 			end
 			
 			def transaction( action )
-				tr = Transaction.new @db_conn
-				tr.commit
+				@transaction = Transaction.new @db_conn
+				@transaction.commit
 				begin
-					action.call tr
-					tr.commit
+					action.call @transaction
+					@transaction.commit
 				rescue RollbackError
 					# rollback handled by Transaction
 				rescue
 					err_to_raise = $!
-					tr.rollback false
+					@transaction.rollback false
 					raise err_to_raise
 				end
+				@transaction = nil
 			end
 			
 			class Transaction #:nodoc:
@@ -640,17 +643,21 @@ module Lafcadio
 		
 			def disconnect; @dbh.disconnect; end
 			
-			def load_new_dbh
+			def driver_url
 				config = LafcadioConfig.new
 				dbName = @@db_name || config['dbname']
-				dbAndHost = nil
+				driver_name = config['dbtype'] || 'Mysql'
 				if dbName && config['dbhost']
-					dbAndHost = "dbi:Mysql:#{ dbName }:#{ config['dbhost'] }"
+					"dbi:#{ driver_name }:#{ dbName }:#{ config['dbhost'] }"
 				else
-					dbAndHost = "dbi:#{config['dbconn']}"
+					"dbi:#{config['dbconn']}"
 				end
+			end
+			
+			def load_new_dbh
+				config = LafcadioConfig.new
 				dbh = @@conn_class.connect(
-					dbAndHost, config['dbuser'], config['dbpassword']
+					driver_url, config['dbuser'], config['dbpassword']
 				)
 				dbh['AutoCommit'] = false
 				dbh

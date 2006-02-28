@@ -3,7 +3,7 @@ require 'lafcadio/objectField'
 module Lafcadio
 	class CreateTableStatement #:nodoc:
 		@@simple_field_clauses = {
-			BooleanField => 'bool', BlobField => 'blob', DateField => 'date', 
+			BooleanField => 'bool', BinaryField => 'blob', DateField => 'date', 
 			DomainObjectField => 'int', FloatField => 'float',
 			DateTimeField => 'datetime', IntegerField => 'int',
 			StringField => 'varchar(255)', TextListField => 'varchar(255)',

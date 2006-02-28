@@ -9,67 +9,111 @@ require 'test/unit'
 
 include Lafcadio
 
-class ObjectStore::DbConnection
-	attr_accessor :allow_select
+class ObjectStore
+	def self.flush_db_bridge; @@db_bridge = nil; end
 
-	def select_all( sql )
-		if @allow_select.nil? or @allow_select
-			@dbh.select_all sql
-		else
-			raise
+	class DbConnection
+		attr_accessor :allow_select
+	
+		def select_all( sql )
+			if @allow_select.nil? or @allow_select
+				@dbh.select_all sql
+			else
+				raise
+			end
 		end
 	end
 end
 
-def connect_to_dbh
-	LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
+def connect_to_dbh( db_code )
 	config = LafcadioConfig.new
-	dbAndHost = "dbi:Mysql:#{ config['dbname'] }:#{ config['dbhost'] }"
+	dbAndHost = [
+		'dbi', db_code, config['dbname'], config['dbhost']
+	].join( ':' )
 	DBI.connect( dbAndHost, config['dbuser'], config['dbpassword'] )
 end
 
+def setup_lafcadio_config( db )
+	LafcadioConfig.set_values(
+		'dbuser' => 'test', 'dbpassword' => 'password', 'dbname' => 'test',
+		'dbhost' => 'localhost', 'dbtype' => db
+	)
+end
+
 class AcceptanceTestCase < Test::Unit::TestCase
+	@@children_dbs = Hash.new { |h, k| h[k] = 'Mysql' }
+	
+	def self.db( db_code ); @@children_dbs[self] = db_code; end
+
 	def self.domain_classes
-		[ TestBadRow, TestChildRow, TestDiffPkRow, TestInnoDBRow, TestRow ]
+		[ TestBadRow, TestChildRow, TestDiffPkRow, TestRow, TestTransactionRow ]
 	end
 	
 	def setup
 		super
-		@dbh = connect_to_dbh
+		setup_lafcadio_config db
+		@dbh = connect_to_dbh db
 		AcceptanceTestCase.domain_classes.each do |domain_class|
-			domain_class.create_table @dbh
+			domain_class.create_table( @dbh, db )
 		end
 		@object_store = ObjectStore.get_object_store
 	end
 	
 	def teardown
 		LafcadioConfig.set_values nil
-		self.class.domain_classes.each do |domain_class|
-			domain_class.drop_table @dbh
-		end
 		ObjectStore.set_object_store nil
+		ObjectStore.flush_db_bridge
+		ObjectStore::DbConnection.get_db_connection.disconnect
+		ObjectStore::DbConnection.set_db_connection nil
+		self.class.domain_classes.each do |domain_class|
+			domain_class.drop_table( @dbh, db )
+		end
+		@dbh.disconnect
 	end
+	
+	def db; @@children_dbs[self.class]; end
 	
 	def default_test; end
 end
 
 class DomainObject
-	def self.create_table( dbh )
-		drop_table dbh
-		dbh.do create_sql
+	def self.create_table( dbh, db )
+		drop_table( dbh, db )
+		dbh.do create_sql( db )
 	end
 	
-	def self.drop_table( dbh )
-		dbh.do "drop table if exists #{ self.table_name }"
+	def self.create_sql( db )
+		( db == 'Mysql' ) ? create_sql_mysql : create_sql_postgres
+	end
+	
+	def self.drop_table( dbh, db )
+		if db == 'Mysql'
+			dbh.do "drop table if exists #{ self.table_name }"
+		else
+			sql =
+					"select count(*) from pg_class where relname = '#{ self.table_name }'"
+			matches = nil
+			dbh.select_all( sql ) do |row| matches = row['count'].to_i; end
+			dbh.do "drop table #{ self.table_name }" if matches > 0
+		end
 	end
 end
 
 class TestBadRow < DomainObject
-	def self.create_sql
+	def self.create_sql_mysql
 		<<-CREATE
 create table test_bad_rows (
 	objId int not null auto_increment,
 	primary key (objId),
+	text_field text
+)
+		CREATE
+	end
+	
+	def self.create_sql_postgres
+		<<-CREATE
+create table test_bad_rows (
+	objId serial primary key,
 	text_field text
 )
 		CREATE
@@ -79,11 +123,20 @@ create table test_bad_rows (
 end
 
 class TestDiffPkRow < DomainObject
-	def self.create_sql
+	def self.create_sql_mysql
 		<<-CREATE
 create table test_diff_pk_rows (
 	objId int not null auto_increment,
 	primary key (objId),
+	text_field text
+)
+		CREATE
+	end
+	
+	def self.create_sql_postgres
+		<<-CREATE
+create table test_diff_pk_rows (
+	objId serial primary key,
 	text_field text
 )
 		CREATE
@@ -93,10 +146,10 @@ create table test_diff_pk_rows (
 	sql_primary_key_name 'objId'
 end
 
-class TestInnoDBRow < DomainObject
-	def self.create_sql
+class TestTransactionRow < DomainObject
+	def self.create_sql_mysql
 		<<-CREATE
-create table test_inno_db_rows (
+create table test_transaction_rows (
 	pk_id int not null auto_increment,
 	primary key (pk_id),
 	string varchar(15)
@@ -104,12 +157,20 @@ create table test_inno_db_rows (
 		CREATE
 	end
 
+	def self.create_sql_postgres
+		<<-CREATE
+create table test_transaction_rows (
+	pk_id serial primary key,
+	string varchar(15)
+)
+		CREATE
+	end
+	
 	string 'string'
-	table_name 'test_inno_db_rows'
 end
 
 class TestRow < DomainObject
-	def self.create_sql
+	def self.create_sql_mysql
 		<<-CREATE
 create table test_rows (
 	pk_id int not null auto_increment,
@@ -117,21 +178,36 @@ create table test_rows (
 	text_field text,
 	date_time datetime,
 	bool_field tinyint,
-	blob_field blob,
+	binary_field blob,
 	text_field2 text,
 	test_diff_pk_row int,
-	test_inno_db_row int
+	test_transaction_row int
 )
 		CREATE
 	end
 	
+	def self.create_sql_postgres
+		<<-CREATE
+create table test_rows (
+	pk_id serial primary key,
+	text_field text,
+	date_time time,
+	bool_field boolean,
+	binary_field bytea,
+	text_field2 text,
+	test_diff_pk_row int,
+	test_transaction_row int
+)
+		CREATE
+	end
+
 	boolean       'bool_field'
-	blob          'blob_field'
+	binary        'binary_field'
 	date_time     'date_time'
 	string        'text_field'
 	string        'text2', { 'db_field_name' => 'text_field2' }
 	domain_object TestDiffPkRow
-	domain_object TestInnoDBRow
+	domain_object TestTransactionRow
 	
 	def TestRow.sql_primary_key_name
 		'pk_id'
@@ -139,11 +215,20 @@ create table test_rows (
 end
 
 class TestChildRow < TestRow
-	def self.create_sql
+	def self.create_sql_mysql
 		<<-CREATE
 create table test_child_rows (
 	pk_id int not null auto_increment,
 	primary key (pk_id),
+	child_text_field text
+)
+		CREATE
+	end
+	
+	def self.create_sql_mysql
+		<<-CREATE
+create table test_child_rows (
+	pk_id serial primary key,
 	child_text_field text
 )
 		CREATE
@@ -160,23 +245,28 @@ create table test_child_rows (
 	end
 end
 
-class AccTestBlobField < AcceptanceTestCase
+module AccTestBinaryFieldMethods
 	def test_delete
 		test_str = 'The quick brown fox jumped over the lazy dog.'
-		@dbh.do( 'insert into test_rows( blob_field ) values( ? )', test_str )
+		@dbh.do( 'insert into test_rows( binary_field ) values( ? )', test_str )
 		test_row = @object_store.test_row 1
 		test_row.delete = true
 		test_row.commit
 		assert_equal( 0, @object_store.all( TestRow ).size )
 	end
+end
+
+class AccTestBinaryFieldMysql < AcceptanceTestCase
+	db 'Mysql'
+	include AccTestBinaryFieldMethods
 
 	def test_insert
 		test_str = 'The quick brown fox jumped over the lazy dog.'
-		test_row = TestRow.new( 'blob_field' => test_str )
+		test_row = TestRow.new( 'binary_field' => test_str )
 		test_row.commit
 		@object_store.flush test_row
 		test_row_prime = @object_store.test_row 1
-		assert_equal( test_str, test_row_prime.blob_field )
+		assert_equal( test_str, test_row_prime.binary_field )
 	end
 	
 	def test_nil_commit
@@ -184,8 +274,13 @@ class AccTestBlobField < AcceptanceTestCase
 		test_row.commit
 		@object_store.flush test_row
 		test_row_prime = @object_store.test_row 1
-		assert_nil test_row_prime.blob_field
+		assert_nil test_row_prime.binary_field
 	end
+end
+
+class AccTestBinaryFieldPostgres < AcceptanceTestCase
+	db 'Pg'
+	include AccTestBinaryFieldMethods
 end
 
 class AccTestBooleanField < AcceptanceTestCase
@@ -312,7 +407,7 @@ class AccTestObjectStore < AcceptanceTestCase
 			date_time_str = date_time_field.value_for_sql( Time.now )
 			bool_val = ( i % 2 == 0 ) ? "'1'" : "'0'"
 			sql = <<-SQL
-insert into test_rows( text_field, date_time, bool_field, blob_field )
+insert into test_rows( text_field, date_time, bool_field, binary_field )
 values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 			SQL
 			@dbh.do sql
@@ -375,20 +470,22 @@ values( 1, 'sample text' )
 	
 	def test_eager_loading
 		dpr = TestDiffPkRow.new( 'text_field' => 'text 1' ).commit
-		idr = TestInnoDBRow.new( 'string' => 'text 2' ).commit
+		idr = TestTransactionRow.new( 'string' => 'text 2' ).commit
 		tr = TestRow.new(
 			'text_field' => 'text 3', 'test_diff_pk_row' => dpr,
-			'test_inno_db_row' => idr
+			'test_transaction_row' => idr
 		).commit
 		trs = TestRow.all( :include => :test_diff_pk_row )
 		dbc = ObjectStore::DbConnection.get_db_connection
 		dbc.allow_select = false
 		assert_equal( 'text 1', trs.first.test_diff_pk_row.text_field )
 		dbc.allow_select = true
-		trs = TestRow.all( :include => [ :test_diff_pk_row, :test_inno_db_row ] )
+		trs = TestRow.all(
+			:include => [ :test_diff_pk_row, :test_transaction_row ]
+		)
 		dbc.allow_select = false
 		assert_equal( 'text 1', trs.first.test_diff_pk_row.text_field )
-		assert_equal( 'text 2', trs.first.test_inno_db_row.string )
+		assert_equal( 'text 2', trs.first.test_transaction_row.string )
 		dbc.allow_select = true
 		tr2 = TestRow.new( 'text_field' => 'text 4' ).commit
 		trs = TestRow.all( :include => :test_diff_pk_row )
@@ -479,25 +576,25 @@ values( 1, 'sample text' )
 	
 	def test_transaction
 		@object_store.transaction do |tr|
-			TestInnoDBRow.new( 'string' => 'some string' ).commit
+			TestTransactionRow.new( 'string' => 'some string' ).commit
 			tr.rollback
 			raise 'should stop block before you get to this line'
 		end
-		assert_equal( 0, TestInnoDBRow.all.size )
+		assert_equal( 0, TestTransactionRow.all.size )
 		begin
 			@object_store.transaction do |tr|
-				TestInnoDBRow.new( 'string' => 'some string' ).commit
+				TestTransactionRow.new( 'string' => 'some string' ).commit
 				raise Errno::ENOENT, 'msg here', caller
 				raise 'should stop block before you get to this line'
 			end
 		rescue Errno::ENOENT
 			assert_match( /msg here/, $!.to_s )
 		end
-		assert_equal( 0, TestInnoDBRow.all.size )
+		assert_equal( 0, TestTransactionRow.all.size )
 		@object_store.transaction do |tr|
-			TestInnoDBRow.new( 'string' => 'some string' ).commit
+			TestTransactionRow.new( 'string' => 'some string' ).commit
 		end
-		assert_equal( 1, TestInnoDBRow.all.size )
+		assert_equal( 1, TestTransactionRow.all.size )
 		TestRow.new( 'text_field' => 'something' ).commit
 		@object_store.transaction do |tr|
 			tr.rollback
@@ -576,7 +673,8 @@ apostrophe's
 end
 
 if ARGV.include? '--commit_one_row'
-	connect_to_dbh
+	setup_lafcadio_config 'Mysql'
+	connect_to_dbh 'Mysql'
 	text = ''
 	10.times do text << 'abcdefghijklmnopqrstuvwxyz'.split( // )[rand(25)]; end
 	row = TestRow.new( 'text_field' => text ).commit

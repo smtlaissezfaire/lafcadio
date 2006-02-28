@@ -44,6 +44,8 @@ class MockDbi
 		end
 
 		def []= ( key, val ); end
+		
+		def commit; end
 
     def connected?; @@connected; end
 
@@ -52,6 +54,8 @@ class MockDbi
     def disconnect; @@connected = false; end
     
 		def log_sql( sql ); @sql_statements << sql; end
+		
+		def rollback; end
 
 		def select_all(str)
 			log_sql( str )
@@ -695,7 +699,7 @@ class TestObjectStore < LafcadioTestCase
 	
 		class ParentDomainObject < Lafcadio::DomainObject
 			string 'parent_string'
-			blob   'blob'
+			binary 'binary'
 		end
 		
 		class ChildDomainObject < ParentDomainObject
@@ -734,14 +738,14 @@ class TestObjectStore < LafcadioTestCase
 		def test_commits_delete
 			@client.delete = true
 			@dbb.commit(@client)
-			assert_equal(
-				"delete from clients where pk_id=1", @mockDbh.sql_statements.last
-			)
+			sqls = @mockDbh.sql_statements
+			assert_equal( 'delete from clients where pk_id=1', sqls[-2] )
+			assert_equal( 'commit', sqls.last )
 		end
 	
 		def test_commits_edit
 			@dbb.commit(@client)
-			sql = @mockDbh.sql_statements.last
+			sql = @mockDbh.sql_statements[-2]
 			assert(sql.index("update clients set name='clientName1'") != nil, sql)
 		end
 	
@@ -749,7 +753,7 @@ class TestObjectStore < LafcadioTestCase
 			ic = InternalClient.new({ 'pk_id' => 1, 'name' => 'client name',
 					'billingType' => 'trade' })
 			@dbb.commit ic
-			assert_equal 2, @mockDbh.sql_statements.size
+			assert_equal 3, @mockDbh.sql_statements.size
 			sql1 = @mockDbh.sql_statements[0]
 			assert_not_nil sql1 =~ /update clients set/, sql1
 			sql2 = @mockDbh.sql_statements[1]
@@ -864,6 +868,16 @@ class TestObjectStore < LafcadioTestCase
 			assert_equal( DomainObjectProxy, xml_sku.link1.class )
 			assert_equal( 1, xml_sku.link1.pk_id )
 		end
+		
+		def test_transaction
+			@client.delete = true
+			action = proc { |tr|
+				@dbb.commit(@client)
+				sqls = @mockDbh.sql_statements
+				assert_equal( 'delete from clients where pk_id=1', sqls.last )
+			}
+			@dbb.transaction action
+		end
 	end
 
 	class TestDbConnection < Test::Unit::TestCase
@@ -873,6 +887,7 @@ class TestObjectStore < LafcadioTestCase
 			LafcadioConfig.set_filename 'lafcadio/test/testconfig.dat'
 			ObjectStore::DbConnection.connection_class = MockDbi
 			MockDbi.reset
+			ObjectStore.db_name = nil
 		end
 	
 		def test_connection_pooling
@@ -896,6 +911,25 @@ class TestObjectStore < LafcadioTestCase
 			ObjectStore::DbConnection.get_db_connection.disconnect
 			@mockDbh = MockDbi.mock_dbh
 			assert !@mockDbh.connected?
+		end
+		
+		def test_driver_url
+			LafcadioConfig.set_values(
+				'dbuser' => 'test', 'dbpassword' => 'password', 'dbname' => 'test',
+				'dbhost' => 'localhost'
+			)
+			assert_equal(
+				'dbi:Mysql:test:localhost',
+				ObjectStore::DbConnection.get_db_connection.driver_url
+			)
+			LafcadioConfig.set_values(
+				'dbuser' => 'test', 'dbpassword' => 'password', 'dbname' => 'test',
+				'dbhost' => 'localhost', 'dbtype' => 'Pg'
+			)
+			assert_equal(
+				'dbi:Pg:test:localhost',
+				ObjectStore::DbConnection.get_db_connection.driver_url
+			)
 		end
 	end
 
