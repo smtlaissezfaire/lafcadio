@@ -191,7 +191,7 @@ create table test_rows (
 create table test_rows (
 	pk_id serial primary key,
 	text_field text,
-	date_time time,
+	date_time timestamp,
 	bool_field boolean,
 	binary_field bytea,
 	text_field2 text,
@@ -263,11 +263,7 @@ module AccTestBinaryFieldMethods
 		test_row_prime = @object_store.test_row 1
 		assert_equal( test_str, test_row_prime.binary_field )
 	end
-end
-
-class AccTestBinaryFieldMysql < AcceptanceTestCase
-	include AccTestBinaryFieldMethods
-
+	
 	def test_nil_commit
 		test_row = TestRow.new( {} )
 		test_row.commit
@@ -277,20 +273,41 @@ class AccTestBinaryFieldMysql < AcceptanceTestCase
 	end
 end
 
+class AccTestBinaryFieldMysql < AcceptanceTestCase
+	include AccTestBinaryFieldMethods
+end
+
 class AccTestBinaryFieldPostgres < AcceptanceTestCase
 	db 'Pg'
 	include AccTestBinaryFieldMethods
 end
 
-class AccTestBooleanField < AcceptanceTestCase
+module AccTestBooleanFieldMethods
 	def test_value_from_sql
-		@dbh.do 'insert into test_rows( bool_field ) values( 1 )'
+		@dbh.do "insert into test_rows( bool_field ) values( #{ true_str } )"
 		test_row = @object_store.test_row 1
 		assert test_row.bool_field
-		@dbh.do 'insert into test_rows( bool_field ) values( 0 )'
+		@dbh.do "insert into test_rows( bool_field ) values( #{ false_str } )"
 		test_row2 = @object_store.test_row 2
 		assert !test_row2.bool_field
 	end
+end
+
+class AccTestBooleanFieldMysql < AcceptanceTestCase
+	include AccTestBooleanFieldMethods
+	
+	def false_str; '0'; end
+	
+	def true_str; '1'; end
+end
+
+class AccTestBooleanFieldPostgres < AcceptanceTestCase
+	db 'Pg'
+	include AccTestBooleanFieldMethods
+
+	def false_str; 'false'; end
+	
+	def true_str; 'true'; end
 end
 
 class AccTestContextualService < AcceptanceTestCase
@@ -299,15 +316,32 @@ class AccTestContextualService < AcceptanceTestCase
 	end
 end
 
-class AccTestDateTimeField < AcceptanceTestCase
+module AccTestDateTimeFieldMethods
 	def test_value_from_sql
-		@dbh.do 'insert into test_rows( date_time ) values( "2004-01-01" )'
+		@dbh.do "insert into test_rows( date_time ) values( #{ date_str } )"
 		test_row = @object_store.test_row 1
 		assert_equal( Time.gm( 2004, 1, 1 ), test_row.date_time )
-		@dbh.do 'insert into test_rows( ) values( )'
+		@dbh.do empty_insert_sql
 		test_row2 = @object_store.test_row 2
 		assert_nil test_row2.date_time
 	end
+end
+
+class AccTestDateTimeFieldMysql < AcceptanceTestCase
+	include AccTestDateTimeFieldMethods
+	
+	def date_str; '"2004-01-01"'; end
+	
+	def empty_insert_sql; 'insert into test_rows( ) values( )'; end
+end
+
+class AccTestDateTimeFieldPostgres < AcceptanceTestCase
+	db 'Pg'
+	include AccTestDateTimeFieldMethods
+	
+	def date_str; "'2004-01-01'"; end
+
+	def empty_insert_sql; 'insert into test_rows default values'; end
 end
 
 class DomainObject
@@ -315,7 +349,7 @@ class DomainObject
 	attr_accessor :original_values
 end
 
-class AccTestDomainObject < AcceptanceTestCase
+module AccTestDomainObjectMethods
 	def test_dont_check_field_values_if_using_real_object_store
 		LafcadioConfig.set_values(
 			'checkFields' => 'onAllStates',
@@ -323,6 +357,10 @@ class AccTestDomainObject < AcceptanceTestCase
 		)
 		TestChildRow.new( {} )
 	end
+end
+
+class AccTestDomainObjectMysql < AcceptanceTestCase
+	include AccTestDomainObjectMethods
 
 	def test_inheritance_get
 		child = TestChildRow.new(
@@ -367,6 +405,11 @@ class AccTestDomainObject < AcceptanceTestCase
 			TestDiffPkRow.class_fields.first.db_field_name
 		)
 	end
+end
+
+class AccTestDomainObjectPostgres < AcceptanceTestCase
+	db 'Pg'
+	include AccTestDomainObjectMethods
 end
 
 class AccTestDomainObjectProxy < AcceptanceTestCase
