@@ -149,6 +149,11 @@ class TestObjectStore < LafcadioTestCase
 		ObjectStore.set_object_store @testObjectStore
 	end
 	
+	def teardown
+		super
+		ObjectStore.db_type = 'Mysql'
+	end
+	
 	def set_test_client
 		@client = Client.uncommitted_mock
 		@mockDbBridge.commit @client
@@ -213,6 +218,13 @@ class TestObjectStore < LafcadioTestCase
 
 	def test_db_bridge
 		assert_equal( @mockDbBridge, @testObjectStore.db_bridge )
+	end
+	
+	def test_db_type
+		ObjectStore.flush
+		assert_equal( 'Mysql', ObjectStore.db_type )
+		LafcadioConfig.set_values( 'dbtype' => 'Pg' )
+		assert_equal( 'Pg', ObjectStore.db_type )
 	end
 	
 	def test_deep_linking
@@ -618,6 +630,11 @@ class TestObjectStore < LafcadioTestCase
 	end
 
 	class TestCommitSqlStatementsAndBinds < LafcadioTestCase
+		def teardown
+			super
+			ObjectStore.db_type = 'Mysql'
+		end
+	
 		def test_commit_sql_with_apostrophe
 			client = Client.new( { "name" => "T'est name" } )
 			assert_equal("T'est name", client.name)
@@ -688,6 +705,13 @@ class TestObjectStore < LafcadioTestCase
 			binds = ObjectStore::CommitSqlStatementsAndBinds.new(client1b)[0][1]
 			assert_equal( 0, binds.size )
 		end
+		
+		def test_insert_postgres
+			ObjectStore.db_type = 'Pg'
+			user = User.new( 'administrator' => false )
+			sqls = ObjectStore::CommitSqlStatementsAndBinds.new( user )
+			assert_match( %r{values\(null, null, false\)}, sqls.first.first )
+		end
 
 		def test_sets_nulls
 			client = Client.new({ 'pk_id' => 1, 'name' => 'client name',
@@ -727,6 +751,7 @@ class TestObjectStore < LafcadioTestCase
 			@dbb = nil
 			ObjectStore::DbConnection.flush
 			ObjectStore::DbConnection.db_name = nil
+			ObjectStore.db_type = 'Mysql'
 		end
 	
 		def test_all
@@ -822,6 +847,15 @@ class TestObjectStore < LafcadioTestCase
 			query4 = Query::Max.new( Attribute )
 			assert_nil( @dbb.group_query( query4 ).only[:max] )
 		end
+		
+		def test_insert_postgres
+			ObjectStore.db_type = 'Pg'
+			@mockDbh.select_results["select currval('clients_pk_id_seq')"] =
+					[ { 'currval' => '12' } ]
+			client = Client.new( { "name" => "clientName1" } )
+			@dbb.commit client
+			assert_equal 12, @dbb.last_pk_id_inserted
+		end
 	
 		def test_last_pk_id_inserted
 			@mockDbh.select_results["select last_insert_id()"] =
@@ -889,6 +923,8 @@ class TestObjectStore < LafcadioTestCase
 			MockDbi.reset
 			ObjectStore.db_name = nil
 		end
+		
+		def teardown; ObjectStore.db_type = 'Mysql'; end
 	
 		def test_connection_pooling
 			ObjectStore::DbConnection.connection_class = MockDbi

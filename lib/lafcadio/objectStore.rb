@@ -147,10 +147,8 @@ module Lafcadio
 	# DomainObject#pre_commit_trigger and DomainObject#post_commit_trigger for
 	# more.
 	class ObjectStore < ContextualService::Service
-		# Returns true if the current stored instance is a MockObjectStore.
-		def self.mock?; get_object_store.mock?; end
-		
 		@@db_bridge = nil
+		@@db_type = 'Mysql'
 		
 		# Returns the DbBridge; this is useful in case you need to use raw SQL for
 		# a specific query.
@@ -159,6 +157,13 @@ module Lafcadio
 		def self.db_name= (dbName)
 			DbConnection.db_name= dbName
 		end
+		
+		def self.db_type; @@db_type; end
+		
+		def self.db_type=( dbt ); @@db_type = dbt; end
+		
+		# Returns true if the current stored instance is a MockObjectStore.
+		def self.mock?; get_object_store.mock?; end
 		
 		def initialize #:nodoc:
 			@cache = ObjectStore::Cache.new self.class.db_bridge
@@ -542,11 +547,21 @@ module Lafcadio
 					@db_conn.do( sql, *binds )
 				end
 				if statements_and_binds[0].first =~ /insert/
-					sql = 'select last_insert_id()'
-					result = select_all( sql )
-					@@last_pk_id_inserted = result[0]['last_insert_id()'].to_i
+					@@last_pk_id_inserted = get_last_pk_id_inserted(
+						db_object.domain_class
+					)
 				end
 				@db_conn.do( 'commit' ) unless @transaction
+			end
+			
+			def get_last_pk_id_inserted( domain_class )
+				case ObjectStore.db_type
+				when 'Mysql'
+					select_all( 'select last_insert_id()' )[0]['last_insert_id()'].to_i
+				when 'Pg'
+					sql = "select currval('#{ domain_class.table_name }_pk_id_seq')"
+					select_all( sql ).first['currval'].to_i
+				end
 			end
 			
 			def group_query( query )

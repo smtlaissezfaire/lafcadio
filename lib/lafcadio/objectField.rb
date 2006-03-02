@@ -168,6 +168,7 @@ module Lafcadio
 	# only
 	#   * :one_zero (the default, uses integers 1 and 0)
 	#   * :capital_yes_no (uses characters 'Y' and 'N')
+	#   * :raw_true_false (uses unquoted values 'true' and 'false')
 	# In a class definition, this would look like
 	#   class User < Lafcadio::DomainObject
 	#     boolean 'administrator', { 'enum_type' => :capital_yes_no }
@@ -186,23 +187,37 @@ module Lafcadio
 
 		def initialize( domain_class, name )
 			super( domain_class, name )
-			@enum_type = :one_zero
 			@enums = nil
+		end
+		
+		def default_enum_type
+			case ObjectStore.db_type
+			when 'Mysql'
+				:one_zero
+			when 'Pg'
+				:raw_true_false
+			end
 		end
 
 		def enums( value = nil ) # :nodoc:
 			if @enums
 				@enums
-			elsif @enum_type == :one_zero
-				if value.is_a?( String )
-					{ true => '1', false => '0' }
-				else
-					{ true => 1, false => 0 }
-				end
-			elsif @enum_type == :capital_yes_no
-				{ true => 'Y', false => 'N' }
 			else
-				raise MissingError
+				enum_type = ( @enum_type or default_enum_type )
+				case enum_type
+				when :one_zero
+					if value.is_a?( String )
+						{ true => '1', false => '0' }
+					else
+						{ true => 1, false => 0 }
+					end
+				when :capital_yes_no
+					{ true => 'Y', false => 'N' }
+				when :raw_true_false
+					{ true => true, false => false }
+				else
+					raise MissingError
+				end
 			end
 		end
 

@@ -265,7 +265,6 @@ module AccTestBinaryFieldMethods
 	end
 end
 
-=begin
 class AccTestBinaryFieldMysql < AcceptanceTestCase
 	include AccTestBinaryFieldMethods
 
@@ -277,7 +276,6 @@ class AccTestBinaryFieldMysql < AcceptanceTestCase
 		assert_nil test_row_prime.binary_field
 	end
 end
-=end
 
 class AccTestBinaryFieldPostgres < AcceptanceTestCase
 	db 'Pg'

@@ -10,7 +10,12 @@ class TestBooleanField < LafcadioTestCase
   	super
     @bf = BooleanField.new(nil, "administrator")
   end
-
+	
+	def teardown
+		super
+		ObjectStore.db_type = 'Mysql'
+	end
+	
 	def test_raise_error_if_no_enums_available
 		@bf.enum_type = 999
 		begin
@@ -29,6 +34,8 @@ class TestBooleanField < LafcadioTestCase
 
   def test_value_for_sql
     assert_equal(0, @bf.value_for_sql(false))
+		ObjectStore.db_type = 'Pg'
+    assert_equal( false, @bf.value_for_sql( false ))
   end
 
 	def test_value_from_sql

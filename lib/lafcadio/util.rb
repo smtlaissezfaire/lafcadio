@@ -40,6 +40,7 @@ module Lafcadio
 		
 		def self.set_values( value_hash )
 			@@value_hash = ( value_hash.nil? ? {} : value_hash )
+			ObjectStore.db_type = @@value_hash['dbtype'] if @@value_hash['dbtype']
 		end
 
 		def initialize
