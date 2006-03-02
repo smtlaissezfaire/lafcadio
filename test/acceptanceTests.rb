@@ -60,7 +60,6 @@ class AcceptanceTestCase < Test::Unit::TestCase
 	end
 	
 	def teardown
-		LafcadioConfig.set_values nil
 		ObjectStore.set_object_store nil
 		ObjectStore.flush_db_bridge
 		ObjectStore::DbConnection.get_db_connection.disconnect
@@ -69,6 +68,7 @@ class AcceptanceTestCase < Test::Unit::TestCase
 			domain_class.drop_table( @dbh, db )
 		end
 		@dbh.disconnect
+		LafcadioConfig.set_values nil
 	end
 	
 	def db; @@children_dbs[self.class]; end
@@ -254,11 +254,6 @@ module AccTestBinaryFieldMethods
 		test_row.commit
 		assert_equal( 0, @object_store.all( TestRow ).size )
 	end
-end
-
-class AccTestBinaryFieldMysql < AcceptanceTestCase
-	db 'Mysql'
-	include AccTestBinaryFieldMethods
 
 	def test_insert
 		test_str = 'The quick brown fox jumped over the lazy dog.'
@@ -268,7 +263,12 @@ class AccTestBinaryFieldMysql < AcceptanceTestCase
 		test_row_prime = @object_store.test_row 1
 		assert_equal( test_str, test_row_prime.binary_field )
 	end
-	
+end
+
+=begin
+class AccTestBinaryFieldMysql < AcceptanceTestCase
+	include AccTestBinaryFieldMethods
+
 	def test_nil_commit
 		test_row = TestRow.new( {} )
 		test_row.commit
@@ -277,6 +277,7 @@ class AccTestBinaryFieldMysql < AcceptanceTestCase
 		assert_nil test_row_prime.binary_field
 	end
 end
+=end
 
 class AccTestBinaryFieldPostgres < AcceptanceTestCase
 	db 'Pg'
