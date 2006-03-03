@@ -506,6 +506,11 @@ class TestDomainObject < LafcadioTestCase
 	def test_pk_id_needs_fixnum
 		assert_equal Fixnum, Client.uncommitted_mock.pk_id.class
 	end
+	
+	def test_postgres_pk_id_seq
+		assert_equal( 'users_pk_id_seq', User.postgres_pk_id_seq )
+		assert_equal( 'that_table_xml_sku2_id_seq', XmlSku2.postgres_pk_id_seq )
+	end
 
 	def test_refresh_original_values_after_commit
 		client = Client.new( 'name' => 'text' ).commit

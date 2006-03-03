@@ -365,10 +365,6 @@ module AccTestDomainObjectMethods
 		child_prime = @object_store.test_child_row 1
 		assert_equal( child.text_field, child_prime.text_field )
 	end
-end
-
-class AccTestDomainObjectMysql < AcceptanceTestCase
-	include AccTestDomainObjectMethods
 
 	def test_inheritance_insert
 		TestChildRow.new(
@@ -407,12 +403,16 @@ class AccTestDomainObjectMysql < AcceptanceTestCase
 	end
 end
 
+class AccTestDomainObjectMysql < AcceptanceTestCase
+	include AccTestDomainObjectMethods
+end
+
 class AccTestDomainObjectPostgres < AcceptanceTestCase
 	db 'Pg'
 	include AccTestDomainObjectMethods
 end
 
-class AccTestDomainObjectProxy < AcceptanceTestCase
+module AccTestDomainObjectProxyMethods
 	def test_correct_hashing
 		TestRow.new( 'text_field' => 'some text' ).commit
 		coll = @object_store.test_rows { |test_row|
@@ -425,7 +425,16 @@ class AccTestDomainObjectProxy < AcceptanceTestCase
 	end
 end
 
-class AccTestEquals < AcceptanceTestCase
+class AccTestDomainObjectProxyMysql < AcceptanceTestCase
+	include AccTestDomainObjectProxyMethods
+end
+
+class AccTestDomainObjectProxyMysql < AcceptanceTestCase
+	db 'Pg'
+	include AccTestDomainObjectProxyMethods
+end
+
+module AccTestEqualsMethods
 	def test_db_field_name
 		row = TestRow.new( 'text2' => 'some text' ).commit
 		cond = Query::Equals.new( 'text2', 'some text', TestRow )
@@ -436,9 +445,16 @@ class AccTestEquals < AcceptanceTestCase
 	end
 end
 
-class AccTestObjectStore < AcceptanceTestCase
-	include MonitorMixin
-	
+class AccTestEqualsMysql < AcceptanceTestCase
+	include AccTestEqualsMethods
+end
+
+class AccTestEqualsPostgres < AcceptanceTestCase
+	db 'Pg'
+	include AccTestEqualsMethods
+end
+
+module AccTestObjectStoreMethods
 	def insert_1000_rows
 		date_time_field = TestRow.field 'date_time'
 		big_str = <<-BIG_STR
@@ -461,7 +477,7 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		threads = []
 		10.times do
 			threads << Thread.new {
-				result = `ruby ../test/acceptanceTests.rb --commit_one_row`
+				result = `ruby ../test/acceptanceTests.rb --commit_one_row --db=#{ db }`
 				result =~ /(\d+):(.*)/
 				synchronize {
 					rows[$1] = $2
@@ -479,7 +495,7 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 			assert_equal( text, TestRow[pk_id].text_field )
 		end
 	end
-	
+
 	def test_caching_accounts_for_limits_and_sort_by
 		TestRow.new( 'text_field' => 'aza' ).commit
 		TestRow.new( 'text_field' => 'bzb' ).commit
@@ -496,7 +512,7 @@ values( #{ text }, #{ date_time_str }, #{ bool_val }, #{ big_str } )
 		q.order_by_order = :desc
 		assert_equal( 'aza', @object_store.query( q ).last.text_field )
 	end
-	
+
 	def test_diff_pk
 		sql = <<-SQL
 insert into test_diff_pk_rows( objId, text_field )
@@ -505,7 +521,7 @@ values( 1, 'sample text' )
 		@dbh.do sql
 		assert_equal( 1, @object_store.max( TestDiffPkRow ) )
 	end
-	
+
 	def test_dumpable
 		os_prime = Marshal.load( Marshal.dump( @object_store ) )
 	end
@@ -533,6 +549,10 @@ values( 1, 'sample text' )
 		trs = TestRow.all( :include => :test_diff_pk_row )
 		assert_equal( 2, trs.size )
 	end
+end
+
+class AccTestObjectStoreMysql < AcceptanceTestCase
+	include MonitorMixin, AccTestObjectStoreMethods
 
 	def test_get_by_domain_class
 		diff_pk_row = TestDiffPkRow.new( 'text_field' => 'sample text' ).commit
@@ -644,6 +664,11 @@ values( 1, 'sample text' )
 	end
 end
 
+class AccTestObjectStorePostgres < AcceptanceTestCase
+	db 'Pg'
+	include MonitorMixin, AccTestObjectStoreMethods
+end
+
 class AccTestQuery < AcceptanceTestCase
 	def test_boolean_compound
 		TestRow.new( 'text_field' => 'something', 'bool_field' => true ).commit
@@ -715,8 +740,10 @@ apostrophe's
 end
 
 if ARGV.include? '--commit_one_row'
-	setup_lafcadio_config 'Mysql'
-	connect_to_dbh 'Mysql'
+	db = nil
+	ARGV.each do |a| if a =~ /--db=(\w+)/; db = $1; end; end
+	setup_lafcadio_config db
+	connect_to_dbh db
 	text = ''
 	10.times do text << 'abcdefghijklmnopqrstuvwxyz'.split( // )[rand(25)]; end
 	row = TestRow.new( 'text_field' => text ).commit

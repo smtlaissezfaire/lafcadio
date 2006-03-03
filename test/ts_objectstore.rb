@@ -698,7 +698,7 @@ class TestObjectStore < LafcadioTestCase
 			)
 			sql4 = statements2[2].first
 			assert_equal(
-				"select setval( 'table_name_pk_id_seq', currval('parent_domain_objects_pk_id_seq') )",
+				"select setval( 'table_name_primary_key_seq', currval('parent_domain_objects_pk_id_seq') )",
 				sql4
 			)
 		end
