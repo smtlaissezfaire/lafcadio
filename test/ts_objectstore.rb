@@ -684,9 +684,23 @@ class TestObjectStore < LafcadioTestCase
 			assert_equal( 1, bind1.size )
 			sql2 = statements[1].first
 			assert_match( /insert into table_name.*primary_key/, sql2 )
-			assert_match( /values.*LAST_INSERT_ID\(\)/, sql2 )
+			assert_match( /values.*last_insert_id\(\)/, sql2 )
 			bind2 = statements[1].last
 			assert_equal( 0, bind2.size )
+			ObjectStore.db_type = 'Pg'
+			cdo2 = ChildDomainObject.new(
+				'parent_string' => 'parent string', 'child_string' => 'child string'
+			)
+			statements2 = ObjectStore::CommitSqlStatementsAndBinds.new cdo2
+			sql3 = statements2[1].first
+			assert_match(
+				/values.*currval\('parent_domain_objects_pk_id_seq'\)/, sql3
+			)
+			sql4 = statements2[2].first
+			assert_equal(
+				"select setval( 'table_name_pk_id_seq', currval('parent_domain_objects_pk_id_seq') )",
+				sql4
+			)
 		end
 	
 		def test_insert_update_and_delete

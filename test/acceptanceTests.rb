@@ -225,7 +225,7 @@ create table test_child_rows (
 		CREATE
 	end
 	
-	def self.create_sql_mysql
+	def self.create_sql_postgres
 		<<-CREATE
 create table test_child_rows (
 	pk_id serial primary key,
@@ -357,10 +357,6 @@ module AccTestDomainObjectMethods
 		)
 		TestChildRow.new( {} )
 	end
-end
-
-class AccTestDomainObjectMysql < AcceptanceTestCase
-	include AccTestDomainObjectMethods
 
 	def test_inheritance_get
 		child = TestChildRow.new(
@@ -369,6 +365,10 @@ class AccTestDomainObjectMysql < AcceptanceTestCase
 		child_prime = @object_store.test_child_row 1
 		assert_equal( child.text_field, child_prime.text_field )
 	end
+end
+
+class AccTestDomainObjectMysql < AcceptanceTestCase
+	include AccTestDomainObjectMethods
 
 	def test_inheritance_insert
 		TestChildRow.new(

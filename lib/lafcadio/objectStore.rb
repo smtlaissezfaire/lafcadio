@@ -444,7 +444,9 @@ module Lafcadio
 				@obj = obj
 				reversed = []
 				@obj.class.self_and_concrete_superclasses.each { |domain_class|
-					reversed << statement_bind_value_pair( domain_class )
+					statement_bind_value_pairs( domain_class ).reverse.each do |pair|
+						reversed << pair
+					end
 				}
 				reversed.reverse.each do |statement, binds|
 					self << [ statement, binds ]
@@ -477,7 +479,8 @@ module Lafcadio
 				fields = domain_class.class_fields
 				nameValuePairs = get_name_value_pairs( domain_class )
 				if domain_class.is_child_domain_class?
-					nameValuePairs[domain_class.sql_primary_key_name] = 'LAST_INSERT_ID()'
+					pair = DbBridge.last_inserted_pk_id_pair domain_class.superclass
+					nameValuePairs[domain_class.sql_primary_key_name] = pair.first
 				end
 				fieldNameStr = nameValuePairs.keys.join ", "
 				fieldValueStr = nameValuePairs.values.join ", "
@@ -485,18 +488,24 @@ module Lafcadio
 						"values(#{fieldValueStr})"
 			end
 	
-			def statement_bind_value_pair( domain_class )
+			def statement_bind_value_pairs( domain_class )
 				@bind_values = []
 				if @obj.pk_id == nil
 					statement = insert_sql( domain_class )
+					pairs = [ [statement, @bind_values] ]
+					if domain_class.is_child_domain_class? and ObjectStore.db_type == 'Pg'
+						setval_sql = "select setval( '#{ domain_class.postgres_pk_id_seq }', currval('#{ domain_class.superclass.postgres_pk_id_seq }') )"
+						pairs << [ setval_sql, @bind_values ]
+					end
+					pairs
 				else
 					if @obj.delete
 						statement = delete_sql( domain_class )
 					else
 						statement = update_sql( domain_class)
 					end
+					[ [statement, @bind_values] ]
 				end
-				[statement, @bind_values]
 			end
 	
 			def update_sql( domain_class )
@@ -526,6 +535,15 @@ module Lafcadio
 				new
 			end
 			
+			def self.last_inserted_pk_id_pair( domain_class )
+				case ObjectStore.db_type
+				when 'Mysql'
+					[ 'last_insert_id()', 'last_insert_id()' ]
+				when 'Pg'
+					[ "currval('#{ domain_class.postgres_pk_id_seq }')", 'currval' ]
+				end
+			end
+
 			def initialize
 				@db_conn = DbConnection.get_db_connection
 				@transaction = nil
@@ -555,13 +573,9 @@ module Lafcadio
 			end
 			
 			def get_last_pk_id_inserted( domain_class )
-				case ObjectStore.db_type
-				when 'Mysql'
-					select_all( 'select last_insert_id()' )[0]['last_insert_id()'].to_i
-				when 'Pg'
-					sql = "select currval('#{ domain_class.table_name }_pk_id_seq')"
-					select_all( sql ).first['currval'].to_i
-				end
+				pair = self.class.last_inserted_pk_id_pair( domain_class )
+				sql = 'select ' + pair.first
+				select_all( sql ).first[pair.last].to_i
 			end
 			
 			def group_query( query )

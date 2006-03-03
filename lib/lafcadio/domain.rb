@@ -545,6 +545,8 @@ module Lafcadio
 		#
 		#   the_one_user = User.only
 		def self.only; all.only; end
+		
+		def self.postgres_pk_id_seq; "#{ table_name }_pk_id_seq"; end
 
 		def self.require_domain_file( typeString ) # :nodoc:
 			typeString =~ /([^\:]*)$/
