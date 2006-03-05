@@ -549,10 +549,6 @@ values( 1, 'sample text' )
 		trs = TestRow.all( :include => :test_diff_pk_row )
 		assert_equal( 2, trs.size )
 	end
-end
-
-class AccTestObjectStoreMysql < AcceptanceTestCase
-	include MonitorMixin, AccTestObjectStoreMethods
 
 	def test_get_by_domain_class
 		diff_pk_row = TestDiffPkRow.new( 'text_field' => 'sample text' ).commit
@@ -600,11 +596,10 @@ class AccTestObjectStoreMysql < AcceptanceTestCase
 	end
 	
 	def test_raise_if_bad_primary_key_map
-		TestBadRow.new( 'text_field' => 'a' ).commit
-		error_msg = 'The field "pk_id" can\'t be found in the table "testbadrows".'
-		assert_raise( FieldMatchError, error_msg ) {
+		assert_raise( FieldMatchError ) do
+			TestBadRow.new( 'text_field' => 'a' ).commit
 			@object_store.all TestBadRow
-		}
+		end
 	end
 	
 	def test_threading
@@ -664,12 +659,16 @@ class AccTestObjectStoreMysql < AcceptanceTestCase
 	end
 end
 
+class AccTestObjectStoreMysql < AcceptanceTestCase
+	include MonitorMixin, AccTestObjectStoreMethods
+end
+
 class AccTestObjectStorePostgres < AcceptanceTestCase
 	db 'Pg'
 	include MonitorMixin, AccTestObjectStoreMethods
 end
 
-class AccTestQuery < AcceptanceTestCase
+module AccTestQueryMethods
 	def test_boolean_compound
 		TestRow.new( 'text_field' => 'something', 'bool_field' => true ).commit
 		TestRow.new( 'text_field' => 'something', 'bool_field' => false ).commit
@@ -684,6 +683,10 @@ class AccTestQuery < AcceptanceTestCase
 		qry = qry.and { |tr| tr.text_field.like( /^s/ ) }
 		assert_equal( 1, @object_store.query( qry ).size )
 	end
+end
+
+class AccTestQueryMysql < AcceptanceTestCase
+	include AccTestQueryMethods
 	
 	def test_count
 		TestRow.new( 'text2' => 'zzz' ).commit
@@ -715,6 +718,11 @@ class AccTestQuery < AcceptanceTestCase
 		assert_equal( 2, coll.size )
 		assert_equal( r2, coll.first )
 	end
+end
+
+class AccTestQueryPostgres < AcceptanceTestCase
+	db 'Pg'
+	include AccTestQueryMethods
 end
 
 class AccTestStringField < AcceptanceTestCase

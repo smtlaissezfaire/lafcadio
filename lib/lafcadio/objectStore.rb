@@ -575,7 +575,15 @@ module Lafcadio
 			def get_last_pk_id_inserted( domain_class )
 				pair = self.class.last_inserted_pk_id_pair( domain_class )
 				sql = 'select ' + pair.first
-				select_all( sql ).first[pair.last].to_i
+				begin
+					select_all( sql ).first[pair.last].to_i
+				rescue RuntimeError
+					error_msg =
+							"The field \"" + domain_class.sql_primary_key_name +
+							"\" can\'t be found in the table \"" + 
+							domain_class.table_name + "\"."
+					raise FieldMatchError, error_msg, caller
+				end
 			end
 			
 			def group_query( query )
@@ -610,7 +618,7 @@ module Lafcadio
 			
 			def select_dobjs(query)
 				domain_class = query.domain_class
-				select_all( query.to_sql ).collect { |row_hash|
+				select_all( query.to_sql( ObjectStore.db_type ) ).collect { |row_hash|
 					dobj = domain_class.new(
 						SqlToRubyValues.new( domain_class, row_hash )
 					)

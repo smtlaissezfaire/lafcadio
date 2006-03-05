@@ -1,6 +1,7 @@
 require 'extensions/module'
 require 'lafcadio/objectField'
 require 'lafcadio/util'
+require 'monitor'
 require 'rexml/document'
 
 module Lafcadio
@@ -277,6 +278,7 @@ module Lafcadio
 	# different levels.
 	class DomainObject
 		@@subclass_records = Hash.new do |h, k| h[k] = SubclassRecord.new( k ); end
+		@@subclass_records.extend MonitorMixin
 
 		include DomainComparable
 		
@@ -603,7 +605,7 @@ module Lafcadio
 		end
 		
 		def self.subclass_record # :nodoc:
-			@@subclass_records[self]
+			@@subclass_records.synchronize { @@subclass_records[self] }
 		end
 
 		def self.subclasses #:nodoc:

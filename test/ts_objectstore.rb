@@ -901,6 +901,16 @@ class TestObjectStore < LafcadioTestCase
 			fail if Time.now - File.ctime( logFilePath ) > 5
 		end
 		
+		def test_postgres
+			ObjectStore.db_type = 'Pg'
+			query = Query.new Client
+			query.limit = 0..9
+			@dbb.select_dobjs query
+			assert_equal(
+				'select * from clients limit 10', @mockDbh.sql_statements.first
+			)
+		end
+		
 		def test_passes_sql_value_converter_to_domain_class_init
 			@mockDbh.select_results['select * from some_other_table'] = [
 				OneTimeAccessHash.new(

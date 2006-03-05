@@ -243,8 +243,17 @@ module Lafcadio
 			@limit = limit.is_a?( Fixnum ) ? 0..limit-1 : limit
 		end
 		
-		def limit_clause #:nodoc:
-			"limit #{ @limit.begin }, #{ @limit.end - @limit.begin + 1 }" if @limit
+		def limit_clause( db ) #:nodoc:
+			if @limit
+				case db
+				when 'Mysql'
+					"limit #{ @limit.begin }, #{ @limit.end - @limit.begin + 1 }"
+				when 'Pg'
+					limit_clause = "limit #{ @limit.end - @limit.begin + 1 }"
+					limit_clause += " offset #{ @limit.begin }" if @limit.begin > 0
+					limit_clause
+				end
+			end
 		end
 		
 		def one_pk_id?; @condition and @condition.one_pk_id?; end
@@ -323,11 +332,11 @@ module Lafcadio
 			sql
 		end
 
-		def to_sql
+		def to_sql( db = 'Mysql' )
 			clauses = [ "select #{ fields }", "from #{ tables }" ]
 			clauses << where_clause if where_clause
 			clauses << order_clause if order_clause
-			clauses << limit_clause if limit_clause
+			clauses << limit_clause( db ) if limit_clause( db )
 			clauses.join ' '
 		end
 
