@@ -13,6 +13,7 @@ module Lafcadio
 	#   dbpassword:password
 	#   dbname:lafcadio_test
 	#   dbhost:localhost
+	#   dbtype:Mysql ("Mysql" is the default; select "Pg" for Postgres)
 	class LafcadioConfig < Hash
 		@@value_hash = {}
 		@@instances = []

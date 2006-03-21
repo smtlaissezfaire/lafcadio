@@ -6,7 +6,7 @@
 	<chapter>
 		<title>Introduction</title>
 		<para>
-			Lafcadio is an object-relational mapping library for Ruby and MySQL. The point of an ORM is to allow you to treat database rows like first-class objects, minimizing the amount of time you have to spend thinking about SQL vagaries so you can spend more time thinking about your program's logic.
+			Lafcadio is an object-relational mapping library for Ruby. The point of an ORM is to allow you to treat database rows like first-class objects, minimizing the amount of time you have to spend thinking about SQL vagaries so you can spend more time thinking about your program's logic. It currently supports MySQL and PostgreSQL.
 		</para>
 		<para>
 			Features include:
@@ -334,7 +334,7 @@ puts "There are #{ messages_to_jane.size } message(s) to Jane Doe."</programlist
 		<sect1>
 			<title>Defining domain class fields</title>
 			<para>
-				Lafcadio takes a Ruby-centric approach to object-relational mapping, as opposed to a database-centric approach. That means it relies on information in the Ruby code, as opposed to a live database schema, to tell it what fields tables have. The tradeoffs to this are significant. On one hand, Lafcadio has a test mode that runs in-memory, and in tandem with this test mode, defining domain classes fully in-Ruby means that you can write and test an application using Lafcadio without even having MySQL installed. On the other hand, there's definitely more typing up-front, as you have to define individual fields in Lafcadio classes.
+				Lafcadio takes a Ruby-centric approach to object-relational mapping, as opposed to a database-centric approach. That means it relies on information in the Ruby code, as opposed to a live database schema, to tell it what fields tables have. The tradeoffs to this are significant. On one hand, Lafcadio has a test mode that runs in-memory, and in tandem with this test mode, defining domain classes fully in-Ruby means that you can write and test an application using Lafcadio without even having a database installed. On the other hand, there's definitely more typing up-front, as you have to define individual fields in Lafcadio classes.
 			</para>
 			<para>
 				Domain class fields are set with one-line class methods which look something like:
@@ -381,9 +381,9 @@ end</programlisting>
 				Many of the fields map directly to common types of fields in SQL databases, but a few are also specialized extensions that might be convenient. The fields are:
 			</para>
 			<sect2>
-				<title>blob</title>
+				<title>binary</title>
 				<para>
-					Maps to a blob field in MySQL. This acts fairly the same as <constant>string</constant>, below.
+					Maps to a binary field in the database. This acts fairly the same as <constant>string</constant>, below.
 				</para>
 			</sect2>
 			<sect2>
@@ -714,7 +714,7 @@ qry.to_sql
 <programlisting>qry = Query.infer(
   SKU,
   :order_by => [ :standardPrice, :salePrice ],
-  :order_by_order => Query::DESC
+  :order_by_order => :desc
 ) { |s| s.sku.nil? }
 qry.to_sql
 # => "select * from skus where skus.sku is null order by standardPrice, salePrice desc"</programlisting>
@@ -792,9 +792,11 @@ administrators = User.get { |u| u.administrator } # both forms work</programlist
 fname_ends_with_a = User.get { |user| user.fname.like( /a$/ ) }
 # => "select * from users where fname like '%a'"
 fname_contains_a = User.get { |user| user.fname.like( /a/ ) }
-# => "select * from users where fname like '%a%'"</programlisting>
+# => "select * from users where fname like '%a%'"
+james_or_jones = User.get { |user| user.lname.like( /J..es/ ) }
+# => "select * from users where lname like 'J__es'"</programlisting>
 				<para>
-					Please note that although we're using the Regexp operators here, these aren't full-fledged regexps. Only ^ and $ work for this.
+					Please note that although we're using the Regexp operators here, these aren't full-fledged regexps. Only ^, $, and . work for this.
 				</para>
 			</sect2>
 			<sect2>
@@ -865,6 +867,19 @@ User.get { |u| u.lname.equals( 'Smith' ) &amp; u.fname.like( /John/ ) }
 User.get { |u| u.lname.equals( 'Smith' ) &amp; u.email.like( /hotmail/ ) }</programlisting>
 			<para>
 				Lafcadio can tell that the 2nd and 3rd queries are subsets of the first. So these three statements will result in one database call, for the first  statement: The 2nd and 3rd statements will be handled entirely in Ruby. The result is less database calls with no extra work for the programmer.</para>
+		</sect1>
+		<sect1>
+			<title>Eager loading</title>
+			<para>
+				As of Lafcadio 0.9.3, you can use eager loading to pre-join requested domain objects. This reduces the number of SQL calls.
+			</para>
+<programlisting>invoices_and_clients = Invoice.all( :include => :client )
+# => "select * from invoices left outer join clients on invoices.client = clients.pk_id"</programlisting>
+			<para>
+				The <constant>:include</constant> argument works through <constant>DomainObject</constant> convenience methods such as <constant>DomainObject.all</constant> and <constant>DomainObject.get</constant>. It can also be used while creating a query by hand with <constant>Query.new</constant>.
+			</para>
+<programlisting>iac_query = Query.new( Invoice, :include => :client )
+# => "select * from invoices left outer join clients on invoices.client = clients.pk_id"</programlisting>
 		</sect1>
 	</chapter>
 	<chapter>
@@ -982,6 +997,9 @@ end</programlisting>
   raise "just kidding"
   to_account.update!( 'amount' => to_account.amount + transfer_amount )
 end</programlisting>
+			<para>
+				Note also that the MockObjectStore handles transactions as well. This means that you can write unit-tests testing transaction-dependent logic, and test them in-memory.
+			</para>
 		</sect1>
 		<sect1>
 			<title>The ObjectStore cache</title>
@@ -989,7 +1007,7 @@ end</programlisting>
 				<constant>ObjectStore</constant> automatically caches the results of any selects it runs. This reduces SQL calls in surprising ways, in particular by calculating if queries are subsets of previous queries. The cache is only updated on updates, inserts, and deletes.
 			</para>
 			<para>
-				If you are running a long-running program that does a lot of selects, without updates, inserts, and deletes--for example, a big reporting program--you'll find that the program will use a lot of memory, as it slowly begins to clone the MySQL database in RAM. You can trim the cache by calling ObjectStore#flush.
+				If you are running a long-running program that does a lot of selects, without updates, inserts, and deletes--for example, a big reporting program--you'll find that the program will use a lot of memory, as it slowly begins to clone the database in RAM. You can trim the cache by calling ObjectStore#flush.
 			</para>
 <programlisting>object_store.flush( user )</programlisting>
 		</sect1>
@@ -1000,7 +1018,7 @@ end</programlisting>
 			Lafcadio is written and maintained by <ulink url="http://fhwang.net/">Francis Hwang</ulink>.
 		</para>
 		<para>
-			Thanks to Kaspar Schiess for submitting patches for added Blob field support, and fixing problems with inserts on inherited domain objects.
+			Thanks to Kaspar Schiess for submitting patches for added Binary field support, and fixing problems with inserts on inherited domain objects.
 		</para>
 	</chapter>
 </book>

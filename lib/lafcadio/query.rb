@@ -93,8 +93,10 @@
 #   # => "select * from users where fname like '%a'"
 #   fname_contains_a = User.get { |user| user.fname.like( /a/ ) }
 #   # => "select * from users where fname like '%a%'"
+#   james_or_jones = User.get { |user| user.lname.like( /J..es/ ) }
+#   # => "select * from users where lname like 'J__es'"
 # Please note that although we're using the Regexp operators here, these aren't
-# full-fledged regexps. Only ^ and $ work for this.
+# full-fledged regexps. Only ^, $, and . work for this.
 #
 # == Compound conditions: <tt>&</tt> and <tt>|</tt>
 #   invoices = Invoice.get { |inv|
