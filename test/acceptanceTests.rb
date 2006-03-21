@@ -683,10 +683,6 @@ module AccTestQueryMethods
 		qry = qry.and { |tr| tr.text_field.like( /^s/ ) }
 		assert_equal( 1, @object_store.query( qry ).size )
 	end
-end
-
-class AccTestQueryMysql < AcceptanceTestCase
-	include AccTestQueryMethods
 	
 	def test_count
 		TestRow.new( 'text2' => 'zzz' ).commit
@@ -694,7 +690,7 @@ class AccTestQueryMysql < AcceptanceTestCase
 		TestRow.new( 'text2' => 'xxx' ).commit
 		assert_equal( 3, TestRow.get( :group => :count ).only[:count] )
 	end
-
+	
 	def test_order_by
 		r1 = TestRow.new( 'text2' => 'zzz', 'text_field' => 'something' ).commit
 		r2 = TestRow.new( 'text2' => 'aaa', 'text_field' => 'something' ).commit
@@ -720,12 +716,16 @@ class AccTestQueryMysql < AcceptanceTestCase
 	end
 end
 
+class AccTestQueryMysql < AcceptanceTestCase
+	include AccTestQueryMethods
+end
+
 class AccTestQueryPostgres < AcceptanceTestCase
 	db 'Pg'
 	include AccTestQueryMethods
 end
 
-class AccTestStringField < AcceptanceTestCase
+module AccTestStringFieldMethods
 	def testEscaping
 		text = <<-TEXT
 // ~  $ \\
@@ -745,6 +745,15 @@ apostrophe's
 		test_row3_prime = @object_store.test_row 3
 		assert_equal( text3, test_row3_prime.text_field )
 	end
+end
+
+class AccTestStringFieldMysql < AcceptanceTestCase
+	include AccTestStringFieldMethods
+end
+
+class AccTestStringFieldPostgres < AcceptanceTestCase
+	db 'Pg'
+	include AccTestStringFieldMethods
 end
 
 if ARGV.include? '--commit_one_row'
