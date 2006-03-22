@@ -1,5 +1,30 @@
 CHANGELOG
 
+0.9.3 -- March 21 2006
+* WARNING: Eliminated many constants, using symbols instead. Replaced
+	DomainObject::COMMIT_ADD, DomainObject::COMMIT_EDIT, and
+	DomainObject::COMMIT_DELETE with :insert, :update, and :delete. Replaced
+	BooleanField::ENUMS_ONE_ZERO and BooleanField::ENUMS_CAPITAL_YES_NO with
+	:one_zero and :capital_yes_no. Replaced Query::ASC and Query::DESC with
+	symbols :asc and :desc. Replaced Query::Like::PRE_ONLY, ::POST_ONLY, and
+	::PRE_AND_POST with :pre_only, :post_only, and :pre_and_post
+* WARNING: BlobField and DomainObject.blob are renamed to BinaryField and
+	DomainObject.binary
+* Fixed bug causing problems if "classDefinitionDir" wasn't set for
+  LafcadioConfig
+* Fixed transactions against MockObjectStore
+* Query::Like converts '.' into '_', matching MySQL like syntax
+* Query inference isn't run with queries that only search for one dobj by pk_id
+* When you use a DomainObjectImpostor and get a field name wrong, the
+  NoMethodError is somewhat less confusing
+* Query#order_by can take either string or symbol field names
+* Added RDoc for DomainMock
+* Updated lafcadio_schema 
+* pk_id retrievals on inserts are thread-safe
+* Added LafcadioConfig[]= 
+* Eager loading
+* Postgres support
+
 0.9.2 -- February 12 2006
 * Added manual.
 

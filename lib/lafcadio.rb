@@ -1,5 +1,5 @@
-# Lafcadio is an object-relational mapping library for Ruby and MySQL. Its
-# design has a few aspects in mind:
+# Lafcadio is an object-relational mapping library for Ruby. It currently
+# supports MySQL and PostgreSQL. Its design has a few aspects in mind:
 # * The importance of unit-testing. Lafcadio includes a MockObjectStore which
 #   can take the place of the ObjectStore for unit tests, so you can test
 #   complex database-driven logic. Committing domain objects, running queries,
@@ -16,7 +16,7 @@
 # http://lafcadio.rubyforge.org/tutorial.html.
 
 module Lafcadio
-	Version = "0.9.2"
+	Version = "0.9.3"
 
 	require 'lafcadio/depend'
 	require 'lafcadio/domain'
