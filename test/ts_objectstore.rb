@@ -882,6 +882,7 @@ class TestObjectStore < LafcadioTestCase
 		end
 		
 		def test_logs_sql
+			Log4r::Logger['sql'].outputters = [] if Log4r::Logger['sql']
 			logFilePath = '../test/testOutput/sql'
 			@dbb.select_all 'select * from users'
 			if FileTest.exist?( logFilePath )
@@ -892,9 +893,15 @@ class TestObjectStore < LafcadioTestCase
 			)
 			@dbb.select_all 'select * from clients'
 			fail if Time.now - File.ctime( logFilePath ) > 5
+			@mockDbh.select_results['select last_insert_id()'] = 
+					[ { 'last_insert_id()' => '1' } ]
+      @dbb.commit Client.new( 'name' => 'client name' )
+      contents = File.read logFilePath
+      assert_match /insert into clients/, contents
 		end
 		
 		def test_logs_sql_to_different_file_name
+			Log4r::Logger['sql'].outputters = [] if Log4r::Logger['sql']
 			LafcadioConfig.set_filename( '../test/testData/config_with_log_path.dat' )
 			logFilePath = '../test/testOutput/another.sql'
 			@dbb.select_all 'select * from users'

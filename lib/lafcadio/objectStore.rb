@@ -562,6 +562,7 @@ module Lafcadio
 					db_object
 				)
 				statements_and_binds.each do |sql, binds|
+					maybe_log sql
 					@db_conn.do( sql, *binds )
 				end
 				if statements_and_binds[0].first =~ /insert/
@@ -596,13 +597,15 @@ module Lafcadio
 				config = LafcadioConfig.new
 				if config['logSql'] == 'y'
 					sqllog = Log4r::Logger['sql'] || Log4r::Logger.new( 'sql' )
-					filename = File.join(
-						config['logdir'], config['sqlLogFile'] || 'sql'
-					)
-					outputter = Log4r::FileOutputter.new(
-						'outputter', { :filename => filename }
-					)
-					sqllog.outputters = outputter
+					if sqllog.outputters.empty?
+						filename = File.join(
+							config['logdir'], config['sqlLogFile'] || 'sql'
+						)
+						outputter = Log4r::FileOutputter.new(
+							'outputter', { :filename => filename }
+						)
+						sqllog.outputters = outputter
+					end
 					sqllog.info sql
 				end
 			end
