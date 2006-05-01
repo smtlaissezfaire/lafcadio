@@ -22,6 +22,8 @@ Lafcadio is an object-relational mapping layer for Ruby. It lets you treat datab
 	s.autorequire = 'lafcadio'
 	s.executables = [ 'lafcadio_schema' ]
 	s.bindir = 'bin'
+  s.has_rdoc = true
+  s.rdoc_options << '--main' << 'lib/lafcadio.rb'
 end
 if $0==__FILE__
   Gem::Builder.new(spec).build
