@@ -5,7 +5,7 @@ spec = Gem::Specification.new do |s|
 	)
 	dependencies.each do |dependency| s.add_dependency( dependency ); end
 	s.name = 'lafcadio'
-	s.version = '0.9.3'
+	s.version = '0.9.4'
 	s.platform = Gem::Platform::RUBY
 	s.date = Time.now
 	s.summary = "Lafcadio is an object-relational mapping layer"

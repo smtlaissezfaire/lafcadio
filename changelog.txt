@@ -1,5 +1,9 @@
 CHANGELOG
 
+0.9.4 -- May 1 2006
+* Incorporated Brian Marick's logging patch: INSERTs, DELETEs and UPDATEs are also logged
+* Added RDoc auto-generation to the Gemspec
+
 0.9.3 -- March 21 2006
 * WARNING: Eliminated many constants, using symbols instead. Replaced
 	DomainObject::COMMIT_ADD, DomainObject::COMMIT_EDIT, and
