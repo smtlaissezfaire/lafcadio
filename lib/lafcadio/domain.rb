@@ -645,7 +645,6 @@ module Lafcadio
 		end
 
 		def self.try_load_xml_parser # :nodoc:
-			require 'lafcadio/domain'
 			if ( dirName = LafcadioConfig.new['classDefinitionDir'] )
 				xmlFileName = self.basename + '.xml'
 				xmlPath = File.join( dirName, xmlFileName )
