@@ -35,8 +35,8 @@ end
 
 def setup_lafcadio_config( db )
 	LafcadioConfig.set_values(
-		'dbuser' => 'test', 'dbpassword' => 'password', 'dbname' => 'test',
-		'dbhost' => 'localhost', 'dbtype' => db
+		'dbuser' => 'lafcadio_test', 'dbpassword' => 'password',
+		'dbname' => 'test', 'dbhost' => 'localhost', 'dbtype' => db
 	)
 end
 
