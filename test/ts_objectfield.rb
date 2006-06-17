@@ -1,9 +1,9 @@
 require 'dbi'
 require 'lafcadio/depend'
-require 'lafcadio/test'
 require 'lafcadio/objectField'
 require 'lafcadio/objectStore'
 require '../test/mock_domain'
+require '../test/test_case'
 
 class TestBooleanField < LafcadioTestCase
   def setup

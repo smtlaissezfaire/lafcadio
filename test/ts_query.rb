@@ -1,7 +1,7 @@
 require 'date'
 require 'lafcadio/query'
-require 'lafcadio/test'
 require '../test/mock_domain'
+require '../test/test_case'
 
 # necessary for test_global_methods_dont_interfere_with_method_missing
 def name; 'global name'; end

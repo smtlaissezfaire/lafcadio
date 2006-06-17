@@ -1,7 +1,7 @@
-require 'lafcadio/test'
 require 'lafcadio/depend'
 require 'lafcadio/domain'
 require '../test/mock_domain'
+require '../test/test_case'
 
 class TestClassDefinitionXmlParser < LafcadioTestCase
 	def get_class_fields( domain_class, xml )

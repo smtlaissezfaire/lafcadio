@@ -3,9 +3,8 @@ require 'date'
 require 'lafcadio/mock'
 require 'lafcadio/objectStore'
 require 'lafcadio/query'
-require 'lafcadio/test'
-require 'runit/testcase'
 require '../test/mock_domain'
+require '../test/test_case'
 
 class Lafcadio::ObjectStore
 	attr_reader :cache

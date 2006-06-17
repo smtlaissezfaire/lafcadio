@@ -1,7 +1,7 @@
 require 'lafcadio/domain'
 require 'lafcadio/query'
-require 'lafcadio/test'
 require '../test/mock_domain'
+require '../test/test_case'
 
 class TestMockDbBridge < LafcadioTestCase
   def setup
