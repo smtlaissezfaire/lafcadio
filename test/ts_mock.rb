@@ -291,6 +291,15 @@ class TestMockObjectStore < LafcadioTestCase
 			tr.rollback
 		end
 	end
+	
+	def test_transaction_allows_double_commits
+		@mockObjectStore.transaction do
+			u = User.new( 'email' => 'fred@fred.com', 'firstNames' => 'fred' )
+			u.commit
+			u.commit
+		end
+		User.get 'fred', :firstNames
+	end
 
 	def test_transaction_retrieves_committed_dobjs
 		@mockObjectStore.transaction do

@@ -60,10 +60,6 @@ module Lafcadio
 					@last_pk_id_inserted = next_pk_id
 				elsif domain_object.pk_id
 					domain_object.pk_id
-				elsif ( next_pk_id = @next_pk_ids[domain_object.domain_class] )
-					@last_pk_id_inserted = next_pk_id
-					@next_pk_ids[domain_object.domain_class] = nil
-					next_pk_id
 				else
 					pk_ids = objects_by_domain_class( domain_object.domain_class ).keys
 					@last_pk_id_inserted = pk_ids.max ? pk_ids.max + 1 : 1
@@ -106,6 +102,7 @@ module Lafcadio
 				@transaction = tr
 				action.call tr
 				@transaction = nil
+				tr.uniq!
 				tr.each do |dobj_to_commit| commit( dobj_to_commit ); end
 			end
 			
