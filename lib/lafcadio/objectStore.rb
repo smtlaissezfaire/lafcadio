@@ -265,12 +265,24 @@ module Lafcadio
 		#     Client.new( 'name' => 'Big Co.' ).commit
 		#     tr.rollback
 		#   end   # the client will not be saved to the DB
-		def transaction( &action ); @cache.transaction( action ); end
+		def transaction( &action )
+			old_cache = @cache
+			@cache = @cache.transactional_clone
+			begin
+				@cache.transaction action
+			rescue
+				err_to_raise = $!
+				@cache.rollback unless $!.is_a? RollbackError
+				@cache = old_cache
+				raise err_to_raise unless $!.is_a? RollbackError
+			end
+		end
 		
 		class Cache #:nodoc:
 			include MonitorMixin
 		
-			attr_reader :db_bridge
+			attr_reader   :db_bridge
+			attr_accessor :domain_class_caches
 			
 			def initialize( db_bridge = DbBridge.new )
 				super()
@@ -315,7 +327,9 @@ module Lafcadio
 					if !collected and main_cache.queries.values
 						newObjects = @db_bridge.select_dobjs query
 						newObjects.each { |dbObj| main_cache.save dbObj }
-						main_cache.queries[query] = newObjects.collect { |dobj| dobj.pk_id }
+						main_cache.queries[query] = newObjects.collect { |dobj|
+							dobj.pk_id
+						}
 					end
 				end
 				main_cache.queries[query].map { |pk_id| main_cache[pk_id] }.compact
@@ -333,15 +347,27 @@ module Lafcadio
 
 			def method_missing( meth, *args )
 				simple_dispatch = [
-					:queries, :save, :set_commit_time, :update_after_commit
+					:flush, :queries, :save, :set_commit_time, :update_after_commit
 				]
 				if simple_dispatch.include?( meth )
 					cache( args.first.domain_class ).send( meth, *args )
 				elsif [ :[], :last_commit_time ].include?( meth )
 					cache( args.first ).send( meth, *args[1..-1] )
-				elsif [ :group_query, :transaction ].include?( meth )
+				elsif [ :group_query, :rollback, :transaction ].include?( meth )
 					@db_bridge.send( meth, *args )
+				else
+					super
 				end
+			end
+
+			def transactional_clone
+				tc = Cache.new @db_bridge.transactional_clone
+				dcc_clones = {}
+				@domain_class_caches.each do |domain_class, dcc|
+					dcc_clones[domain_class] = dcc.transactional_clone
+				end
+				tc.domain_class_caches = dcc_clones
+				tc
 			end
 
 			def update_dependent_domain_class( db_object, aClass, field )
@@ -367,7 +393,8 @@ module Lafcadio
 			end
 			
 			class DomainClassCache < Hash #:nodoc:
-				attr_reader :commit_times, :domain_class, :queries
+				attr_reader   :domain_class
+				attr_accessor :commit_times, :queries
 				
 				def initialize( domain_class, db_bridge )
 					super()
@@ -423,6 +450,13 @@ module Lafcadio
 				end
 			
 				def set_commit_time( d_obj ); commit_times[d_obj.pk_id] = Time.now; end
+				
+				def transactional_clone
+					tc = clone
+					tc.commit_times = commit_times.clone
+					tc.queries = queries.clone
+					tc
+				end
 
 				def update_after_commit( db_object ) #:nodoc:
 					if [ :update, :insert ].include?(
@@ -547,9 +581,6 @@ module Lafcadio
 			def initialize
 				@db_conn = DbConnection.get_db_connection
 				@transaction = nil
-				ObjectSpace.define_finalizer( self, proc { |id|
-					DbConnection.get_db_connection.disconnect
-				} )
 			end
 	
 			def _dump(aDepth)
@@ -610,6 +641,8 @@ module Lafcadio
 				end
 			end
 			
+			def rollback; @transaction.rollback( false ) if @transaction; end
+			
 			def select_all(sql)
 				maybe_log sql
 				begin
@@ -646,8 +679,6 @@ module Lafcadio
 				begin
 					action.call @transaction
 					@transaction.commit
-				rescue RollbackError
-					# rollback handled by Transaction
 				rescue
 					err_to_raise = $!
 					@transaction.rollback false
@@ -655,6 +686,8 @@ module Lafcadio
 				end
 				@transaction = nil
 			end
+			
+			def transactional_clone; clone; end
 			
 			class Transaction #:nodoc:
 				def initialize( db_conn ); @db_conn = db_conn; end
@@ -666,9 +699,6 @@ module Lafcadio
 					raise RollbackError if raise_error
 				end
 			end
-			
-			class RollbackError < StandardError #:nodoc:
-			end
 		end
 
 		class DbConnection < ContextualService::Service #:nodoc:
@@ -679,7 +709,10 @@ module Lafcadio
 	
 			def self.db_name=( db_name ); @@db_name = db_name; end
 	
-			def initialize; @dbh = load_new_dbh; end
+			def initialize
+				@dbh = load_new_dbh
+				ObjectSpace.define_finalizer( self, proc { |id| disconnect } )
+			end
 		
 			def disconnect; @dbh.disconnect; end
 			
@@ -811,6 +844,9 @@ module Lafcadio
 					caller
 				)
 			end
+		end
+		
+		class RollbackError < StandardError #:nodoc:
 		end
 
 		class SqlToRubyValues #:nodoc:

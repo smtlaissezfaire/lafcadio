@@ -1,3 +1,4 @@
+require '../test/depend'
 require 'lafcadio/domain'
 require 'lafcadio/query'
 require '../test/mock_domain'
@@ -6,7 +7,7 @@ require '../test/test_case'
 class TestMockDbBridge < LafcadioTestCase
   def setup
   	super
-		@mockDbBridge = MockDbBridge.new
+		@mockDbBridge = ObjectStore::MockDbBridge.new
     @client = Client.new( {"pk_id" => 1, "name" => "clientName1"} )
   end
 
@@ -50,7 +51,10 @@ class TestMockDbBridge < LafcadioTestCase
 	end
 
   def test_dumpable
-		assert_equal MockDbBridge, Marshal.load(Marshal.dump(@mockDbBridge)).class
+		assert_equal(
+			ObjectStore::MockDbBridge,
+			Marshal.load(Marshal.dump(@mockDbBridge)).class
+		)
   end
 
 	def test_group_query
@@ -287,6 +291,19 @@ class TestMockObjectStore < LafcadioTestCase
 			tr.rollback
 		end
 	end
+
+	def test_transaction_retrieves_committed_dobjs
+		@mockObjectStore.transaction do
+			assert_equal( 0, User.get( 'fred', :firstNames ).size )
+			original = User.new(
+				'email' => 'fred@fred.com', 'firstNames' => 'fred'
+			)
+			original.commit
+			retrieved = User.get( 'fred', :firstNames )[0]
+			assert_not_nil retrieved
+			assert_equal( 'fred@fred.com', retrieved.email )
+		end
+  end
 
 	def testUpdate
 		@mockObjectStore.commit Client.new( { 'pk_id' => 100,

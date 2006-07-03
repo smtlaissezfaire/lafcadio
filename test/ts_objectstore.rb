@@ -569,7 +569,8 @@ class TestObjectStore < LafcadioTestCase
 			user = User.uncommitted_mock
 			user.pk_id = 1
 			@cache.save( user )
-			assert( user.object_id != @cache.get( User, 1 ).object_id )
+			qry = Query.new( User, :pk_id => 1 )
+			assert( user.object_id != @cache.get_by_query( qry ).object_id )
 			all( User ).each do |a_user|
 				assert( user.object_id != a_user.object_id )
 			end
